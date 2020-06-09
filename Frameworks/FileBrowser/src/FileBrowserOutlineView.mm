@@ -61,30 +61,32 @@
 	}
 }
 
-- (void)keyDown:(NSEvent*)theEvent
+- (BOOL)performKeyEquivalent:(NSEvent*)anEvent
 {
-	static struct key_action_t { std::string key; SEL action; } const KeyActions[] =
+	if(self.window.firstResponder == self)
 	{
-		{ "@" + utf8::to_s(NSLeftArrowFunctionKey),  @selector(goBack:)                   },
-		{ "@" + utf8::to_s(NSRightArrowFunctionKey), @selector(goForward:)                },
-		{ utf8::to_s(NSCarriageReturnCharacter),     @selector(performEditSelectedRow:)   },
-		{ utf8::to_s(NSEnterCharacter),              @selector(performEditSelectedRow:)   },
-		{ "@" + utf8::to_s(NSDownArrowFunctionKey),  @selector(performDoubleClick:)       },
-		{ "~" + utf8::to_s(NSF2FunctionKey),         @selector(showContextMenu:)          },
-		{ "@o",                                      @selector(performDoubleClick:)       },
-		{ "@d",                                      @selector(duplicateSelectedEntries:) },
-		{ "@G",                                      @selector(orderFrontGoToFolder:)     },
-		{ " ",                                       @selector(toggleQuickLookPreview:)   },
-	};
+		static struct key_action_t { std::string key; SEL action; } const KeyActions[] =
+		{
+			{ "@" + utf8::to_s(NSLeftArrowFunctionKey),  @selector(goBack:)                   },
+			{ "@" + utf8::to_s(NSRightArrowFunctionKey), @selector(goForward:)                },
+			{ utf8::to_s(NSCarriageReturnCharacter),     @selector(performEditSelectedRow:)   },
+			{ utf8::to_s(NSEnterCharacter),              @selector(performEditSelectedRow:)   },
+			{ "@" + utf8::to_s(NSDownArrowFunctionKey),  @selector(performDoubleClick:)       },
+			{ "~" + utf8::to_s(NSF2FunctionKey),         @selector(showContextMenu:)          },
+			{ "@o",                                      @selector(performDoubleClick:)       },
+			{ "@d",                                      @selector(duplicateSelectedEntries:) },
+			{ "@G",                                      @selector(orderFrontGoToFolder:)     },
+			{ " ",                                       @selector(toggleQuickLookPreview:)   },
+		};
 
-	std::string const key = to_s(theEvent);
-	for(auto const& keyAction : KeyActions)
-	{
-		if(key == keyAction.key)
-			return (void)[NSApp sendAction:keyAction.action to:nil from:self];
+		std::string const key = to_s(anEvent);
+		for(auto const& keyAction : KeyActions)
+		{
+			if(key == keyAction.key)
+				return [NSApp sendAction:keyAction.action to:nil from:self];
+		}
 	}
-
-	[super keyDown:theEvent];
+	return [super performKeyEquivalent:anEvent];
 }
 
 - (void)draggingSession:(NSDraggingSession*)session endedAtPoint:(NSPoint)screenPoint operation:(NSDragOperation)operation
