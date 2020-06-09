@@ -477,22 +477,38 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 		{ @"Add to Favorites",        @selector(addSelectedEntriesToFavorites:)      },
 		{ @"Remove From Favorites",   @selector(removeSelectedEntriesFromFavorites:) },
 		{ /* -------- */ },
-		{ @"Move to Trash",           @selector(delete:) },
+		{ @"Move to Trash",           @selector(delete:), .key = NSBackspaceCharacter },
 		{ /* -------- */ .ref = &insertBundleItemsMenuItem },
 		{ /* -------- */ },
 		{ @"Copy",                    @selector(copy:)                                                                            },
 		{ @"Copy as Pathname",        @selector(copyAsPathname:),      @"",  NSEventModifierFlagOption, .alternate = YES, .tag = kRequiresSelectionTag },
-		{ @"Paste",                   @selector(paste:),                                                                          },
+		{ @"Paste",                   @selector(paste:),               @"v"                                                       },
 		{ @"Move Items Here",         @selector(pasteNext:),           @"v", NSEventModifierFlagCommand|NSEventModifierFlagOption },
 		{ /* -------- */ },
 		{ @"Finder Tag", .ref = &finderTagsMenuItem,   .tag = kRequiresSelectionTag },
 		{ /* -------- */ },
-		{ @"Undo",                    @selector(undo:) },
-		{ @"Redo",                    @selector(redo:) },
+		{ @"Undo",                    @selector(undo:),                @"z"                                                       },
+		{ @"Redo",                    @selector(redo:),                @"z", NSEventModifierFlagCommand|NSEventModifierFlagShift  },
 		{ /* -------- */ },
 	};
 
 	MBCreateMenu(items, menu);
+
+	std::map<SEL, std::string> inactiveKeyEquivalents = {
+		{ @selector(openSelectedItems:),        "@" + utf8::to_s(NSDownArrowFunctionKey) },
+		{ @selector(editSelectedEntries:),      "" + utf8::to_s(NSCarriageReturnCharacter) },
+		{ @selector(duplicateSelectedEntries:), "@d" },
+		{ @selector(toggleQuickLookPreview:),   " " },
+		{ @selector(copy:),                     "@c" },
+		{ @selector(copyAsPathname:),           "~@c" },
+	};
+
+	for(NSMenuItem* menuItem in menu.itemArray)
+	{
+		auto it = inactiveKeyEquivalents.find(menuItem.action);
+		if(it != inactiveKeyEquivalents.end())
+			[menuItem setInactiveKeyEquivalentCxxString:it->second];
+	}
 
 	if(self.previewableItems.count == 0)
 	{
@@ -1018,7 +1034,7 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 					case 1:  items = [NSString stringWithFormat:@" “%@”", previewableItems.firstObject.localizedName]; break;
 					default: items = [NSString stringWithFormat:@" %ld Items", previewableItems.count]; break;
 				}
-				menuItem.dynamicTitle = [NSString stringWithFormat:info.format, items];
+				[menuItem updateTitle:[NSString stringWithFormat:info.format, items]];
 			}
 		}
 
