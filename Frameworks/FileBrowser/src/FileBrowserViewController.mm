@@ -477,13 +477,13 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 		{ @"Add to Favorites",        @selector(addSelectedEntriesToFavorites:)      },
 		{ @"Remove From Favorites",   @selector(removeSelectedEntriesFromFavorites:) },
 		{ /* -------- */ },
-		{ @"Move to Trash",           @selector(deleteURLs:) },
+		{ @"Move to Trash",           @selector(delete:) },
 		{ /* -------- */ .ref = &insertBundleItemsMenuItem },
 		{ /* -------- */ },
-		{ @"Copy",                    @selector(copyURLs:)                                                                        },
+		{ @"Copy",                    @selector(copy:)                                                                            },
 		{ @"Copy as Pathname",        @selector(copyAsPathname:),      @"",  NSEventModifierFlagOption, .alternate = YES, .tag = kRequiresSelectionTag },
-		{ @"Paste",                   @selector(pasteURLs:)                                                                       },
-		{ @"Move Items Here",         @selector(moveURLs:),            @"v", NSEventModifierFlagCommand|NSEventModifierFlagOption },
+		{ @"Paste",                   @selector(paste:),                                                                          },
+		{ @"Move Items Here",         @selector(pasteNext:),           @"v", NSEventModifierFlagCommand|NSEventModifierFlagOption },
 		{ /* -------- */ },
 		{ @"Finder Tag", .ref = &finderTagsMenuItem,   .tag = kRequiresSelectionTag },
 		{ /* -------- */ },
@@ -717,14 +717,14 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 	return YES;
 }
 
-- (void)cutURLs:(id)sender
+- (void)cut:(id)sender
 {
 	NSPasteboard* pboard = NSPasteboard.generalPasteboard;
 	if([self writeItems:self.previewableItems toPasteboard:pboard])
 		[pboard setString:@"cut" forType:@"OakFileBrowserOperation"];
 }
 
-- (void)copyURLs:(id)sender
+- (void)copy:(id)sender
 {
 	[self writeItems:self.previewableItems toPasteboard:NSPasteboard.generalPasteboard];
 }
@@ -742,15 +742,16 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 	[NSPasteboard.generalPasteboard writeObjects:pathnames];
 }
 
-- (void)pasteURLs:(id)sender
+- (void)paste:(id)sender
 {
 	BOOL hasOperation = [[NSPasteboard.generalPasteboard availableTypeFromArray:@[ @"OakFileBrowserOperation" ]] isEqualToString:@"OakFileBrowserOperation"];
 	BOOL cut = hasOperation && [[NSPasteboard.generalPasteboard stringForType:@"OakFileBrowserOperation"] isEqualToString:@"cut"];
 	[self insertItemsAndRemoveOriginal:cut];
 }
 
-- (void)moveURLs:(id)sender
+- (void)pasteNext:(id)sender
 {
+	// We use pasteNext: so that this action is triggered by ⌥⌘V
 	[self insertItemsAndRemoveOriginal:YES];
 }
 
@@ -814,7 +815,7 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 		[self.outlineView editColumn:0 row:self.outlineView.selectedRow withEvent:nil select:YES];
 }
 
-- (void)deleteURLs:(id)sender
+- (void)delete:(id)sender
 {
 	NSOutlineView* outlineView = self.outlineView;
 
@@ -863,12 +864,6 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 		}
 	}
 }
-
-- (void)cut:(id)sender       { [self cutURLs:sender];    }
-- (void)copy:(id)sender      { [self copyURLs:sender];   }
-- (void)paste:(id)sender     { [self pasteURLs:sender];  }
-- (void)pasteNext:(id)sender { [self moveURLs:sender];   }
-- (void)delete:(id)sender    { [self deleteURLs:sender]; }
 
 - (void)insertItemsAndRemoveOriginal:(BOOL)removeOriginal
 {
@@ -933,7 +928,7 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 	NSArray<FileItem*>* selectedItems    = self.selectedItems;
 	NSArray<FileItem*>* previewableItems = self.previewableItems;
 
-	BOOL res = YES;
+	BOOL res = YES, hideAndDisable = NO;
 
 	if(menuItem.action == @selector(undo:))
 	{
@@ -965,58 +960,47 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 	else if(menuItem.action == @selector(newFolder:))
 		res = self.directoryURLForNewItems ? YES : NO;
 	else if(menuItem.action == @selector(openSelectedItems:))
-		menuItem.hidden = previewableItems.count == 0;
+		hideAndDisable = previewableItems.count == 0;
 	else if(menuItem.action == @selector(openWithMenuAction:))
-		menuItem.hidden = previewableItems.count == 0 || selectedItems.count == 1 && selectedItems.firstObject.isApplication;
+		hideAndDisable = previewableItems.count == 0 || selectedItems.count == 1 && selectedItems.firstObject.isApplication;
 	else if(menuItem.action == @selector(showSelectedEntriesInFinder:))
-		menuItem.hidden = previewableItems.count == 0;
+		hideAndDisable = previewableItems.count == 0;
 	else if(menuItem.action == @selector(showOriginal:))
-		menuItem.hidden = selectedItems.count != 1 || [selectedItems.firstObject.URL isEqual:selectedItems.firstObject.resolvedURL];
+		hideAndDisable = selectedItems.count != 1 || [selectedItems.firstObject.URL isEqual:selectedItems.firstObject.resolvedURL];
 	else if(menuItem.action == @selector(showEnclosingFolder:))
-		menuItem.hidden = selectedItems.count != 1 || [selectedItems.firstObject.parentURL isEqual:((FileItem*)[self.outlineView parentForItem:selectedItems.firstObject]).URL ?: selectedItems.firstObject.parentURL];
+		hideAndDisable = selectedItems.count != 1 || [selectedItems.firstObject.parentURL isEqual:((FileItem*)[self.outlineView parentForItem:selectedItems.firstObject]).URL ?: selectedItems.firstObject.parentURL];
 	else if(menuItem.action == @selector(showPackageContents:))
-		menuItem.hidden = previewableItems.count != 1 || previewableItems.firstObject.isPackage == NO;
+		hideAndDisable = previewableItems.count != 1 || previewableItems.firstObject.isPackage == NO;
 	else if(menuItem.action == @selector(editSelectedEntries:))
-		menuItem.hidden = previewableItems.count != 1 || previewableItems.firstObject.canRename == NO;
+		hideAndDisable = previewableItems.count != 1 || previewableItems.firstObject.canRename == NO;
 	else if(menuItem.action == @selector(addSelectedEntriesToFavorites:))
-		menuItem.hidden = previewableItems.count == 0 || [self favoritesDirectoryContainsItems:previewableItems];
+		hideAndDisable = previewableItems.count == 0 || [self favoritesDirectoryContainsItems:previewableItems];
 	else if(menuItem.action == @selector(removeSelectedEntriesFromFavorites:))
-		menuItem.hidden = previewableItems.count == 0 || ![self favoritesDirectoryContainsItems:previewableItems];
-	else if(menuItem.action == @selector(cutURLs:))
-		menuItem.hidden = previewableItems.count == 0;
-	else if(menuItem.action == @selector(copyURLs:))
-		menuItem.hidden = previewableItems.count == 0;
-	else if(menuItem.action == @selector(copyAsPathname:))
-		menuItem.hidden = previewableItems.count == 0;
-	else if(menuItem.action == @selector(pasteURLs:))
-		menuItem.hidden = self.canPaste == NO;
-	else if(menuItem.action == @selector(moveURLs:))
-		menuItem.hidden = self.canPaste == NO;
-	else if(menuItem.action == @selector(duplicateSelectedEntries:))
-		menuItem.hidden = previewableItems.count == 0;
-	else if(menuItem.action == @selector(deleteURLs:))
-		menuItem.hidden = previewableItems.count == 0;
-	else if(menuItem.action == @selector(cut:))
-		res = previewableItems.count != 0;
-	else if(menuItem.action == @selector(copy:))
-		res = previewableItems.count != 0;
-	else if(menuItem.action == @selector(paste:))
-		res = self.canPaste;
-	else if(menuItem.action == @selector(pasteNext:))
-		res = self.canPaste;
+		hideAndDisable = previewableItems.count == 0 || ![self favoritesDirectoryContainsItems:previewableItems];
 	else if(menuItem.action == @selector(delete:))
-		res = previewableItems.count != 0;
+		hideAndDisable = previewableItems.count == 0;
+	else if(menuItem.action == @selector(cut:))
+		hideAndDisable = previewableItems.count == 0;
+	else if(menuItem.action == @selector(copy:))
+		hideAndDisable = previewableItems.count == 0;
+	else if(menuItem.action == @selector(copyAsPathname:))
+		hideAndDisable = previewableItems.count == 0;
+	else if(menuItem.action == @selector(paste:))
+		hideAndDisable = self.canPaste == NO;
+	else if(menuItem.action == @selector(pasteNext:))
+		hideAndDisable = self.canPaste == NO;
+	else if(menuItem.action == @selector(duplicateSelectedEntries:))
+		hideAndDisable = previewableItems.count == 0;
 
-	if(res && !menuItem.hidden)
+	menuItem.hidden = hideAndDisable && menuItem.target == self;
+	if(res = res && !hideAndDisable)
 	{
 		NSString* copyAsPathnameTitle = previewableItems.count > 1 ? @"Copy%@ as Pathnames" : @"Copy%@ as Pathname";
 
 		struct { NSString* format; SEL action; } const menuTitles[] =
 		{
 			{ @"Cut%@",                   @selector(cut:)                                },
-			{ @"Cut%@",                   @selector(cutURLs:)                            },
 			{ @"Copy%@",                  @selector(copy:)                               },
-			{ @"Copy%@",                  @selector(copyURLs:)                           },
 			{ copyAsPathnameTitle,        @selector(copyAsPathname:)                     },
 			{ @"Show%@ in Finder",        @selector(showSelectedEntriesInFinder:)        },
 			{ @"Add%@ to Favorites",      @selector(addSelectedEntriesToFavorites:)      },
@@ -1025,7 +1009,7 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 
 		for(auto const& info : menuTitles)
 		{
-			if(info.action == menuItem.action)
+			if(menuItem.target == self && menuItem.action == info.action)
 			{
 				NSString* items;
 				switch(previewableItems.count)
@@ -1044,14 +1028,14 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 			if(menuItem.action == @selector(newFolder:))
 				menuItem.dynamicTitle = [NSString stringWithFormat:@"New Folder in “%@”", folderNameForNewItems];
 
-			if(menuItem.action == @selector(paste:) || menuItem.action == @selector(pasteURLs:))
+			if(menuItem.action == @selector(paste:) && menuItem.target == self)
 			{
 				NSInteger count = [self URLsFromPasteboard:NSPasteboard.generalPasteboard].count;
 				if(count == 1)
 						menuItem.dynamicTitle = [NSString stringWithFormat:@"Paste Item in “%@”", folderNameForNewItems];
 				else	menuItem.dynamicTitle = [NSString stringWithFormat:@"Paste %ld Items in “%@”", count, folderNameForNewItems];
 			}
-			else if(menuItem.action == @selector(pasteNext:) || menuItem.action == @selector(moveURLs:))
+			else if(menuItem.action == @selector(pasteNext:) && menuItem.target == self)
 			{
 				NSInteger count = [self URLsFromPasteboard:NSPasteboard.generalPasteboard].count;
 				if(count == 1)
