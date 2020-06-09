@@ -484,6 +484,7 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 		{ @"Copy as Pathname",        @selector(copyAsPathname:),      @"",  NSEventModifierFlagOption, .alternate = YES, .tag = kRequiresSelectionTag },
 		{ @"Paste",                   @selector(paste:),               @"v"                                                       },
 		{ @"Move Items Here",         @selector(pasteNext:),           @"v", NSEventModifierFlagCommand|NSEventModifierFlagOption },
+		{ @"Create Link to Items",    @selector(createLinkToPasteboardItems:) },
 		{ /* -------- */ },
 		{ @"Finder Tag", .ref = &finderTagsMenuItem,   .tag = kRequiresSelectionTag },
 		{ /* -------- */ },
@@ -762,13 +763,18 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 {
 	BOOL hasOperation = [[NSPasteboard.generalPasteboard availableTypeFromArray:@[ @"OakFileBrowserOperation" ]] isEqualToString:@"OakFileBrowserOperation"];
 	BOOL cut = hasOperation && [[NSPasteboard.generalPasteboard stringForType:@"OakFileBrowserOperation"] isEqualToString:@"cut"];
-	[self insertItemsAndRemoveOriginal:cut];
+	[self insertItemsFromPasteboardWithOperation:cut ? FBOperationMove : FBOperationCopy];
 }
 
 - (void)pasteNext:(id)sender
 {
 	// We use pasteNext: so that this action is triggered by ⌥⌘V
-	[self insertItemsAndRemoveOriginal:YES];
+	[self insertItemsFromPasteboardWithOperation:FBOperationMove];
+}
+
+- (void)createLinkToPasteboardItems:(id)sender
+{
+	[self insertItemsFromPasteboardWithOperation:FBOperationLink];
 }
 
 - (void)duplicateSelectedEntries:(id)sender
@@ -881,7 +887,7 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 	}
 }
 
-- (void)insertItemsAndRemoveOriginal:(BOOL)removeOriginal
+- (void)insertItemsFromPasteboardWithOperation:(FBOperation)operation
 {
 	if(NSURL* directoryURL = self.directoryURLForNewItems)
 	{
@@ -892,14 +898,11 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 			if([NSFileManager.defaultManager fileExistsAtPath:srcURL.path isDirectory:&srcIsDirectory])
 			{
 				NSURL* destURL = [directoryURL URLByAppendingPathComponent:srcURL.lastPathComponent isDirectory:srcIsDirectory];
-				if(![srcURL isEqual:destURL] || !removeOriginal)
+				if(![srcURL isEqual:destURL] || operation != FBOperationMove)
 					urls[srcURL] = destURL;
 			}
 		}
-
-		if(removeOriginal)
-				[self performOperation:FBOperationMove withURLs:urls unique:YES select:YES];
-		else	[self performOperation:FBOperationCopy withURLs:urls unique:YES select:YES];
+		[self performOperation:operation withURLs:urls unique:YES select:YES];
 	}
 }
 
@@ -1005,6 +1008,8 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 		hideAndDisable = self.canPaste == NO;
 	else if(menuItem.action == @selector(pasteNext:))
 		hideAndDisable = self.canPaste == NO;
+	else if(menuItem.action == @selector(createLinkToPasteboardItems:))
+		hideAndDisable = self.canPaste == NO;
 	else if(menuItem.action == @selector(duplicateSelectedEntries:))
 		hideAndDisable = previewableItems.count == 0;
 
@@ -1057,6 +1062,13 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 				if(count == 1)
 						menuItem.dynamicTitle = [NSString stringWithFormat:@"Move Item to “%@”", folderNameForNewItems];
 				else	menuItem.dynamicTitle = [NSString stringWithFormat:@"Move %ld Items to “%@”", count, folderNameForNewItems];
+			}
+			else if(menuItem.action == @selector(createLinkToPasteboardItems:) && menuItem.target == self)
+			{
+				NSInteger count = [self URLsFromPasteboard:NSPasteboard.generalPasteboard].count;
+				if(count == 1)
+						menuItem.dynamicTitle = [NSString stringWithFormat:@"Create Link in “%@”", folderNameForNewItems];
+				else	menuItem.dynamicTitle = [NSString stringWithFormat:@"Create Link to %ld Items in “%@”", count, folderNameForNewItems];
 			}
 		}
 	}
