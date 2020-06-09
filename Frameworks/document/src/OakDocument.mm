@@ -1397,7 +1397,7 @@ NSString* OakDocumentBookmarkIdentifier                          = @"bookmark";
 		}
 
 		text::pos_t to(crlfCount, match.last - bol);
-		size_t toOffset = bol == match.last ? bol : (eol != std::string::npos ? (match.last <= eol ? eol : eol + crlf.size()) : text.size());
+		size_t toOffset = (bol == match.last && match.first != match.last) ? bol : (eol != std::string::npos ? (match.last <= eol ? eol : eol + crlf.size()) : text.size());
 
 		size_t orgFromOffset = fromOffset;
 		if(match.first - fromOffset > 200)
