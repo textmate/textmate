@@ -74,6 +74,7 @@
 			{ "@" + utf8::to_s(NSDownArrowFunctionKey),  @selector(performDoubleClick:)       },
 			{ "~" + utf8::to_s(NSF2FunctionKey),         @selector(showContextMenu:)          },
 			{ "@o",                                      @selector(performDoubleClick:)       },
+			{ "~@c",                                     @selector(copyAsPathname:)           },
 			{ "@d",                                      @selector(duplicateSelectedEntries:) },
 			{ "@G",                                      @selector(orderFrontGoToFolder:)     },
 			{ " ",                                       @selector(toggleQuickLookPreview:)   },
