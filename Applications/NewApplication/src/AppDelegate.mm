@@ -59,11 +59,11 @@
 				{ /* -------- */ },
 				{ @"Find",
 					.submenu = {
-						{ @"Find…",                  @selector(performFindPanelAction:),       @"f", .tag = NSFindPanelActionShowFindPanel  },
-						{ @"Find and Replace…",      @selector(performFindPanelAction:),       @"f", .tag = 12, .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption},
-						{ @"Find Next",              @selector(performFindPanelAction:),       @"g", .tag = NSFindPanelActionNext           },
-						{ @"Find Previous",          @selector(performFindPanelAction:),       @"G", .tag = NSFindPanelActionPrevious       },
-						{ @"Use Selection for Find", @selector(performFindPanelAction:),       @"e", .tag = NSFindPanelActionSetFindString  },
+						{ @"Find…",                  @selector(performTextFinderAction:),      @"f", .tag = NSTextFinderActionShowFindInterface },
+						{ @"Find and Replace…",      @selector(performTextFinderAction:),      @"f", .tag = NSTextFinderActionShowReplaceInterface, .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption },
+						{ @"Find Next",              @selector(performTextFinderAction:),      @"g", .tag = NSTextFinderActionNextMatch         },
+						{ @"Find Previous",          @selector(performTextFinderAction:),      @"G", .tag = NSTextFinderActionPreviousMatch     },
+						{ @"Use Selection for Find", @selector(performTextFinderAction:),      @"e", .tag = NSTextFinderActionSetSearchString   },
 						{ @"Jump to Selection",      @selector(centerSelectionInVisibleArea:), @"j"   },
 					}
 				},
