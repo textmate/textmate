@@ -1321,7 +1321,7 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 	}
 
 	[NSPasteboard.generalPasteboard clearContents];
-	[NSPasteboard.generalPasteboard writeObjects:array];
+	[NSPasteboard.generalPasteboard writeObjects:@[ [array componentsJoinedByString:@"\n"] ]];
 }
 
 - (void)copyEntireLines:(BOOL)entireLines withFilename:(BOOL)withFilename
@@ -1345,7 +1345,7 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 	}
 
 	[NSPasteboard.generalPasteboard clearContents];
-	[NSPasteboard.generalPasteboard writeObjects:array];
+	[NSPasteboard.generalPasteboard writeObjects:@[ [array componentsJoinedByString:@"\n"] ]];
 }
 
 - (void)copy:(id)sender                          { [self copyEntireLines:YES withFilename:NO ]; }
