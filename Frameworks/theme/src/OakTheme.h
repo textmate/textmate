@@ -20,7 +20,7 @@
 @property (nonatomic, readonly) NSColor* selectionColor;
 @property (nonatomic, readonly) NSColor* invisiblesColor;
 @property (nonatomic, readonly) NSFont* font;
-@property (nonatomic, readonly) NSFontDescriptorSymbolicTraits fontTraits;
+@property (nonatomic, readonly) NSFontTraitMask fontTraits;
 @property (nonatomic, readonly) BOOL underlined;
 @property (nonatomic, readonly) BOOL strikethrough;
 @property (nonatomic, readonly) BOOL misspelled;

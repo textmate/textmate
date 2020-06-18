@@ -244,15 +244,10 @@ static CGFloat ParseFontSize (NSString* fontSizeString)
 		}
 
 		_font       = [NSFont fontWithName:fontName size:fontSize];
-		_fontTraits = (boldEnabled ? NSFontDescriptorTraitBold : 0) | (italicEnabled ? NSFontDescriptorTraitItalic : 0);
+		_fontTraits = (boldEnabled ? NSBoldFontMask : 0) | (italicEnabled ? NSItalicFontMask : 0);
 
 		if(_fontTraits)
-		{
-			_font = [NSFont fontWithDescriptor:[NSFontDescriptor fontDescriptorWithFontAttributes:@{
-				NSFontFamilyAttribute: _font.familyName,
-				NSFontTraitsAttribute: @{ NSFontSymbolicTrait: @(_fontTraits) },
-			}] size:_font.pointSize];
-		}
+			_font = [NSFontManager.sharedFontManager convertFont:_font toHaveTrait:_fontTraits];
 	}
 	return self;
 }

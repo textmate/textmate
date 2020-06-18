@@ -12,7 +12,6 @@ static size_t kParseSizeLimit = 1024;
 @interface OakSyntaxFormatter ()
 {
 	NSString* _grammarName;
-	NSFont* _font;
 
 	BOOL _didLoadGrammarAndTheme;
 	parse::grammar_ptr _grammar;
@@ -75,56 +74,42 @@ static size_t kParseSizeLimit = 1024;
 	if(OakIsEmptyString(plain) || !_grammarName)
 		return;
 
-	if(!_font)
-	{
-		NSDictionary* attributes = [styled fontAttributesInRange:NSMakeRange(0, plain.length)];
-		_font = attributes[NSFontAttributeName] ?: [NSFont systemFontOfSize:0];
-	}
-
-	for(NSString* attr in @[ NSForegroundColorAttributeName, NSBackgroundColorAttributeName, NSUnderlineStyleAttributeName, NSStrikethroughStyleAttributeName ])
+	for(NSString* attr in @[ NSBackgroundColorAttributeName, NSUnderlineStyleAttributeName, NSStrikethroughStyleAttributeName ])
 		[styled removeAttribute:attr range:NSMakeRange(0, plain.length)];
+	[styled addAttributes:@{ NSForegroundColorAttributeName: NSColor.controlTextColor } range:NSMakeRange(0, plain.length)];
+	[styled applyFontTraits:NSUnboldFontMask|NSUnitalicFontMask range:NSMakeRange(0, plain.length)];
 
-	if(_enabled == NO || ![self tryLoadGrammarAndTheme])
+	if(_enabled && [self tryLoadGrammarAndTheme])
 	{
-		[styled addAttributes:@{ NSFontAttributeName: _font, NSForegroundColorAttributeName: [NSColor controlTextColor] } range:NSMakeRange(0, plain.length)];
-		[styled fixFontAttributeInRange:NSMakeRange(0, plain.length)];
-		return;
-	}
+		std::string str = to_s(plain);
+		std::map<size_t, scope::scope_t> scopes;
+		parse::parse(str.data(), str.data() + std::min(str.size(), kParseSizeLimit), _grammar->seed(), scopes, true);
 
-	std::string str = to_s(plain);
-	std::map<size_t, scope::scope_t> scopes;
-	parse::parse(str.data(), str.data() + std::min(str.size(), kParseSizeLimit), _grammar->seed(), scopes, true);
-
-	size_t from = 0, pos = 0;
-	for(auto pair = scopes.begin(); pair != scopes.end(); )
-	{
-		OakThemeStyles* styles = [_theme stylesForScope:pair->second];
-
-		size_t to = ++pair != scopes.end() ? pair->first : str.size();
-		size_t len = utf16::distance(str.data() + from, str.data() + to);
-		NSMutableDictionary* attributes = [@{
-			NSFontAttributeName:               _font,
-			NSForegroundColorAttributeName:    styles.foregroundColor,
-			NSUnderlineStyleAttributeName:     @(styles.underlined ? NSUnderlineStyleSingle : NSUnderlineStyleNone),
-			NSStrikethroughStyleAttributeName: @(styles.strikethrough ? NSUnderlineStyleSingle : NSUnderlineStyleNone),
-		} mutableCopy];
-
-		if(![styles.backgroundColor isEqual:_theme.backgroundColor])
-			attributes[NSBackgroundColorAttributeName] = styles.backgroundColor;
-
-		if(styles.fontTraits)
+		size_t from = 0, pos = 0;
+		for(auto pair = scopes.begin(); pair != scopes.end(); )
 		{
-			attributes[NSFontAttributeName] = [NSFont fontWithDescriptor:[NSFontDescriptor fontDescriptorWithFontAttributes:@{
-				NSFontFamilyAttribute: _font.familyName,
-				NSFontTraitsAttribute: @{ NSFontSymbolicTrait: @(styles.fontTraits) },
-			}] size:_font.pointSize];
+			OakThemeStyles* styles = [_theme stylesForScope:pair->second];
+
+			size_t to = ++pair != scopes.end() ? pair->first : str.size();
+			size_t len = utf16::distance(str.data() + from, str.data() + to);
+
+			if(styles.fontTraits)
+				[styled applyFontTraits:styles.fontTraits range:NSMakeRange(pos, len)];
+
+			NSMutableDictionary* attributes = [NSMutableDictionary dictionaryWithObject:styles.foregroundColor forKey:NSForegroundColorAttributeName];
+			if(![styles.backgroundColor isEqual:_theme.backgroundColor])
+				attributes[NSBackgroundColorAttributeName] = styles.backgroundColor;
+			if(styles.underlined)
+				attributes[NSUnderlineStyleAttributeName] = @(NSUnderlineStyleSingle);
+			if(styles.strikethrough)
+				attributes[NSStrikethroughStyleAttributeName] = @(NSUnderlineStyleSingle);
+			[styled addAttributes:attributes range:NSMakeRange(pos, len)];
+
+			pos += len;
+			from = to;
 		}
-
-		[styled addAttributes:attributes range:NSMakeRange(pos, len)];
-
-		pos += len;
-		from = to;
 	}
+
 	[styled fixFontAttributeInRange:NSMakeRange(0, plain.length)];
 }
 @end
