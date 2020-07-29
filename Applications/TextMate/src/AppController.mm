@@ -133,6 +133,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 				{ @"Close All Tabs",          @selector(performCloseAllTabs:),      @"w", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption|NSEventModifierFlagControl },
 				{ @"Close Other Tabs",        @selector(performCloseOtherTabsXYZ:), @"w", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagControl },
 				{ @"Close Tabs to the Right", @selector(performCloseTabsToTheRight:)       },
+				{ @"Close Tabs to the Left",  @selector(performCloseTabsToTheLeft:),      .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption, .alternate = YES },
 				{ /* -------- */ },
 				{ @"Sticky",                  @selector(toggleSticky:)                     },
 				{ /* -------- */ },
