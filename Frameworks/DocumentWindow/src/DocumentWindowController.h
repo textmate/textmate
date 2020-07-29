@@ -54,6 +54,7 @@
 - (IBAction)performCloseAllTabs:(id)sender;
 - (IBAction)performCloseOtherTabsXYZ:(id)sender;
 - (IBAction)performCloseTabsToTheRight:(id)sender;
+- (IBAction)performCloseTabsToTheLeft:(id)sender;
 
 - (IBAction)saveDocument:(id)sender;
 - (IBAction)saveDocumentAs:(id)sender;

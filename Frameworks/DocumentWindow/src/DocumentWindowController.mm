@@ -600,6 +600,12 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		[self closeTabsAtIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(from, to - from)] askToSaveChanges:YES createDocumentIfEmpty:YES activate:YES];
 }
 
+- (IBAction)performCloseTabsToTheLeft:(id)sender
+{
+	if(_selectedTabIndex > 0)
+		[self closeTabsAtIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, _selectedTabIndex)] askToSaveChanges:YES createDocumentIfEmpty:YES activate:YES];
+}
+
 - (void)saveProjectState
 {
 	if(self.treatAsProjectWindow)
@@ -1654,11 +1660,13 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	NSMutableIndexSet* clickedTab    = tabIndex == -1 ? [NSMutableIndexSet indexSet] : [NSMutableIndexSet indexSetWithIndex:tabIndex];
 	NSMutableIndexSet* otherTabs     = tabIndex == -1 ? [NSMutableIndexSet indexSet] : [NSMutableIndexSet indexSetWithIndexesInRange:NSMakeRange(0, total)];
 	NSMutableIndexSet* rightSideTabs = tabIndex == -1 ? [NSMutableIndexSet indexSet] : [NSMutableIndexSet indexSetWithIndexesInRange:NSMakeRange(0, total)];
+	NSMutableIndexSet* leftSideTabs  = tabIndex == -1 ? [NSMutableIndexSet indexSet] : [NSMutableIndexSet indexSetWithIndexesInRange:NSMakeRange(0, tabIndex)];
 
 	if(tabIndex != -1)
 	{
 		[otherTabs removeIndex:tabIndex];
 		[rightSideTabs removeIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, tabIndex + 1)]];
+		// No need to modify leftSideTabs
 	}
 
 	for(NSUInteger i = 0; i < _documents.count; ++i)
@@ -1667,6 +1675,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		{
 			[otherTabs removeIndex:i];
 			[rightSideTabs removeIndex:i];
+			[leftSideTabs removeIndex:i];
 		}
 	}
 
@@ -1678,6 +1687,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		{ @"Close Tab",                closeSingleTabSelector,             .representedObject = clickedTab    },
 		{ @"Close Other Tabs",         @selector(takeTabsToCloseFrom:),    .representedObject = otherTabs     },
 		{ @"Close Tabs to the Right",  @selector(takeTabsToCloseFrom:),    .representedObject = rightSideTabs },
+		{ @"Close Tabs to the Left",   @selector(takeTabsToCloseFrom:),    .representedObject = leftSideTabs, .modifierFlags = NSEventModifierFlagOption, .alternate = YES },
 		{ /* -------- */ },
 		{ @"Sticky",                   @selector(toggleSticky:),           .representedObject = clickedTab    },
 	};
@@ -2302,6 +2312,8 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		active = _documents.count > 1;
 	else if([menuItem action] == @selector(performCloseTabsToTheRight:))
 		active = _selectedTabIndex + 1 < _documents.count;
+	else if([menuItem action] == @selector(performCloseTabsToTheLeft:))
+		active = _selectedTabIndex > 0;
 	else if([menuItem action] == @selector(performBundleItemWithUUIDStringFrom:))
 		active = [_textView validateMenuItem:menuItem];
 
