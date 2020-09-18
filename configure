@@ -86,9 +86,6 @@ done
 # = Generate fixtures and build files =
 # =====================================
 
-mkdir -p "$builddir/Frameworks/SoftwareUpdate/fixtures"
-DST=$(cd >/dev/null "$builddir/Frameworks/SoftwareUpdate/fixtures"; pwd) make -C Frameworks/SoftwareUpdate/fixtures
-
 bin/gen_build -o build.ninja -C "$builddir" -dAPP_VERSION="$ver" -didentity="$identity" -drest_api="$rest_api" -dbzip2_flag="$bzip2_flag" -dcapnp_prefix="$capnp_prefix" -dlibressl_prefix="$libressl_prefix" target
 
 BUNDLES_TBZ=Applications/TextMate/resources/DefaultBundles.tbz
