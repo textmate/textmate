@@ -119,7 +119,7 @@ void OakPrintBadAssertion (char const* lhs, char const* op, char const* rhs, std
 {
 	if([[exception name] isEqualToString:@"FSExecutionErrorException"])
 		return NO;
-	bug(" \n*** %s: %s\n", [[exception name] UTF8String], [[exception reason] UTF8String]);
+	os_log_error(OS_LOG_DEFAULT, "%@: %@\n", exception.name, exception.reason);
 	abort();
 	return YES;
 }
