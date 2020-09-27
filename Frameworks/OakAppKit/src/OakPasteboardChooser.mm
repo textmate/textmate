@@ -55,7 +55,7 @@ static NSUserInterfaceItemIdentifier const kTableColumnIdentifierFlag = @"flag";
 				[res appendAttributedString:[[NSAttributedString alloc] initWithString:str]];
 			}
 		}];
-		[res addAttributes:defaultAttributes range:NSMakeRange(0, res.string.length)];
+		[res addAttributes:defaultAttributes range:NSMakeRange(0, res.length)];
 	}
 
 	return res;
