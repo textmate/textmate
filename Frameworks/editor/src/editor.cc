@@ -1189,10 +1189,7 @@ namespace ng
 	{
 		std::multimap<range_t, std::string> tmp;
 		for(auto pair : replacements)
-		{
-			// D(DBF_Editor, bug("replace range %zu-%zu with ‘%s’\n", pair->first.first, pair->first.second, pair->second.c_str()););
 			tmp.emplace(range_t(pair.first.first, pair.first.second), pair.second);
-		}
 
 		if(!tmp.empty())
 		{

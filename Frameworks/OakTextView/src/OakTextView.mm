@@ -1929,7 +1929,6 @@ doScroll:
 - (void)performBundleItem:(bundles::item_ptr)item
 {
 	crash_reporter_info_t info("%s %s", sel_getName(_cmd), item->name_with_bundle().c_str());
-	// D(DBF_OakTextView_BundleItems, bug("%s\n", anItem->name_with_bundle().c_str()););
 	switch(item->kind())
 	{
 		case bundles::kItemTypeSnippet:
