@@ -1385,9 +1385,9 @@ doScroll:
 				CFAttributedStringSetAttribute(str, CFRangeMake(0, CFAttributedStringGetLength(str)), kCTFontAttributeName, styles.font());
 				CFAttributedStringSetAttribute(str, CFRangeMake(0, CFAttributedStringGetLength(str)), kCTForegroundColorAttributeName, styles.foreground());
 				if(styles.underlined())
-					CFAttributedStringSetAttribute(str, CFRangeMake(0, CFAttributedStringGetLength(str)), kCTUnderlineStyleAttributeName, cf::wrap(kCTUnderlineStyleSingle|kCTUnderlinePatternSolid));
+					CFAttributedStringSetAttribute(str, CFRangeMake(0, CFAttributedStringGetLength(str)), kCTUnderlineStyleAttributeName, cf::wrap(kCTUnderlineStyleSingle));
 				if(styles.strikethrough())
-					CFAttributedStringSetAttribute(str, CFRangeMake(0, CFAttributedStringGetLength(str)), (CFStringRef)NSStrikethroughStyleAttributeName, cf::wrap(kCTUnderlineStyleSingle|kCTUnderlinePatternSolid));
+					CFAttributedStringSetAttribute(str, CFRangeMake(0, CFAttributedStringGetLength(str)), (CFStringRef)NSStrikethroughStyleAttributeName, cf::wrap(kCTUnderlineStyleSingle));
 				CFAttributedStringReplaceAttributedString(res, CFRangeMake(CFAttributedStringGetLength(res), 0), str);
 
 				CFRelease(str);
