@@ -1346,7 +1346,7 @@ namespace ng
 			}
 
 			if(m && range.sorted() != ng::range_t(m.begin(), m.end()))
-				res.emplace(ng::range_t(m.begin(), m.end()), m.captures());
+				res.emplace(ng::range_t(m.begin(), m.end(), false, false, true), m.captures());
 		}
 
 		return res;
