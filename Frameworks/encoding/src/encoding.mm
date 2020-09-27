@@ -174,12 +174,12 @@ namespace encoding
 				return;
 			}
 
-			for(auto const& src : freq.getCharsets())
+			for(auto src : freq.getCharsets())
 			{
 				record_t r;
-				for(auto const& word : src.getWords())
+				for(auto word : src.getWords())
 					r.words.emplace(word.getType().getWord(), word.getCount());
-				for(auto const& byte : src.getBytes())
+				for(auto byte : src.getBytes())
 					r.bytes.emplace(byte.getType().getByte(), byte.getCount());
 				_charsets.emplace(src.getCharset(), r);
 			}

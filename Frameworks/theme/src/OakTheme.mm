@@ -104,7 +104,7 @@ static CGFloat ParseFontSize (NSString* fontSizeString)
 			{ @"misspelled",    OakThemeStyleMisspelled    },
 		};
 
-		for(auto const option : options)
+		for(auto option : options)
 		{
 			bundles::item_ptr item;
 			plist::any_t const value = bundles::value_for_setting(to_s(option.key), scope, &item);
@@ -157,7 +157,7 @@ static CGFloat ParseFontSize (NSString* fontSizeString)
 					{ @"strikethrough", OakThemeStyleStrikethrough },
 				};
 
-				for(auto const option : options)
+				for(auto option : options)
 				{
 					if([fontStyle containsString:option.keyword])
 					{
@@ -412,7 +412,7 @@ static CGFloat ParseFontSize (NSString* fontSizeString)
 			ordering.emplace(*rank, style);
 	}
 
-	for(auto const pair : ordering)
+	for(auto pair : ordering)
 		[styles addObject:pair.second];
 
 	return [[OakThemeStyles alloc] initWithRawStyles:styles];

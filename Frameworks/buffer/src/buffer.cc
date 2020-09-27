@@ -106,7 +106,7 @@ namespace ng
 	bool buffer_t::visit_data (std::function<void(char const*, size_t, size_t, bool*)> const& f) const
 	{
 		size_t offset = 0;
-		for(auto const& memory : _storage)
+		for(auto memory : _storage)
 		{
 			bool stop = false;
 			f(memory.data(), offset, memory.size(), &stop);
