@@ -226,10 +226,10 @@ static NSMutableDictionary* SharedChoosers;
 - (void)addTitlebarAccessoryView:(NSView*)titlebarView
 {
 	titlebarView.translatesAutoresizingMaskIntoConstraints = NO;
-	[titlebarView setFrameSize:titlebarView.fittingSize];
 
 	_accessoryViewController = [[NSTitlebarAccessoryViewController alloc] init];
 	_accessoryViewController.view = titlebarView;
+	[_accessoryViewController.view setFrameSize:titlebarView.fittingSize];
 	[self.window addTitlebarAccessoryViewController:_accessoryViewController];
 }
 
