@@ -29,14 +29,14 @@ To bootstrap the build you need to run `./configure` (in the root of the source 
 
 In the simplest case (assuming [Homebrew][] is installed) you would run:
 
-	brew install ragel boost multimarkdown hg ninja capnp google-sparsehash libressl
+	brew install ragel boost multimarkdown hg ninja capnp google-sparsehash
 	git clone --recursive https://github.com/textmate/textmate.git
 	cd textmate
 	./configure && ninja
 
 If you're using [MacPorts][] then instead run this line to install dependencies:
 
-	sudo port install ninja ragel boost multimarkdown mercurial sparsehash libressl
+	sudo port install ninja ragel boost multimarkdown mercurial sparsehash
 
 Unless you’re using [Homebrew][] then [Cap’n Proto][capnp] must be manually installed. Feel free to submit a PR to update `configure`.
 

@@ -28,7 +28,6 @@ LN_FLAGS += -Wl,-dead_strip_dylibs
 
 CODESIGN_FLAGS = --options runtime --timestamp
 
-FLAGS += -I"$libressl_prefix/include"
 FLAGS += -I"$capnp_prefix/include"
 
 PRELUDE = Shared/PCH/prelude.*
