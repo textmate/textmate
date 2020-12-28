@@ -5,9 +5,6 @@
 #include <text/tokenize.h>
 #include <text/case.h>
 #include <text/format.h>
-#include <openssl/bio.h>
-#include <openssl/pem.h>
-#include <openssl/rsa.h>
 #include <crash/info.h>
 
 extern std::vector<size_t> const& revoked_serials () WEAK_IMPORT_ATTRIBUTE;
@@ -37,39 +34,87 @@ namespace
 		return res;
 	}
 
+	static SecKeyRef parse_public_key (std::string const& publicKey)
+	{
+		SecKeyRef res = nullptr;
+		if(CFDataRef keyData = CFDataCreateWithBytesNoCopy(kCFAllocatorDefault, (const UInt8*)publicKey.data(), publicKey.size(), kCFAllocatorNull))
+		{
+			SecExternalFormat format = kSecFormatOpenSSL;
+			SecExternalItemType type = kSecItemTypePublicKey;
+
+			CFArrayRef cfItems = nullptr;
+			OSStatus err = SecItemImport(keyData, CFSTR(".pem"), &format, &type, 0, nullptr, nullptr, &cfItems);
+			if(err == noErr && cfItems)
+			{
+				if(CFArrayGetCount(cfItems) == 1)
+				{
+					if(res = (SecKeyRef)CFArrayGetValueAtIndex(cfItems, 0))
+						CFRetain(res);
+				}
+				else
+				{
+					os_log_error(OS_LOG_DEFAULT, "SecItemImport() returned %ld items, expected 1", CFArrayGetCount(cfItems));
+				}
+				CFRelease(cfItems);
+			}
+			else
+			{
+				if(CFStringRef message = SecCopyErrorMessageString(err, NULL))
+				{
+					os_log_error(OS_LOG_DEFAULT, "SecItemImport: %{public}@", message);
+					CFRelease(message);
+				}
+			}
+			CFRelease(keyData);
+		}
+		else
+		{
+			os_log_error(OS_LOG_DEFAULT, "Failed to create CFDataRef for public key");
+		}
+		return res;
+	}
+
 	static std::string ssl_decode (std::string const& src, std::string const& publicKey)
 	{
 		crash_reporter_info_t info("key size %zu, cipher size %zu", publicKey.size(), src.size());
 
 		std::string res = NULL_STR;
-		if(BIO* bio = BIO_new_mem_buf((void*)publicKey.data(), publicKey.size()))
+		if(SecKeyRef key = parse_public_key(publicKey))
 		{
-			RSA* rsa_key = nullptr;
-			if(PEM_read_bio_RSA_PUBKEY(bio, &rsa_key, nullptr, nullptr))
+			if(CFDataRef data = CFDataCreateWithBytesNoCopy(kCFAllocatorDefault, (const UInt8*)src.data(), src.size(), kCFAllocatorNull))
 			{
-				std::string dst(src.size(), '\0');
-				if(RSA_size(rsa_key) == (int)src.size())
+				CFErrorRef err;
+				if(CFDataRef tmp = SecKeyCreateDecryptedData(key, kSecKeyAlgorithmRSAEncryptionRaw, (CFDataRef)data, &err))
 				{
-					int len = RSA_public_decrypt(src.size(), (unsigned char*)src.data(), (unsigned char*)&dst[0], rsa_key, RSA_PKCS1_PADDING);
-					if(len > 0)
-							res = dst.substr(0, len);
-					else	os_log_error(OS_LOG_DEFAULT, "RSA_public_decrypt failed");
+					char const* first = (char const*)CFDataGetBytePtr(tmp);
+					char const* last  = first + CFDataGetLength(tmp);
+					if(last - first > 3 && *first++ == '\0' && *first++ == '\1')
+					{
+						while(first != last && *first++ != '\0')
+							;
+						res = std::string(first, last);
+					}
+					else
+					{
+						os_log_error(OS_LOG_DEFAULT, "Failed to decode license: Unexpected padding format");
+					}
+					CFRelease(tmp);
 				}
 				else
 				{
-					os_log_error(OS_LOG_DEFAULT, "Wrong RSA size");
+					os_log_error(OS_LOG_DEFAULT, "Failed to decrypt license: %{public}@", err);
 				}
-				RSA_free(rsa_key);
+				CFRelease(data);
 			}
 			else
 			{
-				os_log_error(OS_LOG_DEFAULT, "PEM_read_bio_RSA_PUBKEY failed");
+				os_log_error(OS_LOG_DEFAULT, "Failed to create CFDataRef for license key");
 			}
-			BIO_free(bio);
+			CFRelease(key);
 		}
 		else
 		{
-			os_log_error(OS_LOG_DEFAULT, "BIO_new_mem_buf failed");
+			os_log_error(OS_LOG_DEFAULT, "Failed to parse public key: %{public}s", publicKey.c_str());
 		}
 		return res;
 	}
