@@ -139,7 +139,7 @@ namespace path
 			}
 
 			NSError* error;
-			if([NSFileManager.defaultManager replaceItemAtURL:_destURL withItemAtURL:_tempURL backupItemName:nil options:NSFileManagerItemReplacementUsingNewMetadataOnly resultingItemURL:nil error:&error])
+			if([NSFileManager.defaultManager replaceItemAtURL:_destURL withItemAtURL:_tempURL backupItemName:nil options:0 resultingItemURL:nil error:&error])
 				return true;
 
 			NSString* displayName;
