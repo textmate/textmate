@@ -29,20 +29,26 @@ To bootstrap the build you need to run `./configure` (in the root of the source 
 
 In the simplest case (assuming [Homebrew][] is installed) you would run:
 
-	brew install ragel boost multimarkdown ninja capnp google-sparsehash
-	git clone --recursive https://github.com/textmate/textmate.git
-	cd textmate
-	./configure && ninja
+```sh
+brew install ragel boost multimarkdown ninja capnp google-sparsehash
+git clone --recursive https://github.com/textmate/textmate.git
+cd textmate
+./configure && ninja
+```
 
 If you're using [MacPorts][] then instead run this line to install dependencies:
 
-	sudo port install ninja ragel boost multimarkdown sparsehash
+```sh
+sudo port install ninja ragel boost multimarkdown sparsehash
+```
 
 Unless you’re using [Homebrew][] then [Cap’n Proto][capnp] must be manually installed. Feel free to submit a PR to update `configure`.
 
 If `port` fails with a build error then likely you need to agree (system-wide) to Apple’s Xcode license:
 
-	sudo xcodebuild -license
+```sh
+sudo xcodebuild -license
+```
 
 ## Prerequisites
 
@@ -71,12 +77,16 @@ Similarly, if the current file belongs to an application target (other than `Tex
 
 For the `TextMate.app` application there are two symbolic build targets:
 
-	ninja TextMate      # Build and sign TextMate
-	ninja TextMate/run  # Build, sign, and (re)launch TextMate
+```sh
+ninja TextMate      # Build and sign TextMate
+ninja TextMate/run  # Build, sign, and (re)launch TextMate
+```
 
 To clean everything run:
 
-	ninja -t clean
+```sh
+ninja -t clean
+```
 
 # Legal
 
