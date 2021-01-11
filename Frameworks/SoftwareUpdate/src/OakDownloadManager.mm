@@ -47,7 +47,7 @@ static NSString* GetHardwareInfo (int field, BOOL isInteger = NO)
 	NSError*                            _extractorError;
 
 	NSDate*                             _sampleStartDate;
-	NSUInteger                          _sampleCountOfBytesReceived;
+	int64_t                             _sampleCountOfBytesReceived;
 }
 @property (nonatomic) NSProgress* progress;
 @property (nonatomic) NSData* extractorTaskOutputData;
@@ -190,28 +190,35 @@ static NSString* GetHardwareInfo (int field, BOOL isInteger = NO)
 		[fileHandle writeData:data];
 		[_data appendData:data];
 
-		_progress.totalUnitCount     = dataTask.countOfBytesExpectedToReceive;
-		_progress.completedUnitCount = dataTask.countOfBytesReceived;
-
-		if(NSUInteger bytesLeft = dataTask.countOfBytesExpectedToReceive - dataTask.countOfBytesReceived)
+		if(dataTask.countOfBytesExpectedToReceive != NSURLSessionTransferSizeUnknown)
 		{
-			NSTimeInterval secondsSampled = -_sampleStartDate.timeIntervalSinceNow;
-			if(secondsSampled > 0.9 || !_sampleStartDate)
+			if(!_sampleStartDate)
 			{
-				if(secondsSampled)
+				_sampleStartDate = [NSDate date];
+			}
+			else
+			{
+				if(int64_t bytesLeft = dataTask.countOfBytesExpectedToReceive - dataTask.countOfBytesReceived)
 				{
-					NSUInteger bytesReceived = dataTask.countOfBytesReceived - _sampleCountOfBytesReceived;
-					[_progress setUserInfoObject:(bytesReceived ? @(ceil(bytesLeft * secondsSampled / bytesReceived)) : nil) forKey:NSProgressEstimatedTimeRemainingKey];
-				}
+					NSTimeInterval secondsSampled = -_sampleStartDate.timeIntervalSinceNow;
+					if(secondsSampled > 0.9)
+					{
+						int64_t bytesReceivedSinceLastSample = dataTask.countOfBytesReceived - _sampleCountOfBytesReceived;
+						[_progress setUserInfoObject:@(ceil(bytesLeft * secondsSampled / bytesReceivedSinceLastSample)) forKey:NSProgressEstimatedTimeRemainingKey];
 
-				_sampleStartDate            = [NSDate date];
-				_sampleCountOfBytesReceived = dataTask.countOfBytesReceived;
+						_sampleStartDate            = [NSDate date];
+						_sampleCountOfBytesReceived = dataTask.countOfBytesReceived;
+					}
+				}
+				else
+				{
+					[_progress setUserInfoObject:nil forKey:NSProgressEstimatedTimeRemainingKey];
+				}
 			}
 		}
-		else
-		{
-			[_progress setUserInfoObject:nil forKey:NSProgressEstimatedTimeRemainingKey];
-		}
+
+		_progress.totalUnitCount     = dataTask.countOfBytesExpectedToReceive;
+		_progress.completedUnitCount = dataTask.countOfBytesReceived;
 	}
 	else
 	{
