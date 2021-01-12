@@ -764,13 +764,13 @@ class CompileStrings < Compiler
   end
 end
 
-class CompilePropertyList < Compiler
+class CompileInfoPropertyList < Compiler
   transforms 'Info.plist' => 'Info.plist'
 
   def setup(buildfile, context)
-    buildfile.rule('process_plist', {
-      'command'     => "#{BIN}/process_plist > $out~ $args $in && mv $out~ $out",
-      'description' => 'Process plist ‘$in’…',
+    buildfile.rule('expand_variables', {
+      'command'     => "#{BIN}/expand_variables > $out~ $args $in && mv $out~ $out",
+      'description' => 'Expand variables ‘$in’…',
     })
   end
 
@@ -779,7 +779,7 @@ class CompilePropertyList < Compiler
     flags << asset.context['PLIST_FLAGS']
 
     new_asset = self.derive_asset(asset, buildfile.dir)
-    buildfile.build('process_plist', asset.file, new_asset.file, flags, [ "#{BIN}/process_plist" ])
+    buildfile.build('expand_variables', asset.file, new_asset.file, flags, [ "#{BIN}/expand_variables" ])
     [ new_asset ]
   end
 end
