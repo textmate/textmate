@@ -747,6 +747,26 @@ class CompileXCAssets < Compiler
   end
 end
 
+class ProcessInfoPlistStrings < Compiler
+  transforms 'InfoPlist.vstrings' => 'InfoPlist.strings'
+
+  def setup(buildfile, context)
+    buildfile.rule('process_infoplist_strings', {
+      'command'     => "set -o pipefail; #{BIN}/expand_variables $args $in|iconv -f utf-8 -t utf-16 > $out~ && mv $out~ $out",
+      'description' => 'Expand variables ‘$in’ and save as UTF-16…',
+    })
+  end
+
+  def transform(asset, buildfile)
+    flags = [ "-dTARGET_NAME='#{asset.context['TARGET_NAME']}'", "-dYEAR='#{Time.now.year}'" ]
+    flags << asset.context['INFO_PLIST_FLAGS']
+
+    new_asset = self.derive_asset(asset, buildfile.dir)
+    buildfile.build('process_infoplist_strings', asset.file, new_asset.file, flags, [ "#{BIN}/expand_variables" ])
+    [ new_asset ]
+  end
+end
+
 class CompileStrings < Compiler
   transforms '.strings' => '.strings'
 
