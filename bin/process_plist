@@ -34,11 +34,11 @@ OptionParser.new do |opts|
     exit
   end
 
-  opts.on("-v","--variables FILE", "the «file» to write build info into.") do |arg|
+  opts.on("-v","--variables FILE", "read variables from FILE.") do |arg|
     variables.merge!(parse_variables(arg))
   end
 
-  opts.on("-d", "--define NAME=VALUE", "define a variable that ends up in build.ninja") do |arg|
+  opts.on("-d", "--define NAME=VALUE", "set variable NAME to VALUE.") do |arg|
     if arg =~ /^(\w+)\s*(=)[ \t]*(.*)$/
       variables[$1] = Shellwords.shellwords($3)
     end
