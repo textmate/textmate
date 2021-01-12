@@ -14,10 +14,6 @@
 @interface LicenseManager ()
 {
 	id _owner;
-
-	BOOL _decorateWindowsImmediately;
-	NSHashTable* _windowsToDecorate;
-	NSTimer* _decorateWindowsTimer;
 }
 - (BOOL)addLicense:(License*)license;
 @end
@@ -242,7 +238,6 @@ static NSTextField* OakCreateTextField ()
 	if(license::add(to_s([info.owner stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet]), to_s(info.licenseAsBase32), &error))
 	{
 		_owner = info.owner;
-		[self removeAllRegisterButtons:self];
 
 		NSAlert* alert        = [[NSAlert alloc] init];
 		alert.messageText     = @"License Added to Keychain";
@@ -266,94 +261,5 @@ static NSTextField* OakCreateTextField ()
 {
 	static AddLicenseWindowController* windowController = [[AddLicenseWindowController alloc] initWithLicense:_license];
 	[windowController showWindow:self];
-}
-
-// ==============================
-// = Window Titlebar Decoration =
-// ==============================
-
-static NSString* const kAddLicenseViewIdentifier = @"org.TextMate.addLicenseButton";
-
-- (void)showAddLicensePopover:(id)sender
-{
-	NSPopover* popover = [[NSPopover alloc] init];
-	popover.behavior = NSPopoverBehaviorTransient;
-	popover.contentViewController = [[AddLicenseViewController alloc] init];
-	popover.contentViewController.representedObject = _license;
-	[popover showRelativeToRect:NSZeroRect ofView:sender preferredEdge:NSMaxYEdge];
-}
-
-- (void)addRegisterButtonToWindow:(NSWindow*)window
-{
-	NSButton* addLicenseButton = [[NSButton alloc] initWithFrame:NSZeroRect];
-
-	addLicenseButton.cell.backgroundStyle = NSBackgroundStyleRaised;
-
-	addLicenseButton.showsBorderOnlyWhileMouseInside = YES;
-	addLicenseButton.controlSize = NSControlSizeSmall;
-	addLicenseButton.font        = [NSFont messageFontOfSize:[NSFont systemFontSizeForControlSize:NSControlSizeSmall]];
-	addLicenseButton.bezelStyle  = NSBezelStyleRecessed;
-	addLicenseButton.buttonType  = NSButtonTypeMomentaryPushIn;
-	addLicenseButton.title       = @"Add License";
-	addLicenseButton.action      = @selector(showAddLicensePopover:);
-	addLicenseButton.target      = self;
-
-	[addLicenseButton sizeToFit];
-
-	NSTitlebarAccessoryViewController* viewController = [[NSTitlebarAccessoryViewController alloc] init];
-	viewController.layoutAttribute = NSLayoutAttributeRight;
-	viewController.title = kAddLicenseViewIdentifier;
-	viewController.view = addLicenseButton;
-	[window addTitlebarAccessoryViewController:viewController];
-}
-
-- (void)removeAllRegisterButtons:(id)sender
-{
-	for(NSWindow* win in [NSApp orderedWindows])
-	{
-		NSArray* viewControllers = win.titlebarAccessoryViewControllers;
-		for(NSUInteger i = viewControllers.count; i != 0; )
-		{
-			NSTitlebarAccessoryViewController* viewController = viewControllers[--i];
-			if([viewController.title isEqualToString:kAddLicenseViewIdentifier])
-				[win removeTitlebarAccessoryViewControllerAtIndex:i];
-		}
-	}
-}
-
-- (void)decorateWindowsTimerDidFire:(id)sender
-{
-	if(self.owner == nil)
-	{
-		for(NSWindow* win in _windowsToDecorate)
-		{
-			if(win)
-				[self addRegisterButtonToWindow:win];
-		}
-	}
-
-	_windowsToDecorate          = nil;
-	_decorateWindowsTimer       = nil;
-	_decorateWindowsImmediately = YES;
-}
-
-- (void)decorateWindow:(NSWindow*)window
-{
-	if(_decorateWindowsImmediately)
-	{
-		if(self.owner == nil)
-			[self addRegisterButtonToWindow:window];
-	}
-	else
-	{
-		NSTimeInterval const kAddLicenseButtonDelay = 60*60; // One hour
-
-		if(_windowsToDecorate == nil)
-			_windowsToDecorate = [NSHashTable weakObjectsHashTable];
-		[_windowsToDecorate addObject:window];
-
-		if(_decorateWindowsTimer == nil)
-			_decorateWindowsTimer = [NSTimer scheduledTimerWithTimeInterval:kAddLicenseButtonDelay target:self selector:@selector(decorateWindowsTimerDidFire:) userInfo:nil repeats:NO];
-	}
 }
 @end
