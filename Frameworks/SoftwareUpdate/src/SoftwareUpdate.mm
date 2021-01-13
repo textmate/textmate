@@ -142,9 +142,6 @@ NSString* const kSoftwareUpdateChannelCanary                                   =
 		[request setValue:OakDownloadManager.sharedInstance.userAgentString forHTTPHeaderField:@"User-Agent"];
 
 		NSURLSessionDataTask* dataTask = [NSURLSession.sharedSession dataTaskWithRequest:request completionHandler:^(NSData* data, NSURLResponse* response, NSError* error){
-			[NSUserDefaults.standardUserDefaults setObject:[NSDate date] forKey:kUserDefaultsLastSoftwareUpdateCheckKey];
-			self.checking = NO;
-
 			NSURL* remoteURL;
 			NSString* remoteVersion;
 
@@ -176,6 +173,8 @@ NSString* const kSoftwareUpdateChannelCanary                                   =
 			}
 
 			dispatch_async(dispatch_get_main_queue(), ^{
+				[NSUserDefaults.standardUserDefaults setObject:[NSDate date] forKey:kUserDefaultsLastSoftwareUpdateCheckKey];
+				self.checking = NO;
 				completionHandler(remoteURL, remoteVersion, error);
 			});
 		}];
