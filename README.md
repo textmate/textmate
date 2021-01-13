@@ -29,14 +29,14 @@ To bootstrap the build you need to run `./configure` (in the root of the source 
 
 In the simplest case (assuming [Homebrew][] is installed) you would run:
 
-	brew install ragel boost multimarkdown hg ninja capnp google-sparsehash
+	brew install ragel boost multimarkdown ninja capnp google-sparsehash
 	git clone --recursive https://github.com/textmate/textmate.git
 	cd textmate
 	./configure && ninja
 
 If you're using [MacPorts][] then instead run this line to install dependencies:
 
-	sudo port install ninja ragel boost multimarkdown mercurial sparsehash
+	sudo port install ninja ragel boost multimarkdown sparsehash
 
 Unless you’re using [Homebrew][] then [Cap’n Proto][capnp] must be manually installed. Feel free to submit a PR to update `configure`.
 
@@ -53,10 +53,7 @@ Building TextMate has the following dependencies:
  * [boost][]         — portable C++ source libraries
  * [sparsehash][]    — A cache friendly hash_map
  * [multimarkdown][] — marked-up plain text compiler
- * [mercurial][]     — distributed SCM system
  * [Cap’n Proto][capnp] — serialization library
-
-In practice `hg` ([mercurial][]) is only required for the SCM library’s tests so you can skip this dependency if you don’t mind a failing test.
 
 ## Building from within TextMate
 
@@ -91,7 +88,6 @@ TextMate is a trademark of Allan Odgaard.
 [ninja]:         https://ninja-build.org/
 [multimarkdown]: http://fletcherpenney.net/multimarkdown/
 [ragel]:         http://www.complang.org/ragel/
-[mercurial]:     https://www.mercurial-scm.org/
 [capnp]:         https://github.com/capnproto/capnproto.git
 [MacPorts]:      http://www.macports.org/
 [Homebrew]:      http://brew.sh/
