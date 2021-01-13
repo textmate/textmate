@@ -55,16 +55,8 @@ Building TextMate has the following dependencies:
  * [multimarkdown][] — marked-up plain text compiler
  * [mercurial][]     — distributed SCM system
  * [Cap’n Proto][capnp] — serialization library
- * [LibreSSL][libressl] - OpenBSD fork of OpenSSL
 
 In practice `hg` ([mercurial][]) is only required for the SCM library’s tests so you can skip this dependency if you don’t mind a failing test.
-
-If you want to avoid the libressl linker warnings about being built for different deployment target then run `brew edit libressl` and make the following change:
-
-	-    system "./configure", *args
-	+    system "env", "LDFLAGS=-mmacosx-version-min=10.8", "CFLAGS=-mmacosx-version-min=10.8", "./configure", *args
-
-Afterward you must rebuild using: `brew reinstall --build-from-source libressl`
 
 ## Building from within TextMate
 
@@ -101,7 +93,6 @@ TextMate is a trademark of Allan Odgaard.
 [ragel]:         http://www.complang.org/ragel/
 [mercurial]:     https://www.mercurial-scm.org/
 [capnp]:         https://github.com/capnproto/capnproto.git
-[libressl]:      http://www.libressl.org
 [MacPorts]:      http://www.macports.org/
 [Homebrew]:      http://brew.sh/
 [NinjaBundle]:   https://github.com/textmate/ninja.tmbundle
