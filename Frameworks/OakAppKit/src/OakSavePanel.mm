@@ -62,7 +62,7 @@
 	NSView* containerView = [[NSView alloc] initWithFrame:NSZeroRect];
 	OakAddAutoLayoutViewsToSuperview([views allValues], containerView);
 
-	[containerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[encodingLabel]-[encodingPopUp]-[lineEndingsPopUp]-(>=0)-|" options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
+	[containerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[encodingLabel]-[encodingPopUp]-[lineEndingsPopUp]-(>=20)-|" options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
 	[containerView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(8)-[encodingPopUp]-(8)-|" options:NSLayoutFormatAlignAllLeading metrics:nil views:views]];
 
 	containerView.frame = (NSRect){ NSZeroPoint, [containerView fittingSize] };
