@@ -91,7 +91,7 @@ static NSMutableDictionary* SharedChoosers;
 
 - (id)initWithPasteboard:(OakPasteboard*)aPasteboard
 {
-	if(self = [super initWithWindow:[[NSPanel alloc] initWithContentRect:NSMakeRect(600, 700, 400, 500) styleMask:(NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable|NSWindowStyleMaskFullSizeContentView) backing:NSBackingStoreBuffered defer:NO]])
+	if(self = [super initWithWindow:[[NSPanel alloc] initWithContentRect:NSMakeRect(600, 700, 400, 500) styleMask:(NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable) backing:NSBackingStoreBuffered defer:NO]])
 	{
 		_pasteboard = aPasteboard;
 
