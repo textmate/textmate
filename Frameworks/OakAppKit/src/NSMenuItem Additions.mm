@@ -121,9 +121,14 @@ static char const* kOakMenuItemTabTrigger    = "OakMenuItemTabTrigger";
 		NSFontAttributeName:           menuFont,
 	}]];
 
+	NSColor* shortcutTextColor = NSColor.textColor;
+	if(@available(macos 10.16, *))
+		shortcutTextColor = NSColor.tertiaryLabelColor;
+
 	[attributedString appendAttributedString:[[NSAttributedString alloc] initWithString:rightString attributes:@{
-		NSParagraphStyleAttributeName: rightPStyle,
-		NSFontAttributeName:           aFont ?: menuFont,
+		NSParagraphStyleAttributeName:  rightPStyle,
+		NSFontAttributeName:            aFont ?: menuFont,
+		NSForegroundColorAttributeName: shortcutTextColor,
 	}]];
 
 	MenuAttributedString* attributedTitle = [[MenuAttributedString alloc] initWithAttributedString:attributedString];
