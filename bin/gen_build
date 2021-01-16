@@ -837,6 +837,32 @@ class CompileMarkdown < Compiler
   end
 end
 
+class CreateBundlesArchive < Compiler
+  transforms '.tbz.bl' => '.tbz'
+
+  def setup(buildfile, context)
+    buildfile.rule('download_bundles', {
+      'command'     => "#{buildfile.dir}/Applications/bl/bl -C $out install $$(<$in)",
+      'description' => 'Download bundles…',
+      'pool'        => 'console',
+    })
+
+    buildfile.rule('archive_bundles', {
+      'command'     => '/usr/bin/tar --disable-copyfile $bzip2_flag -cf $out~ -C "$$(dirname $in)" "$$(basename $in)" && mv $out~ $out',
+      'description' => 'Create tbz archive for ‘$in’…',
+      'generator'   => 'true',
+    })
+  end
+
+  def transform(asset, buildfile)
+    tmp_dir_asset = Asset.new(File.expand_path("#{asset.file}/Managed", buildfile.dir), asset.context)
+    new_asset = self.derive_asset(asset, buildfile.dir)
+    buildfile.build('download_bundles', asset.file, tmp_dir_asset.file, nil, [ "#{buildfile.dir}/Applications/bl/bl" ])
+    buildfile.build('archive_bundles', tmp_dir_asset.file, new_asset.file)
+    [ new_asset ]
+  end
+end
+
 # ========
 # = Main =
 # ========
