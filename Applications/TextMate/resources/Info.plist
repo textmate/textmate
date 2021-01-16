@@ -2937,7 +2937,7 @@
 		<dict>
 			<key>UTTypeConformsTo</key>
 			<array>
-				<string>public.shell-script</string>
+				<string>public.script</string>
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Shell script</string>
