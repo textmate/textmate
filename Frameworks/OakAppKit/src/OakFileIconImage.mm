@@ -175,7 +175,7 @@ enum {
 		}
 		else if(self.exists)
 		{
-			if(NSImage* image = [NSWorkspace.sharedWorkspace iconForFileType:NSFileTypeForHFSTypeCode(self.isDirectory ? kGenericFolderIcon : kGenericDocumentIcon)])
+			if(NSImage* image = [NSWorkspace.sharedWorkspace iconForFileType:NSFileTypeForHFSTypeCode(self.isDirectory ? (OSType)kGenericFolderIcon : (OSType)kGenericDocumentIcon)])
 				[res addObject:image];
 		}
 		else

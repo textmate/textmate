@@ -93,7 +93,7 @@ NSImage* CreateIconImageForURL (NSURL* url, BOOL isModified, BOOL isMissing, BOO
 		}
 		else
 		{
-			image = [NSWorkspace.sharedWorkspace iconForFileType:NSFileTypeForHFSTypeCode(isDirectory ? kGenericFolderIcon : kGenericDocumentIcon)];
+			image = [NSWorkspace.sharedWorkspace iconForFileType:NSFileTypeForHFSTypeCode(isDirectory ? (OSType)kGenericFolderIcon : (OSType)kGenericDocumentIcon)];
 		}
 
 		if(!image)
