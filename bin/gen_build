@@ -743,14 +743,11 @@ class CompileXCAssets < Compiler
   end
 end
 
-class ProcessInfoPlistStrings < Compiler
-  transforms 'InfoPlist.vstrings' => 'InfoPlist.strings'
+class ExpandVariablesStrings < Compiler
+  transforms 'InfoPlist.strings' => 'InfoPlist.strings'
 
   def setup(buildfile, context)
-    buildfile.rule('process_infoplist_strings', {
-      'command'     => "set -o pipefail; #{BIN}/expand_variables $args $in|iconv -f utf-8 -t utf-16 > $out~ && mv $out~ $out",
-      'description' => 'Expand variables ‘$in’ and save as UTF-16…',
-    })
+    # We rely on the expand_variables rule from ExpandVariablesPlist
   end
 
   def transform(asset, buildfile)
@@ -758,7 +755,7 @@ class ProcessInfoPlistStrings < Compiler
     flags << asset.context['INFO_PLIST_FLAGS']
 
     new_asset = self.derive_asset(asset, buildfile.dir)
-    buildfile.build('process_infoplist_strings', asset.file, new_asset.file, flags, [ "#{BIN}/expand_variables" ])
+    buildfile.build('expand_variables', asset.file, new_asset.file, flags, [ "#{BIN}/expand_variables" ])
     [ new_asset ]
   end
 end
@@ -780,7 +777,7 @@ class CompileStrings < Compiler
   end
 end
 
-class CompileInfoPropertyList < Compiler
+class ExpandVariablesPlist < Compiler
   transforms 'Info.plist' => 'Info.plist'
 
   def setup(buildfile, context)
