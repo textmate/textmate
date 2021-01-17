@@ -1,14 +1,12 @@
 #!/System/Library/Frameworks/Ruby.framework/Versions/Current/usr/bin/ruby
 # == Synopsis
 #
-# process_plist: substitute ${VARIABLES} in text files
+# expand_variables: substitute ${VARIABLES} in text files
 #
 # == Usage
 #
 # --help:
 #    show help
-$KCODE = 'U' if RUBY_VERSION < "1.9"
-
 require 'optparse'
 require 'shellwords'
 
@@ -45,17 +43,27 @@ OptionParser.new do |opts|
   end
 end.parse!
 
-while gets
-  $_.gsub!(/\$\{(.*?)\}/) do
-    value = nil
-    if variables.include?($1)
-      value = variables[$1]
-    elsif ENV.include?($1)
-      value = ENV[$1]
-    else
-      abort "*** unknown variable: ‘#$1’"
-    end
-    value.kind_of?(Array) ? value.join(' ') : value
-  end
-  print $_
+data, enc = ARGF.binmode.read, Encoding::UTF_8
+if data.start_with?("\xFE\xFF".b)
+  enc = Encoding::UTF_16BE
+elsif data.start_with?("\xFF\xFE".b)
+  enc = Encoding::UTF_16LE
 end
+
+data.force_encoding(enc)
+data.encode!(Encoding::UTF_8) if enc != Encoding::UTF_8
+STDOUT.set_encoding(enc)
+
+data.gsub!(/\$\{(.*?)\}/) do
+  value = nil
+  if variables.include?($1)
+    value = variables[$1]
+  elsif ENV.include?($1)
+    value = ENV[$1]
+  else
+    abort "*** unknown variable: ‘#$1’"
+  end
+  value.kind_of?(Array) ? value.join(' ') : value
+end
+
+STDOUT << data
