@@ -614,7 +614,13 @@ class Compiler < Plugin
   end
 
   def derive_asset(asset, dest, options = nil)
-    Asset.new(File.expand_path(asset.file.chomp(@ext) + @dest_ext, dest), options ? asset.context.derive(options) : asset.context)
+    new_path = asset.file.chomp(@ext) + @dest_ext
+    if filter?
+      dirname, basename = File.dirname(new_path), File.basename(new_path)
+      dirname = File.dirname(dirname) if File.basename(dirname) =~ /^_[A-Z]\w+/
+      new_path = File.join(dirname, "_#{self.class}", basename)
+    end
+    Asset.new(File.expand_path(new_path, dest), options ? asset.context.derive(options) : asset.context)
   end
 end
 
