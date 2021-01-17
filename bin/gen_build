@@ -448,27 +448,15 @@ SHELL
   def transform(initial_asset)
     derived_assets = [ ]
 
+    exclude = Set.new
     queue = [ initial_asset ]
-    enable_filters = true
     while asset = queue.shift
-      if compiler = compiler_for(asset.file, enable_filters: enable_filters)
-        if compiler.filter?
-          derived_assets += compiler.transform(asset, self)
-        else
-          queue += compiler.transform(asset, self)
-        end
+      if compiler = compiler_for(asset.file, exclude)
+        exclude.add(compiler.class)
+        queue += compiler.transform(asset, self)
       else
         derived_assets << asset
       end
-
-      # We disable filters after first iteration because filters do not change the
-      # file name and therefore can only be used when we go from source → build
-      # directory.
-      #
-      # Example of problem: file → expand variables → convert utf-8 to utf-16
-      # src/InfoPlist.strings → build/InfoPlist.strings → build/InfoPlist.strings
-      # Here we need to mangle all but the last file path.
-      enable_filters = false
     end
 
     derived_assets
@@ -512,7 +500,7 @@ SHELL
 
   private
 
-  def compiler_for(file, enable_filters: true)
+  def compiler_for(file, exclude)
     candidates = []
 
     Plugin.plugins_of_type(Compiler).each do |klass|
@@ -534,7 +522,7 @@ SHELL
     candidates.sort! { |lhs, rhs| lhs[:ext].length <=> rhs[:ext].length }
     while match = candidates.pop
       res = match[:class].new(self, @context, match[:ext], match[:canonical_ext] || match[:ext], match[:dest_ext])
-      return res if enable_filters || !res.filter?
+      return res unless exclude.include?(match[:class])
     end
   end
 end
