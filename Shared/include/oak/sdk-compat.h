@@ -33,3 +33,21 @@ extern NSAppearanceName const NSAppearanceNameDarkAqua __attribute__((weak_impor
 + (NSColor*)separatorColor;
 @end
 #endif
+
+// ===========================
+// = From the macOS 11.0 SDK =
+// ===========================
+
+#if !defined(MAC_OS_X_VERSION_10_16) || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_16)
+typedef NS_ENUM(NSInteger, NSWindowToolbarStyle) {
+	NSWindowToolbarStyleAutomatic,
+	NSWindowToolbarStyleExpanded,
+	NSWindowToolbarStylePreference,
+	NSWindowToolbarStyleUnified,
+	NSWindowToolbarStyleUnifiedCompact
+};
+
+@interface NSWindow (BigSur)
+@property NSWindowToolbarStyle toolbarStyle API_AVAILABLE(macos(11.0));
+@end
+#endif
