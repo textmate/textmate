@@ -569,6 +569,8 @@ class CleanupTargets
           # FIXME Does not seem to work with symbolic links (Proxy.png → Settings.png)
           File.unlink(path) unless dry_run == true
         end
+      rescue Exception => e
+        STDERR << "File.unlink: #{e}\n"
       end
     end
   end
