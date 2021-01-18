@@ -36,7 +36,7 @@ static void* kFirstResponderContext = &kFirstResponderContext;
 
 @interface FFTextFieldViewController () <NSComboBoxDelegate, NSTextStorageDelegate>
 {
-	OakAutoSizingTextField* _textField;
+	NSComboBox* _textField;
 	OakSyntaxFormatter*     _syntaxFormatter;
 	OakPasteboard*          _pasteboard;
 	NSString*               _grammarName;
@@ -80,11 +80,11 @@ static void* kFirstResponderContext = &kFirstResponderContext;
 	return _syntaxFormatter;
 }
 
-- (OakAutoSizingTextField*)textField
+- (NSComboBox*)textField
 {
 	if(!_textField)
 	{
-		_textField = [[OakAutoSizingTextField alloc] initWithFrame:NSZeroRect];
+		_textField = [[NSComboBox alloc] initWithFrame:NSZeroRect];
 		_textField.font       = OakControlFont();
 		_textField.formatter  = self.syntaxFormatter;
 		_textField.delegate   = self;
@@ -115,7 +115,6 @@ static void* kFirstResponderContext = &kFirstResponderContext;
 	if([_stringValue isEqualToString:newStringValue])
 		return;
 	_stringValue = newStringValue;
-	[_textField updateIntrinsicContentSizeToEncompassString:newStringValue];
 
 	if(NSDictionary* info = [self infoForBinding:@"stringValue"])
 	{
@@ -132,8 +131,30 @@ static void* kFirstResponderContext = &kFirstResponderContext;
 
 - (void)comboBoxWillPopUp:(NSNotification *)aNotification
 {
-	[self.textField removeAllItems];
-	[self.textField addItemsWithObjectValues:[_pasteboard.entries valueForKeyPath:@"string"]];
+	[_textField removeAllItems];
+	[_textField addItemsWithObjectValues:[_pasteboard.entries valueForKeyPath:@"string"]];
+}
+
+- (void)comboBoxWillDismiss:(NSNotification *)aNotification
+{
+	NSMutableArray* remove = [NSMutableArray array];
+	
+	for(OakPasteboardEntry* entry in _pasteboard.entries)
+	{
+		if (![self textFieldContainsString:entry.string]) {
+			[remove addObject:entry];
+		}
+	}
+	
+	[_pasteboard removeEntries:remove];
+}
+
+-(BOOL)textFieldContainsString:(NSString*)aString
+{
+	NSUInteger index = [_textField.objectValues indexOfObjectPassingTest:^BOOL(NSString* string, NSUInteger idx, BOOL *stop) {
+		return [string isEqualToString: aString];
+	}];
+	return index != NSNotFound;
 }
 
 - (void)observeValueForKeyPath:(NSString*)keyPath ofObject:(id)object change:(NSDictionary*)change context:(void*)context
@@ -160,12 +181,24 @@ static void* kFirstResponderContext = &kFirstResponderContext;
 {
 	if(command == @selector(moveDown:))
 	{
+		if (!_textField.cell.isAccessibilityExpanded) {
+			[_textField.cell performSelector:@selector(popUp:)];
+		}
+		
 		NSRange lastNewline    = [textView.string rangeOfString:@"\n" options:NSBackwardsSearch];
 		NSRange insertionPoint = textView.selectedRanges.lastObject.rangeValue;
 
 		if(lastNewline.location == NSNotFound || lastNewline.location < NSMaxRange(insertionPoint))
 			return YES;
 	}
+	else if (command == @selector(deleteBackward:) || command == @selector(deleteForward:))
+	{
+		if (_textField.cell.isAccessibilityExpanded) {
+			[_textField removeItemAtIndex:_textField.indexOfSelectedItem];
+			return YES;
+		}
+	}
+	
 	return NO;
 }
 
