@@ -22,6 +22,7 @@ def parse_variables(path)
 end
 
 variables = { }
+outfile   = nil
 OptionParser.new do |opts|
   opts.banner = "Usage: expand_variables [options]"
   opts.separator "Synopsis:"
@@ -41,6 +42,10 @@ OptionParser.new do |opts|
       variables[$1] = Shellwords.shellwords($3)
     end
   end
+
+  opts.on("-o", "--output FILE", "write output to FILE.") do |arg|
+    outfile = arg
+  end
 end.parse!
 
 data, enc = ARGF.binmode.read, Encoding::UTF_8
@@ -52,7 +57,6 @@ end
 
 data.force_encoding(enc)
 data.encode!(Encoding::UTF_8) if enc != Encoding::UTF_8
-STDOUT.set_encoding(enc)
 
 data.gsub!(/\$\{(.*?)\}/) do
   value = nil
@@ -66,4 +70,7 @@ data.gsub!(/\$\{(.*?)\}/) do
   value.kind_of?(Array) ? value.join(' ') : value
 end
 
-STDOUT << data
+io = outfile ? open(outfile, 'w') : STDOUT
+io.set_encoding(enc)
+io << data
+io.close
