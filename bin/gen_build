@@ -743,23 +743,6 @@ class CompileXCAssets < Compiler
   end
 end
 
-class ExpandVariablesStrings < Compiler
-  transforms 'InfoPlist.strings' => 'InfoPlist.strings'
-
-  def setup(buildfile, context)
-    # We rely on the expand_variables rule from ExpandVariablesPlist
-  end
-
-  def transform(asset, buildfile)
-    flags = [ "-dTARGET_NAME='#{asset.context['TARGET_NAME']}'", "-dYEAR='#{Time.now.year}'" ]
-    flags << asset.context['INFO_PLIST_FLAGS']
-
-    new_asset = self.derive_asset(asset, buildfile.dir)
-    buildfile.build('expand_variables', asset.file, new_asset.file, flags, [ "#{BIN}/expand_variables" ])
-    [ new_asset ]
-  end
-end
-
 class CopyAsUTF16Strings < Compiler
   transforms '.strings' => '.strings'
 
@@ -777,8 +760,8 @@ class CopyAsUTF16Strings < Compiler
   end
 end
 
-class ExpandVariablesPlist < Compiler
-  transforms 'Info.plist' => 'Info.plist'
+class ExpandVariables < Compiler
+  transforms 'Info.plist' => 'Info.plist', 'InfoPlist.strings' => 'InfoPlist.strings'
 
   def setup(buildfile, context)
     buildfile.rule('expand_variables', {
@@ -788,7 +771,7 @@ class ExpandVariablesPlist < Compiler
   end
 
   def transform(asset, buildfile)
-    flags = [ "-dTARGET_NAME='#{asset.context['TARGET_NAME']}'" ]
+    flags = [ "-dTARGET_NAME='#{asset.context['TARGET_NAME']}'", "-dYEAR='#{Time.now.year}'" ]
     flags << asset.context['PLIST_FLAGS']
 
     new_asset = self.derive_asset(asset, buildfile.dir)
