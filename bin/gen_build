@@ -782,7 +782,7 @@ class ExpandVariablesPlist < Compiler
 
   def setup(buildfile, context)
     buildfile.rule('expand_variables', {
-      'command'     => "#{BIN}/expand_variables > $out~ $args $in && mv $out~ $out",
+      'command'     => "#{BIN}/expand_variables -o $out $args $in",
       'description' => 'Expand variables ‘$in’…',
     })
   end
