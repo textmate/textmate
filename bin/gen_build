@@ -144,8 +144,6 @@ class Target
 
       targets.each do |target|
         target.resources(buildfile, all_targets).each do |file, path, deps|
-          # Do not copy the main Info.plist from other targets
-          next if path == 'Contents/Info.plist' && target != self
           resources << buildfile.build('copy', file, File.join(buildfile.dir, self.dir, bundle, path), nil, deps)
           @files << [ file, File.join(bundle, path), deps ]
         end
@@ -249,15 +247,11 @@ class Target
 
       @context.keys.each do |key|
         if key =~ /^CP_(.+)/
-          asset_section = "Contents/#$1"
+          asset_section = $1 == "InfoPlist" ? "Contents" : "Contents/#$1"
           queue = @context.paths_for(key).map { |file| [ file, asset_section ] }
 
           while info = queue.shift do
             file, dest = *info
-
-            # Any Info.plist destined for Resources will instead be used as the bundle’s main Info.plist
-            dest = 'Contents' if File.basename(file) == 'Info.plist' && dest == 'Contents/Resources'
-
             buildfile.transform(Asset.new(file, @context)).each do |new_asset|
               if File.directory?(new_asset.file)
                 queue += Dir.entries(new_asset.file).reject { |path| path =~ /^\./ }.map do |entry|

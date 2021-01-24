@@ -1,4 +1,5 @@
 CP_Resources     = resources/*
+CP_InfoPlist     = Info.plist
 SOURCES          = src/*.{mm}
 LINK            += file theme
 BUNDLE_EXTENSION = xpc

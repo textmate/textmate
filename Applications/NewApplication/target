@@ -1,4 +1,5 @@
 SOURCES       = src/*.{cc,mm}
 CP_Resources  = resources/*
+CP_InfoPlist  = Info.plist
 LINK         += OakFoundation OakAppKit MenuBuilder
 FRAMEWORKS    = Cocoa
