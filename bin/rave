@@ -1,0 +1,1531 @@
+#!/usr/bin/env ruby
+require 'optparse'
+require 'shellwords'
+require 'fileutils'
+require 'json'
+require 'set'
+
+class Parser
+  attr_reader :globs, :targets, :environment
+
+  def initialize(ravefile)
+    @environment = {}
+
+    lines, ravefiles, globs = load_recursive(File.basename(ravefile))
+    records, more_globs = expand_globs(flatten(lines))
+
+    dirs = []
+
+    records.each do |variables, line|
+      command, args = line
+      case command
+        when :copy, :files
+          dirs += args[0...-1].select { |file| !file.start_with?('@') && File.directory?(file)  }
+      end
+    end
+
+    @ravefiles = ravefiles
+    @globs     = globs + more_globs + dirs.map { |dir| File.join(dir, '**') }
+    @targets   = create_targets(records)
+  end
+
+  def dependencies
+    globs, files = @globs.partition { |path| path =~ /\*/  }
+    dirs = files.select { |file| File.directory?(file) }
+
+    res = Set.new(@ravefiles)
+    res.merge(watchlist([ *globs, *dirs.map { |dir| File.join(dir, '**') } ]))
+
+    @targets.each do |_, archs|
+      archs.each do |_, target|
+        if target[:captured_variables] && target[:inference]
+          target[:captured_variables].each do |variable|
+            res.merge(target[:inference][variable]) if target[:inference].include?(variable)
+          end
+        end
+      end
+    end
+
+    res, missing = res.partition { |file| File.exist?(file) }
+    missing.each { |file| STDERR << "*** reference is missing: #{file}\n" }
+
+    res
+  end
+
+  private
+
+  def load_recursive(ravefile)
+    res, globs, ravefiles = [], [], []
+
+    queue = [ { lines: res, file: ravefile } ]
+    while record = queue.pop
+      stack = []
+      lines, io = record[:lines], open(record[:file])
+      while line = io.gets
+        if line =~ /^\s*(?:(\})|(#.*)|([a-z_]+)\s*(.+?)\s*(\{)?)\s*$/
+          close_brace, comment, command, parameters, open_brace = $1, $2, $3, $4, $5
+          args = (parameters.nil? ? [] : Shellwords.split(parameters))
+
+          next if comment
+
+          if command == 'load'
+            args = args.map { |file| File.join(File.dirname(record[:file]), file) } if record[:file].include?('/')
+            globs += args
+            files = args.flat_map { |glob| Dir.glob(glob) }
+            ravefiles += files
+            files.each do |file|
+              queue << { lines: [], file: file }
+              lines << [ :load, [ file ], queue.last[:lines] ]
+            end
+          elsif open_brace
+            stack.push(lines)
+            lines << [ command.to_sym, args, [] ]
+            lines = lines.last.last
+          elsif close_brace
+            lines = stack.pop
+          else
+            lines << [ command.to_sym, args ]
+          end
+        end
+      end
+    end
+
+    [ res, ravefiles, globs ]
+  end
+
+  def flatten(root_lines)
+    res = []
+
+    queue = [ { lines: root_lines, variables: {} } ]
+    while record = queue.pop
+      lines, variables = record[:lines], record[:variables]
+
+      lines.each do |line|
+        command, args, options = *line
+        if options
+          args = args.map { |arg| expand_variables(arg, variables) }
+
+          temp = nil
+          case command
+            when :load
+              dir = File.dirname(args.first)
+              temp = dir == '.' ? variables : variables.merge(:dir => dir, 'dirname' => File.basename(dir))
+            when :target, :extend, :config, :arch
+              temp = variables.merge(command => args)
+          end
+          abort "Options not supported for #{command}" if temp.nil?
+          queue << { lines: options, variables: temp }
+        else
+          res << [ variables, line ]
+        end
+      end
+    end
+
+    res
+  end
+
+  def expand_globs(lines)
+    res, globs = [], []
+
+    lines.each do |variables, line|
+      command, args = line
+
+      inputs = nil
+      if [ :prelude, :sources, :headers, :tests, :cxx_tests ].include?(command)
+        inputs, args = args, []
+      elsif [ :files, :copy ].include?(command)
+        args, inputs = args.partition { |e| e.start_with?('@') }
+        args.push(inputs.pop)
+      end
+
+      if inputs
+        inputs = inputs.map { |input| File.join(variables[:dir], input) } if variables.include?(:dir)
+        expanded = inputs.flat_map { |input| Dir.glob(input) }
+        res << [ variables, [ command, expanded + args ] ]
+        globs += inputs
+      else
+        res << [ variables, line ]
+      end
+    end
+
+    [ res, globs ]
+  end
+
+  def create_targets(records)
+    n = 0
+    records = records.sort_by do |variables, line|
+      n += 1
+      [ variables[:extend] ? 2 : (variables[:target] ? 1 : 0), variables[:config] ? 1 : 0, variables[:arch] ? 1 : 0, n ]
+    end
+
+    targets = Hash.new { |hash, key| hash[key] = [] }
+    configs = Hash.new { |hash, key| hash[key] = [] }
+    archs   = Hash.new { |hash, key| hash[key] = [] }
+
+    records.each do |record|
+      variables, _ = record
+      if variables.include?(:arch)
+        variables[:arch].each { |arch| archs[arch] << record }
+      elsif variables.include?(:config)
+        variables[:config].each { |config| configs[config] << record }
+      else
+        (variables[:target] || variables[:extend] || [ :no_target ]).each { |target| targets[target] << record }
+      end
+    end
+
+    config_to_targets_map = configs.map do |config_name, records|
+      [ config_name,
+        records.reduce(Set.new) do |set, record|
+          variables, _ = record
+          (variables[:target] || variables[:extend] || [ :no_target ]).each { |target_name| set << target_name }
+          set
+        end
+      ]
+    end
+
+    res = []
+
+    targets.each do |target_name, records|
+      next if target_name.is_a?(Symbol)
+
+      config_names = config_to_targets_map.select { |config_name, set| set.include?(:no_target) || set.include?(target_name) }.map { |config_name, _| config_name }
+      config_names = [ :no_config ] if config_names.empty?
+
+      config_names.each do |config_name|
+        arch_names = archs.select do |arch_name, records|
+          records.find do |variables, _|
+            (variables[:target] || variables[:extend] || [ target_name ]).include?(target_name) && (variables[:config] || [ config_name ]).include?(config_name)
+          end
+        end.keys
+        arch_names = [ :no_arch ] if arch_names.empty?
+
+        res << [ (config_name.is_a?(Symbol) ? target_name : "#{target_name}/#{config_name}"),
+          arch_names.map do |arch_name|
+            target = []
+            target += targets[:no_target] if targets.include?(:no_target)
+            target += targets[target_name]
+            target += configs[config_name].select do |variables, _|
+              (variables[:target] || variables[:extend] || [ target_name ]).include?(target_name)
+            end
+            target += archs[arch_name].select do |variables, _|
+              (variables[:target] || variables[:extend] || [ target_name ]).include?(target_name) && (variables[:config] || [ config_name ]).include?(config_name)
+            end
+
+            lines = target.map do |variables, line|
+              unless config_name.is_a?(Symbol)
+                command, args = line
+                args = args.map { |arg| "#{arg}/#{config_name}" } if [ :require, :require_headers ].include?(command)
+                args = args.map { |arg| arg.sub(/^@.+$/, "\\&/#{config_name}") } if [ :files, :copy ].include?(command)
+                line = [ command, args ]
+              end
+              [ *line, { 'dir' => variables[:dir] || '.' } ]
+            end
+
+            env = { 'target' => target_name, 'config' => config_name, 'arch' => arch_name }.reject { |key, value| value.is_a?(Symbol) }
+            [ arch_name, { variables: env, lines: lines } ]
+          end
+        ]
+      end
+    end
+
+    # ========================
+    # = Constrct the Targets =
+    # ========================
+
+    shell_cache      = {}
+    file_check_cache = {}
+
+    res = res.map do |target_name, archs|
+      archs = archs.map do |arch_name, target|
+        variables = target[:variables]
+
+        n = 0
+        lines = target[:lines].sort_by do |command, _, _|
+          [ [ :set, :add, :capture ].include?(command) ? 0 : 1, n += 1 ]
+        end
+
+        lines.each do |command, args, env|
+          env = variables.merge(env)
+          case command
+            when :set, :add, :capture
+              value     = args[1..-1].join(' ')
+              new_value = expand_variables(value, env)
+
+              if new_value.include?('/') && new_value !~ /['"= $]/
+                file_check_cache[new_value] = File.file?(new_value) unless file_check_cache.include?(new_value)
+              end
+
+              files = []
+
+              if file_check_cache[new_value]
+                files << new_value
+              elsif inference = target[:inference]
+                value.gsub(/\\([\\$])/, '').scan(VARIABLE_MATCH) do
+                  files += inference[$1 || $2] if inference.include?($1 || $2)
+                end
+              end
+
+              unless files.empty?
+                target[:inference] ||= {}
+                target[:inference][args.first] ||= []
+                target[:inference][args.first] += files
+              end
+
+              if command == :capture
+                unless shell_cache.include?(new_value)
+                  shell_cache[new_value] = %x{ #{new_value} }.chomp
+                end
+
+                variables[args.first] = shell_cache[new_value]
+                target[:captured_variables] ||= []
+                target[:captured_variables] << args.first
+              elsif command == :add && env.include?(args.first)
+                variables[args.first] = env[args.first] + ' ' + new_value
+              else
+                variables[args.first] = new_value
+              end
+            when :prefix, :executable
+              target[command] = args.map { |value| expand_variables(value, env) }.join(' ')
+              target[:dir] = env['dir']
+            when :notarize
+              target[command] = args.map { |value| expand_variables(value, env) }
+            when :files, :copy
+              target[command] ||= {}
+              target[command][args.last] ||= []
+              target[command][args.last] += args[0...-1]
+            when :define
+              target[command] ||= []
+              target[command] << args
+            when :require, :require_headers, :prelude, :headers, :sources, :tests, :cxx_tests, :frameworks
+              target[command] ||= []
+              target[command] += args
+            when :libraries
+              target[command] ||= []
+              target[command] += args.map { |value| expand_variables(value, env) }
+            else
+              STDERR << "Unhandled command: #{command} #{args.join(' ')}\n"
+          end
+        end
+
+        target.delete(:lines)
+
+        [ arch_name, target ]
+      end
+      [ target_name, Hash[archs] ]
+    end
+
+    Hash[res]
+  end
+
+  # ======================
+  # = Variable Expansion =
+  # ======================
+
+  VARIABLE_MATCH = /\$(?:\{(.+?)\}|(\w+))/
+
+  def expand_variables(value, variables)
+    value.gsub(/\\([\\$])|#{VARIABLE_MATCH}/) do
+      name = $2 || $3
+      if $1
+        $1
+      elsif variables.include?(name)
+        variables[name]
+      elsif ENV.include?(name)
+        @environment[name] ||= ENV[name]
+      else
+        STDERR << "*** unknown variable ‘#{name}’ in line: #{value}\n"
+        STDERR << "Available: #{variables.keys.join(', ')}\n"
+        abort
+      end
+    end
+  end
+
+  # ========================================
+  # = Find dependencies from list of globs =
+  # ========================================
+
+  def expand_braces(string)
+    stack, children, escape = [], nil, false
+    siblings = [ { value: String.new } ]
+
+    string.split('').each do |ch|
+      if ch == '{' && !escape
+        stack.push([ siblings, children ])
+        siblings << { children: [ { siblings: [ { value: String.new } ] } ] }
+        children = siblings.last[:children]
+        siblings = children.last[:siblings]
+      elsif ch == ',' && children && !escape
+        children << { siblings: [ { value: String.new } ] }
+        siblings = children.last[:siblings]
+      elsif ch == '}' && children && !escape
+        siblings, children = stack.pop
+        siblings << { value: String.new }
+      else
+        escape = ch == '\\' && !escape
+        siblings.last[:value] << ch
+      end
+    end
+
+    siblings, _ = stack.pop until stack.empty?
+
+    unfold = lambda do |siblings|
+      res = [ '' ]
+
+      siblings.each do |sibling|
+        if value = sibling[:value]
+          res.each { |str| str << value }
+        elsif children = sibling[:children]
+          res = children.flat_map do |child|
+            unfold.call(child[:siblings]).flat_map do |value|
+              res.map { |str| str + value }
+            end
+          end
+        end
+      end
+
+      res
+    end
+
+    unfold.call(siblings)
+  end
+
+  def watchlist(globs)
+    paths = {}
+
+    globs.each do |glob|
+      expand_braces(glob).each do |file|
+        components = file.split(File::SEPARATOR).reject { |component| component == '.' }
+
+        components.each_with_index do |component, i|
+          if component.include?('**')
+            record = { watch_descendents: true }
+          elsif component.include?('*')
+            if i == components.size-1
+              recurd = { }
+            else
+              record = { watch_children: true }
+            end
+          else
+            next
+          end
+
+          path = components[0...i].join(File::SEPARATOR)
+          record = paths[path].merge(record) if paths[path]
+          paths[path] = record
+
+          break
+        end
+      end
+    end
+
+    res = Set.new
+    cache = {}
+
+    queue = paths.map do |path, options|
+      flag = if options && options[:watch_descendents]
+        :watch_descendents
+      elsif options && options[:watch_children]
+        :watch_children
+      end
+      [ path, flag ]
+    end
+
+    while record = queue.shift
+      path, flag = *record
+
+      res << path
+
+      if flag
+        if !cache[path]
+          cache[path] = Dir.entries(path).reject { |file| file.start_with?('.') }.map { |entry| File.join(path, entry) }.select { |file| File.directory?(file) }
+        end
+
+        cache[path].each do |file|
+          queue << [ file, flag == :watch_descendents ? flag : nil ]
+        end
+      end
+    end
+
+    res.to_a.sort
+  end
+end
+
+# ===================
+# = Transformations =
+# ===================
+
+class Plugin
+  @@plugins = []
+
+  def self.inherited(subclass)
+    @@plugins << subclass
+  end
+
+  def self.plugins_of_type(klass)
+    @@plugins.select { |candidate| candidate < klass }
+  end
+end
+
+class Compiler < Plugin
+  class << self
+    def transforms(hash = nil)
+      @transforms = hash || @transforms
+    end
+
+    def extensions(hash = nil)
+      @extensions = hash || @extensions
+    end
+
+    def transform(file, config, builddir)
+      res     = [ ]
+      exclude = Set.new
+      queue   = [ file ]
+
+      while f = queue.shift
+        if compiler = find(f, exclude)
+          exclude << compiler.class
+
+          cache_key = "#{f}/#{(config['config'] || 'no_config')}"
+          if info = @@cache[cache_key]
+            queue << Array(info[:out]).first
+            if flags = info[:new_flags]
+              config = config.merge('FLAGS' => "#{config['FLAGS']} #{info[:new_flags]}")
+            end
+          else
+            info = compiler.transform(f, config, builddir)
+
+            if !compiler.respond_to?(:universal?) || !compiler.universal?
+              @@cache[cache_key] = info.dup
+            end
+
+            if info.include?(:new_flags)
+              config = config.merge('FLAGS' => "#{config['FLAGS']} #{info[:new_flags]}")
+              info.delete(:new_flags)
+            end
+
+            res << info
+
+            queue << Array(info[:out]).first
+          end
+        end
+      end
+
+      res.empty? ? nil : res
+    end
+
+    private
+
+    @@cache = {}
+
+    def find(file, exclude)
+      candidates = []
+
+      Plugin.plugins_of_type(Compiler).each do |klass|
+        klass.transforms.each do |ext, dest_ext|
+          if file =~ /\b#{Regexp.escape ext}$/
+            candidates << { class: klass, ext: ext, dest_ext: dest_ext }
+          end
+        end unless klass.transforms.nil?
+
+        klass.extensions.each do |canonical_ext, extensions|
+          extensions.each do |ext|
+            if file =~ /\b#{Regexp.escape ext}$/
+              candidates << { class: klass, ext: ext, dest_ext: klass.transforms[canonical_ext], canonical_ext: canonical_ext }
+            end
+          end
+        end unless klass.extensions.nil?
+      end
+
+      candidates.sort! { |lhs, rhs| lhs[:ext].length <=> rhs[:ext].length }
+      while match = candidates.pop
+        res = match[:class].new(match[:ext], match[:canonical_ext] || match[:ext], match[:dest_ext])
+        return res unless exclude.include?(match[:class])
+      end
+    end
+  end
+
+  def initialize(ext, canonical_ext, dest_ext)
+    @ext, @canonical_ext, @dest_ext = ext, canonical_ext, dest_ext
+  end
+
+  def filter?
+    @canonical_ext == @dest_ext
+  end
+
+  def transform(file, config, builddir)
+    sourcedir = File.dirname(file).sub(%r{#{Regexp.escape(builddir)}(/_\w+(?=/))?}, '')
+    arch = self.respond_to?(:universal?) && self.universal? && config.include?('arch') ? "-#{config['arch']}" : ""
+    { in: file, out: File.join(builddir, "_#{self.class}#{arch}", sourcedir, File.basename(file).chomp(@ext) + @dest_ext), name: self.class.to_s }
+  end
+end
+
+class CompileClang < Compiler
+  transforms '.c' => '.o', '.m' => '.o', '.cc' => '.o', '.mm' => '.o'
+  extensions '.cc' => [ '.c++', '.cxx', '.cpp' ]
+
+  COMPILER_INFO = {
+    '.c'  => { :flags => 'C_FLAGS',      :type => 'c-header'             },
+    '.m'  => { :flags => 'OBJC_FLAGS',   :type => 'objective-c-header'   },
+    '.cc' => { :flags => 'CXX_FLAGS',    :type => 'c++-header'           },
+    '.mm' => { :flags => 'OBJCXX_FLAGS', :type => 'objective-c++-header' },
+  }
+
+  @@prelude = Set.new
+
+  def universal?
+    true
+  end
+
+  def transform(file, config, builddir)
+    info = COMPILER_INFO[@canonical_ext]
+
+    flags = []
+    flags << config['FLAGS']      if config.include?('FLAGS')
+    flags << config[info[:flags]] if config.include?(info[:flags])
+
+    pch, dependencies = nil, []
+
+    # Precompiled header
+    if prelude = config[:prelude]
+      if header = prelude.find { |file| File.extname(file) == @canonical_ext }
+        arch = config.include?('arch') ? "-#{config['arch']}" : ""
+        output = File.join(builddir, "_PCH#{arch}", File.dirname(header), File.basename(header) + '.gch')
+
+        unless @@prelude.include?(output)
+          @@prelude << output
+
+          pch = {
+            name:        'PCH',
+            in:          header,
+            out:         output,
+            flags:       [ '-x', info[:type], *flags ].join(' '),
+            command:     'xcrun --sdk macosx clang -c -o $out $flags -MMD -MF $out.d $in',
+            depfile:     '$out.d',
+            deps:        'gcc',
+            description: 'Precompile ‘${in}’…',
+          }
+        end
+
+        dependencies << output
+        flags << [ "-include", output.chomp('.gch').shellescape ]
+      end
+    end
+
+    flags << config[:include].map { |dir| "-I#{dir.shellescape}" } if config.include?(:include)
+
+    super.merge(
+      before:       pch,
+      flags:        flags.join(' '),
+      command:      'xcrun --sdk macosx clang -c -o $out $flags -MMD -MF $out.d $in',
+      depfile:      '$out.d',
+      deps:         'gcc',
+      description:  'Compile ‘${in}’…',
+      dependencies: dependencies,
+      order_only:   config[:include],
+    )
+  end
+end
+
+class CompileRagel < Compiler
+  transforms '.rl' => '.cc', '.mm.rl' => '.mm', '.cc.rl' => '.cc'
+
+  def transform(file, config, builddir)
+    super.merge(
+      flags:        config['RAGEL_FLAGS'],
+      command:      'ragel -o $out $flags $in',
+      description:  'Ragel ‘${in}’…',
+      new_flags:    "-iquote #{File.dirname(file).shellescape}",
+      dependencies: config.dig(:inference, 'RAGEL_FLAGS'),
+    )
+  end
+end
+
+class CompileCapnp < Compiler
+  transforms '.capnp' => '.capnp.c++'
+
+  def transform(file, config, builddir)
+    abort 'This build requires CAPNP_PATH to be defined' unless config.include?('CAPNP_PATH')
+
+    base = super
+
+    source = base[:out]
+    header = source.chomp('.c++') + '.h'
+
+    base.merge(
+      out:         [ source, header ],
+      flags:       "-oc++:#{File.dirname(source).shellescape} --src-prefix=#{File.dirname(file).shellescape}",
+      capnp_bin:   (config['CAPNP_BIN'] || "#{config['CAPNP_PATH']}/bin").shellescape,
+      command:     'PATH="$capnp_bin:$$PATH" capnp compile $flags $in',
+      description: 'Cap’n Proto ‘${in}’…',
+    )
+  end
+end
+
+class CompileXib < Compiler
+  transforms '.xib' => '.nib'
+
+  def transform(file, config, builddir)
+    super.merge(
+      flags:        config['IB_FLAGS'],
+      command:      'xcrun ibtool --compile $out $flags $in',
+      description:  'Xib ‘${in}’…',
+      dependencies: config.dig(:inference, 'IB_FLAGS'),
+    )
+  end
+end
+
+class CompileAssetCatalog < Compiler
+  transforms '.xcassets' => '.car'
+
+  def transform(file, config, builddir)
+    super.merge(
+      out:          File.join(builddir, "_#{self.class}", File.dirname(file), 'Assets.car'),
+      flags:        config['AC_FLAGS'],
+      command:      'xcrun actool --compile "$(dirname $out)" $flags $in',
+      description:  'Assets ‘${in}’…',
+      dependencies: Dir.glob("#{file}/**/*") + (config.dig(:inference, 'AC_FLAGS') || []),
+    )
+  end
+end
+
+class ConvertToUTF16 < Compiler
+  transforms '.strings' => '.strings'
+
+  def transform(file, config, builddir)
+    super.merge(
+      command:     'if [[ "$(head -c2 $in)" == $\'\\xFF\\xFE\' || "$(head -c2 $in)" == $\'\\xFE\\xFF\' ]]; then /bin/cp -Xp $in $out && touch $out; else iconv -f utf-8 -t utf-16 < $in > $out~ && mv $out~ $out; fi',
+      description: 'Encode ‘${in}’ as UTF-16…',
+    )
+  end
+end
+
+class ExpandVariables < Compiler
+  transforms 'Info.plist' => 'Info.plist', 'InfoPlist.strings' => 'InfoPlist.strings'
+
+  def transform(file, config, builddir)
+    flags = [ "-dYEAR=#{Time.now.year}" ]
+    flags << config['PLIST_FLAGS'] if config.include?('PLIST_FLAGS')
+
+    super.merge(
+      flags:        flags.join(' '),
+      command:      "#{__dir__}/expand_variables -o $out $flags $in",
+      description:  'Expand variables ‘${in}’…',
+      dependencies: [ "#{__dir__}/expand_variables", *(config.dig(:inference, 'PLIST_FLAGS') || []) ],
+    )
+  end
+end
+
+class CompileMarkdown < Compiler
+  transforms '.md' => '.html'
+  extensions '.md' => [ '.mdown' ]
+
+  def transform(file, config, builddir)
+    super.merge(
+      flags:        config['MD_FLAGS'],
+      command:      "#{__dir__}/gen_html > $out~ $flags $in && mv $out~ $out",
+      description:  'Markdown ‘${in}’…',
+      dependencies: [ "#{__dir__}/gen_html", *(config.dig(:inference, 'MD_FLAGS') || []) ],
+    )
+  end
+end
+
+class CreateBundlesArchive < Compiler
+  transforms '.tbz.bl' => '.tbz'
+
+  def transform(file, config, builddir)
+    bundles = {
+      name:        "DownloadBundles",
+      in:          file,
+      out:         File.join(builddir, "_#{self.class}", File.dirname(file), 'Managed'),
+      command:     "$bl -C $out install $(<$in) && touch $out",
+      description: 'Download bundles…',
+      pool:        'console',
+      bl:          "#{builddir}/Applications/bl/bl",
+      order_only:  "#{builddir}/Applications/bl/bl",
+    }
+
+    flags = [ '--disable-copyfile' ]
+    if pbzip2 = ENV['PATH'].split(':').map { |path| File.join(path, 'pbzip2') }.find { |path| File.exist?(path) }
+      flags << "--use-compress-prog=#{pbzip2.shellescape}"
+    else
+      flags << '-j'
+    end
+
+    super.merge(
+      before:      [ bundles ],
+      in:          bundles[:out],
+      flags:       flags.join(' '),
+      command:     '/usr/bin/tar $flags -cf $out~ -C $(dirname $in) $(basename $in) && mv $out~ $out',
+      description: 'Archive ‘${in}’…',
+    )
+  end
+end
+
+# ==========
+# = Target =
+# ==========
+
+module Target
+  module_function
+
+  def prepare(target)
+    unless target.include?(:build)
+      target[:build]      = { rules: [] }
+      target[:name]       = target[:variables]['target']
+      target[:identifier] = target[:variables]['target']
+      target[:arch]       = target[:variables]['arch'] || :no_arch
+      target[:builddir]   = '$builddir'
+
+      if config = target[:variables]['config']
+        target[:identifier] += '/' + config
+        target[:builddir]   += '/' + config
+      end
+    end
+
+    target
+  end
+
+  def required_targets(target, targets, include_self: false, include_weak: false)
+    res, seen = [], Set.new
+
+    queue = []
+    queue << target[:identifier]      if include_self
+    queue += target[:require]         if target.include?(:require)
+    queue += target[:require_headers] if include_weak && target.include?(:require_headers)
+
+    while name = queue.shift
+      next if seen.include?(name)
+      seen.add(name)
+
+      if archs = targets[name]
+        res << archs
+        if required_target = archs[target[:arch]]
+          queue += required_target[:require]         if required_target.include?(:require)
+          queue += required_target[:require_headers] if include_weak && required_target.include?(:require_headers)
+        else
+          STDERR << "*** No #{target[:arch]} architecture for #{name} (required by #{target[:identifier]})\n"
+        end
+      else
+        STDERR << "*** No target named #{name} (required by #{target[:identifier]})\n"
+      end
+    end
+
+    res
+  end
+
+  def include_dir(archs)
+    target = archs.values.first
+
+    unless target[:build][:include_dir]
+      include_dir, rules = nil, []
+
+      if headers = target[:headers]
+        include_dir = File.join(target[:builddir], '_Include', target[:name])
+
+        headers = headers.map do |header|
+          rules << {
+            name:        'ExportHeader',
+            in:          header,
+            out:         File.join(include_dir, target[:name], File.basename(header)),
+            command:     '/bin/cp -Xp $in $out && touch $out',
+            description: 'Export ‘${in}’…',
+          }
+          rules.last[:out]
+        end
+
+        rules << {
+          name: 'phony',
+          in:   headers,
+          out:  include_dir
+        }
+      end
+
+      target[:build][:rules]       += rules
+      target[:build][:include_dir]  = include_dir
+    end
+
+    target[:build][:include_dir]
+  end
+
+  def objects(target, targets)
+    unless target[:build][:objects]
+      objects, rules = [], []
+
+      if sources = target[:sources]
+        include_dirs = required_targets(target, targets, include_weak: true).map { |archs| include_dir(archs) }.reject { |e| e.nil? }.sort
+
+        config = target[:variables].merge(prelude: target[:prelude], inference: target[:inference])
+
+        flags = []
+        flags << config['FLAGS'] if config.include?('FLAGS')
+
+        # ===============
+        # = Cap’n Proto =
+        # ===============
+
+        capnp, sources = sources.partition { |file| File.extname(file) == '.capnp' }
+        capnp_headers = []
+
+        unless capnp.empty?
+          capnp.each do |file|
+            if links = Compiler.transform(file, config, target[:builddir])
+              capnp_headers << links.last[:in]
+              objects << links.last[:out]
+              link = links.shift
+              rules += [ link.merge(order_only: [ *Array(link[:order_only]) ]), *links ]
+            end
+          end
+        end
+
+        capnp_headers.map { |path| File.dirname(path) }.uniq.each do |dir|
+          flags << "-iquote #{dir.shellescape}"
+        end
+
+        # ===============
+
+        config['FLAGS'] = flags.join(' ')
+        config[:include] = include_dirs.sort.uniq
+
+        sources.each do |file|
+          if links = Compiler.transform(file, config, target[:builddir])
+            objects << links.last[:out]
+            link = links.shift
+            rules += [ link.merge(order_only: [ *capnp_headers, *Array(link[:order_only]) ]), *links ]
+          end
+        end
+      end
+
+      target[:build][:rules]   += rules
+      target[:build][:objects]  = objects
+    end
+
+    target[:build][:objects]
+  end
+
+  def executable(target, targets)
+    unless target[:build][:executable]
+      executable, rules = nil, []
+
+      if executable = target[:executable]
+        required_targets = required_targets(target, targets, include_self: true).map { |archs| archs[target[:arch]] }
+
+        objects = required_targets.flat_map do |target|
+          objects(target, targets)
+        end
+
+        frameworks = required_targets.flat_map { |target| target[:frameworks] }.reject { |e| e.nil? }.sort.uniq
+        libraries  = required_targets.flat_map { |target| target[:libraries]  }.reject { |e| e.nil? }.sort.uniq
+        static, libraries = libraries.partition { |lib| lib =~ /\.a$/ }
+
+        ln_flags = []
+        required_targets.each do |target|
+          ln_flags += target[:variables]['LN_FLAGS'].split(' ') if target[:variables].include?('LN_FLAGS')
+        end
+        ln_flags = [ ln_flags.uniq.join(' ') ]
+
+        ln_flags += frameworks.map { |e| "-framework #{e.shellescape}" }
+        ln_flags += libraries.map { |e| "-l#{e.shellescape}" }
+        ln_flags += static
+
+        executable = if target[:arch].is_a?(String)
+          File.join(target[:builddir], "_Link-#{target[:arch]}", target[:name])
+        else
+          File.join(*[ target[:builddir], target[:dir], target[:prefix], target[:executable] ].reject { |e| e.nil? })
+        end
+
+        rules << {
+          name:        'Link',
+          in:          objects.sort.uniq,
+          out:         executable,
+          flags:       ln_flags.join(' '),
+          command:     'xcrun --sdk macosx clang -o $out $flags $in',
+          description: 'Link ‘${out}’…',
+        }
+      end
+
+      target[:build][:rules]      += rules
+      target[:build][:executable]  = executable
+    end
+
+    target[:build][:executable]
+  end
+
+  def lipo(archs, targets)
+    target = archs.values.first
+
+    unless target[:build][:lipo]
+      rules, lipo = [], nil
+
+      executables = archs.map { |_, target| executable(target, targets) }.reject { |e| e.nil? }
+      if executables.size > 1
+        lipo = File.join(*[ target[:builddir], target[:dir], target[:prefix], target[:executable] ].reject { |e| e.nil? })
+        rules << {
+          name:        'Lipo',
+          in:          executables,
+          out:         lipo,
+          command:     'xcrun --sdk macosx lipo $in -create -output $out',
+          description: 'Lipo ‘${out}’…',
+        }
+      else
+        lipo = executables.first
+      end
+
+      target[:build][:rules] += rules
+      target[:build][:lipo]   = lipo
+    end
+
+    target[:build][:lipo]
+  end
+
+  def assets(archs, targets)
+    target = archs.values.first
+
+    unless target[:build][:assets]
+      assets, rules = [], []
+
+      config = target[:variables].merge(inference: target[:inference])
+
+      [ :files, :copy ].each do |key|
+        if hash = target[key]
+          queue = hash.to_a
+          while pair = queue.pop
+            dest, files = pair
+
+            files.each do |file|
+              if file =~ /^@(.+)$/
+                if archs = targets[$1]
+                  assets += assets_with_executable(archs, targets).map do |src, dst, deps|
+                    [ src, File.join(dest, dst), deps ]
+                  end
+                else
+                  STDERR << "*** Unknown target ‘#$1’ referenced by #{target[:target]}\n"
+                end
+              else
+                if key == :files
+                  if links = Compiler.transform(file, config, target[:builddir])
+                    rules += links
+                    file = links.last[:out]
+                  end
+                end
+
+                if File.directory?(file)
+                  queue << [
+                    File.join(dest, File.basename(file)),
+                    Dir.entries(file).reject { |path| path =~ /^\./ }.map { |entry| File.join(file, entry) }
+                  ]
+                else
+                  assets << [ file, File.join(dest, File.basename(file)).gsub(%r{(^|\G|(?<=/))\./|/\.$}, ''), [] ]
+                end
+              end
+            end
+          end
+        end
+      end
+
+      target[:build][:rules]  += rules
+      target[:build][:assets]  = assets
+    end
+
+    target[:build][:assets]
+  end
+
+  def assets_with_executable(archs, targets)
+    target = archs.values.first
+
+    unless target[:build][:bundle]
+      bundle, rules = [], []
+
+      executable = lipo(archs, targets)
+      signature  = signature(archs, targets)
+
+      if prefix = target[:prefix]
+        required_targets(target, targets, include_self: true).each do |other|
+          assets(other, targets).each do |src, dst, deps|
+            bundle << [ src, File.join(prefix, dst), [ signature, *deps ] ]
+          end
+        end
+
+        if executable
+          bundle << [ executable, File.join(prefix, target[:executable]), [ signature ] ]
+          bundle << [ signature, File.join(prefix, '_CodeSignature/CodeResources'), [] ]
+        end
+      elsif executable
+        bundle << [ executable, target[:executable], [ signature ] ]
+      end
+
+      target[:build][:rules]  += rules
+      target[:build][:bundle]  = bundle
+    end
+
+    target[:build][:bundle]
+  end
+
+  def application(archs, targets)
+    target = archs.values.first
+
+    unless target[:build][:application]
+      application, rules = nil, []
+
+      if prefix = target[:prefix]
+        if executable = Target.lipo(archs, targets)
+          application = executable.chomp(File.join(prefix, target[:executable]).sub(%r{^[^/]+}, ''))
+
+          rules << {
+            name: 'phony',
+            out:  application,
+          }
+        end
+      end
+
+      target[:build][:rules]       += rules
+      target[:build][:application]  = application
+    end
+
+    target[:build][:application]
+  end
+
+  def signature(archs, targets)
+    target = archs.values.first
+
+    unless target[:build][:signature]
+      signature, rules = nil, []
+
+      if executable = Target.lipo(archs, targets)
+        signature    = File.join(target[:builddir], '_Sign', "#{target[:name]}.ok")
+        dependencies = []
+
+        if application = application(archs, targets)
+          dependencies << executable
+          executable = application
+          signature  = File.join(application, 'Contents/_CodeSignature/CodeResources')
+
+          required_targets(target, targets, include_self: true).each do |other|
+            assets(other, targets).each do |src, dst, deps|
+              rules << {
+                name:         'CopyFile',
+                in:           src,
+                out:          File.join(target[:builddir], target[:dir], target[:prefix], dst),
+                command:      '/bin/cp -Xp $in $out && touch $out',
+                description:  'Copy ‘${in}’…',
+                dependencies: deps,
+              }
+              dependencies << rules.last[:out]
+            end
+          end
+        end
+
+        rules << {
+          name:         'Codesign',
+          in:           executable,
+          out:          signature,
+          identity:     target[:variables]['CS_IDENTITY'] || '-',
+          flags:        target[:variables]['CS_FLAGS'],
+          command:      'xcrun codesign --sign "$identity" $flags $in && touch $out',
+          description:  'Sign ‘${in}’…',
+          dependencies: dependencies + (target.dig(:inference, 'CS_FLAGS') || []),
+        }
+
+        rules << {
+          name: 'phony',
+          in:   signature,
+          out:  target[:identifier],
+        }
+      end
+
+      target[:build][:rules]     += rules
+      target[:build][:signature]  = signature
+    end
+
+    target[:build][:signature]
+  end
+
+  def runner(archs, targets)
+    target = archs.values.first
+
+    unless target[:build][:runner]
+      runner, rules = nil, []
+
+      if executable = Target.lipo(archs, targets)
+        runner = File.join(target[:builddir], '.always-run-' + target[:name])
+
+        if application = application(archs, targets)
+          rules << {
+            name:    'RunApplication',
+            in:      application,
+            out:     runner,
+            command: <<~SHELL.gsub(/\s+/, ' '),
+              {
+                app_name=$(basename $in .app);
+                if pgrep "$$app_name"; then
+                  if [[ -x "$$DIALOG" && $("$$DIALOG" alert --title "Relaunch $$app_name?" --body "Would you like to quit $$app_name and start the newly built version?" --button1 Relaunch --button2 Cancel|pl) != *"buttonClicked = 0"* ]];
+                    then exit;
+                  fi;
+                  pkill "$$app_name";
+                  while pgrep "$$app_name"; do
+                    if (( ++n == 10 )); then
+                      test -x "$$DIALOG" && "$$DIALOG" alert --title "Relaunch Timed Out" --body "Unable to exit $$app_name." --button1 OK;
+                      exit;
+                    fi;
+                    sleep .2;
+                  done;
+                fi;
+                open $in --args -disableSessionRestore NO;
+              } </dev/null &>/dev/null &
+            SHELL
+            dependencies: Target.signature(archs, targets),
+            description: 'Run ‘$in’…',
+          }
+        else
+          rules << {
+            name:        'RunExecutable',
+            in:          executable,
+            out:         runner,
+            command:     '$in',
+            description: 'Run ‘$in’…',
+            dependencies: Target.signature(archs, targets),
+            pool:        'console',
+          }
+        end
+
+        rules << {
+          name: 'phony',
+          in:   runner,
+          out:  target[:identifier] + '/run',
+        }
+      end
+
+      target[:build][:rules] += rules
+      target[:build][:runner] = runner
+    end
+
+    target[:build][:runner]
+  end
+
+  def notarize(archs, targets)
+    target = archs.values.first
+
+    unless target[:build][:notarize]
+      notarize, rules = nil, []
+
+      if args = target[:notarize]
+        if application = application(archs, targets)
+          guardfile = File.join(target[:builddir], '_Notarize', target[:name])
+          guardfile << '_' + target[:variables]['version'] if target[:variables].include?('version')
+
+          notarize = guardfile + '.ok'
+
+          rules << {
+            name:         'Zip',
+            in:           application,
+            out:          "#{guardfile}.zip",
+            command:      '/usr/bin/ditto -ck --keepParent --norsrc --noextattr --noacl --noqtn $in $out~ && mv $out~ $out',
+            description:  'Zip ‘${in}’…',
+            dependencies: signature(archs, targets),
+          }
+
+          rules << { user: args[0], pass: args[1], bundle: args[2] }.merge(
+            name:        'NotarizeSubmit',
+            in:          rules.last[:out],
+            out:         "#{guardfile}-submit.xml",
+            command:     'xcrun altool --notarize-app > $out~ -u "$user" -p "$pass" --output-format xml -f $in --primary-bundle-id "$bundle" -t osx && mv $out~ $out',
+            description: 'Submit ‘${in}’ for notarization…',
+          )
+
+          rules << { user: args[0], pass: args[1] }.merge(
+            name:         'NotarizeStatus',
+            in:           rules.last[:out],
+            out:          "#{guardfile}-status.xml",
+            command:      "#{__dir__}/notarize_await \"xcrun altool --notarization-info '$(plutil -extract notarization-upload.RequestUUID xml1 -o - $in|sed -n 's/.*<string>\\(.*\\)<\\/string>.*/\\1/p')' -u '$user' -p '$pass' --output-format xml\" > $out~ && mv $out~ $out",
+            description:  'Waiting for notarization…',
+            dependencies: "#{__dir__}/notarize_await",
+            pool:         'console',
+          )
+
+          rules << {
+            name:         'NotarizeStaple',
+            in:           application,
+            out:          notarize,
+            command:      'xcrun stapler staple $in && touch $out',
+            description:  'Staple ‘${in}’…',
+            dependencies: rules.last[:out],
+          }
+
+          rules << {
+            name: 'phony',
+            in:   notarize,
+            out:  target[:identifier] + '/notarize',
+          }
+        end
+      end
+
+      target[:build][:rules]    += rules
+      target[:build][:notarize]  = notarize
+    end
+
+    target[:build][:notarize]
+  end
+
+  def defines(archs, targets)
+    target = archs.values.first
+
+    unless target[:build][:defines]
+      defines, rules = true, []
+
+      if defines = target[:define]
+        variables = target[:variables].merge(
+          'executable'  => lipo(archs, targets),
+          'application' => application(archs, targets),
+        )
+
+        inference = (target[:inference] || {}).merge(
+          'executable'  => signature(archs, targets),
+          'application' => notarize(archs, targets) || signature(archs, targets),
+        )
+
+        guardfile = File.join(target[:builddir], '_Actions', target[:name])
+        guardfile << '_' + target[:variables]['version'] if target[:variables].include?('version')
+
+        defines.each do |name, command|
+          variable_names = command.scan(/\$(?:\{(.+?)\}|(\w+))/).map { |a, b| a || b }.uniq
+
+          dep_files = variable_names.flat_map { |name| inference[name] }
+          dep_files = dep_files.reject { |e| e.nil? }.sort.uniq
+
+          temp = variable_names.map { |name| [ name, variables[name] || ENV[name] ] }.reject { |key, value| value.nil? }
+
+          rules << temp.to_h.merge(
+            name:         target[:identifier].tr('/', '_') + '_' + name.capitalize,
+            keep:         true,
+            out:          "#{guardfile}.#{name}",
+            command:      "#{command =~ /\|(?!\|)(?<!\|\|)/ ? 'set -o pipefail; ' : ''}#{command} > $out~ && mv $out~ $out",
+            dependencies: dep_files,
+            description:  "#{name.capitalize} ‘#{File.basename(guardfile)}’…",
+            pool:         'console',
+          )
+
+          variables[name] = rules.last[:out]
+          inference[name] = rules.last[:out]
+
+          rules << {
+            name: 'phony',
+            in:   rules.last[:out],
+            out:  target[:identifier] + '/' + name,
+          }
+        end
+      end
+
+      target[:build][:rules]   += rules
+      target[:build][:defines]  = defines
+    end
+
+    target[:build][:defines]
+  end
+end
+
+# ====================
+# = Output Buildfile =
+# ====================
+
+NINJA_KEYS = %w[ command description depfile deps generator pool ]
+
+def write_rules(io, rules)
+  actions = Set.new
+
+  flat_rules = []
+  queue = rules.dup
+  while rule = queue.shift
+    if before = rule[:before]
+      rule.delete(:before)
+      queue = [ *(before.is_a?(Array) ? before : [ before ]), rule, *queue ]
+    else
+      flat_rules << rule
+    end
+  end
+
+  rules = flat_rules.sort_by { |rule| rule[:name].downcase }
+
+  rules.each do |rule|
+    next if actions.include?(rule[:name]) || rule[:name] == 'phony'
+    actions.add(rule[:name])
+
+    io << "rule #{rule[:name]}\n"
+    rule.each do |key, value|
+      next unless NINJA_KEYS.include?(key.to_s)
+      io << "  #{key} = #{value.gsub(/\$(?![a-zA-Z{$])/, '$$')}\n"
+    end
+    io << "\n"
+  end
+
+  escape = lambda do |x|
+    Array(x).map { |file| file.gsub(/(?!\$\{?builddir\}?)[ :$]/, '$\&') }.join(' ')
+  end
+
+  rules = rules.sort_by { |rule| Array(rule[:out]).first.downcase }
+
+  rules.each do |rule|
+    io << 'build '
+    if rule[:out].kind_of?(Array)
+      io << escape.call(rule[:out].first)
+      io << ' | ' << escape.call(rule[:out][1..-1]) unless rule[:out][1..-1].empty?
+    else
+      io << escape.call(rule[:out])
+    end
+    io << ': '   << escape.call(rule[:name])
+    io << ' '    << escape.call(rule[:in])           unless rule[:in].nil?           || rule[:in].empty?
+    io << ' | '  << escape.call(rule[:dependencies]) unless rule[:dependencies].nil? || rule[:dependencies].empty?
+    io << ' || ' << escape.call(rule[:order_only])   unless rule[:order_only].nil?   || rule[:order_only].empty?
+    io << "\n"
+
+    rule.each do |key, value|
+      next if value.nil?
+      next if NINJA_KEYS.include?(key.to_s)
+      next if %w[ name in out dependencies order_only keep ].include?(key.to_s)
+      io << "  #{key} = #{value}\n"
+    end
+    io << "\n"
+  end
+end
+
+# ===========
+# = Program =
+# ===========
+
+if __FILE__ == $PROGRAM_NAME
+  flags = ARGV.dup
+
+  builddir       = File.expand_path("~/build/#{File.basename(Dir.pwd)}")
+  outfile        = 'build.ninja'
+  depfile        = '$builddir/build.ninja.d'
+  default_config = nil
+  default_target = nil
+
+  OptionParser.new do |opts|
+    opts.banner = "Usage: #{File.basename(__FILE__)} [options] [ravefile]"
+    opts.separator "Synopsis"
+    opts.separator "#{File.basename(__FILE__)}: create build.ninja from rave file"
+    opts.separator "Options:"
+
+    opts.on("-h", "--help", "Show help.") do
+      puts opts
+      exit
+    end
+
+    opts.on("-b", "--builddir DIRECTORY", "Defaults to ‘#{builddir}’.") do |dir|
+      builddir = dir
+    end
+
+    opts.on("-o", "--output FILE", "Defaults to ‘#{outfile}’.") do |file|
+      outfile = file
+    end
+
+    opts.on("-d", "--depfile FILE", "Defaults to ‘#{depfile}’.") do |file|
+      depfile = file
+    end
+
+    opts.on("-c", "--config CONFIG", "Set default config, e.g. ‘debug’.") do |arg|
+      default_config = arg
+    end
+
+    opts.on("-t", "--target TARGET", "set default target, e.g. ‘MyApp/run’.") do |arg|
+      default_target = arg
+    end
+  end.parse!
+
+  ravefile = ARGV.shift || 'default.rave'
+  ravefile = '/dev/stdin' if ravefile == '-'
+
+  parser = Parser.new(ravefile)
+  targets = parser.targets
+
+  targets.each { |_, archs| archs.each { |_, target| Target.prepare(target) } }
+
+  targets.each do |target_name, archs|
+    Target.notarize(archs, targets)
+    Target.runner(archs, targets)
+    Target.signature(archs, targets)
+    Target.defines(archs, targets)
+  end
+
+  rules = targets.flat_map do |_, archs|
+    archs.flat_map do |_, target|
+      target[:build][:rules]
+    end
+  end
+
+  if default_config
+    phonies = rules.select { |rule| rule[:name] == 'phony' }.map { |rule| Array(rule[:out]).first }
+    phonies.select! { |name| name =~ %r{^[^/$]+/#{Regexp.escape(default_config)}(/|$)} }
+
+    phonies.each do |name|
+      rules << {
+        name: 'phony',
+        in:   name,
+        out:  name.sub(%r{/#{Regexp.escape(default_config)}(?=/|$)}, ''),
+      }
+    end
+  end
+
+  open(outfile == '-' ? '/dev/stdout' : outfile, 'w') do |io|
+    io << "builddir = #{builddir}\n"
+    io << "\n"
+    io << "rule MakeBuildfile\n"
+    io << "  command = ${env}#{__FILE__} $flags\n"
+    io << "  depfile = #{depfile}\n"
+    io << "  deps = gcc\n"
+    io << "  generator = true\n"
+    io << "  description = Generate ‘$out’…\n"
+    io << "\n"
+    io << "build #{outfile}: MakeBuildfile #{ravefile} | #{__FILE__}\n"
+    io << "  flags = #{flags.shelljoin}\n"
+    io << "  env = #{parser.environment.map { |key, value| "#{key}=#{value.shellescape} " }.join}\n"
+    io << "\n"
+
+    write_rules(io, rules)
+
+    io << "default #{default_target}\n\n" if default_target
+    io << "include local.ninja\n\n" if File.exist?('local.ninja')
+  end
+
+  depfile = depfile.gsub(/\$builddir|\$\{builddir\}/, builddir)
+  FileUtils.mkdir_p(File.dirname(depfile))
+  open(depfile, 'w') do |io|
+    io << "#{outfile}: "
+    io << parser.dependencies.to_a.sort.map { |dep| dep.gsub(/ /, '\\ ') }.join(" \\\n  ")
+    io << "\n"
+  end
+
+  # ======================
+  # = Remove old outputs =
+  # ======================
+
+  outputs_file = File.expand_path('outputs.json', builddir)
+
+  new_outputs = Set.new(rules.reject { |rule| rule[:name] == 'phony' || rule[:keep] }.flat_map { |rule| Array(rule[:out]).map { |file| file.sub(/^\$\{?builddir\}?(?=\/)/, builddir) } })
+  new_outputs << outputs_file
+
+  old_outputs = nil
+  begin
+    old_outputs = Set.new(JSON.parse(File.read(outputs_file)))
+  rescue Errno::ENOENT
+  rescue Exception => e
+    STDERR << "Error reading ‘#{outputs_file}’: #{e}\n"
+  end
+
+  if new_outputs && old_outputs
+    lost_outputs = old_outputs - new_outputs
+    lost_outputs.each do |path|
+      if File.exists?(path)
+        STDERR << "Remove old target ‘#{path}’…\n"
+        # FIXME Does not seem to work with symbolic links (Proxy.png → Settings.png)
+        File.unlink(path)
+      end
+    rescue Exception => e
+      STDERR << "File.unlink: #{e}\n"
+    end
+  end
+
+  if json = JSON.generate(new_outputs.to_a)
+    FileUtils.mkdir_p(File.dirname(outputs_file))
+    File.write(outputs_file, json)
+  end
+end
