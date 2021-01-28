@@ -1,12 +1,4 @@
 #!/System/Library/Frameworks/Ruby.framework/Versions/Current/usr/bin/ruby
-# == Synopsis
-#
-# expand_variables: substitute ${VARIABLES} in text files
-#
-# == Usage
-#
-# --help:
-#    show help
 require 'optparse'
 require 'shellwords'
 

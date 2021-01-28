@@ -1,27 +1,4 @@
 #!/System/Library/Frameworks/Ruby.framework/Versions/Current/usr/bin/ruby
-# == Synopsis
-#
-# gen_html: generates HTML file from markdown and optional template(s)
-#
-# == Usage
-#
-# gen_html [OPTION] ... [FILE]
-#
-# --help:
-#    show help
-#
-# -t/--title «title»
-#    make «title» available to template (as `page_name`)
-#
-# -h/--header «file»
-#    prepend «file» as header (erb)
-#
-# -f/--footer «file»
-#    append «file» as footer (erb)
-#
-# FILE: The markdown document to read (defaults to stdin)
-$KCODE = 'U' if RUBY_VERSION < "1.9"
-
 require 'optparse'
 require 'erb'
 
