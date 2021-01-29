@@ -1,6 +1,10 @@
 #include <test/jail.h>
 #include <io/events.h>
 
+#ifndef BSTR
+#define BSTR(b) ((b)?"YES":"NO")
+#endif
+
 struct callback_t : fs::event_callback_t
 {
 	callback_t (test::jail_t const& jail, bool log = false) : _jail(jail), _in_replay(false), _log(log) { }
