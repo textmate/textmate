@@ -1,6 +1,5 @@
 TARGET_NAME       = TextMateQL
 SOURCES           = src/*.{c,mm}
-CP_Resources      = resources/*
 CP_InfoPlist      = Info.plist
 FRAMEWORKS        = CoreFoundation QuickLook AppKit OSAKit
 LINK             += OakFoundation buffer bundles cf file io ns plist scope settings theme
