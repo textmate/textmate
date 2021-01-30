@@ -142,8 +142,9 @@ namespace // PopulateMenu{Flat,Hierarchical}
 
 - (void)updateMenu
 {
+	NSString* currentEncodingsTitle = self.encoding;
+
 	std::vector<menu_item_t> items;
-	std::string currentEncodingsTitle = to_s(self.encoding);
 	for(auto const& charset : encoding_list())
 	{
 		if([self.availableEncodings containsObject:[NSString stringWithCxxString:charset.code()]])
@@ -153,23 +154,29 @@ namespace // PopulateMenu{Flat,Hierarchical}
 			{
 				items.push_back(menu_item_t(v.front(), v.back(), charset.code()));
 				if(to_s(self.encoding) == charset.code())
-					currentEncodingsTitle = charset.name();
+					currentEncodingsTitle = to_ns(charset.name());
 			}
 		}
 	}
 
 	[self.menu removeAllItems];
 	self.firstMenuItem = nil;
-	if(items.size() >= 10)
-	{
-		self.firstMenuItem = [self.menu addItemWithTitle:[NSString stringWithCxxString:currentEncodingsTitle] action:NULL keyEquivalent:@""];
-		[self.menu addItem:[NSMenuItem separatorItem]];
-		[self selectItem:self.firstMenuItem];
-	}
 
 	if(items.size() < 10)
-			[self selectItem:PopulateMenuFlat(self.menu, items, self, @selector(selectEncoding:), to_s(self.encoding))];
-	else	PopulateMenuHierarchical(self.menu, items, self, @selector(selectEncoding:), to_s(self.encoding));
+	{
+		if(NSMenuItem* currentItem = PopulateMenuFlat(self.menu, items, self, @selector(selectEncoding:), to_s(self.encoding)))
+			[self selectItem:currentItem];
+	}
+	else
+	{
+		if(currentEncodingsTitle)
+		{
+			self.firstMenuItem = [self.menu addItemWithTitle:currentEncodingsTitle action:NULL keyEquivalent:@""];
+			[self.menu addItem:[NSMenuItem separatorItem]];
+			[self selectItem:self.firstMenuItem];
+		}
+		PopulateMenuHierarchical(self.menu, items, self, @selector(selectEncoding:), to_s(self.encoding));
+	}
 
 	[self.menu addItem:[NSMenuItem separatorItem]];
 	[[self.menu addItemWithTitle:@"Customize List…" action:@selector(customizeAvailableEncodings:) keyEquivalent:@""] setTarget:self];
