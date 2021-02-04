@@ -2,6 +2,16 @@ Title: Release Notes
 
 # Changes
 
+## 2021-02-04 (v2.0.16)
+
+* TextMate is now a universal build.
+* A few tweaks to improve appearance on Big Sur.
+* With focus in the file browser: ⌥⌘C will copy selection as path name.
+* File browser’s context menu now show shortcut keys for most items, though most only work with focus in the file browser. Hint: ⌥⌘⇥ switches focus between file browser and text editor.
+* With a file copied to the clipboard, it is now possible to “Create Link” in the file browser (via context menu): This creates a symbolic link to the file.
+* Atomic saving is now disabled by default (except for remote volumes). This is because APFS is prevalent, and it does not provide a way to do atomic save without creating a new inode and thereby updating the date of the file’s directory (which I consider bad). You can change the default by setting `atomicSave` in `~/.tm_properties`, see further down in these release notes for potential values.
+* See [all changes since v2.0.15](https://github.com/textmate/textmate/compare/v2.0.15...v2.0.16)
+
 ## 2020-05-16 (v2.0.15)
 
 * Fix another potential crash in 2.0.13 related to transparent themes: We no longer support themes with a transparent background. This is due to technical challenges achieving this on macOS 10.14 and later, where each view is rendered into its own layer. The feature may come back, but probably not until we require macOS 10.14, because we may need different code paths (and testing) for different versions of macOS.
