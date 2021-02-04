@@ -168,15 +168,15 @@ static NSButton* OakCreateImageToggleButton (NSImage* image, NSString* accessibi
 	MBMenu const items = {
 		{ @"Current Indent" },
 		{ @"Indent Size",  @selector(nop:) },
-		{ @"2",            @selector(takeTabSizeFrom:), .tag = 2, .target = self.target, .indent = 1 },
-		{ @"3",            @selector(takeTabSizeFrom:), .tag = 3, .target = self.target, .indent = 1 },
-		{ @"4",            @selector(takeTabSizeFrom:), .tag = 4, .target = self.target, .indent = 1 },
-		{ @"8",            @selector(takeTabSizeFrom:), .tag = 8, .target = self.target, .indent = 1 },
-		{ @"Other…",       @selector(showTabSizeSelectorPanel:),  .target = self.target, .indent = 1 },
+		{ @"2",            @selector(takeTabSizeFrom:), .tag = 2, .indent = 1, .target = self.target },
+		{ @"3",            @selector(takeTabSizeFrom:), .tag = 3, .indent = 1, .target = self.target },
+		{ @"4",            @selector(takeTabSizeFrom:), .tag = 4, .indent = 1, .target = self.target },
+		{ @"8",            @selector(takeTabSizeFrom:), .tag = 8, .indent = 1, .target = self.target },
+		{ @"Other…",       @selector(showTabSizeSelectorPanel:),  .indent = 1, .target = self.target },
 		{ /* -------- */ },
 		{ @"Indent Using", @selector(nop:) },
-		{ @"Tabs",         @selector(setIndentWithTabs:),         .target = self.target, .indent = 1 },
-		{ @"Spaces",       @selector(setIndentWithSpaces:),       .target = self.target, .indent = 1 },
+		{ @"Tabs",         @selector(setIndentWithTabs:),         .indent = 1, .target = self.target },
+		{ @"Spaces",       @selector(setIndentWithSpaces:),       .indent = 1, .target = self.target },
 	};
 	self.tabSizePopUp.menu = MBCreateMenu(items);
 }

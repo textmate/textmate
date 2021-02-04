@@ -171,9 +171,9 @@ static NSString* NameForLocaleIdentifier (NSString* languageCode)
 
 	MBMenu const items = {
 		{ @"Appearance",       @selector(nop:),                                                                          },
-		{ @"Light",            @selector(takeThemeAppearanceFrom:), .target = self, .indent = 1, .representedObject = @"light" },
-		{ @"Dark",             @selector(takeThemeAppearanceFrom:), .target = self, .indent = 1, .representedObject = @"dark"  },
-		{ @"Auto",             @selector(takeThemeAppearanceFrom:), .target = self, .indent = 1, .representedObject = nil      },
+		{ @"Light",            @selector(takeThemeAppearanceFrom:), .indent = 1, .target = self, .representedObject = @"light" },
+		{ @"Dark",             @selector(takeThemeAppearanceFrom:), .indent = 1, .target = self, .representedObject = @"dark"  },
+		{ @"Auto",             @selector(takeThemeAppearanceFrom:), .indent = 1, .target = self, .representedObject = nil      },
 		{ /* -------- */ },
 		{ @"Theme for Light Appearance", .submenuRef = &lightMenu },
 		{ @"Theme for Dark Appearance",  .submenuRef = &darkMenu  },

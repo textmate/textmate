@@ -3578,9 +3578,9 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 - (BOOL)filterDocumentThroughCommand:(NSString*)commandString input:(input::type)inputUnit output:(output::type)outputUnit
 {
 	bundle_command_t command = {
-		.command        = "#!/bin/sh\n" + to_s(commandString),
 		.name           = "Filter Through Command",
 		.uuid           = oak::uuid_t().generate(),
+		.command        = "#!/bin/sh\n" + to_s(commandString),
 		.input          = inputUnit,
 		.input_fallback = input::entire_document,
 		.output         = outputUnit,
