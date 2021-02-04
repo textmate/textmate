@@ -137,6 +137,13 @@ static __weak OakToolTip* LastToolTip;
 
 	NSRect r = [aScreen visibleFrame];
 	NSRect frame = [self frameRectForContentRect:{ NSZeroPoint, field.fittingSize }];
+
+	if(field.isBordered)
+	{
+		frame.size.width  += 2;
+		frame.size.height += 2;
+	}
+
 	frame.size.width = std::min(NSWidth(frame), NSWidth(r));
 	frame.size.height = std::min(NSHeight(frame), NSHeight(r));
 	[self setFrame:frame display:NO];
