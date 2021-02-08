@@ -25,10 +25,14 @@
 
 @class OakCommand;
 
-@interface BundleEditor () <OakTextViewDelegate>
+@interface BundleEditor () <NSWindowDelegate, OakTextViewDelegate>
 {
-	IBOutlet NSBrowser* browser;
-	IBOutlet OakDocumentView* documentView;
+	NSViewController*      _browserViewController;
+	NSViewController*      _documentViewController;
+	NSSplitViewController* _splitViewController;
+
+	NSBrowser* browser;
+	OakDocumentView* documentView;
 	NSDrawer* drawer;
 
 	be::entry_ptr bundles;
@@ -138,13 +142,30 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 @implementation BundleEditor
 + (instancetype)sharedInstance
 {
+	static dispatch_once_t onceToken;
+	dispatch_once(&onceToken, ^{
+		static struct { NSString* name; NSArray* array; } const converters[] =
+		{
+			{ @"OakSaveStringListTransformer",                  @[ @"nop", @"saveActiveFile", @"saveModifiedFiles" ] },
+			{ @"OakInputStringListTransformer",                 @[ @"selection", @"document", @"scope", @"line", @"word", @"character", @"none" ] },
+			{ @"OakInputFormatStringListTransformer",           @[ @"text", @"xml" ] },
+			{ @"OakOutputLocationStringListTransformer",        @[ @"replaceInput", @"replaceDocument", @"atCaret", @"afterInput", @"newWindow", @"toolTip", @"discard", @"replaceSelection" ] },
+			{ @"OakOutputFormatStringListTransformer",          @[ @"text", @"snippet", @"html", @"completionList" ] },
+			{ @"OakOutputCaretStringListTransformer",           @[ @"afterOutput", @"selectOutput", @"interpolateByChar", @"interpolateByLine", @"heuristic" ] },
+		};
+
+		[OakRot13Transformer register];
+		for(auto const& converter : converters)
+			[OakStringListTransformer createTransformerWithName:converter.name andObjectsArray:converter.array];
+	});
+
 	static BundleEditor* sharedInstance = [self new];
 	return sharedInstance;
 }
 
 - (id)init
 {
-	if(self = [super initWithWindowNibName:@"BundleEditor"])
+	if(self = [super initWithWindow:nil])
 	{
 		struct callback_t : bundles::callback_t
 		{
@@ -156,38 +177,76 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 
 		static callback_t cb(self);
 		bundles::add_callback(&cb);
+
+		self.window = [NSWindow windowWithContentViewController:self.splitViewController];
+		self.window.delegate = self;
+
+		NSRect r = self.window.screen.visibleFrame;
+		[self.window setFrame:NSInsetRect(r, MAX(0, round((NSWidth(r)-800)/2)), MAX(0, round((NSHeight(r)-600)/2))) display:NO];
+
+		[self.splitViewController.splitView setPosition:round(NSHeight(self.splitViewController.splitView.frame) / 3) ofDividerAtIndex:0];
+
+		self.windowFrameAutosaveName = @"Bundle Editor";
+		self.splitViewController.splitView.autosaveName = @"Bundle Editor";
+
+		drawer = [[NSDrawer alloc] initWithContentSize:NSZeroSize preferredEdge:NSMaxXEdge];
+		[drawer setParentWindow:self.window];
+
+		bundles = be::bundle_entries();
+		[browser loadColumnZero];
+
+		[self.window makeFirstResponder:browser];
 	}
 	return self;
 }
 
-- (void)windowDidLoad
+- (NSViewController*)browserViewController
 {
-	static struct { NSString* name; NSArray* array; } const converters[] =
+	if(!_browserViewController)
 	{
-		{ @"OakSaveStringListTransformer",                  @[ @"nop", @"saveActiveFile", @"saveModifiedFiles" ] },
-		{ @"OakInputStringListTransformer",                 @[ @"selection", @"document", @"scope", @"line", @"word", @"character", @"none" ] },
-		{ @"OakInputFormatStringListTransformer",           @[ @"text", @"xml" ] },
-		{ @"OakOutputLocationStringListTransformer",        @[ @"replaceInput", @"replaceDocument", @"atCaret", @"afterInput", @"newWindow", @"toolTip", @"discard", @"replaceSelection" ] },
-		{ @"OakOutputFormatStringListTransformer",          @[ @"text", @"snippet", @"html", @"completionList" ] },
-		{ @"OakOutputCaretStringListTransformer",           @[ @"afterOutput", @"selectOutput", @"interpolateByChar", @"interpolateByLine", @"heuristic" ] },
-	};
+		browser = [[NSBrowser alloc] initWithFrame:NSZeroRect];
 
-	[OakRot13Transformer register];
-	for(auto const& converter : converters)
-		[OakStringListTransformer createTransformerWithName:converter.name andObjectsArray:converter.array];
+		browser.titled                = NO;
+		browser.autohidesScroller     = YES;
+		browser.hasHorizontalScroller = YES;
+		browser.columnResizingType    = NSBrowserUserColumnResizing;
+		browser.defaultColumnWidth    = 180;
+		browser.columnsAutosaveName   = @"OakBundleEditorBrowserColumnWidths";
+		browser.delegate              = self;
+		browser.target                = self;
+		browser.action                = @selector(browserSelectionDidChange:);
 
-	drawer = [[NSDrawer alloc] initWithContentSize:NSZeroSize preferredEdge:NSMaxXEdge];
-	[drawer setParentWindow:[self window]];
+		_browserViewController = [[NSViewController alloc] initWithNibName:nil bundle:nil];
+		_browserViewController.view = browser;
+	}
+	return _browserViewController;
+}
 
-	bundles = be::bundle_entries();
+- (NSViewController*)documentViewController
+{
+	if(!_documentViewController)
+	{
+		documentView = [[OakDocumentView alloc] initWithFrame:NSZeroRect];
+		documentView.textView.delegate = self;
 
-	[browser setDelegate:self];
-	[browser loadColumnZero];
-	[browser setAutohidesScroller:YES];
+		_documentViewController = [[NSViewController alloc] initWithNibName:nil bundle:nil];
+		_documentViewController.view = documentView;
+	}
+	return _documentViewController;
+}
 
-	documentView.textView.delegate = self;
+- (NSSplitViewController*)splitViewController
+{
+	if(!_splitViewController)
+	{
+		_splitViewController = [[NSSplitViewController alloc] init];
+		_splitViewController.title = @"Bundle Editor";
+		_splitViewController.splitView.vertical = NO;
 
-	[[self window] makeFirstResponder:browser];
+		[_splitViewController addSplitViewItem:[NSSplitViewItem splitViewItemWithViewController:self.browserViewController]];
+		[_splitViewController addSplitViewItem:[NSSplitViewItem splitViewItemWithViewController:self.documentViewController]];
+	}
+	return _splitViewController;
 }
 
 - (NSString*)scopeAttributes
