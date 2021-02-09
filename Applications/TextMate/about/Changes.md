@@ -2,6 +2,12 @@ Title: Release Notes
 
 # Changes
 
+## 2021-02-09 (v2.0.18)
+
+* Fix inability to resize split view in bundle editor on macOS 10.14 and earlier.
+* Removed bundle editor’s drawer while addressing the above issue.
+* See [all changes since v2.0.17](https://github.com/textmate/textmate/compare/v2.0.17...v2.0.18)
+
 ## 2021-02-05 (v2.0.17)
 
 * Previous build would not launch on macOS 10.14 and earlier due to missing linker option.
