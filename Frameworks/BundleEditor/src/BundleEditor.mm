@@ -8,6 +8,7 @@
 #import <OakAppKit/NSImage Additions.h>
 #import <OakAppKit/OakSound.h>
 #import <OakAppKit/OakFileIconImage.h>
+#import <OakAppKit/OakUIConstructionFunctions.h>
 #import <OakTextView/OakDocumentView.h>
 #import <document/OakDocument.h>
 #import <document/OakDocumentController.h>
@@ -30,10 +31,14 @@
 	NSViewController*      _browserViewController;
 	NSViewController*      _documentViewController;
 	NSSplitViewController* _splitViewController;
+	NSViewController*      _propertiesViewController;
+	NSLayoutConstraint*    _propertiesHeightConstraint;
+	NSViewController*      _windowViewController;
+
+	CGFloat _maxLabelWidth;
 
 	NSBrowser* browser;
 	OakDocumentView* documentView;
-	NSDrawer* drawer;
 
 	be::entry_ptr bundles;
 	std::map<bundles::item_ptr, plist::dictionary_t> changes;
@@ -178,19 +183,16 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 		static callback_t cb(self);
 		bundles::add_callback(&cb);
 
-		self.window = [NSWindow windowWithContentViewController:self.splitViewController];
+		self.window = [NSWindow windowWithContentViewController:self.windowViewController];
 		self.window.delegate = self;
 
 		NSRect r = self.window.screen.visibleFrame;
-		[self.window setFrame:NSInsetRect(r, MAX(0, round((NSWidth(r)-800)/2)), MAX(0, round((NSHeight(r)-600)/2))) display:NO];
+		[self.window setFrame:NSInsetRect(r, MAX(0, round((NSWidth(r)-1200)/2)), MAX(0, round((NSHeight(r)-700)/2))) display:NO];
 
 		[self.splitViewController.splitView setPosition:round(NSHeight(self.splitViewController.splitView.frame) / 3) ofDividerAtIndex:0];
 
 		self.windowFrameAutosaveName = @"Bundle Editor";
 		self.splitViewController.splitView.autosaveName = @"Bundle Editor";
-
-		drawer = [[NSDrawer alloc] initWithContentSize:NSZeroSize preferredEdge:NSMaxXEdge];
-		[drawer setParentWindow:self.window];
 
 		bundles = be::bundle_entries();
 		[browser loadColumnZero];
@@ -240,13 +242,57 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 	if(!_splitViewController)
 	{
 		_splitViewController = [[NSSplitViewController alloc] init];
-		_splitViewController.title = @"Bundle Editor";
 		_splitViewController.splitView.vertical = NO;
 
 		[_splitViewController addSplitViewItem:[NSSplitViewItem splitViewItemWithViewController:self.browserViewController]];
 		[_splitViewController addSplitViewItem:[NSSplitViewItem splitViewItemWithViewController:self.documentViewController]];
 	}
 	return _splitViewController;
+}
+
+- (NSViewController*)windowViewController
+{
+	if(!_windowViewController)
+	{
+		CGFloat maxWidth = 0, maxLabelWidth = 0;
+
+		NSArray<NSString*>* viewControllerNames = @[ @"SharedProperties", @"BundleProperties", @"CommandProperties", @"FileDropProperties", @"SnippetProperties", @"GrammarProperties", @"ThemeProperties", @"MacroProperties" ];
+		for(NSString* name in viewControllerNames)
+		{
+			if(PropertiesViewController* viewController = [[PropertiesViewController alloc] initWithName:name])
+			{
+				if(NSView* view = viewController.view)
+				{
+					maxWidth      = MAX(maxWidth, NSWidth(view.frame) - viewController.labelWidth);
+					maxLabelWidth = MAX(maxLabelWidth, viewController.labelWidth);
+				}
+			}
+		}
+
+		maxWidth += maxLabelWidth;
+		_maxLabelWidth = maxLabelWidth;
+
+		_propertiesViewController = [[NSViewController alloc] init];
+		_propertiesViewController.view = [[NSView alloc] initWithFrame:NSZeroRect];
+
+		[_propertiesViewController.view.widthAnchor constraintEqualToConstant:maxWidth].active = YES;
+		_propertiesHeightConstraint = [_propertiesViewController.view.heightAnchor constraintGreaterThanOrEqualToConstant:0];
+
+		NSDictionary* views = @{
+			@"splitView":  self.splitViewController.view,
+			@"properties": _propertiesViewController.view,
+		};
+
+		NSView* contentView = [[NSView alloc] initWithFrame:NSZeroRect];
+		OakAddAutoLayoutViewsToSuperview(views.allValues, contentView);
+
+		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[splitView][properties]|" options:NSLayoutFormatAlignAllTop|NSLayoutFormatAlignAllBottom metrics:nil views:views]];
+		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[splitView]|" options:0 metrics:nil views:views]];
+
+		_windowViewController = [[NSViewController alloc] initWithNibName:nil bundle:nil];
+		_windowViewController.view = contentView;
+	}
+	return _windowViewController;
 }
 
 - (NSString*)scopeAttributes
@@ -893,46 +939,53 @@ static NSMutableDictionary* DictionaryForPropertyList (plist::dictionary_t const
 	documentView.document = bundleItemContent;
 	[bundleItemContent addObserver:self forKeyPath:@"documentEdited" options:0 context:nullptr];
 
-	_sharedPropertiesViewController = [[PropertiesViewController alloc] initWithName:@"SharedProperties"];
+	_propertiesHeightConstraint.active = NO;
+	for(NSView* subview in _propertiesViewController.view.subviews)
+		[subview removeFromSuperview];
+
+	_sharedPropertiesViewController = nil;
 	_extraPropertiesViewController  = nil;
-	[_sharedPropertiesViewController setProperties:_bundleItemProperties];
 
-	if(info.kind == bundles::kItemTypeBundle)
-		_sharedPropertiesViewController = nil;
+	NSView* contentView = [[NSView alloc] initWithFrame:{ NSZeroPoint, _propertiesViewController.view.frame.size }];
+	[contentView setAutoresizingMask:NSViewHeightSizable];
+	CGFloat maxY = NSHeight(contentView.frame);
 
-	NSView* sharedView = [_sharedPropertiesViewController view];
+	if(info.kind != bundles::kItemTypeBundle)
+	{
+		_sharedPropertiesViewController = [[PropertiesViewController alloc] initWithName:@"SharedProperties"];
+		[_sharedPropertiesViewController setProperties:_bundleItemProperties];
+
+		NSView* propertiesView = [_sharedPropertiesViewController view];
+		[propertiesView setAutoresizingMask:NSViewMinYMargin];
+		maxY -= NSHeight(propertiesView.frame);
+		[propertiesView setFrame:NSMakeRect(_maxLabelWidth - _sharedPropertiesViewController.labelWidth, maxY, NSWidth(propertiesView.frame), NSHeight(propertiesView.frame))];
+		[contentView addSubview:propertiesView];
+	}
+
 	if(info.view_controller)
 	{
 		_extraPropertiesViewController = [[PropertiesViewController alloc] initWithName:info.view_controller];
 		[_extraPropertiesViewController setProperties:_bundleItemProperties];
+
 		NSView* extraView = [_extraPropertiesViewController view];
-
-		CGFloat delta = _extraPropertiesViewController.labelWidth - _sharedPropertiesViewController.labelWidth;
-		if(delta > 0)
-				[sharedView setFrame:NSOffsetRect(sharedView.frame, delta, 0)];
-		else	[extraView setFrame:NSOffsetRect(extraView.frame, -delta, 0)];
-
-		NSView* contentView = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, std::max(NSMaxX(sharedView.frame) + 1, NSMaxX(extraView.frame) + 1), NSHeight(sharedView.frame) + NSHeight(extraView.frame))];
-		[sharedView setAutoresizingMask:NSViewMinXMargin|NSViewMinYMargin];
-		[extraView setAutoresizingMask:NSViewMinXMargin|NSViewMinYMargin];
-
-		[sharedView setFrame:NSOffsetRect(sharedView.frame, 0, NSHeight(extraView.frame))];
-		[contentView addSubview:sharedView];
+		[extraView setAutoresizingMask:NSViewMinYMargin];
+		maxY -= NSHeight(extraView.frame);
+		[extraView setFrame:NSMakeRect(_maxLabelWidth - _extraPropertiesViewController.labelWidth, maxY, NSWidth(extraView.frame), NSHeight(extraView.frame))];
 		[contentView addSubview:extraView];
+	}
 
-		[drawer setContentView:[[NSView alloc] initWithFrame:NSZeroRect]];
-		[drawer setContentSize:contentView.frame.size];
-		[drawer setContentView:contentView];
-		[drawer open:self];
-	}
-	else
+	_propertiesHeightConstraint.constant = NSHeight(contentView.frame) + -maxY;
+	[_propertiesViewController.view addSubview:contentView];
+
+	if(maxY < 0)
 	{
-		[sharedView setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
-		[drawer setContentSize:sharedView.frame.size];
-		[drawer setContentView:sharedView];
-		[drawer open:self];
+		NSWindow* window = _propertiesViewController.view.window;
+		NSRect frame = NSOffsetRect(window.frame, 0, maxY);
+		frame.size.height += -maxY;
+		[window setFrame:frame display:YES animate:YES];
 	}
-	[[[drawer contentView] window] recalculateKeyViewLoop];
+
+	_propertiesHeightConstraint.active = YES;
 }
 
 static NSString* DescriptionForChanges (std::map<bundles::item_ptr, plist::dictionary_t> const& changes)
