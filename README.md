@@ -18,56 +18,44 @@ Before you submit a bug report please read the [writing bug reports](https://git
 
 # Building
 
-## Bootstrap
+## Setup
 
-To bootstrap the build you need to run `./configure` (in the root of the source tree). You can set a few (environment) variables read by this script that change the generated build file:
+To build TextMate, you need the following:
 
-* `builddir` — location of built files. Defaults to `~/build/TextMate`.
-* `identity` — for Apple’s `codesign`. Defaults to ad-hoc signing, which does not use an identity at all.
-* `boostdir` — location of boost includes. By default it will search various locations including MacPorts and Homebrew.
-* `sparsedir` — location of sparsehash includes. By default it will search various locations including MacPorts and Homebrew.
+ * [boost][]            — portable C++ source libraries
+ * [Cap’n Proto][capnp] — serialization library
+ * [multimarkdown][]    — marked-up plain text compiler
+ * [ninja][]            — build system similar to `make`
+ * [ragel][]            — state machine compiler
+ * [sparsehash][]       — a cache friendly `hash_map`
 
-In the simplest case (assuming [Homebrew][] is installed) you would run:
+All this can be installed using either [Homebrew][] or [MacPorts][]:
 
 ```sh
-brew install ragel boost multimarkdown ninja capnp google-sparsehash
+# Homebrew
+brew install boost capnp google-sparsehash multimarkdown ninja ragel
+
+# MacPorts
+sudo port install boost capnproto multimarkdown ninja ragel sparsehash
+```
+
+After installing dependencies, make sure you have a full checkout (including submodules) and then run `./configure` followed by `ninja`, for example:
+
+```sh
 git clone --recursive https://github.com/textmate/textmate.git
 cd textmate
-./configure && ninja
+./configure && ninja TextMate/run
 ```
 
-If you're using [MacPorts][] then instead run this line to install dependencies:
-
-```sh
-sudo port install ninja ragel boost multimarkdown sparsehash
-```
-
-Unless you’re using [Homebrew][] then [Cap’n Proto][capnp] must be manually installed. Feel free to submit a PR to update `configure`.
-
-If `port` fails with a build error then likely you need to agree (system-wide) to Apple’s Xcode license:
-
-```sh
-sudo xcodebuild -license
-```
-
-## Prerequisites
-
-Building TextMate has the following dependencies:
-
- * [ninja][]         — build system similar to `make`
- * [ragel][]         — state machine compiler
- * [boost][]         — portable C++ source libraries
- * [sparsehash][]    — A cache friendly hash_map
- * [multimarkdown][] — marked-up plain text compiler
- * [Cap’n Proto][capnp] — serialization library
+The `./configure` script simply checks that all dependencies can be found, and then calls `bin/rave` to bootstrap a `build.ninja` file with default config set to `release` and default target set to `TextMate`.
 
 ## Building from within TextMate
 
 You should install the [Ninja][NinjaBundle] bundle which can be installed via _Preferences_ → _Bundles_.
 
-After this you can press ⌘B to build from within TextMate. In case you haven't already you also need to set up the `PATH` variable either in _Preferences_ → _Variables_ or `~/.tm_properties` so it can find `ninja` and related tools; an example could be `$PATH:/opt/local/bin`.
+After this you can press ⌘B to build from within TextMate. In case you haven't already you also need to set up the `PATH` variable either in _Preferences_ → _Variables_ or `~/.tm_properties` so it can find `ninja` and related tools; an example could be `$PATH:/usr/local/bin`.
 
-The default target is `TextMate/run`. This will relaunch TextMate but when called from within TextMate, a dialog will appear before the current instance is killed. As there is full session restore, it is safe to relaunch even with unsaved changes.
+The default target (set in `.tm_properties`) is `TextMate/run`. This will relaunch TextMate but when called from within TextMate, a dialog will appear before the current instance is killed. As there is full session restore, it is safe to relaunch even with unsaved changes.
 
 If the current file is a test file then the target to build is changed to build the library to which the test belongs (this is done by setting `TM_NINJA_TARGET` in the `.tm_properties` file found in the root of the source tree).
 
@@ -87,6 +75,8 @@ To clean everything run:
 ```sh
 ninja -t clean
 ```
+
+Or simply delete `~/build/TextMate`.
 
 # Legal
 
