@@ -1,38 +1,59 @@
 #!/System/Library/Frameworks/Ruby.framework/Versions/Current/usr/bin/ruby -w
 require 'optparse'
+require 'shellwords'
 
-PROGRAM_NAME = File.basename(__FILE__)
-
-new_tag = nil
+outfile = '/dev/stdout'
+inplace = false
+dump_version = false
 
 OptionParser.new do |opts|
-  opts.banner = "Usage: #{PROGRAM_NAME} [options]"
-  opts.on('-t', '--tag=name', 'Tag to use for next release.') { |value| new_tag = value }
-  opts.on_tail('-h', '--help', 'Show this message.')          { puts opts; exit         }
-end.parse!
+  opts.banner = "Usage: #{File.basename(__FILE__)} [options]"
+  opts.on_tail('-h', '--help', 'Show this message.') { puts opts; exit }
 
-abort "#{PROGRAM_NAME}: No release tag specified, use -t/--tag." if new_tag.nil?
-
-did_output = false
-ARGF.each do |line|
-  if !did_output && line =~ %r{^#.*\b(v\d+(?:\.\d+)*(-\w+(?:\.\w+)*)?)}
-    old_tag = $1
-    abort "#{PROGRAM_NAME}: Changes already added for release tag ‘#{old_tag}’." if new_tag == old_tag
-    changes = %x{git log --pretty=tformat:'* %s *[%an]*' --date=short --reverse #{old_tag}..}
-    abort "#{PROGRAM_NAME}: Error calling ‘git log’: #{changes}" unless $? == 0
-
-    changes.gsub!(/\.?( \*\[(?:Allan Odgaard|(.+?))\]\*)$/) do
-      $2.nil? ? "." : ".#$1"
-    end
-
-    puts "## #{Time.now.strftime('%Y-%m-%d')} (#{new_tag})"
-    puts ""
-    puts changes
-    puts "* See [all changes since #{old_tag}](https://github.com/textmate/textmate/compare/#{old_tag}...#{new_tag})"
-    puts ""
-
-    did_output = true
+  opts.on("-o", "--output FILE", "Defaults to ‘#{outfile}’.") do |file|
+    outfile = file
   end
 
-  puts line
+  opts.on("-i", "--inplace", "Overwrite input file") do
+    inplace = true
+  end
+
+  opts.on("-d", "--dump-version", "Write new version number to stdout") do
+    dump_version = true
+  end
+end.parse!
+
+infile  = ARGV.shift || '/dev/stdin'
+outfile = infile if inplace && !infile.start_with?('/dev/')
+success = false
+
+data = File.read(infile)
+
+data.sub!(%r{^#+ .* \((v\d+(?:\.\d+)*(-\w+(?:\.\w+)*)?)\)}) do |match, cap|
+  success = true
+
+  lastVersion = $1
+  newVersion  = lastVersion.sub(/(.*\b)(\d+)/) { "#$1%d" % ($2.to_i + 1) }
+
+  changes = %x{git log --pretty=tformat:'* %s *[%an]*' --date=short --reverse #{lastVersion.shellescape}..}
+  abort "#{File.basename(__FILE__)}: Error calling ‘git log’: #{changes}" unless $? == 0
+
+  STDOUT << newVersion if dump_version
+
+  changes.gsub!(/\.?( \*\[(?:Allan Odgaard|(.+?))\]\*)$/) do
+    $2.nil? ? "." : ".#$1"
+  end
+
+  res = "## #{Time.now.strftime('%Y-%m-%d')} (#{newVersion})\n"
+  res << "\n"
+  res << changes
+  res << "* See [all changes since #{lastVersion}](https://github.com/textmate/textmate/compare/#{lastVersion}...#{newVersion})\n"
+  res << "\n"
+  res << match
+
+  res
 end
+
+abort "No version number found in #{infile}." unless success
+
+File.write(outfile, data)
