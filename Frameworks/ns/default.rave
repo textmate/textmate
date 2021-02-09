@@ -1,0 +1,8 @@
+target "${dirname}" {
+	require text OakFoundation plist
+	headers src/*.h
+	sources src/*.mm
+	tests tests/t_*.{cc,mm}
+	cxx_tests tests/gui_*.mm
+	frameworks Cocoa
+}

@@ -1,0 +1,9 @@
+target "${dirname}" {
+	require text cf io
+	headers src/*.h
+	sources src/*.{cc,rl,capnp}
+	tests tests/*.cc
+	add FLAGS "-I${CAPNP_PATH}/include"
+	libraries "${CAPNP_PATH}/lib/libcapnp.a" "${CAPNP_PATH}/lib/libkj.a"
+	frameworks CoreFoundation
+}

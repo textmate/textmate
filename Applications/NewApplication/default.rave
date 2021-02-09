@@ -1,0 +1,12 @@
+target "${dirname}" {
+	require OakFoundation OakAppKit MenuBuilder
+
+	prefix "${target}.app/Contents"
+
+	files Info.plist  "."
+	files resources/* "Resources"
+
+	sources src/*.{cc,mm}
+	executable "MacOS/${target}"
+	frameworks Cocoa
+}

@@ -1,0 +1,6 @@
+target "${dirname}" {
+	require MenuBuilder OakAppKit OakFoundation Preferences document io ns regexp settings text
+	headers src/Find.h
+	sources src/*.{cc,mm}
+	frameworks Cocoa
+}

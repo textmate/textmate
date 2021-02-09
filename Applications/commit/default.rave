@@ -1,0 +1,5 @@
+target "${dirname}" {
+	require_headers CommitWindow
+	sources src/*.mm
+	executable "${target}"
+}

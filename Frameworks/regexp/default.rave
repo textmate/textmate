@@ -1,0 +1,6 @@
+target "${dirname}" {
+	require Onigmo text cf
+	headers src/{find,format_string,parser_fwd,regexp,snippet,glob,indent}.h
+	sources src/*.cc
+	tests tests/*.cc
+}

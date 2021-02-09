@@ -1,0 +1,26 @@
+target "${dirname}" {
+	require BundleEditor BundleMenu BundlesManager CommitWindow CrashReporter DocumentWindow Find HTMLOutputWindow MenuBuilder OakAppKit OakCommand OakFilterList OakFoundation OakSystem OakTextView Preferences SoftwareUpdate authorization bundles cf command crash document io kvdb license network ns plist regexp scm settings text theme
+
+	set HTML_HEADER     "${dir}/templates/header.html"
+	set HTML_FOOTER     "${dir}/templates/footer.html"
+	set CS_ENTITLEMENTS "${dir}/Entitlements.plist"
+
+	set     TEXTMATE_CHANGES "${dir}/about/Changes.md"
+	capture TEXTMATE_VERSION "grep -om1 '^## .* (v.*)$' '${TEXTMATE_CHANGES}'|sed 's/.*(v\\(.*\))/\\1/'"
+
+	add PLIST_FLAGS "-dAPP_VERSION='${TEXTMATE_VERSION}'"
+	add MD_FLAGS    "-h'${HTML_HEADER}' -f'${HTML_FOOTER}'"
+	add CS_FLAGS    "--entitlements '${CS_ENTITLEMENTS}'"
+
+	prefix "${target}.app/Contents"
+
+	files resources/* icons/*.icns about/* @PrivilegedTool @mate @tm_query @commit "Resources"
+	files Info.plist         "."
+	copy  support/*          "SharedSupport"
+	copy  @Dialog @Dialog2   "PlugIns"
+	copy  @TextMateQL        "Library/QuickLook"
+
+	sources src/*.{cc,mm}
+	executable "MacOS/${target}"
+	frameworks Cocoa
+}

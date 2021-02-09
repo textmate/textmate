@@ -1,0 +1,6 @@
+target "${dirname}" {
+	require text
+	headers src/*.h
+	sources src/*.mm
+	frameworks Cocoa
+}

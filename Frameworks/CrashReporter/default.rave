@@ -1,0 +1,7 @@
+target "${dirname}" {
+	require Preferences
+	headers src/CrashReporter.h
+	sources src/*.mm
+	frameworks Foundation UserNotifications
+	libraries z
+}

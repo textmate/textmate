@@ -1,0 +1,9 @@
+target "${dirname}" {
+	require BundlesManager OakAppKit OakFoundation OakTextView bundles cf command document io ns plist regexp settings text
+	headers src/BundleEditor.h
+
+	files resources/* templates/*.plist gfx/**/*.png "Resources"
+
+	sources src/*.{cc,mm}
+	frameworks Cocoa AddressBook
+}

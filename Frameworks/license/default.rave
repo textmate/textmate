@@ -1,0 +1,8 @@
+target "${dirname}" {
+	require crash text cf ns OakAppKit OakFoundation
+	headers src/LicenseManager.h
+	sources src/*.{cc,mm}
+	frameworks Security
+
+	add LN_FLAGS "-Wl,-U,__Z15revoked_serialsv"
+}

@@ -1,0 +1,6 @@
+target "${dirname}" {
+	require OakAppKit OakFoundation OakSystem buffer bundles cf io plist regexp scope selection settings text
+	headers src/*.h
+	sources src/*.{cc,mm}
+	tests tests/*.cc
+}

@@ -1,0 +1,11 @@
+target "TextMateQL" {
+	require OakFoundation buffer bundles cf file io ns plist scope settings theme
+
+	prefix "${target}.qlgenerator/Contents"
+	files Info.plist "."
+	add LN_FLAGS "-bundle"
+
+	sources src/*.{c,mm}
+	executable "MacOS/${target}"
+	frameworks CoreFoundation QuickLook AppKit OSAKit
+}

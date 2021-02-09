@@ -1,0 +1,10 @@
+target "${dirname}" {
+	require text cf io settings regexp
+	headers src/{scm,status}.h
+
+	files resources/* "Resources"
+
+	sources src/**/*.cc
+	tests tests/t_*.cc
+	frameworks Carbon Security
+}

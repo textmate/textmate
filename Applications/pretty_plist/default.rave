@@ -1,0 +1,5 @@
+target "${dirname}" {
+	require plist
+	sources src/*.cc
+	executable "${target}"
+}

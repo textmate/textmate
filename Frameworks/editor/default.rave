@@ -1,0 +1,6 @@
+target "${dirname}" {
+	require buffer bundles cf command io regexp scope selection settings text
+	headers src/editor.h src/snippets.h src/clipboard.h src/write.h
+	sources src/*.cc
+	tests tests/*.cc
+}

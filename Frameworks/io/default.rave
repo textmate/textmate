@@ -1,0 +1,7 @@
+target "${dirname}" {
+	require text cf ns regexp crash OakFoundation
+	headers src/*.h
+	sources src/*.{cc,mm}
+	tests tests/*.cc
+	frameworks Carbon Security
+}

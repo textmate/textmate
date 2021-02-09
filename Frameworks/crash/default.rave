@@ -1,0 +1,4 @@
+target "${dirname}" {
+	headers src/*.h
+	sources src/*.cc
+}

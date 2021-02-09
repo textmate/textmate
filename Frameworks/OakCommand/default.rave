@@ -1,0 +1,5 @@
+target "${dirname}" {
+	require BundleEditor HTMLOutput HTMLOutputWindow OakAppKit OakSystem bundles cf command document io ns regexp settings text
+	headers src/*.h
+	sources src/*.mm
+}

@@ -1,0 +1,6 @@
+target "${dirname}" {
+	require bundles io ns parse regexp scope text
+	headers src/buffer.h src/indexed_map.h src/storage.h
+	sources src/*.cc
+	tests tests/*.{cc,mm}
+}

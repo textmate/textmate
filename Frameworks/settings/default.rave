@@ -1,0 +1,6 @@
+target "${dirname}" {
+	require cf io plist regexp scope text
+	headers src/{settings,keys}.h
+	sources src/*.{cc,rl}
+	tests tests/*.cc
+}

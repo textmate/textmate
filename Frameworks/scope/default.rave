@@ -1,0 +1,6 @@
+target "${dirname}" {
+	require text
+	headers src/scope.h
+	sources src/*.cc
+	tests tests/*.cc
+}

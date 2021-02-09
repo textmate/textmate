@@ -1,0 +1,6 @@
+target "${dirname}" {
+	headers    vendor/kvdb/kvdb.h
+	sources    vendor/kvdb/*.m
+	frameworks Cocoa
+	libraries  sqlite3
+}

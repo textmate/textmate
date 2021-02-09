@@ -1,0 +1,11 @@
+target "${dirname}" {
+	require file theme
+
+	prefix "${target}.xpc/Contents"
+
+	files Info.plist  "."
+	files resources/* "Resources"
+
+	sources src/*.{mm}
+	executable "MacOS/${target}"
+}

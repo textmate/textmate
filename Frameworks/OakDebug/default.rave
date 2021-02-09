@@ -1,0 +1,6 @@
+target "${dirname}" {
+	require_headers text
+	headers src/*.h
+	sources src/*.{cc,mm}
+	frameworks Cocoa ExceptionHandling
+}

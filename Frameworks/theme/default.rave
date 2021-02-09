@@ -1,0 +1,6 @@
+target "${dirname}" {
+	require bundles cf ns scope
+	headers src/*.h
+	sources src/*.{cc,mm}
+	tests tests/*.cc
+}

@@ -1,0 +1,6 @@
+target "${dirname}" {
+	require authorization io plist text
+	sources src/*.mm
+	executable "${target}"
+	frameworks ApplicationServices Security
+}

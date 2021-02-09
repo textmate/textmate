@@ -1,0 +1,10 @@
+target "${dirname}" {
+	require OakAppKit
+	headers src/*.h
+
+	files resources/* "Resources"
+
+	sources src/*.mm
+	tests tests/t_*.mm
+	frameworks Cocoa WebKit
+}

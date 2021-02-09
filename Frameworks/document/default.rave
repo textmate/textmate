@@ -1,0 +1,7 @@
+target "${dirname}" {
+	require BundlesManager FileBrowser OakAppKit OakFoundation authorization buffer cf command editor encoding file io layout ns plist regexp scm selection settings text theme undo
+	headers src/OakDocument.h src/OakDocumentController.h src/OakDocumentEditor.h
+	sources src/*.{mm,cc}
+	tests tests/t_*.{mm,cc}
+	frameworks ApplicationServices
+}

@@ -1,0 +1,5 @@
+target "${dirname}" {
+	require authorization io text
+	sources src/*.cc
+	executable "${target}"
+}

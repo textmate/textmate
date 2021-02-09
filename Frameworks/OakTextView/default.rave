@@ -1,0 +1,10 @@
+target "${dirname}" {
+	require BundleMenu BundlesManager HTMLOutput MenuBuilder OakAppKit OakCommand OakFilterList OakFoundation OakSystem Preferences buffer bundles cf command crash document editor file io layout ns settings text theme
+	require_headers Find
+	headers src/OakDocumentView.h src/GutterView.h src/OakTextView.h
+
+	files resources/* "Resources"
+
+	sources src/*.{cc,mm}
+	frameworks Cocoa
+}

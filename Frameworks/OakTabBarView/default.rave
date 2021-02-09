@@ -1,0 +1,9 @@
+target "${dirname}" {
+	require OakFoundation OakAppKit
+	headers src/OakTabBarView.h src/OakTabBarViewController.h
+
+	files gfx/*.png "Resources"
+
+	sources src/*.mm
+	frameworks Cocoa
+}

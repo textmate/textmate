@@ -1,0 +1,48 @@
+set APP_MIN_OS    "10.12"
+set CAPNP_PATH    "/usr/local"
+set CS_IDENTITY   "-"
+
+set C_FLAGS       "-std=c99"
+set CXX_FLAGS     "-std=c++2a"
+set OBJC_FLAGS    "${C_FLAGS} -fobjc-abi-version=3 -fobjc-arc"
+set OBJCXX_FLAGS  "${OBJC_FLAGS} ${CXX_FLAGS} -fobjc-call-cxx-cdtors"
+
+add FLAGS         "-funsigned-char"
+add FLAGS         "-Wall -Wwrite-strings -Wformat -Winit-self -Wmissing-include-dirs"
+add FLAGS         "-Wno-parentheses -Wno-sign-compare -Wno-switch -Wno-c99-designator"
+add FLAGS         "-D'NULL_STR=\"\\uFFFF\"' -D'REST_API=\"https://api.textmate.org\"'"
+add FLAGS         "-IShared/include -I/usr/local/include"
+add FLAGS         "-mmacosx-version-min=${APP_MIN_OS}"
+
+set LN_FLAGS      "-mmacosx-version-min=${APP_MIN_OS} -fobjc-link-runtime"
+
+set IB_FLAGS      "--errors --warnings --notices --output-format human-readable-text"
+add IB_FLAGS      "--minimum-deployment-target=${APP_MIN_OS}"
+
+set AC_FLAGS      "--errors --warnings --notices --output-format human-readable-text"
+add AC_FLAGS      "--minimum-deployment-target=${APP_MIN_OS} --platform=macosx"
+
+set CS_FLAGS      "--force --options runtime"
+
+set PLIST_FLAGS   "-dTARGET_NAME='${target}' -dAPP_MIN_OS='${APP_MIN_OS}'"
+
+prelude Shared/PCH/prelude.*
+libraries c++
+
+config debug {
+	require OakDebug
+
+	add FLAGS    "-Os"
+	add FLAGS    "-fsanitize=address -fno-omit-frame-pointer"
+	add LN_FLAGS "-fsanitize=address"
+	add CS_FLAGS "--timestamp=none"
+}
+
+config release {
+	add FLAGS    "-Os -DNDEBUG -flto=thin"
+	add LN_FLAGS "-flto=thin -Wl,-cache_path_lto,'\\${builddir}/.cache'"
+	add LN_FLAGS "-Wl,-dead_strip -Wl,-dead_strip_dylibs"
+	add CS_FLAGS "--timestamp"
+}
+
+load local.rave {Applications,Frameworks,PlugIns,vendor}/*/*.rave

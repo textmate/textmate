@@ -1,0 +1,6 @@
+target "${dirname}" {
+	require text bundles plist regexp scope
+	headers src/parse.h src/grammar.h
+	sources src/*.cc
+	tests tests/t_*.cc
+}

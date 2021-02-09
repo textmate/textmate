@@ -1,0 +1,6 @@
+target "${dirname}" {
+	require authorization bundles cf command encoding io plist regexp scm settings text
+	headers src/{bytes,open,save,status,encoding,type,path_info,reader}.h
+	sources src/*.cc
+	tests tests/*.cc
+}

@@ -1,0 +1,6 @@
+target "${dirname}" {
+	require OakAppKit OakFoundation OakTextView bundles document io ns plist regexp text
+	headers src/CommitWindow.h
+	sources src/*.mm
+	frameworks Cocoa
+}

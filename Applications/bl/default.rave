@@ -1,0 +1,5 @@
+target "${dirname}" {
+	require OakSystem io regexp text updater
+	sources src/*.cc
+	executable "${target}"
+}

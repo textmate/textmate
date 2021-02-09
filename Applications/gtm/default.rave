@@ -1,0 +1,5 @@
+target "${dirname}" {
+	require parse
+	sources src/*.cc
+	executable "${target}"
+}

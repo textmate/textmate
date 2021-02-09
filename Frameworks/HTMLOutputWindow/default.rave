@@ -1,0 +1,6 @@
+target "${dirname}" {
+	require HTMLOutput OakAppKit OakFoundation command ns
+	headers src/HTMLOutputWindow.h
+	sources src/*.mm
+	frameworks Cocoa
+}

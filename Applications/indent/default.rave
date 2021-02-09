@@ -1,0 +1,5 @@
+target "${dirname}" {
+	require text io regexp plist
+	sources src/*.cc
+	executable "${target}"
+}
