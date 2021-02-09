@@ -11,8 +11,8 @@ jobs:
       with:
         submodules: true
     - name: Setup
-      run: brew install ragel boost multimarkdown ninja capnp google-sparsehash
+      run: brew install boost capnp google-sparsehash multimarkdown ninja ragel
     - name: Configure
-      run: ./configure && ninja Frameworks/encoding/src/frequencies.capnp.h
+      run: ./configure
     - name: Build
       run: ninja TextMate
