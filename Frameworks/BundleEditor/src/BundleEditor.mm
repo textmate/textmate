@@ -907,7 +907,7 @@ static NSMutableDictionary* DictionaryForPropertyList (plist::dictionary_t const
 		[_extraPropertiesViewController setProperties:_bundleItemProperties];
 		NSView* extraView = [_extraPropertiesViewController view];
 
-		CGFloat delta = _extraPropertiesViewController.indent - _sharedPropertiesViewController.indent;
+		CGFloat delta = _extraPropertiesViewController.labelWidth - _sharedPropertiesViewController.labelWidth;
 		if(delta > 0)
 				[sharedView setFrame:NSOffsetRect(sharedView.frame, delta, 0)];
 		else	[extraView setFrame:NSOffsetRect(extraView.frame, -delta, 0)];

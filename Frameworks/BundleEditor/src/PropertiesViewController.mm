@@ -11,7 +11,7 @@
 	return self;
 }
 
-- (CGFloat)indent
+- (CGFloat)labelWidth
 {
 	return alignmentView ? NSMaxX([alignmentView frame]) + 5 : 20;
 }

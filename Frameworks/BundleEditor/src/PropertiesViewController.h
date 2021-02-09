@@ -8,5 +8,5 @@
 }
 - (id)initWithName:(NSString*)aName;
 @property (nonatomic) NSMutableDictionary* properties;
-@property (nonatomic, readonly) CGFloat indent;
+@property (nonatomic, readonly) CGFloat labelWidth;
 @end
