@@ -1,3 +1,0 @@
-SOURCES = src/*.{mm,capnp}
-EXPORT  = src/encoding.h
-LIBS   += "$capnp_prefix/lib/libcapnp.a" "$capnp_prefix/lib/libkj.a"

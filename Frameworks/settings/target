@@ -1,4 +1,0 @@
-TESTS        = tests/*.cc
-SOURCES      = src/*.{cc,rl}
-EXPORT       = src/{settings,keys}.h
-LINK        += cf io plist regexp scope text

@@ -1,5 +1,0 @@
-SOURCES      = src/*.cc
-TESTS        = tests/*.cc
-LINK        += OakSystem io plist regexp scope text
-FRAMEWORKS   = CoreFoundation
-EXPORT       = src/*.h

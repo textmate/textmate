@@ -1,4 +1,0 @@
-SOURCES      = src/*.cc
-TESTS        = tests/*.cc
-LINK        += text buffer bundles crash regexp
-EXPORT       = src/selection.h src/types.h

@@ -1,5 +1,0 @@
-SOURCES      = src/*.{cc,mm}
-EXPORT       = src/LicenseManager.h
-LINK        += crash text cf ns OakAppKit OakFoundation
-LN_FLAGS    += -Wl,-U,__Z15revoked_serialsv
-FRAMEWORKS   = Security

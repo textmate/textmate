@@ -1,6 +1,0 @@
-SOURCES      = src/**/*.mm
-TESTS        = tests/*.cc
-EXPORT       = src/HTMLOutput.h
-CP_Resources = resources/*
-LINK        += OakAppKit OakFoundation cf document io ns text
-FRAMEWORKS   = Cocoa WebKit

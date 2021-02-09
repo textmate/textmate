@@ -1,4 +1,0 @@
-TESTS        = tests/*.cc
-SOURCES      = src/*.cc
-EXPORT       = src/editor.h src/snippets.h src/clipboard.h src/write.h
-LINK        += buffer bundles cf command io regexp scope selection settings text

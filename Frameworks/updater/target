@@ -1,3 +1,0 @@
-SOURCES      = src/*.cc
-LINK        += text io network plist
-EXPORT       = src/updater.h

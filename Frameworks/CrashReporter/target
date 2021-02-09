@@ -1,5 +1,0 @@
-SOURCES       = src/*.mm
-EXPORT        = src/CrashReporter.h
-LINK         += Preferences
-FRAMEWORKS    = Foundation UserNotifications
-LIBS         += z

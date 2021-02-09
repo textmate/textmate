@@ -1,4 +1,0 @@
-TESTS        = tests/*.cc
-SOURCES      = src/*.{cc,mm}
-LINK        += bundles cf ns scope
-EXPORT       = src/*.h

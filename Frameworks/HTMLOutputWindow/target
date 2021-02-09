@@ -1,4 +1,0 @@
-SOURCES      = src/*.mm
-EXPORT       = src/HTMLOutputWindow.h
-LINK        += HTMLOutput OakAppKit OakFoundation command ns
-FRAMEWORKS   = Cocoa

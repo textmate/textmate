@@ -1,4 +1,0 @@
-SOURCES      = src/*.{cc,mm}
-IMPORT       = text
-FRAMEWORKS   = Cocoa ExceptionHandling
-EXPORT       = src/*.h

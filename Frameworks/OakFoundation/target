@@ -1,4 +1,0 @@
-SOURCES      = src/*.mm
-LINK        += text
-EXPORT       = src/*.h
-FRAMEWORKS   = Cocoa

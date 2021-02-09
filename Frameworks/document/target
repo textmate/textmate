@@ -1,5 +1,0 @@
-TESTS       = tests/t_*.{mm,cc}
-SOURCES     = src/*.{mm,cc}
-EXPORT      = src/OakDocument.h src/OakDocumentController.h src/OakDocumentEditor.h
-LINK       += BundlesManager FileBrowser OakAppKit OakFoundation authorization buffer cf command editor encoding file io layout ns plist regexp scm selection settings text theme undo
-FRAMEWORKS  = ApplicationServices

@@ -1,3 +1,0 @@
-SOURCES      = src/*.cc
-LINK        += buffer selection
-EXPORT       = src/undo.h

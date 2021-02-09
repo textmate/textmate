@@ -1,3 +1,0 @@
-SOURCES      = src/*.mm
-EXPORT       = src/MenuBuilder.h
-FRAMEWORKS   = Cocoa

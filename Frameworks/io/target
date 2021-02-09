@@ -1,5 +1,0 @@
-SOURCES      = src/*.{cc,mm}
-TESTS        = tests/*.cc
-LINK        += text cf ns regexp crash OakFoundation
-FRAMEWORKS   = Carbon Security
-EXPORT       = src/*.h

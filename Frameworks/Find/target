@@ -1,4 +1,0 @@
-SOURCES      = src/*.{cc,mm}
-EXPORT       = src/Find.h
-LINK        += MenuBuilder OakAppKit OakFoundation Preferences document io ns regexp settings text
-FRAMEWORKS   = Cocoa

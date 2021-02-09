@@ -1,4 +1,0 @@
-TESTS        = tests/*.{cc,mm}
-SOURCES      = src/*.cc
-LINK        += bundles io ns parse regexp scope text
-EXPORT       = src/buffer.h src/indexed_map.h src/storage.h

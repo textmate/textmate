@@ -1,2 +1,0 @@
-SOURCES = src/*.mm
-IMPORT  = CommitWindow
