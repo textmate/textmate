@@ -2,15 +2,15 @@
 
 ## Download
 
-You can [download TextMate from here](http://macromates.com/download).
+You can [download TextMate from here](https://macromates.com/download).
 
 ## Feedback
 
-You can use [the TextMate mailing list](http://lists.macromates.com/listinfo/textmate) or [#textmate][] IRC channel on [freenode.net][] for questions, comments, and bug reports.
+You can use [the TextMate mailing list](https://lists.macromates.com/listinfo/textmate) or [#textmate][] IRC channel on [freenode.net][] for questions, comments, and bug reports.
 
-You can also [contact MacroMates](http://macromates.com/contact).
+You can also [contact MacroMates](https://macromates.com/support).
 
-Before you submit a bug report please read the [writing bug reports](http://kb.textmate.org/writing_bug_reports) instructions.
+Before you submit a bug report please read the [writing bug reports](https://github.com/textmate/textmate/wiki/writing-bug-reports) instructions.
 
 ## Screenshot
 
