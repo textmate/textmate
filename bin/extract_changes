@@ -1,0 +1,36 @@
+#!/System/Library/Frameworks/Ruby.framework/Versions/Current/usr/bin/ruby -w
+require 'optparse'
+
+outfile = nil
+version = nil
+
+OptionParser.new do |opts|
+  opts.banner = "Usage: #{File.basename(__FILE__)} [options]"
+  opts.on_tail('-h', '--help', 'Show this message.') { puts opts; exit }
+
+  opts.on("-o", "--output FILE", "Defaults to stdout.") do |file|
+    outfile = file unless file == '-'
+  end
+
+  opts.on("-v", "--version NUMBER", "Version number section to extract.") do |arg|
+    version = arg
+  end
+end.parse!
+
+begin
+  io = (outfile ? open(outfile, 'w') : STDOUT)
+
+  echo = false
+
+  while line = ARGF.gets
+    if line =~ /^#+ .* \(v(.*)\)/
+      return if echo
+      echo = true if version.nil? || version == $1
+    end
+    io << line if echo
+  end
+
+  abort (version ? "Unable to find changes for version #{version}." : "Unable to find changes.") unless echo
+rescue Errno::ENOENT => e
+  abort "Unable to open output file: #{outfile || 'stdout'}: #{e}"
+end
