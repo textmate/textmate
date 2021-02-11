@@ -6,7 +6,7 @@
 #include <io/path.h>
 #include <plist/uuid.h>
 
-static char const* const AppVersion = "2.13.2";
+static char const* const AppVersion = "2.13.3";
 
 static char const* socket_path ()
 {
@@ -389,13 +389,21 @@ int main (int argc, char const* argv[])
 	strcpy(addr.sun_path, socket_path());
 	addr.sun_len = SUN_LEN(&addr);
 
-	bool didLaunch = false;
-	while(-1 == connect(fd, (sockaddr*)&addr, sizeof(addr)))
+	int rc;
+	for(size_t i = 0; i < 10; ++i)
 	{
-		if(!didLaunch)
+		rc = connect(fd, (sockaddr*)&addr, sizeof(addr));
+		if(rc == 0)
+			break;
+		if(i == 0)
 			launch_app(!files.empty());
-		didLaunch = true;
 		usleep(500000);
+	}
+
+	if(rc == -1)
+	{
+		perror("unable to bind to socket");
+		exit(EX_IOERR);
 	}
 
 	char buf[1024];
