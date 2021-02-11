@@ -112,6 +112,12 @@ namespace
 			}
 
 			socket_t fd(socket(AF_UNIX, SOCK_STREAM, 0));
+			if(!fd)
+			{
+				OakRunIOAlertPanel("Unable to create socket");
+				return;
+			}
+
 			fcntl(fd, F_SETFD, FD_CLOEXEC);
 			struct sockaddr_un addr = { 0, AF_UNIX };
 			strcpy(addr.sun_path, _socket_path);
