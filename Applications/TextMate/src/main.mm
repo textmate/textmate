@@ -21,10 +21,37 @@ static void sig_term_handler (void* unused)
 	[NSUserDefaults.standardUserDefaults synchronize];
 }
 
+static void increase_max_open_files (rlim_t required = 2048)
+{
+	struct rlimit limit;
+	if(getrlimit(RLIMIT_NOFILE, &limit) == -1)
+	{
+		perror("getrlimit()");
+		return;
+	}
+
+	if(limit.rlim_cur > required)
+		return;
+
+	rlim_t oldLimit = limit.rlim_cur;
+
+	limit.rlim_cur = MIN(OPEN_MAX, limit.rlim_max);
+	if(setrlimit(RLIMIT_NOFILE, &limit) == -1)
+	{
+		perror("setrlimit()");
+		return;
+	}
+
+	if(getrlimit(RLIMIT_NOFILE, &limit) == 0)
+		fprintf(stderr, "Increased maximum number of open files from %llu to %llu\n", oldLimit, limit.rlim_cur);
+}
+
 int main (int argc, char const* argv[])
 {
 	oak::application_t::set_support(path::join(path::home(), "Library/Application Support/TextMate"));
 	oak::application_t app(argc, argv);
+
+	increase_max_open_files();
 
 	signal(SIGINT,  SIG_IGN);
 	signal(SIGTERM, SIG_IGN);
