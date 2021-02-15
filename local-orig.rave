@@ -1,0 +1,39 @@
+# ninja TextMate/release/bump && ninja TextMate/release/deploy
+
+set CS_IDENTITY "${APPLE_DEVELOPER_ID}"
+
+extend pretty_plist {
+	config release {
+		define install "/bin/cp -Xp '${executable}' '${HOME}/bin/pp'"
+	}
+}
+
+config release {
+	arch "arm64" "x86_64" {
+		# From https://bintray.com/homebrew/bottles/capnp#files
+		set CAPNP_PATH "${HOME}/build/capnp/${arch}/capnp/0.8.0"
+		set CAPNP_BIN  "${HOME}/build/capnp/x86_64/capnp/0.8.0/bin"
+ 		add FLAGS      "-target macos-${arch}"
+		add LN_FLAGS   "-target macos-${arch}"
+	}
+}
+
+extend TextMate {
+	config release {
+		notarize "${APPLE_NOTARIZE_USER}" "${APPLE_NOTARIZE_PASS}" "com.macromates.${target}"
+
+		set changes "${TEXTMATE_CHANGES}"
+		set version "${TEXTMATE_VERSION}"
+		set keyfile "${HOME}/.local/share/private/sign-textmate.key"
+
+		define next   "{ bin/update_changes -di '${changes}' && mate -wl7 '${changes}'; }"
+		define bump   "git commit -vem\"Checkin release notes for $(< ${next})\" '${changes}'"
+
+		define tbz    "/usr/bin/tar --disable-copyfile --use-compress-prog=pbzip2 -cC '${application}' --strip-components=1 .."
+		define tag    "bin/extract_changes -v'${version}' '${changes}'|git tag -aF- 'v${version}' && printf 'v${version}'"
+		define upload "git push origin $(< '${tag}') && hub >&2 release create --prerelease -a '${tbz}' -m'${target} ${version}' $(< '${tag}') && hub release show --format '%as' $(< '${tag}')|cut -f1|tr -d '\\n'"
+
+		define sign   "pass Keys/sign-textmate.key|openssl dgst -dss1 -passin stdin -sign '${keyfile}' '${tbz}'|openssl enc -base64|tr -d '\\n'"
+		define deploy "curl -sfn -Furl='<${upload}' -Fsignature='<${sign}' -Fname='${target}' -Fversion='${version}' -Fdepends='os (>= ${APP_MIN_OS}), app (>= 2.0-alpha)' 'https://api.textmate.org/releases'"
+	}
+}
