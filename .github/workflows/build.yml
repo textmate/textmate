@@ -4,12 +4,12 @@ on: [push]
 
 jobs:
   build:
-    runs-on: macOS-10.14
-    
+    runs-on: macOS-latest
+
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
       with:
-        submodules: true
+        submodules: recursive
     - name: Setup
       run: brew install boost capnp google-sparsehash multimarkdown ninja ragel
     - name: Configure
