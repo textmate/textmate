@@ -29,7 +29,7 @@ extend TextMate {
 		define next   "{ bin/update_changes -di '${changes}' && mate -wl7 '${changes}'; }"
 		define bump   "git commit -vem\"Checkin release notes for $(< ${next})\" '${changes}'"
 
-		define tbz    "/usr/bin/tar --disable-copyfile --use-compress-prog=pbzip2 -cC '${application}' --strip-components=1 .."
+		define tbz    "/usr/bin/tar -f /dev/stdout --disable-copyfile --use-compress-prog=pbzip2 -cC '${application}' --strip-components=1 .."
 		define tag    "bin/extract_changes -v'${version}' '${changes}'|git tag -aF- 'v${version}' && printf 'v${version}'"
 		define upload "git push origin $(< '${tag}') && hub >&2 release create --prerelease -a '${tbz}' -m'${target} ${version}' $(< '${tag}') && hub release show --format '%as' $(< '${tag}')|cut -f1|tr -d '\\n'"
 
