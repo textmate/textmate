@@ -2,6 +2,12 @@ Title: Release Notes
 
 # Changes
 
+## 2021-02-25 (v2.0.19)
+
+* Ensure ⌘Z / ⇧⌘Z are not sent to file browser when it does not have focus.
+* Increase maximum number of open files if the current limit is below 2048.
+* See [all changes since v2.0.18](https://github.com/textmate/textmate/compare/v2.0.18...v2.0.19)
+
 ## 2021-02-09 (v2.0.18)
 
 * Fix inability to resize split view in bundle editor on macOS 10.14 and earlier.
