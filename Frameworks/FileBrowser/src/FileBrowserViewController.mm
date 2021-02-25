@@ -488,8 +488,8 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 		{ /* -------- */ },
 		{ @"Finder Tag", .tag = kRequiresSelectionTag, .ref = &finderTagsMenuItem },
 		{ /* -------- */ },
-		{ @"Undo",                    @selector(undo:),                @"z"                                                       },
-		{ @"Redo",                    @selector(redo:),                @"z", NSEventModifierFlagCommand|NSEventModifierFlagShift  },
+		{ @"Undo",                    @selector(undo:) },
+		{ @"Redo",                    @selector(redo:) },
 		{ /* -------- */ },
 	};
 
@@ -502,6 +502,8 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 		{ @selector(toggleQuickLookPreview:),   " " },
 		{ @selector(copy:),                     "@c" },
 		{ @selector(copyAsPathname:),           "~@c" },
+		{ @selector(undo:),                     "@z" },
+		{ @selector(redo:),                     "@Z" },
 	};
 
 	for(NSMenuItem* menuItem in menu.itemArray)
