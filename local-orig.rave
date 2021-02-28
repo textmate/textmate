@@ -30,7 +30,8 @@ extend TextMate {
 		define bump   "git commit -vem\"Checkin release notes for $(< ${next})\" '${changes}'"
 
 		define tbz    "/usr/bin/tar -f /dev/stdout --disable-copyfile --use-compress-prog=pbzip2 -cC '${application}' --strip-components=1 .."
-		define tag    "bin/extract_changes -v'${version}' '${changes}'|git tag --cleanup=whitespace -aF- 'v${version}' && printf 'v${version}'"
+		define mdown  "bin/extract_changes -v'${version}' '${changes}'"
+		define tag    "git tag --cleanup=whitespace -F'${mdown}' 'v${version}' && printf 'v${version}'"
 		define upload "git push origin $(< '${tag}') && hub >&2 release create --prerelease -a '${tbz}' -m'${target} ${version}' $(< '${tag}') && hub release show --format '%as' $(< '${tag}')|cut -f1|tr -d '\\n'"
 
 		define sign   "pass Keys/sign-textmate.key|openssl dgst -dss1 -passin stdin -sign '${keyfile}' '${tbz}'|openssl enc -base64|tr -d '\\n'"
