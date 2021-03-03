@@ -852,45 +852,40 @@ module Target
       objects, rules = [], []
 
       if sources = target[:sources]
-        include_dirs = required_targets(target, targets, include_weak: true).map { |archs| include_dir(archs) }.reject { |e| e.nil? }.sort
-
         config = target[:variables].merge(prelude: target[:prelude], inference: target[:inference])
 
-        flags = []
-        flags << config['FLAGS'] if config.include?('FLAGS')
+        include_dirs = required_targets(target, targets, include_weak: true).map { |archs| include_dir(archs) }.reject { |e| e.nil? }.sort
+        config[:include] = include_dirs.sort.uniq
 
         # ===============
         # = Cap’n Proto =
         # ===============
 
-        capnp, sources = sources.partition { |file| File.extname(file) == '.capnp' }
-        capnp_headers = []
+        generated_headers = []
+        sources, non_sources = sources.partition { |file| file.end_with?('.c', '.m', '.cc', '.mm') }
 
-        unless capnp.empty?
-          capnp.each do |file|
+        unless non_sources.empty?
+          non_sources.each do |file|
             if links = Compiler.transform(file, config, target[:builddir])
-              capnp_headers << links.last[:in]
+              generated_headers += links.map { |link| link[:out] }.flatten.select { |file| file.end_with?('.h', '.hpp') }
               objects << links.last[:out]
               link = links.shift
               rules += [ link.merge(order_only: [ *Array(link[:order_only]) ]), *links ]
             end
           end
-        end
 
-        capnp_headers.map { |path| File.dirname(path) }.uniq.each do |dir|
-          flags << "-iquote #{dir.shellescape}"
+          flags = generated_headers.map { |path| File.dirname(path) }.sort.uniq.map { |dir| "-iquote #{dir.shellescape}" }
+          flags << config['FLAGS'] if config.include?('FLAGS')
+          config['FLAGS'] = flags.join(' ')
         end
 
         # ===============
-
-        config['FLAGS'] = flags.join(' ')
-        config[:include] = include_dirs.sort.uniq
 
         sources.each do |file|
           if links = Compiler.transform(file, config, target[:builddir])
             objects << links.last[:out]
             link = links.shift
-            rules += [ link.merge(order_only: [ *capnp_headers, *Array(link[:order_only]) ]), *links ]
+            rules += [ link.merge(order_only: [ *generated_headers, *Array(link[:order_only]) ]), *links ]
           end
         end
       end
