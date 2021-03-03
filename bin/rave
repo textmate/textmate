@@ -232,8 +232,7 @@ class Parser
     # = Constrct the Targets =
     # ========================
 
-    shell_cache      = {}
-    file_check_cache = {}
+    shell_cache = {}
 
     res = res.map do |target_name, archs|
       archs = archs.map do |arch_name, target|
@@ -251,13 +250,9 @@ class Parser
               value     = args[1..-1].join(' ')
               new_value = expand_variables(value, env)
 
-              if new_value.include?('/') && new_value !~ /['"= $]/
-                file_check_cache[new_value] = File.file?(new_value) unless file_check_cache.include?(new_value)
-              end
-
               files = []
 
-              if file_check_cache[new_value]
+              if value.start_with?('${dir}/', '$dir/', '${HOME}/', '$HOME/')
                 files << new_value
               elsif inference = target[:inference]
                 value.gsub(/\\([\\$])/, '').scan(VARIABLE_MATCH) do
