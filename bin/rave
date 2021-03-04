@@ -1276,6 +1276,11 @@ module Target
         guardfile << '_' + target[:variables]['version'] if target[:variables].include?('version')
 
         defines.each do |name, command|
+          variables[name] = "#{guardfile}.#{name}"
+          inference[name] = "#{guardfile}.#{name}"
+        end
+
+        defines.each do |name, command|
           variable_names = command.scan(VARIABLE_MATCH).map { |a, b| a || b }.uniq
 
           dep_files = variable_names.flat_map { |name| inference[name] }
@@ -1286,15 +1291,12 @@ module Target
           rules << temp.to_h.merge(
             name:         target[:identifier].tr('/', '_') + '_' + name.capitalize,
             keep:         true,
-            out:          "#{guardfile}.#{name}",
+            out:          variables[name],
             command:      "#{command =~ /\|(?!\|)(?<!\|\|)/ ? 'set -o pipefail; ' : ''}#{command} > $out~ && mv $out~ $out",
             dependencies: dep_files,
             description:  "#{name.capitalize} ‘#{File.basename(guardfile)}’…",
             pool:         'console',
           )
-
-          variables[name] = rules.last[:out]
-          inference[name] = rules.last[:out]
 
           rules << {
             name: 'phony',
