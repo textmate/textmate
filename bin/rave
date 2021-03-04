@@ -5,6 +5,8 @@ require 'fileutils'
 require 'json'
 require 'set'
 
+VARIABLE_MATCH = /\$(?:\{(.+?)\}|(\w+))/
+
 class Parser
   attr_reader :globs, :targets, :environment
 
@@ -315,8 +317,6 @@ class Parser
   # ======================
   # = Variable Expansion =
   # ======================
-
-  VARIABLE_MATCH = /\$(?:\{(.+?)\}|(\w+))/
 
   def expand_variables(value, variables)
     value.gsub(/\\([\\$])|#{VARIABLE_MATCH}/) do
@@ -1276,7 +1276,7 @@ module Target
         guardfile << '_' + target[:variables]['version'] if target[:variables].include?('version')
 
         defines.each do |name, command|
-          variable_names = command.scan(/\$(?:\{(.+?)\}|(\w+))/).map { |a, b| a || b }.uniq
+          variable_names = command.scan(VARIABLE_MATCH).map { |a, b| a || b }.uniq
 
           dep_files = variable_names.flat_map { |name| inference[name] }
           dep_files = dep_files.reject { |e| e.nil? }.sort.uniq
