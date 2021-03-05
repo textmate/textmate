@@ -1198,7 +1198,9 @@ module Target
       notarize, rules = nil, []
 
       if args = target[:notarize]
-        if application = application(archs, targets)
+        application = application(archs, targets)
+        executable  = Target.lipo(archs, targets)
+        if application || executable
           guardfile = File.join(target[:builddir], '_Notarize', target[:name])
           guardfile << '_' + target[:variables]['version'] if target[:variables].include?('version')
 
@@ -1206,7 +1208,7 @@ module Target
 
           rules << {
             name:         'Zip',
-            in:           application,
+            in:           application || executable,
             out:          "#{guardfile}.zip",
             command:      '/usr/bin/ditto -ck --keepParent --norsrc --noextattr --noacl --noqtn $in $out~ && mv $out~ $out',
             description:  'Zip ‘${in}’…',
@@ -1231,14 +1233,24 @@ module Target
             pool:         'console',
           )
 
-          rules << {
-            name:         'NotarizeStaple',
-            in:           application,
-            out:          notarize,
-            command:      'xcrun stapler staple $in && touch $out',
-            description:  'Staple ‘${in}’…',
-            dependencies: rules.last[:out],
-          }
+          if application
+            rules << {
+              name:         'NotarizeStaple',
+              in:           application,
+              out:          notarize,
+              command:      'xcrun stapler staple $in && touch $out',
+              description:  'Staple ‘${in}’…',
+              dependencies: rules.last[:out],
+            }
+          else
+            rules << {
+              name:         'NotarizeConfirm',
+              in:           rules.last[:out],
+              out:          notarize,
+              command:      'touch $out',
+              description:  'Touch ‘${out}’…',
+            }
+          end
 
           rules << {
             name: 'phony',
@@ -1268,7 +1280,7 @@ module Target
         )
 
         inference = (target[:inference] || {}).merge(
-          'executable'  => signature(archs, targets),
+          'executable'  => notarize(archs, targets) || signature(archs, targets),
           'application' => notarize(archs, targets) || signature(archs, targets),
         )
 
