@@ -243,6 +243,7 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 	{
 		_splitViewController = [[NSSplitViewController alloc] init];
 		_splitViewController.splitView.vertical = NO;
+		_splitViewController.splitView.dividerStyle = NSSplitViewDividerStylePaneSplitter;
 
 		[_splitViewController addSplitViewItem:[NSSplitViewItem splitViewItemWithViewController:self.browserViewController]];
 		[_splitViewController addSplitViewItem:[NSSplitViewItem splitViewItemWithViewController:self.documentViewController]];
