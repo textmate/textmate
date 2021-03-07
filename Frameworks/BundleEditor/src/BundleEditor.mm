@@ -945,8 +945,7 @@ static NSMutableDictionary* DictionaryForPropertyList (plist::dictionary_t const
 	_sharedPropertiesViewController = nil;
 	_extraPropertiesViewController  = nil;
 
-	NSView* contentView = [[NSView alloc] initWithFrame:{ NSZeroPoint, _propertiesViewController.view.frame.size }];
-	[contentView setAutoresizingMask:NSViewHeightSizable];
+	NSView* contentView = _propertiesViewController.view;
 	CGFloat maxY = NSHeight(contentView.frame);
 
 	if(info.kind != bundles::kItemTypeBundle)
@@ -974,14 +973,12 @@ static NSMutableDictionary* DictionaryForPropertyList (plist::dictionary_t const
 	}
 
 	_propertiesHeightConstraint.constant = NSHeight(contentView.frame) + -maxY;
-	[_propertiesViewController.view addSubview:contentView];
 
 	if(maxY < 0)
 	{
-		NSWindow* window = _propertiesViewController.view.window;
-		NSRect frame = NSOffsetRect(window.frame, 0, maxY);
+		NSRect frame = NSOffsetRect(contentView.window.frame, 0, maxY);
 		frame.size.height += -maxY;
-		[window setFrame:frame display:YES animate:YES];
+		[contentView.window setFrame:frame display:YES animate:YES];
 	}
 
 	_propertiesHeightConstraint.active = YES;
