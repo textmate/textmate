@@ -2,6 +2,13 @@ Title: Release Notes
 
 # Changes
 
+## 2021-03-07 (v2.0.20)
+
+* The TextMate::UI ruby bundle support library should now work with ruby 2.x.
+* Improve aesthetics of bundle editor slightly and make properties a resizable split view.
+* Find dialog would not work properly with HTML output window (pressing return would not trigger a “Find Next”).
+* See [all changes since v2.0.19](https://github.com/textmate/textmate/compare/v2.0.19...v2.0.20)
+
 ## 2021-02-25 (v2.0.19)
 
 * Ensure ⌘Z / ⇧⌘Z are not sent to file browser when it does not have focus.
