@@ -188,10 +188,9 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 
 		NSRect r = self.window.screen.visibleFrame;
 		[self.window setFrame:NSInsetRect(r, MAX(0, round((NSWidth(r)-1200)/2)), MAX(0, round((NSHeight(r)-700)/2))) display:NO];
+		self.windowFrameAutosaveName = @"Bundle Editor";
 
 		[self.splitViewController.splitView setPosition:round(NSHeight(self.splitViewController.splitView.frame) / 3) ofDividerAtIndex:0];
-
-		self.windowFrameAutosaveName = @"Bundle Editor";
 		self.splitViewController.splitView.autosaveName = @"Bundle Editor";
 
 		bundles = be::bundle_entries();
