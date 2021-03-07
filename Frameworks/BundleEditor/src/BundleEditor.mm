@@ -940,8 +940,7 @@ static NSMutableDictionary* DictionaryForPropertyList (plist::dictionary_t const
 	[bundleItemContent addObserver:self forKeyPath:@"documentEdited" options:0 context:nullptr];
 
 	_propertiesHeightConstraint.active = NO;
-	for(NSView* subview in _propertiesViewController.view.subviews)
-		[subview removeFromSuperview];
+	[_propertiesViewController.view.subviews makeObjectsPerformSelector:@selector(removeFromSuperview)];
 
 	_sharedPropertiesViewController = nil;
 	_extraPropertiesViewController  = nil;
