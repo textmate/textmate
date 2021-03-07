@@ -482,6 +482,7 @@ class Compiler < Plugin
 
           cache_key = "#{f}/#{(config['config'] || 'no_config')}"
           if info = @@cache[cache_key]
+            res << info
             queue << Array(info[:out]).first
             if flags = info[:new_flags]
               config = config.merge('FLAGS' => "#{config['FLAGS']} #{info[:new_flags]}")
@@ -490,7 +491,7 @@ class Compiler < Plugin
             info = compiler.transform(f, config, builddir)
 
             if !compiler.respond_to?(:universal?) || !compiler.universal?
-              @@cache[cache_key] = info.dup
+              @@cache[cache_key] = info.merge(duplicate: true)
             end
 
             if info.include?(:new_flags)
@@ -1452,7 +1453,7 @@ if __FILE__ == $PROGRAM_NAME
 
   rules = targets.flat_map do |_, archs|
     archs.flat_map do |_, target|
-      target[:build][:rules]
+      target[:build][:rules].reject { |rule| rule[:duplicate] }
     end
   end
 
