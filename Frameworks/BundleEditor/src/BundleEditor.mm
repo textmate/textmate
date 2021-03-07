@@ -639,12 +639,16 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 		NSMenu* menu = [NSMenu new];
 		if(bundles::item_ptr item = entry->represented_item())
 		{
+			NSString* imageName = entry->identifier() == "Menu Actions" ? @"MenuItem" : info_for(item->kind()).file;
+			NSImage* srcImage   = [NSImage imageNamed:imageName inSameBundleAsClass:[self class]];
+
+			cell.image = [NSImage imageWithSize:NSMakeSize(srcImage.size.width + 2, srcImage.size.height) flipped:NO drawingHandler:^BOOL(NSRect dstRect){
+				[srcImage drawInRect:NSMakeRect(NSMinX(dstRect)+2, NSMinY(dstRect), NSWidth(dstRect)-2, NSHeight(dstRect)) fromRect:NSZeroRect operation:NSCompositingOperationSourceOver fraction:1];
+				return YES;
+			}];
+
 			if(entry->identifier() == "Menu Actions")
-			{
-				[cell setImage:[NSImage imageNamed:@"MenuItem" inSameBundleAsClass:[self class]]];
 				return;
-			}
-			[cell setImage:[NSImage imageNamed:info_for(item->kind()).file inSameBundleAsClass:[self class]]];
 
 			if(item->kind() == bundles::kItemTypeBundle)
 			{
