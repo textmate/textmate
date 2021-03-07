@@ -209,7 +209,23 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 {
 	if(!_browserViewController)
 	{
+		_browserViewController = [[NSViewController alloc] initWithNibName:nil bundle:nil];
+
 		browser = [[NSBrowser alloc] initWithFrame:NSZeroRect];
+		browser.autoresizingMask = NSViewWidthSizable|NSViewHeightSizable;
+
+		if(@available(macos 11, *))
+		{
+			_browserViewController.view = browser;
+		}
+		else
+		{
+			NSView* clipView = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 10, 10)];
+			[clipView addSubview:browser];
+			browser.frame = NSMakeRect(-1, -1, 12, 12);
+
+			_browserViewController.view = clipView;
+		}
 
 		browser.titled                = NO;
 		browser.autohidesScroller     = YES;
@@ -220,9 +236,6 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 		browser.delegate              = self;
 		browser.target                = self;
 		browser.action                = @selector(browserSelectionDidChange:);
-
-		_browserViewController = [[NSViewController alloc] initWithNibName:nil bundle:nil];
-		_browserViewController.view = browser;
 	}
 	return _browserViewController;
 }
