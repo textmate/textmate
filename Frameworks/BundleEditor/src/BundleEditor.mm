@@ -250,6 +250,9 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 
 		[_splitViewController addSplitViewItem:[NSSplitViewItem splitViewItemWithViewController:self.browserViewController]];
 		[_splitViewController addSplitViewItem:[NSSplitViewItem splitViewItemWithViewController:self.documentViewController]];
+
+		_splitViewController.splitViewItems[0].minimumThickness = 50;
+		_splitViewController.splitViewItems[0].canCollapse      = YES;
 	}
 	return _splitViewController;
 }
