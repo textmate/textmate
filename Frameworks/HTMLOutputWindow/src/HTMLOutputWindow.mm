@@ -44,6 +44,11 @@
 	[super showWindow:sender];
 }
 
+- (void)cancelOperation:(id)sender
+{
+	[self.window performClose:sender];
+}
+
 - (BOOL)windowShouldClose:(id)sender
 {
 	if(!_htmlOutputView.isRunningCommand)
