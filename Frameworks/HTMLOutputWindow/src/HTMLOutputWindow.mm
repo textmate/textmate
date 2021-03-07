@@ -14,7 +14,7 @@
 {
 	NSRect rect = [[NSScreen mainScreen] visibleFrame];
 	rect = NSIntegralRect(NSInsetRect(rect, NSWidth(rect) / 3, NSHeight(rect) / 5));
-	NSWindow* window = [[NSPanel alloc] initWithContentRect:rect styleMask:(NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable|NSWindowStyleMaskMiniaturizable) backing:NSBackingStoreBuffered defer:NO];
+	NSWindow* window = [[NSWindow alloc] initWithContentRect:rect styleMask:(NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable|NSWindowStyleMaskMiniaturizable) backing:NSBackingStoreBuffered defer:NO];
 
 	if(self = [super initWithWindow:window])
 	{
@@ -27,7 +27,6 @@
 		[self.window setDelegate:self];
 		[self.window setReleasedWhenClosed:NO];
 		[self.window setCollectionBehavior:NSWindowCollectionBehaviorMoveToActiveSpace|NSWindowCollectionBehaviorFullScreenAuxiliary];
-		[self.window setHidesOnDeactivate:NO];
 	}
 	return self;
 }
