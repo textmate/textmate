@@ -1,20 +1,10 @@
 #import "OakOpenWithMenu.h"
 #import "NSMenu Additions.h"
-#import <OakFoundation/NSString Additions.h>
-#import <oak/oak.h>
 
-@interface OakOpenWithApplicationInfo : NSObject
-@property (nonatomic) NSURL* url;
-@property (nonatomic) NSString* identifier;
-@property (nonatomic) NSString* name;
-@property (nonatomic) NSString* version;
-
-@property (nonatomic, getter = isDefaultApplication) BOOL defaultApplication;
-@property (nonatomic, getter = hasMultipleVersions)  BOOL multipleVersions;
-@property (nonatomic, getter = hasMultipleCopies)    BOOL multipleCopies;
-
-@property (nonatomic, readonly) NSString* nameWithVersion;
-@property (nonatomic, readonly) NSString* displayName;
+@interface OakOpenWithApplicationInfo ()
+@property (nonatomic, readwrite, getter = isDefaultApplication) BOOL defaultApplication;
+@property (nonatomic, readwrite, getter = hasMultipleVersions)  BOOL multipleVersions;
+@property (nonatomic, readwrite, getter = hasMultipleCopies)    BOOL multipleCopies;
 @end
 
 @implementation OakOpenWithApplicationInfo
@@ -26,23 +16,12 @@
 		if(!bundle)
 			return nil;
 
-		_identifier = bundle.bundleIdentifier;
-		if(!_identifier)
-		{
-			NSLog(@"warning: missing CFBundleIdentifier: %@", bundle);
-			return nil;
-		}
-
-		_url     = url;
-		_name    = [NSFileManager.defaultManager displayNameAtPath:url.filePathURL.path];
-		_version = [bundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"] ?: ([bundle objectForInfoDictionaryKey:@"CFBundleVersion"] ?: @"???");
+		_URL              = url;
+		_bundleIdentifier = bundle.bundleIdentifier;
+		_name             = [NSFileManager.defaultManager displayNameAtPath:url.filePathURL.path];
+		_version          = [bundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"] ?: ([bundle objectForInfoDictionaryKey:@"CFBundleVersion"] ?: @"???");
 	}
 	return self;
-}
-
-- (NSString*)nameWithVersion
-{
-	return [NSString stringWithFormat:@"%@ (%@)", _name, _version];
 }
 
 - (NSString*)displayName
@@ -54,148 +33,102 @@
 	if(_defaultApplication)
 		name = [name stringByAppendingFormat:@" (default)"];
 	if(_multipleVersions)
-		name = [name stringByAppendingFormat:@" — %@", [[_url.filePathURL.path stringByDeletingLastPathComponent] stringByAbbreviatingWithTildeInPath]];
+		name = [name stringByAppendingFormat:@" — %@", [[_URL.filePathURL.path stringByDeletingLastPathComponent] stringByAbbreviatingWithTildeInPath]];
 
 	return name;
 }
 @end
 
+@interface OakOpenWithMenuDelegate ()
+{
+	NSArray<OakOpenWithApplicationInfo*>* _applications;
+}
+@end
+
 static NSURL* CanonicalURL (NSURL* url, BOOL isDirectoryFlag = YES)
 {
-	if(NSString* path = [[url filePathURL] path])
+	if(NSString* path = url.filePathURL.path)
 		return [NSURL fileURLWithPath:path isDirectory:isDirectoryFlag];
 	return url;
 }
 
-static NSArray<OakOpenWithApplicationInfo*>* ApplicationURLsForPaths (NSSet* paths)
+@implementation OakOpenWithMenuDelegate
+- (instancetype)initWithDocumentURLs:(NSArray<NSURL*>*)someDocumentURLs
 {
-	NSMutableSet* allAppURLs     = [NSMutableSet set];
-	NSMutableSet* defaultAppURLs = [NSMutableSet set];
-
-	bool first = true;
-	for(NSString* path in paths)
+	if(self = [super init])
 	{
-		NSURL* url = [NSURL fileURLWithPath:path];
+		_documentURLs = someDocumentURLs;
+	}
+	return self;
+}
 
-		NSMutableSet* appUrls = [NSMutableSet set];
-		NSArray* appUrlsArray = (NSArray*)CFBridgingRelease(LSCopyApplicationURLsForURL((__bridge CFURLRef)url, kLSRolesAll));
-		for(NSURL* url in appUrlsArray)
-			[appUrls addObject:CanonicalURL(url)];
+- (NSArray<OakOpenWithApplicationInfo*>*)applications
+{
+	if(!_applications)
+	{
+		NSMutableSet<NSURL*>* allAppURLs;
+		NSMutableSet<NSURL*>* defaultAppURLs = [NSMutableSet set];
 
-		if(NSURL* defaultAppURL = CanonicalURL([NSWorkspace.sharedWorkspace URLForApplicationToOpenURL:url]))
+		for(NSURL* documentURL in _documentURLs)
 		{
-			[appUrls addObject:defaultAppURL];
-			[defaultAppURLs addObject:defaultAppURL];
+			NSMutableSet<NSURL*>* appURLs = [NSMutableSet set];
+			NSArray<NSURL*>* appURLsArray = (NSArray*)CFBridgingRelease(LSCopyApplicationURLsForURL((__bridge CFURLRef)documentURL, kLSRolesAll));
+			for(NSURL* appURL in appURLsArray)
+				[appURLs addObject:CanonicalURL(appURL)];
+
+			if(NSURL* defaultAppURL = CanonicalURL([NSWorkspace.sharedWorkspace URLForApplicationToOpenURL:documentURL]))
+			{
+				[appURLs addObject:defaultAppURL];
+				[defaultAppURLs addObject:defaultAppURL];
+			}
+
+			if(allAppURLs)
+					[allAppURLs intersectSet:appURLs];
+			else	allAppURLs = appURLs;
 		}
 
-		if(std::exchange(first, false))
-				[allAppURLs setSet:appUrls];
-		else	[allAppURLs intersectSet:appUrls];
-	}
+		NSMutableArray<OakOpenWithApplicationInfo*>* apps = [NSMutableArray array];
+		NSCountedSet* counts = [[NSCountedSet alloc] initWithCapacity:allAppURLs.count * 2];
 
-	NSMutableArray<OakOpenWithApplicationInfo*>* apps = [NSMutableArray array];
-	NSCountedSet* counts = [[NSCountedSet alloc] initWithCapacity:allAppURLs.count * 2];
-
-	for(NSURL* url in allAppURLs)
-	{
-		if(OakOpenWithApplicationInfo* info = [[OakOpenWithApplicationInfo alloc] initWithBundleURL:url])
+		for(NSURL* appURL in allAppURLs)
 		{
-			info.defaultApplication = defaultAppURLs.count == 1 && [defaultAppURLs containsObject:url];
-			[apps addObject:info];
+			if(OakOpenWithApplicationInfo* app = [[OakOpenWithApplicationInfo alloc] initWithBundleURL:appURL])
+			{
+				app.defaultApplication = defaultAppURLs.count == 1 && [defaultAppURLs containsObject:appURL];
+				[apps addObject:app];
 
-			[counts addObject:info.name];
-			[counts addObject:info.nameWithVersion];
+				NSString* nameWithVersion = [NSString stringWithFormat:@"%@ (%@)", app.name, app.version];
+				[counts addObject:app.name];
+				[counts addObject:nameWithVersion];
+			}
 		}
-	}
 
-	for(OakOpenWithApplicationInfo* app in apps)
-	{
-		app.countOfDuplicateNames    = [counts countForObject:app.name];
-		app.countOfDuplicateVersions = [counts countForObject:app.nameWithVersion];
-	}
-
-	return [apps count] == 0 ? nil : [apps sortedArrayUsingDescriptors:@[ [NSSortDescriptor sortDescriptorWithKey:@"defaultApplication" ascending:NO], [NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES selector:@selector(localizedCompare:)], [NSSortDescriptor sortDescriptorWithKey:@"version" ascending:NO] ]];
-}
-
-@interface OakOpenWithMenu () <NSMenuDelegate>
-@end
-
-@implementation OakOpenWithMenu
-+ (instancetype)sharedInstance
-{
-	static OakOpenWithMenu* sharedInstance = [self new];
-	return sharedInstance;
-}
-
-+ (void)addOpenWithMenuForPaths:(NSSet*)paths toMenuItem:(NSMenuItem*)item
-{
-	NSMenu* submenu = [NSMenu new];
-	[submenu setDelegate:OakOpenWithMenu.sharedInstance];
-
-	[item setRepresentedObject:paths];
-	[item setSubmenu:submenu];
-}
-
-- (BOOL)menuHasKeyEquivalent:(NSMenu*)aMenu forEvent:(NSEvent*)theEvent target:(id*)aTarget action:(SEL*)anAction
-{
-	return NO;
-}
-
-- (void)menuNeedsUpdate:(NSMenu*)menu
-{
-	NSMenuItem* superItem = [menu parentMenuItem];
-	if(menu.numberOfItems > 0 || !superItem)
-		return;
-
-	NSArray<OakOpenWithApplicationInfo*>* apps = ApplicationURLsForPaths(superItem.representedObject);
-	if(!apps)
-	{
-		[menu addItemWithTitle:@"No Suitable Applications Found" action:@selector(nop:) keyEquivalent:@""];
-		return;
-	}
-
-	BOOL didInsertDefaultItems = NO;
-	for(OakOpenWithApplicationInfo* app : apps)
-	{
-		if(didInsertDefaultItems && app.isDefaultApplication == NO)
-			[menu addItem:[NSMenuItem separatorItem]];
-		didInsertDefaultItems = app.isDefaultApplication;
-
-		NSMenuItem* menuItem = [menu addItemWithTitle:app.displayName action:@selector(openWith:) keyEquivalent:@""];
-		[menuItem setTarget:self];
-		[menuItem setRepresentedObject:app.url];
-		[menuItem setToolTip:[app.url.filePathURL.path stringByAbbreviatingWithTildeInPath]];
-
-		NSImage* image = nil;
-		if([app.url getResourceValue:&image forKey:NSURLEffectiveIconKey error:NULL] || (image = [NSWorkspace.sharedWorkspace iconForFile:app.url.filePathURL.path]))
+		for(OakOpenWithApplicationInfo* app in apps)
 		{
-			image = [image copy];
-			image.size = NSMakeSize(16, 16);
-			[menuItem setImage:image];
+			NSString* nameWithVersion = [NSString stringWithFormat:@"%@ (%@)", app.name, app.version];
+			app.multipleVersions = [counts countForObject:nameWithVersion] > 1;
+			app.multipleCopies   = [counts countForObject:app.name] > [counts countForObject:nameWithVersion];
 		}
+
+		_applications = [apps sortedArrayUsingDescriptors:@[ [NSSortDescriptor sortDescriptorWithKey:@"defaultApplication" ascending:NO], [NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES selector:@selector(localizedCompare:)], [NSSortDescriptor sortDescriptorWithKey:@"version" ascending:NO] ]];
 	}
+	return _applications;
 }
 
-- (void)openWith:(id)sender
+- (void)openDocumentURLs:(NSArray<NSURL*>*)documentURLs withApplicationURL:(NSURL*)applicationURL
 {
 	// Since we can have multiple applications for the same bundle identifier, e.g. Xcode release and beta, we must open by URL.
 	// Unfortunately the API that is URL-based does not allow opening multiple documents at once, so we use AppleScript.
 
-	NSURL* applicationURL = [sender representedObject];
-	NSSet* filePaths = [[[sender menu] parentMenuItem] representedObject];
-
 	NSAppleEventDescriptor* listDesc = [NSAppleEventDescriptor listDescriptor];
 	NSInteger nextIndex = 1;
 
-	for(NSString* filePath in filePaths)
+	for(NSURL* url in documentURLs)
 	{
-		if(NSURL* url = [NSURL fileURLWithPath:filePath])
+		if(NSData* urlData = [url.absoluteString dataUsingEncoding:NSUTF8StringEncoding])
 		{
-			if(NSData* urlData = [url.absoluteString dataUsingEncoding:NSUTF8StringEncoding])
-			{
-				if(NSAppleEventDescriptor* urlDesc = [NSAppleEventDescriptor descriptorWithDescriptorType:typeFileURL data:urlData])
-					[listDesc insertDescriptor:urlDesc atIndex:nextIndex++];
-			}
+			if(NSAppleEventDescriptor* urlDesc = [NSAppleEventDescriptor descriptorWithDescriptorType:typeFileURL data:urlData])
+				[listDesc insertDescriptor:urlDesc atIndex:nextIndex++];
 		}
 	}
 
@@ -206,5 +139,57 @@ static NSArray<OakOpenWithApplicationInfo*>* ApplicationURLsForPaths (NSSet* pat
 	NSError* err = nil;
 	if(![NSWorkspace.sharedWorkspace launchApplicationAtURL:applicationURL options:NSWorkspaceLaunchDefault configuration:launchOptions error:&err])
 		NSLog(@"%@: %@", applicationURL, err.localizedDescription);
+}
+
+// ==========================
+// = MenuItem Action Method =
+// ==========================
+
+- (void)openWith:(id)sender
+{
+	[self openDocumentURLs:_documentURLs withApplicationURL:[sender representedObject]];
+}
+
+// ==========================
+// = NSMenuDelegate Methods =
+// ==========================
+
+- (void)menuNeedsUpdate:(NSMenu*)menu
+{
+	[menu removeAllItems];
+
+	NSArray<OakOpenWithApplicationInfo*>* apps = self.applications;
+	if(apps.count == 0)
+	{
+		[menu addItemWithTitle:@"No Suitable Applications Found" action:@selector(nop:) keyEquivalent:@""];
+	}
+	else
+	{
+		BOOL didInsertDefaultItems = NO;
+		for(OakOpenWithApplicationInfo* app : apps)
+		{
+			if(didInsertDefaultItems && app.isDefaultApplication == NO)
+				[menu addItem:[NSMenuItem separatorItem]];
+			didInsertDefaultItems = app.isDefaultApplication;
+
+			NSMenuItem* menuItem = [menu addItemWithTitle:app.displayName action:@selector(openWith:) keyEquivalent:@""];
+			menuItem.target            = self;
+			menuItem.representedObject = app.URL;
+			menuItem.toolTip           = [app.URL.filePathURL.path stringByAbbreviatingWithTildeInPath];
+
+			NSImage* image = nil;
+			if([app.URL getResourceValue:&image forKey:NSURLEffectiveIconKey error:NULL] || (image = [NSWorkspace.sharedWorkspace iconForFile:app.URL.filePathURL.path]))
+			{
+				image = [image copy];
+				image.size = NSMakeSize(16, 16);
+				menuItem.image = image;
+			}
+		}
+	}
+}
+
+- (BOOL)menuHasKeyEquivalent:(NSMenu*)aMenu forEvent:(NSEvent*)theEvent target:(id*)aTarget action:(SEL*)anAction
+{
+	return NO;
 }
 @end

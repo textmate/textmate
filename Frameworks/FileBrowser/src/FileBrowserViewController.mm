@@ -85,6 +85,7 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 {
 	NSUndoManager* _fileBrowserUndoManager;
 	NSArray<FileItem*>* _previewItems;
+	OakOpenWithMenuDelegate* _openWithMenuDelegate;
 
 	NSMutableDictionary<NSURL*, id>* _fileItemObservers;
 
@@ -455,13 +456,14 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 {
 	NSInteger kRequiresSelectionTag = 1;
 
-	NSMenuItem* openWithMenuItem;
 	NSMenuItem* insertBundleItemsMenuItem;
 	NSMenuItem* finderTagsMenuItem;
 
+	_openWithMenuDelegate = [[OakOpenWithMenuDelegate alloc] initWithDocumentURLs:[self.previewableItems valueForKey:@"resolvedURL"]];
+
 	MBMenu const items = {
-		{ @"Open",                    @selector(openSelectedItems:)                            },
-		{ @"Open With",               @selector(openWithMenuAction:), .ref = &openWithMenuItem },
+		{ @"Open",                    @selector(openSelectedItems:)           },
+		{ @"Open With",               @selector(openWithMenuAction:), .delegate = _openWithMenuDelegate },
 		{ /* -------- */ },
 		{ @"Show Original",           @selector(showOriginal:)                },
 		{ @"Show Enclosing Folder",   @selector(showEnclosingFolder:)         },
@@ -565,8 +567,6 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 		if(!menuItem.target && menuItem.action && [self respondsToSelector:menuItem.action])
 			menuItem.target = self;
 	}
-
-	[OakOpenWithMenu addOpenWithMenuForPaths:[NSSet setWithArray:[self.previewableItems valueForKeyPath:@"resolvedURL.path"]] toMenuItem:openWithMenuItem];
 }
 
 - (void)menuNeedsUpdate:(NSMenu*)menu
