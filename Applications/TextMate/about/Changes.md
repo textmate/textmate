@@ -2,6 +2,12 @@ Title: Release Notes
 
 # Changes
 
+## 2021-03-08 (v2.0.21)
+
+* When selecting an item in the file browser for which TextMate is not the default application configured to open this item, the “Open With” submenu item (in the context menu) now show the default application and can be selected directly (without having to go into the submenu).
+* Ensure ⌘⌫ / [⌥]⌘V are not sent to the file browser when it does not have focus (same issue as with ⌘Z / ⇧⌘Z fixed in v2.0.19).
+* See [all changes since v2.0.20](https://github.com/textmate/textmate/compare/v2.0.20...v2.0.21)
+
 ## 2021-03-07 (v2.0.20)
 
 * The TextMate::UI ruby bundle support library should now work with ruby 2.x.
