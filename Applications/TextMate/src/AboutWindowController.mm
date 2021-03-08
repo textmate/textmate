@@ -65,6 +65,11 @@ static NSData* Digest (NSString* someString)
 		[self.toolbar setDelegate:self];
 		[win setToolbar:self.toolbar];
 
+		if(@available(macos 11.0, *))
+		{
+			win.toolbarStyle = NSWindowToolbarStylePreference;
+		}
+
 		[win setTitle:@"About TextMate"];
 		[win setFrameAutosaveName:@"BundlesReleaseNotes"];
 		[win setDelegate:self];
