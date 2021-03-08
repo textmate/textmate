@@ -461,9 +461,24 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 
 	_openWithMenuDelegate = [[OakOpenWithMenuDelegate alloc] initWithDocumentURLs:[self.previewableItems valueForKey:@"resolvedURL"]];
 
+	NSString* openWithTitle = @"Open With";
+	NSURL* openWithAppURL;
+	for(OakOpenWithApplicationInfo* app in _openWithMenuDelegate.applications)
+	{
+		if(app.isDefaultApplication)
+		{
+			if(![app.bundleIdentifier isEqualToString:NSBundle.mainBundle.bundleIdentifier])
+			{
+				openWithTitle  = [NSString stringWithFormat:@"Open With %@", app.name];
+				openWithAppURL = app.URL;
+			}
+			break;
+		}
+	}
+
 	MBMenu const items = {
 		{ @"Open",                    @selector(openSelectedItems:)           },
-		{ @"Open With",               @selector(openWithMenuAction:), .delegate = _openWithMenuDelegate },
+		{ openWithTitle,              @selector(openWithMenuAction:), .delegate = _openWithMenuDelegate, .representedObject = openWithAppURL },
 		{ /* -------- */ },
 		{ @"Show Original",           @selector(showOriginal:)                },
 		{ @"Show Enclosing Folder",   @selector(showEnclosingFolder:)         },
@@ -586,7 +601,8 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 
 - (void)openWithMenuAction:(id)sender
 {
-	// This action only exist to have validateMenuItem: called for the Open With menu
+	if(NSURL* appURL = [sender representedObject])
+		[_openWithMenuDelegate openDocumentURLs:[self.previewableItems valueForKey:@"resolvedURL"] withApplicationURL:appURL];
 }
 
 - (void)showOriginal:(id)sender
