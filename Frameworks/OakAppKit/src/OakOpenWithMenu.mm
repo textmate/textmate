@@ -8,10 +8,10 @@
 @property (nonatomic) NSString* identifier;
 @property (nonatomic) NSString* name;
 @property (nonatomic) NSString* version;
-@property (nonatomic, getter = isDefaultApplication) BOOL defaultApplication;
 
-@property (nonatomic) NSUInteger countOfDuplicateNames;
-@property (nonatomic) NSUInteger countOfDuplicateVersions;
+@property (nonatomic, getter = isDefaultApplication) BOOL defaultApplication;
+@property (nonatomic, getter = hasMultipleVersions)  BOOL multipleVersions;
+@property (nonatomic, getter = hasMultipleCopies)    BOOL multipleCopies;
 
 @property (nonatomic, readonly) NSString* nameWithVersion;
 @property (nonatomic, readonly) NSString* displayName;
@@ -49,11 +49,11 @@
 {
 	NSString* name = _name;
 
-	if(_countOfDuplicateNames > _countOfDuplicateVersions)
+	if(_multipleCopies)
 		name = [name stringByAppendingFormat:@" (%@)", _version];
 	if(_defaultApplication)
 		name = [name stringByAppendingFormat:@" (default)"];
-	if(_countOfDuplicateVersions > 1)
+	if(_multipleVersions)
 		name = [name stringByAppendingFormat:@" — %@", [[_url.filePathURL.path stringByDeletingLastPathComponent] stringByAbbreviatingWithTildeInPath]];
 
 	return name;
