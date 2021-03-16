@@ -908,11 +908,14 @@ module Target
         libraries  = required_targets.flat_map { |target| target[:libraries]  }.reject { |e| e.nil? }.sort.uniq
         static, libraries = libraries.partition { |lib| lib =~ /\.a$/ }
 
+        deps = []
         ln_flags = []
         required_targets.each do |target|
           ln_flags += target[:variables]['LN_FLAGS'].split(' ') if target[:variables].include?('LN_FLAGS')
+          deps += target.dig(:inference, 'LN_FLAGS') || []
         end
         ln_flags = [ ln_flags.uniq.join(' ') ]
+        deps = deps.uniq.sort
 
         ln_flags += frameworks.map { |e| "-framework #{e.shellescape}" }
         ln_flags += libraries.map { |e| "-l#{e.shellescape}" }
@@ -925,12 +928,13 @@ module Target
         end
 
         rules << {
-          name:        'Link',
-          in:          objects.sort.uniq,
-          out:         executable,
-          flags:       ln_flags.join(' '),
-          command:     'xcrun --sdk macosx clang -o $out $flags $in',
-          description: 'Link ‘${out}’…',
+          name:         'Link',
+          in:           objects.sort.uniq,
+          out:          executable,
+          flags:        ln_flags.join(' '),
+          command:      'xcrun --sdk macosx clang -o $out $flags $in',
+          description:  'Link ‘${out}’…',
+          dependencies: deps
         }
       end
 
