@@ -1315,6 +1315,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		{ "attr.project.swift",   "Package.swift",  "build"   },
 		{ "attr.project.vagrant", "Vagrantfile",    "vagrant" },
 		{ "attr.project.jekyll",  "_config.yml",    "jekyll"  },
+		{ "attr.project.rave",    "default.rave",   "rave"    },
 		{ "attr.test.rspec",      ".rspec",         "test"    },
 	};
 
