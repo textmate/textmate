@@ -396,7 +396,7 @@ class Parser
             record = { watch_descendents: true }
           elsif component.include?('*')
             if i == components.size-1
-              recurd = { }
+              record = { }
             else
               record = { watch_children: true }
             end
