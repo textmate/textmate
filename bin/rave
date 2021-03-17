@@ -848,10 +848,8 @@ module Target
       objects, rules = [], []
 
       if sources = target[:sources]
-        config = target[:variables].merge(prelude: target[:prelude], inference: target[:inference])
-
         include_dirs = required_targets(target, targets, include_weak: true).map { |archs| include_dir(archs) }.reject { |e| e.nil? }.sort
-        config[:include] = include_dirs.sort.uniq
+        config = target[:variables].merge(prelude: target[:prelude], inference: target[:inference], include: include_dirs.sort.uniq)
 
         # ===============
         # = Cap’n Proto =
