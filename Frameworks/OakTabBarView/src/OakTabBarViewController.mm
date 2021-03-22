@@ -16,6 +16,7 @@
 @interface OakTabBarViewController () <OakTabBarViewDataSource>
 {
 	OakTabBarView* _tabBarView;
+	NSArray<NSUUID*>* _previousIdentifiers;
 
 	BOOL _hasPendingReloadTabsFlag;
 	BOOL _animateReloadFlag;
@@ -99,6 +100,27 @@
 
 - (void)reloadTabs:(id)sender
 {
+	if(_animateReloadFlag)
+	{
+		NSMutableSet<NSUUID*>* subsequence = [NSMutableSet setWithArray:_identifiers];
+		[subsequence intersectSet:[NSSet setWithArray:_previousIdentifiers]];
+
+		NSUInteger i = 0, j = 0;
+		while(i < _identifiers.count && j < _previousIdentifiers.count && _animateReloadFlag)
+		{
+			if(![subsequence containsObject:_identifiers[i]])
+				++i;
+			else if(![subsequence containsObject:_previousIdentifiers[j]])
+				++j;
+			else if(![_identifiers[i] isEqual:_previousIdentifiers[j]])
+				_animateReloadFlag = NO;
+			++i;
+			++j;
+		}
+
+		_previousIdentifiers = _identifiers;
+	}
+
 	if(_animateReloadFlag)
 	{
 		[NSAnimationContext runAnimationGroup:^(NSAnimationContext* context){
