@@ -99,7 +99,7 @@ NSImage* CreateIconImageForURL (NSURL* url, BOOL isModified, BOOL isMissing, BOO
 		if(!image)
 			return NO;
 
-		[image drawInRect:dstRect fromRect:NSZeroRect operation:NSCompositingOperationSourceOver fraction:isModified ? 0.4 : 1];
+		[image drawInRect:dstRect fromRect:NSZeroRect operation:NSCompositingOperationCopy fraction:isModified ? 0.4 : 1];
 
 		if(NSImage* badge = BadgeForSCMStatus(scmStatus))
 			[badge drawInRect:dstRect fromRect:NSZeroRect operation:NSCompositingOperationSourceOver fraction:isModified ? 0.4 : 1];
