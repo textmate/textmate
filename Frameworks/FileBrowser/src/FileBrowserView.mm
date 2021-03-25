@@ -40,6 +40,7 @@
 		_scrollView.documentView          = _outlineView;
 		_scrollView.hasHorizontalScroller = NO;
 		_scrollView.hasVerticalScroller   = YES;
+		_scrollView.autohidesScrollers    = YES;
 
 		NSDictionary* views = @{
 			@"header":  _headerView,
