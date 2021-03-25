@@ -186,24 +186,18 @@ OakRolloverButton* OakCreateCloseButton (NSString* accessibilityLabel)
 }
 
 - (void)setActiveBackgroundColor:(NSColor*)aColor             { self.activeBackgroundValue = aColor;    }
-- (void)setActiveBackgroundImage:(NSImage*)anImage            { self.activeBackgroundValue = anImage;   }
 - (void)setActiveBackgroundGradient:(NSGradient*)aGradient    { self.activeBackgroundValue = aGradient; }
 - (void)setInactiveBackgroundColor:(NSColor*)aColor           { self.inactiveBackgroundValue = aColor;    }
-- (void)setInactiveBackgroundImage:(NSImage*)anImage          { self.inactiveBackgroundValue = anImage;   }
 - (void)setInactiveBackgroundGradient:(NSGradient*)aGradient  { self.inactiveBackgroundValue = aGradient; }
 
 - (NSColor*)activeBackgroundColor          { return [_activeBackgroundValue isKindOfClass:[NSColor class]]      ? _activeBackgroundValue   : nil; }
-- (NSImage*)activeBackgroundImage          { return [_activeBackgroundValue isKindOfClass:[NSImage class]]      ? _activeBackgroundValue   : nil; }
 - (NSGradient*)activeBackgroundGradient    { return [_activeBackgroundValue isKindOfClass:[NSGradient class]]   ? _activeBackgroundValue   : nil; }
 - (NSColor*)inactiveBackgroundColor        { return [_inactiveBackgroundValue isKindOfClass:[NSColor class]]    ? _inactiveBackgroundValue : nil; }
-- (NSImage*)inactiveBackgroundImage        { return [_inactiveBackgroundValue isKindOfClass:[NSImage class]]    ? _inactiveBackgroundValue : nil; }
 - (NSGradient*)inactiveBackgroundGradient  { return [_inactiveBackgroundValue isKindOfClass:[NSGradient class]] ? _inactiveBackgroundValue : nil; }
 
 - (NSSize)intrinsicContentSize
 {
-	if(NSImage* image = self.activeBackgroundImage ?: self.inactiveBackgroundImage)
-			return image.size;
-	else	return NSMakeSize(NSViewNoIntrinsicMetric, NSViewNoIntrinsicMetric);
+	return NSMakeSize(NSViewNoIntrinsicMetric, NSViewNoIntrinsicMetric);
 }
 
 - (void)setStyle:(OakBackgroundFillViewStyle)aStyle
@@ -256,15 +250,6 @@ OakRolloverButton* OakCreateCloseButton (NSString* accessibilityLabel)
 	{
 		NSGradient* gradient = value;
 		[gradient drawInRect:self.bounds angle:270];
-	}
-	else if([value isKindOfClass:[NSImage class]])
-	{
-		NSImage* image = value;
-		[[NSColor colorWithPatternImage:image] set];
-		CGContextRef context = NSGraphicsContext.currentContext.CGContext;
-		CGAffineTransform affineTransform = CGContextGetCTM(context);
-		CGContextSetPatternPhase(context, CGSizeMake(affineTransform.tx, affineTransform.ty));
-		NSRectFillUsingOperation(aRect, NSCompositingOperationSourceOver);
 	}
 	else if([value isKindOfClass:[NSColor class]])
 	{

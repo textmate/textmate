@@ -6,8 +6,6 @@ typedef NS_ENUM(NSUInteger, OakBackgroundFillViewStyle) {
 
 @interface OakBackgroundFillView : NSView
 @property (nonatomic) OakBackgroundFillViewStyle style;
-@property (nonatomic) NSImage* activeBackgroundImage;
-@property (nonatomic) NSImage* inactiveBackgroundImage;
 @property (nonatomic) NSColor* activeBackgroundColor;
 @property (nonatomic) NSColor* inactiveBackgroundColor;
 @property (nonatomic) NSGradient* activeBackgroundGradient;
