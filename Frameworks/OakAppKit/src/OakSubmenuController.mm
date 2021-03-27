@@ -1,5 +1,4 @@
 #import "OakSubmenuController.h"
-#import <ns/ns.h>
 
 @interface OakProxyMenuItem : NSMenuItem
 @end
@@ -57,15 +56,16 @@
 	if(![self isShowTabMenu:aMenu])
 		return NO;
 
-	std::string const eventString = to_s(anEvent);
-	if(eventString < "@1" || "@9" < eventString)
+	NSUInteger flags     = anEvent.modifierFlags & (NSEventModifierFlagCommand|NSEventModifierFlagShift|NSEventModifierFlagControl|NSEventModifierFlagOption);
+	NSString* characters = anEvent.characters;
+	if(flags != NSEventModifierFlagCommand || characters.length != 1 || ![NSCharacterSet.decimalDigitCharacterSet characterIsMember:[characters characterAtIndex:0]])
 		return NO;
 
 	NSMenu* dummy = [OakKeyEquivalentMenu new];
 	[self updateMenu:dummy withSelector:@selector(updateShowTabMenu:)];
 	for(NSMenuItem* item in [dummy itemArray])
 	{
-		if(eventString == ns::create_event_string(item.keyEquivalent, item.keyEquivalentModifierMask))
+		if(item.keyEquivalentModifierMask == flags && [item.keyEquivalent isEqualToString:characters])
 		{
 			if(!self.proxyMenuItem)
 				self.proxyMenuItem = [OakProxyMenuItem new];
