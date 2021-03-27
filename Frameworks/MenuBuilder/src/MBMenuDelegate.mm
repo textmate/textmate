@@ -23,47 +23,45 @@
 @end
 
 @interface MBMenuDelegate ()
+@property (nonatomic) SEL selector;
 @property (nonatomic) MBProxyMenuItem* proxyMenuItem;
 @end
 
 @implementation MBMenuDelegate
-+ (instancetype)sharedInstance
++ (MBMenuDelegate*)delegateUsingSelector:(SEL)selector
 {
-	static MBMenuDelegate* sharedInstance = [self new];
-	return sharedInstance;
+	static std::map<SEL, MBMenuDelegate*> retainedDelegates;
+	auto it = retainedDelegates.find(selector);
+	if(it == retainedDelegates.end())
+		it = retainedDelegates.emplace(selector, [[MBMenuDelegate alloc] initWithSelector:selector]).first;
+	return it->second;
 }
 
-- (BOOL)isShowTabMenu:(NSMenu*)aMenu
+- (instancetype)initWithSelector:(SEL)selector
 {
-	return [aMenu.title isEqualToString:@"Show Tab"];
-}
-
-- (void)updateMenu:(NSMenu*)aMenu withSelector:(SEL)aSelector
-{
-	[aMenu removeAllItems];
-	if(id delegate = [NSApp targetForAction:aSelector])
-			[NSApp sendAction:aSelector to:delegate from:aMenu];
-	else	[aMenu addItemWithTitle:@"no items" action:NULL keyEquivalent:@""];
+	if(self = [super init])
+		_selector = selector;
+	return self;
 }
 
 - (void)menuNeedsUpdate:(NSMenu*)aMenu
 {
-	[self updateMenu:aMenu withSelector:[self isShowTabMenu:aMenu] ? @selector(updateShowTabMenu:) : @selector(updateBookmarksMenu:)];
+	[aMenu removeAllItems];
+	if(id delegate = [NSApp targetForAction:_selector])
+			[NSApp sendAction:_selector to:delegate from:aMenu];
+	else	[aMenu addItemWithTitle:@"no items" action:NULL keyEquivalent:@""];
 }
 
 - (BOOL)menuHasKeyEquivalent:(NSMenu*)aMenu forEvent:(NSEvent*)anEvent target:(id*)anId action:(SEL*)aSEL
 {
-	if(![self isShowTabMenu:aMenu])
-		return NO;
-
 	NSUInteger flags     = anEvent.modifierFlags & (NSEventModifierFlagCommand|NSEventModifierFlagShift|NSEventModifierFlagControl|NSEventModifierFlagOption);
 	NSString* characters = anEvent.characters;
 	if(flags != NSEventModifierFlagCommand || characters.length != 1 || ![NSCharacterSet.decimalDigitCharacterSet characterIsMember:[characters characterAtIndex:0]])
 		return NO;
 
 	NSMenu* dummy = [MBKeyEquivalentMenu new];
-	[self updateMenu:dummy withSelector:@selector(updateShowTabMenu:)];
-	for(NSMenuItem* item in [dummy itemArray])
+	[self menuNeedsUpdate:dummy];
+	for(NSMenuItem* item in dummy.itemArray)
 	{
 		if(item.keyEquivalentModifierMask == flags && [item.keyEquivalent isEqualToString:characters])
 		{
