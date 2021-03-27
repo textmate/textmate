@@ -1162,7 +1162,14 @@ module Target
                     sleep .2;
                   done;
                 fi;
-                open $in --args -disableSessionRestore NO;
+                while ! pgrep "$$app_name"; do
+                  if (( ++m == 10 )); then
+                    test -x "$$DIALOG" && "$$DIALOG" alert --title "Relaunch Timed Out" --body "Unable to launch $$app_name." --button1 OK;
+                    exit;
+                  fi;
+                  open $in --args -disableSessionRestore NO;
+                  sleep .2;
+                done;
               } </dev/null &>/dev/null &
             SHELL
             dependencies: Target.signature(archs, targets),
