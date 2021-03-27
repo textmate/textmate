@@ -1,9 +1,9 @@
-#import "OakSubmenuController.h"
+#import "MBMenuDelegate.h"
 
-@interface OakProxyMenuItem : NSMenuItem
+@interface MBProxyMenuItem : NSMenuItem
 @end
 
-@implementation OakProxyMenuItem
+@implementation MBProxyMenuItem
 - (void)tmSendAction:(id)sender
 {
 	[NSApp sendAction:self.action to:self.target from:self];
@@ -12,24 +12,24 @@
 }
 @end
 
-@interface OakKeyEquivalentMenu : NSMenu
+@interface MBKeyEquivalentMenu : NSMenu
 @end
 
-@implementation OakKeyEquivalentMenu
+@implementation MBKeyEquivalentMenu
 - (NSMenuProperties)propertiesToUpdate
 {
 	return NSMenuPropertyItemKeyEquivalent;
 }
 @end
 
-@interface OakSubmenuController ()
-@property (nonatomic) OakProxyMenuItem* proxyMenuItem;
+@interface MBMenuDelegate ()
+@property (nonatomic) MBProxyMenuItem* proxyMenuItem;
 @end
 
-@implementation OakSubmenuController
+@implementation MBMenuDelegate
 + (instancetype)sharedInstance
 {
-	static OakSubmenuController* sharedInstance = [self new];
+	static MBMenuDelegate* sharedInstance = [self new];
 	return sharedInstance;
 }
 
@@ -61,14 +61,14 @@
 	if(flags != NSEventModifierFlagCommand || characters.length != 1 || ![NSCharacterSet.decimalDigitCharacterSet characterIsMember:[characters characterAtIndex:0]])
 		return NO;
 
-	NSMenu* dummy = [OakKeyEquivalentMenu new];
+	NSMenu* dummy = [MBKeyEquivalentMenu new];
 	[self updateMenu:dummy withSelector:@selector(updateShowTabMenu:)];
 	for(NSMenuItem* item in [dummy itemArray])
 	{
 		if(item.keyEquivalentModifierMask == flags && [item.keyEquivalent isEqualToString:characters])
 		{
 			if(!self.proxyMenuItem)
-				self.proxyMenuItem = [OakProxyMenuItem new];
+				self.proxyMenuItem = [MBProxyMenuItem new];
 
 			self.proxyMenuItem.action            = item.action;
 			self.proxyMenuItem.target            = item.target;

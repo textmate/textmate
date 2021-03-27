@@ -14,12 +14,12 @@
 #import <OakAppKit/NSMenuItem Additions.h>
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakPasteboard.h>
-#import <OakAppKit/OakSubmenuController.h>
 #import <OakFilterList/BundleItemChooser.h>
 #import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakTextView/OakDocumentView.h>
 #import <MenuBuilder/MenuBuilder.h>
+#import <MenuBuilder/MBMenuDelegate.h>
 #import <Preferences/Keys.h>
 #import <Preferences/Preferences.h>
 #import <Preferences/TerminalPreferences.h>
@@ -307,7 +307,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 				{ @"Set Bookmark",               @selector(toggleCurrentBookmark:),                                                   .key = NSF2FunctionKey },
 				{ @"Jump to Next Bookmark",      @selector(goToNextBookmark:),             .modifierFlags = 0,                        .key = NSF2FunctionKey },
 				{ @"Jump to Previous Bookmark",  @selector(goToPreviousBookmark:),         .modifierFlags = NSEventModifierFlagShift, .key = NSF2FunctionKey },
-				{ @"Jump to Bookmark",           .delegate = OakSubmenuController.sharedInstance },
+				{ @"Jump to Bookmark",           .delegate = MBMenuDelegate.sharedInstance },
 				{ /* -------- */ },
 				{ @"Jump to Next Mark",          @selector(jumpToNextMark:),               .modifierFlags = 0,                        .key = NSF3FunctionKey },
 				{ @"Jump to Previous Mark",      @selector(jumpToPreviousMark:),           .modifierFlags = NSEventModifierFlagShift, .key = NSF3FunctionKey },
@@ -398,7 +398,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 				{ @"Show Next Tab",          @selector(selectNextTab:),         .modifierFlags = NSEventModifierFlagOption|NSEventModifierFlagCommand, .key = NSRightArrowFunctionKey, .hidden = YES },
 				{ @"Show Previous Tab",      @selector(selectPreviousTab:),     @"{", .hidden = YES },
 				{ @"Show Next Tab",          @selector(selectNextTab:),         @"}", .hidden = YES },
-				{ @"Show Tab",               .delegate = OakSubmenuController.sharedInstance },
+				{ @"Show Tab",               .delegate = MBMenuDelegate.sharedInstance },
 				{ /* -------- */ },
 				{ @"Move Tab to New Window", @selector(moveDocumentToNewWindow:)     },
 				{ @"Merge All Windows",      @selector(mergeAllWindows:)             },
