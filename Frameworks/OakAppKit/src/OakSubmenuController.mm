@@ -1,7 +1,4 @@
 #import "OakSubmenuController.h"
-#import "NSMenu Additions.h"
-#import <OakFoundation/NSString Additions.h>
-#import <oak/debug.h>
 #import <ns/ns.h>
 
 @interface OakProxyMenuItem : NSMenuItem
