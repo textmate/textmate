@@ -3,10 +3,19 @@ target "${dirname}" {
 
 	set HTML_HEADER     "${dir}/templates/header.html"
 	set HTML_FOOTER     "${dir}/templates/footer.html"
-	set CS_ENTITLEMENTS "${dir}/Entitlements.plist"
 
 	set     TEXTMATE_CHANGES "${dir}/about/Changes.md"
 	capture TEXTMATE_VERSION "grep -om1 '^## .* (v.*)$' '${TEXTMATE_CHANGES}'|sed 's/.*(v\\(.*\))/\\1/'"
+
+	config "debug" {
+		add PLIST_FLAGS "-d'CS_GET_TASK_ALLOW=true'"
+	}
+
+	config "release" {
+		add PLIST_FLAGS "-d'CS_GET_TASK_ALLOW=false'"
+	}
+
+	expand CS_ENTITLEMENTS "${dir}/Entitlements.plist"
 
 	add PLIST_FLAGS "-dAPP_VERSION='${TEXTMATE_VERSION}'"
 	add MD_FLAGS    "-h'${HTML_HEADER}' -f'${HTML_FOOTER}'"
