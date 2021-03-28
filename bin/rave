@@ -242,13 +242,13 @@ class Parser
 
         n = 0
         lines = target[:lines].sort_by do |command, _, _|
-          [ [ :set, :add, :capture ].include?(command) ? 0 : 1, n += 1 ]
+          [ [ :set, :add, :capture, :expand ].include?(command) ? 0 : 1, n += 1 ]
         end
 
         lines.each do |command, args, env|
           env = variables.merge(env)
           case command
-            when :set, :add, :capture
+            when :set, :add, :capture, :expand
               value     = args[1..-1].join(' ')
               new_value = expand_variables(value, env)
 
@@ -262,12 +262,6 @@ class Parser
                 end
               end
 
-              unless files.empty?
-                target[:inference] ||= {}
-                target[:inference][args.first] ||= []
-                target[:inference][args.first] += files
-              end
-
               if command == :capture
                 unless shell_cache.include?(new_value)
                   shell_cache[new_value] = %x{ #{new_value} }.chomp
@@ -276,10 +270,25 @@ class Parser
                 variables[args.first] = shell_cache[new_value]
                 target[:captured_variables] ||= []
                 target[:captured_variables] << args.first
+              elsif command == :expand
+                infile  = new_value
+                outfile = File.join("$builddir#{env.include?('config') ? "/#{env['config']}" : ""}", "_ExpandVariables", infile)
+
+                variables[args.first] = outfile
+                files = [ outfile ]
+
+                target[command] ||= []
+                target[command] << [ args.first, infile, outfile ]
               elsif command == :add && env.include?(args.first)
                 variables[args.first] = env[args.first] + ' ' + new_value
               else
                 variables[args.first] = new_value
+              end
+
+              unless files.empty?
+                target[:inference] ||= {}
+                target[:inference][args.first] ||= []
+                target[:inference][args.first] += files
               end
             when :prefix, :executable
               target[command] = args.map { |value| expand_variables(value, env) }.join(' ')
@@ -1334,6 +1343,33 @@ module Target
 
     target[:build][:defines]
   end
+
+  def expand(archs, targets)
+    target = archs.values.first
+
+    unless target[:build][:expand]
+      expand, rules = true, []
+
+      if array = target[:expand]
+        array.each do |variable, infile, outfile|
+          rules << {
+            name:         'ExpandVariables',
+            in:           infile,
+            out:          outfile,
+            flags:        target[:variables]['PLIST_FLAGS'],
+            command:      "#{__dir__}/expand_variables -o $out $flags $in",
+            description:  'Expand variables ‘${in}’…',
+            dependencies: [ "#{__dir__}/expand_variables", *(target.dig(:inference, 'PLIST_FLAGS') || []) ],
+          }
+        end
+      end
+
+      target[:build][:rules]  += rules
+      target[:build][:expand]  = expand
+    end
+
+    target[:build][:expand]
+  end
 end
 
 # ====================
@@ -1454,6 +1490,7 @@ if __FILE__ == $PROGRAM_NAME
   targets.each { |_, archs| archs.each { |_, target| Target.prepare(target) } }
 
   targets.each do |target_name, archs|
+    Target.expand(archs, targets)
     Target.notarize(archs, targets)
     Target.runner(archs, targets)
     Target.signature(archs, targets)
