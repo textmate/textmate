@@ -17,7 +17,9 @@ static NSData* Digest (NSString* someString)
 }
 
 @interface AboutWindowController () <NSWindowDelegate, NSToolbarDelegate, WKNavigationDelegate, WKScriptMessageHandler>
+@property (nonatomic, readonly) NSArray<NSString*>* segmentLabels;
 @property (nonatomic) NSToolbar* toolbar;
+@property (nonatomic) NSSegmentedControl* segmentedControl;
 @property (nonatomic) WKWebView* webView;
 @property (nonatomic) NSString* selectedPage;
 @end
@@ -59,22 +61,20 @@ static NSData* Digest (NSString* someString)
 	NSWindow* win = [[NSPanel alloc] initWithContentRect:rect styleMask:(NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable|NSWindowStyleMaskMiniaturizable|NSWindowStyleMaskFullSizeContentView) backing:NSBackingStoreBuffered defer:NO];
 	if((self = [super initWithWindow:win]))
 	{
+		_segmentLabels    = @[ @"About", @"Changes", @"Bundles", @"Registration", @"Legal", @"Contributions" ];
+		_segmentedControl = [NSSegmentedControl segmentedControlWithLabels:_segmentLabels trackingMode:NSSegmentSwitchTrackingSelectOne target:self action:@selector(takeSelectedSegmentFrom:)];
+
 		self.toolbar = [[NSToolbar alloc] initWithIdentifier:@"About TextMate"];
 		[self.toolbar setAllowsUserCustomization:NO];
-		[self.toolbar setDisplayMode:NSToolbarDisplayModeLabelOnly];
+		[self.toolbar setDisplayMode:NSToolbarDisplayModeIconOnly];
 		[self.toolbar setDelegate:self];
 		[win setToolbar:self.toolbar];
 
-		if(@available(macos 11.0, *))
-		{
-			win.toolbarStyle = NSWindowToolbarStylePreference;
-		}
-
-		[win setTitle:@"About TextMate"];
 		[win setFrameAutosaveName:@"BundlesReleaseNotes"];
 		[win setDelegate:self];
 		[win setAutorecalculatesKeyViewLoop:YES];
 		[win setHidesOnDeactivate:NO];
+		[win setTitleVisibility:NSWindowTitleHidden];
 
 		WKWebViewConfiguration* webConfig = [[WKWebViewConfiguration alloc] init];
 		[webConfig.userContentController addScriptMessageHandler:self name:@"textmate"];
@@ -142,6 +142,14 @@ static NSData* Digest (NSString* someString)
 		[NSUserDefaults.standardUserDefaults setObject:Digest(releaseNotes) forKey:kUserDefaultsReleaseNotesDigestKey];
 }
 
+- (void)takeSelectedSegmentFrom:(id)sender
+{
+	if(sender == _segmentedControl)
+		self.selectedPage = _segmentLabels[_segmentedControl.selectedSegment];
+	else if([sender respondsToSelector:@selector(representedObject)])
+		self.selectedPage = [sender representedObject];
+}
+
 - (void)setSelectedPage:(NSString*)pageName
 {
 	if(_selectedPage == pageName || [_selectedPage isEqualToString:pageName])
@@ -162,17 +170,15 @@ static NSData* Digest (NSString* someString)
 		if(NSURL* url = [[NSBundle mainBundle] URLForResource:file withExtension:@"html"])
 			[self.webView loadRequest:[NSURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:60]];
 
-		[self.window setTitle:pageName];
-		[self.toolbar setSelectedItemIdentifier:pageName];
+		_segmentedControl.selectedSegment = [_segmentLabels indexOfObject:pageName];
 	}
 }
 
 - (void)selectPageAtRelativeOffset:(NSInteger)offset
 {
-	NSArray* allPages = [self toolbarSelectableItemIdentifiers:self.toolbar];
-	NSUInteger index = [allPages indexOfObject:self.selectedPage];
+	NSUInteger index = [_segmentLabels indexOfObject:self.selectedPage];
 	if(index != NSNotFound)
-		self.selectedPage = allPages[(index + allPages.count + offset) % allPages.count];
+		self.selectedPage = _segmentLabels[(index + _segmentLabels.count + offset) % _segmentLabels.count];
 }
 
 - (IBAction)selectNextTab:(id)sender     { [self selectPageAtRelativeOffset:+1]; }
@@ -182,43 +188,23 @@ static NSData* Digest (NSString* someString)
 // = Toolbar Delegate =
 // ====================
 
-- (void)didClickToolbarItem:(id)sender
-{
-	NSString* identifier = nil;
-	if([sender respondsToSelector:@selector(itemIdentifier)])
-		identifier = [sender itemIdentifier];
-	else if([sender respondsToSelector:@selector(representedObject)])
-		identifier = [sender representedObject];
-
-	if(identifier)
-		self.selectedPage = identifier;
-}
-
 - (NSToolbarItem*)toolbar:(NSToolbar*)aToolbar itemForItemIdentifier:(NSString*)anIdentifier willBeInsertedIntoToolbar:(BOOL)flag
 {
 	NSToolbarItem* res = [[NSToolbarItem alloc] initWithItemIdentifier:anIdentifier];
-	[res setLabel:anIdentifier];
-	[res setTarget:self];
-	[res setAction:@selector(didClickToolbarItem:)];
+	if(![anIdentifier isEqualToString:NSToolbarFlexibleSpaceItemIdentifier])
+		res.view = _segmentedControl;
 	return res;
 }
 
 - (NSArray*)toolbarAllowedItemIdentifiers:(NSToolbar*)aToolbar
 {
-	return @[ @"About", @"Changes", @"Bundles", NSToolbarFlexibleSpaceItemIdentifier, @"Registration", @"Legal", @"Contributions" ];
+	return [self toolbarDefaultItemIdentifiers:aToolbar];
 }
 
 - (NSArray*)toolbarDefaultItemIdentifiers:(NSToolbar*)aToolbar
 {
-	return [self toolbarAllowedItemIdentifiers:aToolbar];
+	return @[ NSToolbarFlexibleSpaceItemIdentifier, @"TMSegmentedControlIdentifier", NSToolbarFlexibleSpaceItemIdentifier ];
 }
-
-- (NSArray*)toolbarSelectableItemIdentifiers:(NSToolbar*)aToolbar
-{
-	return @[ @"About", @"Changes", @"Bundles", @"Registration", @"Legal", @"Contributions" ];
-}
-
-// ====================
 
 - (void)updateShowTabMenu:(NSMenu*)aMenu
 {
@@ -228,13 +214,13 @@ static NSData* Digest (NSString* someString)
 		return;
 	}
 
-	char key = 0;
-	for(NSString* label in [self toolbarSelectableItemIdentifiers:self.toolbar])
+	for(NSUInteger i = 0; i < _segmentLabels.count; ++i)
 	{
-		NSMenuItem* item = [aMenu addItemWithTitle:label action:@selector(didClickToolbarItem:) keyEquivalent:key < 9 ? [NSString stringWithFormat:@"%c", '0' + (++key % 10)] : @""];
+		NSString* label = _segmentLabels[i];
+		NSMenuItem* item = [aMenu addItemWithTitle:label action:@selector(takeSelectedSegmentFrom:) keyEquivalent:i < 9 ? [NSString stringWithFormat:@"%c", '1' + (char)i] : @""];
 		[item setRepresentedObject:label];
 		[item setTarget:self];
-		[item setState:[label isEqualToString:[self.toolbar selectedItemIdentifier]] ? NSControlStateValueOn : NSControlStateValueOff];
+		[item setState:i == _segmentedControl.selectedSegment ? NSControlStateValueOn : NSControlStateValueOff];
 	}
 }
 
@@ -268,7 +254,7 @@ static NSDictionary* RemoveOldCommits (NSDictionary* src)
 
 - (void)webView:(WKWebView*)webView didFinishNavigation:(WKNavigation*)navigation
 {
-	if(![[self.toolbar selectedItemIdentifier] isEqualToString:@"Bundles"])
+	if(![_selectedPage isEqualToString:@"Bundles"])
 		return;
 
 	bool first = true;
