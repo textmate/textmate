@@ -122,7 +122,7 @@ static char const* kOakMenuItemTabTrigger    = "OakMenuItemTabTrigger";
 	}]];
 
 	NSColor* shortcutTextColor = NSColor.textColor;
-	if(@available(macos 10.16, *))
+	if(@available(macos 11.0, *))
 		shortcutTextColor = NSColor.tertiaryLabelColor;
 
 	[attributedString appendAttributedString:[[NSAttributedString alloc] initWithString:rightString attributes:@{
