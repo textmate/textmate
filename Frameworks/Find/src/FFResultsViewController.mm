@@ -318,7 +318,10 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 		_outlineView.columnAutoresizingStyle            = NSTableViewNoColumnAutoresizing;
 
 		if(@available(macos 11.0, *))
+		{
 			_outlineView.style = NSTableViewStylePlain;
+			_outlineView.floatsGroupRows = NO;
+		}
 
 		NSTableColumn* tableColumn = [[NSTableColumn alloc] initWithIdentifier:@"checkbox"];
 		tableColumn.width = 50;
