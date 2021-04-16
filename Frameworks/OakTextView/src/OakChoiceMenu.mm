@@ -33,6 +33,8 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 
 		_tableView = [[NSTableView alloc] initWithFrame:NSZeroRect];
 		[_tableView addTableColumn:[[NSTableColumn alloc] initWithIdentifier:@"mainColumn"]];
+		if(@available(macos 11.0, *))
+			_tableView.style = NSTableViewStylePlain;
 		_tableView.headerView              = nil;
 		_tableView.focusRingType           = NSFocusRingTypeNone;
 		_tableView.autoresizingMask        = NSViewWidthSizable|NSViewHeightSizable;
