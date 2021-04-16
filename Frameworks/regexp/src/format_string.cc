@@ -90,7 +90,7 @@ struct expand_visitor : boost::static_visitor<void>
 					auto const it = captures.find(name);
 					return it != captures.end() ? it->second : this->variable(name);
 				}
-				return std::optional<std::string>();
+				return std::nullopt;
 			};
 
 			expand_visitor tmp(getVariable, callback);
