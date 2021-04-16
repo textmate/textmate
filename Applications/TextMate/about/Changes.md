@@ -2,6 +2,11 @@ Title: Release Notes
 
 # Changes
 
+## 2021-04-16 (v2.0.22)
+
+* A few more tweaks to improve things on macOS 11 including dropping use of floating header rows in file browser (SCM Status) and search results, as these appear to cause problems on Big Sur.
+* See [all changes since v2.0.21](https://github.com/textmate/textmate/compare/v2.0.21...v2.0.22)
+
 ## 2021-03-08 (v2.0.21)
 
 * When selecting an item in the file browser for which TextMate is not the default application configured to open this item, the “Open With” submenu item (in the context menu) now show the default application and can be selected directly (without having to go into the submenu).
