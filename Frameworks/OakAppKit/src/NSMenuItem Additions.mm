@@ -1,4 +1,4 @@
-#import "NSMenu Additions.h"
+#import "NSMenuItem Additions.h"
 #import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
 #import <text/case.h>

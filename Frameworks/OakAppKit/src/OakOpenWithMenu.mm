@@ -1,5 +1,4 @@
 #import "OakOpenWithMenu.h"
-#import "NSMenu Additions.h"
 
 @interface OakOpenWithApplicationInfo ()
 @property (nonatomic, readwrite, getter = isDefaultApplication) BOOL defaultApplication;

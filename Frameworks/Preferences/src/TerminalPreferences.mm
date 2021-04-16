@@ -2,7 +2,6 @@
 #import "Keys.h"
 #import <OakAppKit/NSAlert Additions.h>
 #import <OakAppKit/NSImage Additions.h>
-#import <OakAppKit/NSMenu Additions.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakFoundation/OakStringListTransformer.h>
 #import <SoftwareUpdate/SoftwareUpdate.h> // OakCompareVersionStrings()

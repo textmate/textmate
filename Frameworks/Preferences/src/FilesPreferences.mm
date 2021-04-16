@@ -1,6 +1,5 @@
 #import "FilesPreferences.h"
 #import "Keys.h"
-#import <OakAppKit/NSMenu Additions.h>
 #import <OakAppKit/OakEncodingPopUpButton.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
 #import <OakFoundation/NSString Additions.h>

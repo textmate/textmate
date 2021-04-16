@@ -6,7 +6,6 @@
 #import <command/parser.h>
 #import <cf/cf.h>
 #import <ns/ns.h>
-#import <OakAppKit/NSMenu Additions.h>
 #import <OakAppKit/NSMenuItem Additions.h>
 #import <OakAppKit/OakToolTip.h>
 #import <MenuBuilder/MenuBuilder.h>

@@ -1,5 +1,4 @@
 #import "Private.h"
-#import <OakAppKit/NSMenu Additions.h>
 #import <OakAppKit/NSMenuItem Additions.h>
 #import <OakFoundation/NSString Additions.h>
 #import <ns/ns.h>
