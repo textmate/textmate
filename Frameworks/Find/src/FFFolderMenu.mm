@@ -1,6 +1,5 @@
 #import "FFFolderMenu.h"
 #import <OakAppKit/NSMenuItem Additions.h>
-#import <OakAppKit/NSMenu Additions.h>
 #import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
 #import <io/io.h>
@@ -60,10 +59,10 @@ static NSMutableArray* FoldersAtPath (NSString* folder)
 
 - (void)menuNeedsUpdate:(NSMenu*)aMenu
 {
-	NSMenuItem* parentItem = [aMenu parentMenuItem];
-	if([aMenu numberOfItems] != 0 || !parentItem)
+	if(aMenu.numberOfItems > 0)
 		return;
 
+	NSMenuItem* parentItem = [aMenu.supermenu itemAtIndex:[aMenu.supermenu indexOfItemWithSubmenu:aMenu]];
 	NSString* folder = [parentItem representedObject] ?: NSHomeDirectory();
 	for(NSString* path in FoldersAtPath(folder))
 	{
