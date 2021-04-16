@@ -34,6 +34,7 @@ namespace find
 		find_t (std::string const& str, options_t options = none);
 
 		void each_match (char const* buf, size_t len, bool moreToCome, std::function<void(std::pair<size_t, size_t> const&, std::map<std::string, std::string> const&)> const& f);
+		void each_match (char const* buf, size_t len, bool moreToCome, std::function<void(std::pair<size_t, size_t> const&, std::map<std::string, std::string> const&, bool*)> const& f);
 
 	private:
 		std::shared_ptr<find_implementation_t> pimpl;

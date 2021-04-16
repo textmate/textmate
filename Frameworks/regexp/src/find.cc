@@ -442,12 +442,18 @@ namespace find
 
 	void find_t::each_match (char const* buf, size_t len, bool moreToCome, std::function<void(std::pair<size_t, size_t> const&, std::map<std::string, std::string> const&)> const& f)
 	{
-		for(size_t offset = 0; offset < len; )
+		each_match(buf, len, moreToCome, [&f](std::pair<size_t, size_t> const& match, std::map<std::string, std::string> const& captures, bool*){ f(match, captures); });
+	}
+
+	void find_t::each_match (char const* buf, size_t len, bool moreToCome, std::function<void(std::pair<size_t, size_t> const&, std::map<std::string, std::string> const&, bool*)> const& f)
+	{
+		bool stop = false;
+		for(size_t offset = 0; offset < len && !stop; )
 		{
 			std::map<std::string, std::string> captures;
 			std::pair<ssize_t, ssize_t> const& m = pimpl->match(buf + offset, len - offset, &captures);
 			if(m.first <= m.second)
-				f(std::make_pair(_offset + offset + m.first, _offset + offset + m.second), captures);
+				f(std::make_pair(_offset + offset + m.first, _offset + offset + m.second), captures, &stop);
 			offset += m.second;
 		}
 
@@ -457,9 +463,9 @@ namespace find
 		{
 			std::map<std::string, std::string> captures;
 			std::pair<ssize_t, ssize_t> m = pimpl->match(nullptr, 0, &captures);
-			while(m.first <= m.second)
+			while(m.first <= m.second && !stop)
 			{
-				f(std::make_pair(_offset + m.first, _offset + m.second), captures);
+				f(std::make_pair(_offset + m.first, _offset + m.second), captures, &stop);
 				captures.clear();
 				m = pimpl->match(nullptr, 0, &captures);
 			}
