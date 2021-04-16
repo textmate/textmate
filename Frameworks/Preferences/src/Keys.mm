@@ -22,7 +22,6 @@ static NSDictionary* default_settings ()
 	return @{
 		kUserDefaultsHTMLOutputPlacementKey:     @"window",
 		kUserDefaultsFileBrowserPlacementKey:    @"right",
-		kUserDefaultsFoldersOnTopKey:            @YES,
 		kUserDefaultsShowFileExtensionsKey:      @NO,
 		kUserDefaultsEnvironmentVariablesKey:    default_environment(),
 		kUserDefaultsDisableBundleUpdatesKey:    @NO,

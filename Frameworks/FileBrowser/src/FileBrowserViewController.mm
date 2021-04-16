@@ -127,6 +127,15 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 + (NSSet*)keyPathsForValuesAffectingCanGoBack    { return [NSSet setWithObjects:@"historyIndex", nil]; }
 + (NSSet*)keyPathsForValuesAffectingCanGoForward { return [NSSet setWithObjects:@"historyIndex", nil]; }
 
++ (void)initialize
+{
+	[NSApplication.sharedApplication registerServicesMenuSendTypes:@[ NSFilenamesPboardType, NSURLPboardType ] returnTypes:@[ ]];
+
+	[NSUserDefaults.standardUserDefaults registerDefaults:@{
+		kUserDefaultsFoldersOnTopKey: [[[NSUserDefaults alloc] initWithSuiteName:@"com.apple.finder"] objectForKey:@"_FXSortFoldersFirst"] ?: @NO,
+	}];
+}
+
 - (instancetype)init
 {
 	if(self = [super init])
@@ -2214,11 +2223,6 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 // ============
 // = Services =
 // ============
-
-+ (void)initialize
-{
-	[NSApplication.sharedApplication registerServicesMenuSendTypes:@[ NSFilenamesPboardType, NSURLPboardType ] returnTypes:@[ ]];
-}
 
 - (id)validRequestorForSendType:(NSString*)sendType returnType:(NSString*)returnType
 {
