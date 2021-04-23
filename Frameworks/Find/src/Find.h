@@ -34,7 +34,7 @@ typedef NS_ENUM(NSInteger, FFSearchTarget) {
 @property (nonatomic) NSArray* fileBrowserItems;
 @property (nonatomic) NSUUID* documentIdentifier;
 
-@property (nonatomic, readonly) BOOL isVisible;
+@property (nonatomic, readonly, getter = isVisible) BOOL visible;
 
 @property (nonatomic) NSArray<FindMatch*>* findMatches;
 - (IBAction)showFolderSelectionPanel:(id)sender;
