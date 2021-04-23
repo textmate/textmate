@@ -62,7 +62,7 @@ static NSString* GetHardwareInfo (int field, BOOL isInteger = NO)
 		_fileURLToReplace       = localURL;
 		_publicKeys             = publicKeys;
 		_completionHandler      = completionHandler;
-		_progress               = [NSProgress progressWithTotalUnitCount:-1];
+		_progress               = [NSProgress discreteProgressWithTotalUnitCount:-1];
 		_data                   = [NSMutableData data];
 		_extractorDispatchGroup = dispatch_group_create();
 
