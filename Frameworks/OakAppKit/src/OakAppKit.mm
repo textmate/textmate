@@ -34,11 +34,6 @@ BOOL OakIsAlternateKeyOrMouseEvent (NSUInteger flags, NSEvent* anEvent)
 
 static NSString* const kUserDefaultsEnableLoopFilterList = @"enableLoopFilterList";
 
-NSUInteger const OakMoveMoveReturn     = 0;
-NSUInteger const OakMoveAcceptReturn   = 1;
-NSUInteger const OakMoveCancelReturn   = 2;
-NSUInteger const OakMoveNoActionReturn = 3;
-
 @interface OakTableViewActionHelper : NSResponder
 @property (nonatomic) NSTableView* tableView;
 @property (nonatomic) NSUInteger returnCode;
