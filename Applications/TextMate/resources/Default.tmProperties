@@ -15,7 +15,7 @@ TM_APP_PATH          = "${CWD/\/Contents\/Resources$//}"
 TM_MATE              = "$CWD/mate"
 MATEFLAGS            = "--no-recent"
 TM_QUERY             = "$CWD/tm_query"
-TM_SCM_COMMIT_WINDOW = "$CWD/commit"
+TM_SCM_COMMIT_WINDOW = "$CWD/CommitWindowTool"
 
 [ attr.untitled ]
 fileType         = text.plain

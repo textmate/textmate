@@ -2,5 +2,12 @@ target "${dirname}" {
 	require OakAppKit OakFoundation OakTextView bundles document io ns plist regexp text
 	headers src/CommitWindow.h
 	sources src/*.mm
+	files @CommitWindowTool "Resources"
 	frameworks Cocoa
+}
+
+target "${dirname}Tool" {
+	require_headers CommitWindow
+	sources tool/*.mm
+	executable "${target}"
 }

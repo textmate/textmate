@@ -23,7 +23,7 @@ target "${dirname}" {
 
 	prefix "${target}.app/Contents"
 
-	files resources/* icons/*.icns about/* @PrivilegedTool @mate @tm_query @commit "Resources"
+	files resources/* icons/*.icns about/* @PrivilegedTool @mate @tm_query "Resources"
 	files Info.plist         "."
 	copy  support/*          "SharedSupport"
 	copy  @Dialog @Dialog2   "PlugIns"
