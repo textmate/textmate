@@ -366,6 +366,7 @@ namespace
 				os_log_info(kLogSQLite, "Closing sqlite3 database");
 				if(sqlite3_close(db) != SQLITE_OK)
 					os_log_error(kLogSQLite, "sqlite3_close: %{public}s", sqlite3_errmsg(db));
+				db = nullptr;
 			}];
 
 			char const* query =
