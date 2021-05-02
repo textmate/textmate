@@ -69,6 +69,7 @@ static NSMutableArray* FoldersAtPath (NSString* folder)
 		NSMenuItem* menuItem = [aMenu addItemWithTitle:[NSFileManager.defaultManager displayNameAtPath:path] action:parentItem.action keyEquivalent:@""];
 		[menuItem setTarget:parentItem.target];
 		[menuItem setIconForFile:path];
+		[menuItem setRepresentedObject:path];
 
 		if([FoldersAtPath(path) count])
 			[self addSubmenuForDirectoryAtPath:path toMenuItem:menuItem];
