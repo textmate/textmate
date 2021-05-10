@@ -24,7 +24,6 @@ extern NSURL* const kURLLocationFavorites;
 @property (nonatomic, readonly) BOOL canRename;
 @property (nonatomic, readonly, getter = isApplication) BOOL application;
 
-@property (nonatomic, getter = isOpen)             BOOL open;
 @property (nonatomic, getter = isModified)         BOOL modified;
 
 @property (nonatomic, getter = isMissing)          BOOL missing;
