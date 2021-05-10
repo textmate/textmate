@@ -3,6 +3,7 @@
 #import "drivers/api.h"
 #import <scm/scm.h>
 #import <ns/ns.h>
+#import <TMFileReference/TMFileReference.h>
 
 namespace scm
 {
@@ -20,6 +21,7 @@ namespace scm
 	BOOL _updating;
 	NSTimer* _updateTimer;
 	NSDate* _noUpdateBefore;
+	NSMutableSet<TMFileReference*>* _fileReferences;
 }
 @property (nonatomic, readwrite) std::map<std::string, scm::status::type> status;
 @property (nonatomic, readwrite) NSDictionary<NSString*, NSString*>* variables;
@@ -188,6 +190,23 @@ namespace scm
 	_status    = status;
 	_variables = variables;
 	_hasStatus = YES;
+
+	NSMutableSet<TMFileReference*>* fileReferences = [NSMutableSet set];
+	for(auto pair : _status)
+	{
+		if(pair.second != scm::status::none)
+		{
+			NSString* path = [NSFileManager.defaultManager stringWithFileSystemRepresentation:pair.first.data() length:pair.first.size()];
+			TMFileReference* fileReference = [TMFileReference fileReferenceWithURL:[NSURL fileURLWithPath:path]];
+			fileReference.SCMStatus = pair.second;
+			[fileReferences addObject:fileReference];
+			[_fileReferences removeObject:fileReference];
+		}
+	}
+
+	for(TMFileReference* fileReference in _fileReferences)
+		fileReference.SCMStatus = scm::status::none;
+	_fileReferences = fileReferences;
 
 	for(SCMRepositoryObserver* observer in [_observers copy])
 		observer.handler(self);

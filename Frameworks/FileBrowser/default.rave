@@ -1,5 +1,5 @@
 target "${dirname}" {
-	require MenuBuilder OakAppKit OakCommand OakFoundation Preferences bundles io ns regexp scm settings text
+	require MenuBuilder OakAppKit OakCommand OakFoundation TMFileReference Preferences bundles io ns regexp scm settings text
 	headers src/FileBrowserViewController.h src/FileBrowserNotifications.h src/FileItemImage.h src/SCMManager.h src/KEventManager.h
 
 	files resources/* "Resources"
