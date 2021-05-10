@@ -2,6 +2,7 @@
 #import "FileItem.h"
 #import <OakAppKit/OakUIConstructionFunctions.h>
 #import <OakAppKit/OakFinderTag.h>
+#import <TMFileReference/TMFileReference.h>
 
 @interface FileItemSelectBasenameCell : NSTextFieldCell
 @end
@@ -69,8 +70,11 @@
 @property (nonatomic) BOOL rightPadding;
 @end
 
+static void* kObjectValueURLObserverContext = &kObjectValueURLObserverContext;
+
 @interface FileItemTableCellView () <NSTextFieldDelegate>
 @property (nonatomic) FileItemFinderTagsView* finderTagsView;
+@property (nonatomic) TMFileReference* fileReference;
 @end
 
 @implementation FileItemTableCellView
@@ -113,15 +117,17 @@
 		[stackView.topAnchor      constraintEqualToAnchor:self.topAnchor      constant: 0].active = YES;
 		[stackView.bottomAnchor   constraintEqualToAnchor:self.bottomAnchor   constant: 0].active = YES;
 
-		[_openButton bind:NSImageBinding      toObject:self withKeyPath:@"objectValue.image"                 options:nil];
+		[_openButton bind:NSImageBinding      toObject:self withKeyPath:@"fileReference.icon"                options:nil];
 		[textField bind:NSValueBinding        toObject:self withKeyPath:@"objectValue.editingAndDisplayName" options:nil];
 		[textField bind:NSEditableBinding     toObject:self withKeyPath:@"objectValue.canRename"             options:nil];
 		[textField bind:NSToolTipBinding      toObject:self withKeyPath:@"objectValue.toolTip"               options:nil];
 		[_finderTagsView bind:@"finderTags"   toObject:self withKeyPath:@"objectValue.finderTags"            options:nil];
-		[_finderTagsView bind:@"rightPadding" toObject:self withKeyPath:@"objectValue.open"                  options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
-		[_closeButton bind:NSHiddenBinding    toObject:self withKeyPath:@"objectValue.open"                  options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
+		[_finderTagsView bind:@"rightPadding" toObject:self withKeyPath:@"fileReference.closable"            options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
+		[_closeButton bind:NSHiddenBinding    toObject:self withKeyPath:@"fileReference.closable"            options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
 
 		self.textField = textField;
+
+		[self addObserver:self forKeyPath:@"objectValue.URL" options:NSKeyValueObservingOptionNew context:kObjectValueURLObserverContext];
 	}
 	return self;
 }
@@ -134,12 +140,23 @@
 
 - (void)dealloc
 {
+	[self removeObserver:self forKeyPath:@"objectValue.URL" context:kObjectValueURLObserverContext];
+
 	[_openButton unbind:NSImageBinding];
 	[self.textField unbind:NSValueBinding];
 	[self.textField unbind:NSEditableBinding];
 	[self.textField unbind:NSToolTipBinding];
 	[_finderTagsView unbind:@"finderTags"];
 	[_closeButton unbind:NSHiddenBinding];
+}
+
+- (void)observeValueForKeyPath:(NSString*)keyPath ofObject:(id)object change:(NSDictionary*)change context:(void*)context
+{
+	if(context == kObjectValueURLObserverContext)
+	{
+		NSURL* url = change[NSKeyValueChangeNewKey];
+		self.fileReference = [url isKindOfClass:[NSURL class]] ? [TMFileReference fileReferenceWithURL:url] : nil;
+	}
 }
 
 - (void)resetCursorRects
