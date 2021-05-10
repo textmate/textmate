@@ -17,6 +17,7 @@
 #import <OakAppKit/OakZoomingIcon.h>
 #import <OakFoundation/OakFoundation.h>
 #import <OakCommand/OakCommand.h>
+#import <TMFileReference/TMFileReference.h>
 #import <Preferences/Keys.h>
 #import <bundles/bundles.h>
 #import <ns/ns.h>
@@ -376,7 +377,7 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 	{
 		NSMenuItem* menuItem = [menu addItemWithTitle:fileItem.localizedName action:@selector(takeURLFrom:) keyEquivalent:@""];
 		menuItem.representedObject = fileItem.resolvedURL;
-		menuItem.image             = fileItem.image;
+		menuItem.image             = [TMFileReference imageForURL:fileItem.resolvedURL size:NSMakeSize(16, 16)];
 		menuItem.target            = self;
 	}
 
@@ -425,7 +426,7 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 		for(NSArray* items in @[ itemsToOpen, itemsToOpenInTextMate ])
 		{
 			for(FileItem* item in items)
-				[OakZoomingIcon zoomIcon:item.image fromRect:[self imageRectOfItem:item]];
+				[OakZoomingIcon zoomIcon:[TMFileReference imageForURL:item.URL size:NSMakeSize(48, 48)] fromRect:[self imageRectOfItem:item]];
 		}
 	}
 
