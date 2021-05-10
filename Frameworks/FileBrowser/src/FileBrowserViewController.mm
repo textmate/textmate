@@ -1651,40 +1651,6 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 	}
 }
 
-- (void)setModifiedURLs:(NSArray<NSURL*>*)newModifiedURLs
-{
-	_modifiedURLs = newModifiedURLs;
-
-	if(!self.fileItem)
-		return;
-
-	NSMutableArray<FileItem*>* stack = [NSMutableArray arrayWithObject:self.fileItem];
-	while(FileItem* item = stack.firstObject)
-	{
-		[stack removeObjectAtIndex:0];
-		item.modified = [_modifiedURLs containsObject:item.URL];
-		if(item.children)
-			[stack addObjectsFromArray:item.children];
-	}
-}
-
-- (void)setOpenURLs:(NSArray<NSURL*>*)newOpenURLs
-{
-	_openURLs = newOpenURLs;
-
-	if(!self.fileItem)
-		return;
-
-	NSMutableArray<FileItem*>* stack = [NSMutableArray arrayWithObject:self.fileItem];
-	while(FileItem* item = stack.firstObject)
-	{
-		[stack removeObjectAtIndex:0];
-		item.open = [_openURLs containsObject:item.URL];
-		if(item.children)
-			[stack addObjectsFromArray:item.children];
-	}
-}
-
 // ===========================
 // = Loading/Expanding Items =
 // ===========================
@@ -1832,12 +1798,7 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 		}
 
 		for(NSURL* url in urls)
-		{
-			FileItem* newItem = [FileItem fileItemWithURL:url];
-			newItem.open     = [_openURLs containsObject:url];
-			newItem.modified = [_modifiedURLs containsObject:url];
-			[children addObject:newItem];
-		}
+			[children addObject:[FileItem fileItemWithURL:url]];
 
 		item.children = [children copy];
 		[self rearrangeChildrenInParent:item];

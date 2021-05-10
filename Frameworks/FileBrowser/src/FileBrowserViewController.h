@@ -20,9 +20,6 @@
 @property (nonatomic, readonly) NSOutlineView*   outlineView;
 @property (nonatomic, readonly) id               sessionState;
 
-@property (nonatomic) NSArray<NSURL*>* openURLs;
-@property (nonatomic) NSArray<NSURL*>* modifiedURLs;
-
 - (void)setupViewWithState:(id)state;
 - (std::map<std::string, std::string>)variables;
 
