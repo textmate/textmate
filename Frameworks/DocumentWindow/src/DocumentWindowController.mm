@@ -2245,9 +2245,9 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 			item.image.size = NSMakeSize(16, 16);
 		}
 		if(i == _selectedTabIndex)
-			[item setState:NSControlStateValueOn];
+			item.state = NSControlStateValueOn;
 		else if(document.isDocumentEdited)
-			[item setModifiedState:YES];
+			item.modifiedState = YES;
 		++i;
 	}
 

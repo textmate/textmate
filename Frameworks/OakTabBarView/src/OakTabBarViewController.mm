@@ -59,7 +59,7 @@
 			if(i == _tabBarView.selectedTabIndex)
 				item.state = NSControlStateValueOn;
 			else if([_modifiedStates mySafeObjectAtIndex:i].boolValue)
-				[item setModifiedState:YES];
+				item.modifiedState = YES;
 		}
 	}
 
