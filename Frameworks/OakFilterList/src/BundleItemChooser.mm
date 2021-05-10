@@ -1,5 +1,4 @@
 #import "BundleItemChooser.h"
-#import <FileBrowser/FileItemImage.h>
 #import "OakAbbreviations.h"
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
@@ -10,6 +9,7 @@
 #import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakSystem/application.h>
+#import <TMFileReference/TMFileReference.h>
 #import <bundles/bundles.h>
 #import <settings/settings.h>
 #import <text/ranker.h>
@@ -339,7 +339,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 	{
 		if(path::is_child(to_s(path), oak::application_t::path()))
 				image = [NSImage imageNamed:NSImageNameApplicationIcon];
-		else	image = CreateIconImageForURL([NSURL fileURLWithPath:path], NO, NO, NO, NO, scm::status::unknown);
+		else	image = [TMFileReference imageForURL:[NSURL fileURLWithPath:path] size:NSMakeSize(16, 16)];
 	}
 	else
 	{
