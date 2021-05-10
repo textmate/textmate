@@ -122,7 +122,6 @@ static void show_command_error (std::string const& message, oak::uuid_t const& u
 + (void)scheduleSessionBackup:(id)sender;
 
 - (void)makeTextViewFirstResponder:(id)sender;
-- (void)updateFileBrowserStatus:(id)sender;
 
 - (void)fileBrowser:(FileBrowserViewController*)fileBrowser openURLs:(NSArray*)someURLs;
 - (void)fileBrowser:(FileBrowserViewController*)fileBrowser closeURL:(NSURL*)anURL;
@@ -789,7 +788,6 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 
 	if([keyPath hasSuffix:@"arrangedObjects.path"] || [keyPath hasSuffix:@"arrangedObjects.displayName"] || [keyPath hasSuffix:@"arrangedObjects.documentEdited"])
 	{
-		[self updateFileBrowserStatus:self];
 		[self.tabBarView reloadData];
 		[[self class] scheduleSessionBackup:self];
 	}
@@ -1518,7 +1516,6 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	BOOL disableTabBarCollapsingKey = [NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsDisableTabBarCollapsingKey];
 	self.titlebarViewController.hidden = !disableTabBarCollapsingKey && self.documents.count <= 1;
 
-	[self updateFileBrowserStatus:self];
 	[self updateTouchBarButtons];
 	[[self class] scheduleSessionBackup:self];
 }
@@ -1806,7 +1803,6 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 				if(NSString* path = self.projectPath ?: self.defaultProjectPath)
 					[self.fileBrowser goToURL:[NSURL fileURLWithPath:path]];
 			}
-			[self updateFileBrowserStatus:self];
 
 			[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(fileBrowserDidDuplicate:) name:FileBrowserDidDuplicateNotification object:nil];
 		}
@@ -1867,21 +1863,6 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 }
 
 - (IBAction)toggleFileBrowser:(id)sender    { self.fileBrowserVisible = !self.fileBrowserVisible; }
-
-- (void)updateFileBrowserStatus:(id)sender
-{
-	NSMutableArray* openURLs     = [NSMutableArray array];
-	NSMutableArray* modifiedURLs = [NSMutableArray array];
-	for(OakDocument* document in _documents)
-	{
-		if(document.path)
-			[openURLs addObject:[NSURL fileURLWithPath:document.path]];
-		if(document.path && document.isDocumentEdited)
-			[modifiedURLs addObject:[NSURL fileURLWithPath:document.path]];
-	}
-	self.fileBrowser.openURLs     = openURLs;
-	self.fileBrowser.modifiedURLs = modifiedURLs;
-}
 
 - (id)fileBrowserHistory                    { return self.fileBrowser.sessionState ?: _fileBrowserHistory; }
 - (CGFloat)fileBrowserWidth                 { return self.layoutView.fileBrowserWidth;   }
