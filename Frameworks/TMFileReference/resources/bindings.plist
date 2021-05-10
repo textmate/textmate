@@ -2,18 +2,18 @@
 	small-blank                = (  );
 
 	small-text                 = ( mail, eml, man, txt, text, utf8, README, INSTALL, LICENSE, AUTHORS, ChangeLog );
-	small-structured_text      = ( bbcode, mdown, markdown, markdn, md, mmd, rst, rest, etx, etx.txt, textile, t2t );
+	small-structured-text      = ( bbcode, mdown, markdown, markdn, md, mmd, rst, rest, etx, etx.txt, textile, t2t );
 	small-web                  = ( html, htm, shtml, xhtml );
 	small-template             = ( tmpl, tpl, mtml, erb, rhtml, html.erb, inc, asp, aspx, ascx, cfm, cfml, cfc, yaws, mhtml, autohandler, dhandler, mc, tt, adp, gsp, twig );
 	small-log                  = ( log );
-	small-angle_brackets_green = ( jsp, php, php3, php4, php5, phpt, phtml, aw, ctp );
-	small-angle_brackets_brown = ( dist, xml, tld, pt, cpt, dtml, rss, opml, xsl, xslt );
+	small-angle-brackets-green = ( jsp, php, php3, php4, php5, phpt, phtml, aw, ctp );
+	small-angle-brackets-brown = ( dist, xml, tld, pt, cpt, dtml, rss, opml, xsl, xslt );
 	small-brackets             = ( m, mm, M );
 	small-braces               = ( go, sieve );
 	small-list                 = ( gtd, gtdlog, properties, json, strings, plist, dict, scriptsuite, scriptterminology, savedsearch, defs.rem, reminders, TODO, tasks, todolist, yaml, yml );
 	small-grid                 = ( css, css.erb, scss, sass, less, sql );
-	small-tree_structure       = ( dot, rl, proto, capnp );
-	small-config_file          = ( conf, htaccess, config, gitconfig, gitignore, gitmodules, ini, cfg, capfile, ssh_config, sshd_config, tm_properties, tmproperties, ant.xml, build.xml, pro, pri, cmake, cmakelists.txt, Makefile, gnumakefile, ocamlmakefile, pom.xml, cm, Rakefile, rake, target, portfile, gemspec, gemfile, ninja, project.clj, xcodeproj, Cargo.toml );
+	small-tree-structure       = ( dot, rl, proto, capnp );
+	small-config-file          = ( conf, htaccess, config, gitconfig, gitignore, gitmodules, ini, cfg, capfile, ssh_config, sshd_config, tm_properties, tmproperties, ant.xml, build.xml, pro, pri, cmake, cmakelists.txt, Makefile, gnumakefile, ocamlmakefile, pom.xml, cm, Rakefile, rake, target, portfile, gemspec, gemfile, ninja, project.clj, xcodeproj, Cargo.toml );
 
 	small-c                    = ( c, cc, cxx, cpp, 'c++' );
 	small-javascript           = ( js, htc, jsx, jsfl, js.erb );
@@ -21,7 +21,7 @@
 	small-python               = ( py, rpy, pyw, cpy, sconstruct, sconscript );
 	small-header               = ( h, hh, hpp, "h++" );
 	small-latex                = ( lhs, tex, sty, cls );
-	small-latex_alt            = ( bib, rd, snw, rnw );
+	small-latex-alt            = ( bib, rd, snw, rnw );
 
 	small-grey                 = ( diff, patch, csv, tsv, sh, bash, zsh, bashrc, bash_profile, bash_login, profile, bash_logout );
 	small-charcoal             = ( commit_editmsg, git-rebase-todo, svn-commit.tmp, svn-commit.2.tmp, portfile, gemspec, gemfile, erbsql, sql.erb );

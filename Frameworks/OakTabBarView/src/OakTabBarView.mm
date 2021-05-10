@@ -3,8 +3,8 @@
 #import <OakAppKit/OakUIConstructionFunctions.h>
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/NSMenuItem Additions.h>
-#import <OakAppKit/OakFileIconImage.h>
 #import <OakFoundation/OakFoundation.h>
+#import <TMFileReference/TMFileReference.h>
 #import <oak/misc.h>
 
 static NSString* kUserDefaultsTabItemMinWidthKey = @"tabItemMinWidth";
@@ -858,7 +858,7 @@ static void* kOakTabViewSelectedContext  = &kOakTabViewSelectedContext;
 
 		if(NSString* path = tabItem.path)
 		{
-			item.image   = [OakFileIconImage fileIconImageWithPath:(OakIsEmptyString(path) ? nil : path) isModified:tabItem.isModified];
+			item.image   = [TMFileReference imageForURL:[NSURL fileURLWithPath:tabItem.path] size:NSMakeSize(16, 16)];
 			item.toolTip = [path stringByAbbreviatingWithTildeInPath];
 		}
 

@@ -7,9 +7,9 @@
 #import <OakAppKit/NSAlert Additions.h>
 #import <OakAppKit/NSImage Additions.h>
 #import <OakAppKit/OakSound.h>
-#import <OakAppKit/OakFileIconImage.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
 #import <OakTextView/OakDocumentView.h>
+#import <TMFileReference/TMFileReference.h>
 #import <document/OakDocument.h>
 #import <document/OakDocumentController.h>
 #import <BundlesManager/BundlesManager.h>
@@ -685,7 +685,7 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 			std::string const& path = entry->represented_path();
 			if(path != NULL_STR)
 			{
-				[cell setImage:[OakFileIconImage fileIconImageWithPath:[NSString stringWithCxxString:path] size:NSMakeSize(16, 16)]];
+				[cell setImage:[TMFileReference imageForURL:[NSURL fileURLWithPath:[NSFileManager.defaultManager stringWithFileSystemRepresentation:path.data() length:path.size()]] size:NSMakeSize(16, 16)]];
 				[menu addItem:[self createMenuItemForCxxPath:path]];
 			}
 		}

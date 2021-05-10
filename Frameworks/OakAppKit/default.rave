@@ -1,8 +1,8 @@
 target "${dirname}" {
-	require OakFoundation bundles crash file io ns parse regexp scm settings text theme
+	require OakFoundation bundles crash file io ns parse regexp settings text theme
 	headers src/*.h
 
-	files resources/* gfx/**/*.{png,tiff,icns} icons/* "Resources"
+	files resources/* gfx/CloseButton/*.png "Resources"
 
 	sources src/*.{cc,mm}
 	cxx_tests tests/gui_*.mm
