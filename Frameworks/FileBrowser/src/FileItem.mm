@@ -139,15 +139,23 @@ static NSMutableDictionary* SchemeToClass;
 
 - (NSString*)localizedName
 {
-	if(!_localizedName && _URL.isFileURL)
+	if(!_localizedName)
 	{
 		NSString* name;
-		if([_URL getResourceValue:&name forKey:NSURLLocalizedNameKey error:nil])
+		if(_URL.isFileURL)
 		{
-			_localizedName = name;
-			if(_hiddenExtension && self.alwaysShowFileExtension && OakNotEmptyString(_URL.pathExtension))
-				_localizedName = [_localizedName stringByAppendingPathExtension:_URL.pathExtension];
+			NSError* error;
+			if([_URL getResourceValue:&name forKey:NSURLLocalizedNameKey error:&error])
+			{
+				if(_hiddenExtension && self.alwaysShowFileExtension && OakNotEmptyString(_URL.pathExtension))
+					name = [name stringByAppendingPathExtension:_URL.pathExtension];
+			}
+			else
+			{
+				os_log_error(OS_LOG_DEFAULT, "No NSURLLocalizedNameKey for %{public}@: %{public}@", _URL, error);
+			}
 		}
+		_localizedName = name ?: _URL.lastPathComponent;
 	}
 	return _localizedName ?: _URL.lastPathComponent;
 }
