@@ -856,10 +856,16 @@ static void* kOakTabViewSelectedContext  = &kOakTabViewSelectedContext;
 		item.representedObject = tabItem;
 		item.tag = i;
 
-		if(NSString* path = tabItem.path)
+		NSString* path = tabItem.path;
+		if(OakNotEmptyString(path))
 		{
 			item.image   = [TMFileReference imageForURL:[NSURL fileURLWithPath:tabItem.path] size:NSMakeSize(16, 16)];
 			item.toolTip = [path stringByAbbreviatingWithTildeInPath];
+		}
+		else
+		{
+			item.image = [[NSWorkspace.sharedWorkspace iconForFileType:NSFileTypeForHFSTypeCode(kUnknownFSObjectIcon)] copy];
+			item.image.size = NSMakeSize(16, 16);
 		}
 
 		if(tabItem.isSelected)
