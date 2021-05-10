@@ -9,6 +9,7 @@ extern NSNotificationName const TMURLWillCloseNotification;
 + (NSImage*)imageForURL:(NSURL*)url size:(NSSize)size;
 
 @property (nonatomic, readonly)                      NSImage* image;
+@property (nonatomic, readonly)                      NSImage* icon;     // image with alpha = 0.4 when isModified == YES
 @property (nonatomic, readonly, getter = isClosable) BOOL     closable;
 @property (nonatomic, readonly, getter = isModified) BOOL     modified;
 

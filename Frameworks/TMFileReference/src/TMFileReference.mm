@@ -7,11 +7,14 @@ NSNotificationName const TMURLWillCloseNotification = @"TMURLWillCloseNotificati
 	NSUInteger _openCount;
 	NSUInteger _modifiedCount;
 	NSImage* _image;
+	NSImage* _icon;
 }
 @property (nonatomic, readonly) NSURL* URL;
 @end
 
 @implementation TMFileReference
++ (NSSet*)keyPathsForValuesAffectingIcon { return [NSSet setWithObjects:@"image", @"modified", nil]; }
+
 + (TMFileReference*)fileReferenceWithURL:(NSURL*)url
 {
 	NSAssert(NSThread.isMainThread, @"This method must be called on main thread");
@@ -62,6 +65,15 @@ NSNotificationName const TMURLWillCloseNotification = @"TMURLWillCloseNotificati
 - (BOOL)isModified
 {
 	return _modifiedCount != 0;
+}
+
+- (NSImage*)icon
+{
+	NSImage* res = self.image;
+	return self.isModified ? [NSImage imageWithSize:res.size flipped:NO drawingHandler:^BOOL(NSRect dstRect){
+		[res drawInRect:dstRect fromRect:NSZeroRect operation:NSCompositingOperationCopy fraction:0.4];
+		return YES;
+	}] : res;
 }
 
 - (void)performClose:(id)sender
