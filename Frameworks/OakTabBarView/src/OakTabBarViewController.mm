@@ -52,7 +52,10 @@
 			item.target  = self;
 			item.toolTip = [_toolTips mySafeObjectAtIndex:i];
 			if((aMenu.propertiesToUpdate & NSMenuPropertyItemImage) && i < _images.count)
-				item.image = [_images mySafeObjectAtIndex:i];
+			{
+				item.image = [[_images mySafeObjectAtIndex:i] copy];
+				item.image.size = NSMakeSize(16, 16);
+			}
 			if(i == _tabBarView.selectedTabIndex)
 				item.state = NSControlStateValueOn;
 			else if([_modifiedStates mySafeObjectAtIndex:i].boolValue)

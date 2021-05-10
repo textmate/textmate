@@ -2240,7 +2240,10 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		item.tag     = i;
 		item.toolTip = [document.path stringByAbbreviatingWithTildeInPath];
 		if(aMenu.propertiesToUpdate & NSMenuPropertyItemImage)
-			item.image = document.icon;
+		{
+			item.image = [document.icon copy];
+			item.image.size = NSMakeSize(16, 16);
+		}
 		if(i == _selectedTabIndex)
 			[item setState:NSControlStateValueOn];
 		else if(document.isDocumentEdited)

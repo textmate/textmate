@@ -83,6 +83,10 @@
 		_openButton.buttonType            = NSButtonTypeMomentaryChange;
 		_openButton.bordered              = NO;
 		_openButton.imagePosition         = NSImageOnly;
+		_openButton.imageScaling          = NSImageScaleProportionallyUpOrDown;
+
+		[_openButton.widthAnchor  constraintEqualToConstant:16].active = YES;
+		[_openButton.heightAnchor constraintEqualToConstant:16].active = YES;
 
 		NSTextField* textField = OakCreateLabel(@"", [NSFont controlContentFontOfSize:0]);
 		textField.cell = [[FileItemSelectBasenameCell alloc] initTextCell:@""];
