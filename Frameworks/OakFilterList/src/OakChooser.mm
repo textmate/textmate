@@ -129,7 +129,7 @@ NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (std::string
 }
 @end
 
-static void* kFirstResponderBinding = &kFirstResponderBinding;
+static void* kFirstResponderObserverContext = &kFirstResponderObserverContext;
 
 @implementation OakChooser
 - (id)init
@@ -144,7 +144,7 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 		self.window.frameAutosaveName = NSStringFromClass([self class]);
 		self.window.delegate          = self;
 
-		[self.window addObserver:self forKeyPath:@"firstResponder" options:NSKeyValueObservingOptionOld|NSKeyValueObservingOptionNew context:kFirstResponderBinding];
+		[self.window addObserver:self forKeyPath:@"firstResponder" options:NSKeyValueObservingOptionOld|NSKeyValueObservingOptionNew context:kFirstResponderObserverContext];
 	}
 	return self;
 }
@@ -153,7 +153,7 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 {
 	_searchField.delegate = nil;
 	[_searchField unbind:NSValueBinding];
-	[self.window removeObserver:self forKeyPath:@"firstResponder" context:kFirstResponderBinding];
+	[self.window removeObserver:self forKeyPath:@"firstResponder" context:kFirstResponderObserverContext];
 
 	_tableView.target     = nil;
 	_tableView.dataSource = nil;
@@ -337,7 +337,7 @@ static void* kFirstResponderBinding = &kFirstResponderBinding;
 
 - (void)observeValueForKeyPath:(NSString*)keyPath ofObject:(id)object change:(NSDictionary*)change context:(void*)context
 {
-	if(context == kFirstResponderBinding)
+	if(context == kFirstResponderObserverContext)
 	{
 		BOOL oldIsSearchField = change[NSKeyValueChangeOldKey] == _searchField || change[NSKeyValueChangeOldKey] == _searchField.currentEditor;
 		BOOL newIsSearchField = change[NSKeyValueChangeNewKey] == _searchField || change[NSKeyValueChangeNewKey] == _searchField.currentEditor;

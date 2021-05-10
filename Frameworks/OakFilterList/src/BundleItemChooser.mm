@@ -163,7 +163,7 @@ static NSString* OakMenuItemIdentifier (NSMenuItem* menuItem)
 
 // ==============
 
-static void* kRecordingBinding = &kRecordingBinding;
+static void* kRecordingObserverContext = &kRecordingObserverContext;
 
 static std::string key_equivalent_for_menu_item (NSMenuItem* menuItem)
 {
@@ -536,7 +536,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 - (void)dealloc
 {
 	[NSNotificationCenter.defaultCenter removeObserver:self];
-	[_keyEquivalentView removeObserver:self forKeyPath:@"recording" context:kRecordingBinding];
+	[_keyEquivalentView removeObserver:self forKeyPath:@"recording" context:kRecordingObserverContext];
 	[_scopeBar unbind:NSValueBinding];
 }
 
@@ -563,7 +563,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 
 - (void)observeValueForKeyPath:(NSString*)keyPath ofObject:(id)object change:(NSDictionary*)change context:(void*)context
 {
-	if(context == kRecordingBinding)
+	if(context == kRecordingObserverContext)
 	{
 		NSNumber* isRecording = change[NSKeyValueChangeNewKey];
 		self.drawTableViewAsHighlighted = !isRecording.boolValue;
@@ -643,7 +643,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 		_keyEquivalentView = [[OakKeyEquivalentView alloc] initWithFrame:NSZeroRect];
 		[_keyEquivalentView setTranslatesAutoresizingMaskIntoConstraints:NO];
 		[_keyEquivalentView bind:NSValueBinding toObject:self withKeyPath:@"keyEquivalentString" options:nil];
-		[_keyEquivalentView addObserver:self forKeyPath:@"recording" options:NSKeyValueObservingOptionNew context:kRecordingBinding];
+		[_keyEquivalentView addObserver:self forKeyPath:@"recording" options:NSKeyValueObservingOptionNew context:kRecordingObserverContext];
 		_keyEquivalentView.accessibilitySharedFocusElements = @[ self.tableView ];
 	}
 	return _keyEquivalentView;

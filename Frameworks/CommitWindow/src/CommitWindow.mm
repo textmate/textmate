@@ -80,7 +80,7 @@ static NSUInteger const kOakCommitWindowCommitMessagesMax = 5;
 static CGFloat const kOakCommitWindowMinimumDocumentViewHeight = 195;
 static CGFloat const kOakCommitWindowTableViewHeight = 190;
 
-static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBinding;
+static void* kOakCommitWindowIncludeItemObserverContext = &kOakCommitWindowIncludeItemObserverContext;
 
 @interface OakCommitWindow : NSWindowController <NSWindowDelegate, NSTableViewDelegate, NSMenuDelegate, OakTextViewDelegate>
 {
@@ -199,7 +199,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 			[self setupBottomButtonsConstraints];
 		}
 
-		[_arrayController addObserver:self forKeyPath:@"arrangedObjects.commit" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:kOakCommitWindowIncludeItemBinding];
+		[_arrayController addObserver:self forKeyPath:@"arrangedObjects.commit" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:kOakCommitWindowIncludeItemObserverContext];
 
 		if(self.showContinueSuffix)
 		{
@@ -231,7 +231,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 
 - (void)dealloc
 {
-	[self.arrayController removeObserver:self forKeyPath:@"arrangedObjects.commit"];
+	[self.arrayController removeObserver:self forKeyPath:@"arrangedObjects.commit" context:kOakCommitWindowIncludeItemObserverContext];
 
 	if(_eventMonitor)
 		[NSEvent removeMonitor:_eventMonitor];
@@ -488,7 +488,7 @@ static void* kOakCommitWindowIncludeItemBinding = &kOakCommitWindowIncludeItemBi
 
 - (void)observeValueForKeyPath:(NSString*)aKeyPath ofObject:(id)anObject change:(NSDictionary*)someChange context:(void*)context
 {
-	if(context == kOakCommitWindowIncludeItemBinding)
+	if(context == kOakCommitWindowIncludeItemObserverContext)
 	{
 		_filesToCommitCount = 0;
 		for(CWItem* item in [_arrayController arrangedObjects])
