@@ -11,6 +11,7 @@
 #import <OakAppKit/OakEncodingPopUpButton.h>
 #import <OakAppKit/OakSavePanel.h>
 #import <OakAppKit/NSAlert Additions.h>
+#import <TMFileReference/TMFileReference.h>
 #import <BundlesManager/BundlesManager.h>
 #import <authorization/constants.h>
 #import <cf/run_loop.h>
@@ -169,6 +170,8 @@ NSNotificationName const OakDocumentWillCloseNotification        = @"OakDocument
 NSNotificationName const OakDocumentWillShowAlertNotification    = @"OakDocumentWillShowAlertNotification";
 NSString* OakDocumentBookmarkIdentifier                          = @"bookmark";
 
+static void* kDocumentEditedObserverContext = &kDocumentEditedObserverContext;
+
 @interface OakDocument ()
 {
 	NSHashTable* _documentEditors;
@@ -197,6 +200,7 @@ NSString* OakDocumentBookmarkIdentifier                          = @"bookmark";
 @property (nonatomic) BOOL observeFileSystem;
 @property (nonatomic) BOOL needsImportDocumentChanges;
 @property (nonatomic, readonly) BOOL shouldSniffFileType;
+@property (nonatomic) TMFileReference* fileReference;
 
 @property (nonatomic) BOOL                               observeSCMStatus;
 @property (nonatomic) scm::info_ptr                      scmInfo;
@@ -303,6 +307,8 @@ NSString* OakDocumentBookmarkIdentifier                          = @"bookmark";
 		_identifier = [NSUUID UUID];
 		_bufferEmpty = YES;
 		_documentEditors = [NSHashTable weakObjectsHashTable];
+
+		[self addObserver:self forKeyPath:@"documentEdited" options:NSKeyValueObservingOptionOld|NSKeyValueObservingOptionNew context:kDocumentEditedObserverContext];
 	}
 	return self;
 }
@@ -416,6 +422,9 @@ NSString* OakDocumentBookmarkIdentifier                          = @"bookmark";
 
 - (void)dealloc
 {
+	[self removeObserver:self forKeyPath:@"documentEdited" context:kDocumentEditedObserverContext];
+	self.fileReference = nil;
+
 	[OakDocumentController.sharedInstance unregister:self];
 	self.observeSCMStatus = NO;
 	[self deleteBuffer];
@@ -488,6 +497,8 @@ NSString* OakDocumentBookmarkIdentifier                          = @"bookmark";
 	_icon = nil;
 	_cachedDisplayName = nil;
 	self.customName = nil;
+
+	self.fileReference = _path ? [TMFileReference fileReferenceWithURL:[NSURL fileURLWithPath:_path]] : nil;
 
 	if(_observeFileSystem)
 	{
@@ -674,7 +685,44 @@ NSString* OakDocumentBookmarkIdentifier                          = @"bookmark";
 	});
 }
 
-- (void)open   { ++self.openCount; }
+- (void)observeValueForKeyPath:(NSString*)keyPath ofObject:(id)object change:(NSDictionary*)change context:(void*)context
+{
+	if(context == kDocumentEditedObserverContext)
+	{
+		BOOL oldIsDocumentEdited = [change[NSKeyValueChangeOldKey] boolValue];
+		BOOL newIsDocumentEdited = [change[NSKeyValueChangeNewKey] boolValue];
+		if(newIsDocumentEdited && !oldIsDocumentEdited)
+			[_fileReference increaseModifiedCount];
+		else if(!newIsDocumentEdited && oldIsDocumentEdited)
+			[_fileReference decreaseModifiedCount];
+	}
+}
+
+- (void)setFileReference:(TMFileReference*)newFileReference
+{
+	if(self.isDocumentEdited)
+		[_fileReference decreaseModifiedCount];
+	[_fileReference decreaseOpenCount];
+
+	if(_fileReference = newFileReference)
+	{
+		[_fileReference increaseOpenCount];
+		if(self.isDocumentEdited)
+			[_fileReference increaseModifiedCount];
+	}
+}
+
+- (void)open
+{
+	if(++self.openCount == 1)
+	{
+		if(_fileReference)
+			[_fileReference increaseOpenCount];
+		else if(_path)
+			self.fileReference = [TMFileReference fileReferenceWithURL:[NSURL fileURLWithPath:_path]];
+	}
+}
+
 - (BOOL)isOpen { return self.openCount != 0; }
 
 - (BOOL)isLoading
@@ -1018,6 +1066,7 @@ NSString* OakDocumentBookmarkIdentifier                          = @"bookmark";
 	if(--self.openCount != 0)
 		return;
 
+	self.fileReference = nil;
 	[NSNotificationCenter.defaultCenter postNotificationName:OakDocumentWillCloseNotification object:self];
 
 	if(_path && _buffer)
