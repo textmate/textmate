@@ -2,7 +2,6 @@
 #import "Keys.h"
 #import <settings/settings.h>
 #import <OakAppKit/NSImage Additions.h>
-#import <OakAppKit/NSMenuItem Additions.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
 #import <OakTabBarView/OakTabBarView.h>
 #import <OakFoundation/NSString Additions.h>
@@ -67,11 +66,23 @@
 
 - (NSMenuItem*)menuItemForURL:(NSURL*)aURL
 {
-	NSMenuItem* res = [[NSMenuItem alloc] initWithTitle:[NSFileManager.defaultManager displayNameAtPath:[aURL path]] action:@selector(takeFileBrowserPathFrom:) keyEquivalent:@""];
-	[res setTarget:self];
-	[res setRepresentedObject:aURL];
-	if([aURL isFileURL])
-		[res setIconForFile:[aURL path]];
+	NSMenuItem* res = [[NSMenuItem alloc] initWithTitle:[NSFileManager.defaultManager displayNameAtPath:aURL.path] action:@selector(takeFileBrowserPathFrom:) keyEquivalent:@""];
+	res.target = self;
+	res.representedObject = aURL;
+
+	NSImage* image;
+	NSError* error;
+	if([aURL getResourceValue:&image forKey:NSURLEffectiveIconKey error:&error])
+	{
+		image = [image copy];
+		image.size = NSMakeSize(16, 16);
+		res.image = image;
+	}
+	else
+	{
+		os_log_error(OS_LOG_DEFAULT, "No NSURLEffectiveIconKey for %{public}@: %{public}@", aURL, error);
+	}
+
 	return res;
 }
 
