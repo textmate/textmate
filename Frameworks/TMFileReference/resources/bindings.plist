@@ -13,7 +13,7 @@
 	small-list                 = ( gtd, gtdlog, properties, json, strings, plist, dict, scriptsuite, scriptterminology, savedsearch, defs.rem, reminders, TODO, tasks, todolist, yaml, yml );
 	small-grid                 = ( css, css.erb, scss, sass, less, sql );
 	small-tree-structure       = ( dot, rl, proto, capnp );
-	small-config-file          = ( conf, htaccess, config, gitconfig, gitignore, gitmodules, ini, cfg, capfile, ssh_config, sshd_config, tm_properties, tmproperties, ant.xml, build.xml, pro, pri, cmake, cmakelists.txt, Makefile, gnumakefile, ocamlmakefile, pom.xml, cm, Rakefile, rake, target, portfile, gemspec, gemfile, ninja, project.clj, xcodeproj, Cargo.toml );
+	small-config-file          = ( conf, htaccess, config, gitconfig, gitignore, gitmodules, ini, cfg, capfile, ssh_config, sshd_config, tm_properties, tmproperties, ant.xml, build.xml, pro, pri, cmake, cmakelists.txt, Makefile, gnumakefile, ocamlmakefile, pom.xml, cm, Rakefile, rake, rave, portfile, gemspec, gemfile, ninja, project.clj, xcodeproj, Cargo.toml );
 
 	small-c                    = ( c, cc, cxx, cpp, 'c++' );
 	small-javascript           = ( js, htc, jsx, jsfl, js.erb );
