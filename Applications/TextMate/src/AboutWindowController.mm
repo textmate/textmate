@@ -157,17 +157,17 @@ static NSData* Digest (NSString* someString)
 	_selectedPage = pageName;
 
 	NSDictionary* pages = @{
-		@"About":         @"About",
-		@"Changes":       @"Changes",
-		@"Bundles":       @"Bundles",
-		@"Registration":  @"Registration",
-		@"Legal":         @"Legal",
-		@"Contributions": @"Contributions"
+		@"About":         @"About/About",
+		@"Changes":       @"About/Changes",
+		@"Bundles":       @"About/Bundles",
+		@"Registration":  @"About/Registration",
+		@"Legal":         @"About/Legal",
+		@"Contributions": @"About/Contributions"
 	};
 
 	if(NSString* file = pages[pageName])
 	{
-		if(NSURL* url = [[NSBundle mainBundle] URLForResource:file withExtension:@"html"])
+		if(NSURL* url = [NSBundle.mainBundle URLForResource:file withExtension:@"html"])
 			[self.webView loadRequest:[NSURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:60]];
 
 		_segmentedControl.selectedSegment = [_segmentLabels indexOfObject:pageName];
