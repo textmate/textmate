@@ -23,7 +23,8 @@ target "${dirname}" {
 
 	prefix "${target}.app/Contents"
 
-	files resources/* icons/*.icns @PrivilegedTool @mate @tm_query "Resources"
+	files resources/* icons/*.icns @PrivilegedTool "Resources"
+	files @mate @tm_query    "MacOS"
 	files about/*            "Resources/About"
 	files Info.plist         "."
 	copy  support/*          "SharedSupport"

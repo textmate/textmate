@@ -261,7 +261,7 @@ static bool uninstall_mate (std::string const& path)
 
 - (void)installMateAs:(NSString*)dstPath
 {
-	if(NSString* srcPath = [[NSBundle mainBundle] pathForResource:@"mate" ofType:nil])
+	if(NSString* srcPath = [NSBundle.mainBundle pathForAuxiliaryExecutable:@"mate"])
 	{
 		if(install_mate(to_s(srcPath), to_s(dstPath)))
 		{
@@ -328,7 +328,7 @@ static bool uninstall_mate (std::string const& path)
 {
 	NSString* oldMate    = [[NSUserDefaults.standardUserDefaults stringForKey:kUserDefaultsMateInstallPathKey] stringByExpandingTildeInPath];
 	NSString* oldVersion = [NSUserDefaults.standardUserDefaults stringForKey:kUserDefaultsMateInstallVersionKey];
-	NSString* newMate    = [[NSBundle mainBundle] pathForResource:@"mate" ofType:nil];
+	NSString* newMate    = [NSBundle.mainBundle pathForAuxiliaryExecutable:@"mate"];
 
 	if(oldMate && newMate)
 	{
