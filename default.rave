@@ -17,7 +17,6 @@ add FLAGS         "-mmacosx-version-min=${APP_MIN_OS}"
 set LN_FLAGS      "-mmacosx-version-min=${APP_MIN_OS} -fobjc-link-runtime"
 
 set IB_FLAGS      "--errors --warnings --notices --output-format human-readable-text"
-add IB_FLAGS      "--minimum-deployment-target=${APP_MIN_OS}"
 
 set AC_FLAGS      "--errors --warnings --notices --output-format human-readable-text"
 add AC_FLAGS      "--minimum-deployment-target=${APP_MIN_OS} --platform=macosx"

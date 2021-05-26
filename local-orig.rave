@@ -1,6 +1,7 @@
 # ninja TextMate/release/bump && ninja TextMate/release/deploy
 
 set CS_IDENTITY "${APPLE_DEVELOPER_ID}"
+add IB_FLAGS    "--minimum-deployment-target=${APP_MIN_OS}"
 
 extend pretty_plist {
 	config release {
