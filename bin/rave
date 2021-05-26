@@ -649,8 +649,6 @@ class CompileCapnp < Compiler
   transforms '.capnp' => '.capnp.c++'
 
   def transform(file, config, builddir)
-    abort 'This build requires CAPNP_PATH to be defined' unless config.include?('CAPNP_PATH')
-
     base = super
 
     source = base[:out]
@@ -659,8 +657,7 @@ class CompileCapnp < Compiler
     base.merge(
       out:         [ source, header ],
       flags:       "-oc++:#{File.dirname(source).shellescape} --src-prefix=#{File.dirname(file).shellescape}",
-      capnp_bin:   (config['CAPNP_BIN'] || "#{config['CAPNP_PATH']}/bin").shellescape,
-      command:     'PATH="$capnp_bin:$$PATH" capnp compile $flags $in',
+      command:     'capnp compile $flags $in',
       description: 'Cap’n Proto ‘${in}’…',
     )
   end

@@ -13,7 +13,6 @@ config release {
 	arch "arm64" "x86_64" {
 		# From https://bintray.com/homebrew/bottles/capnp#files
 		set CAPNP_PATH "${HOME}/build/capnp/${arch}/capnp/0.8.0"
-		set CAPNP_BIN  "${HOME}/build/capnp/x86_64/capnp/0.8.0/bin"
  		add FLAGS      "-target macos-${arch}"
 		add LN_FLAGS   "-target macos-${arch}"
 	}
