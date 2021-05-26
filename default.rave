@@ -1,5 +1,4 @@
 set APP_MIN_OS    "10.12"
-set CAPNP_PATH    "/usr/local"
 set CS_IDENTITY   "-"
 
 set C_FLAGS       "-std=c99"
@@ -11,7 +10,7 @@ add FLAGS         "-funsigned-char"
 add FLAGS         "-Wall -Wwrite-strings -Wformat -Winit-self -Wmissing-include-dirs"
 add FLAGS         "-Wno-parentheses -Wno-sign-compare -Wno-switch -Wno-c99-designator"
 add FLAGS         "-D'NULL_STR=\"\\uFFFF\"' -D'REST_API=\"https://api.textmate.org\"'"
-add FLAGS         "-IShared/include -I/usr/local/include"
+add FLAGS         "-IShared/include"
 add FLAGS         "-mmacosx-version-min=${APP_MIN_OS}"
 
 set LN_FLAGS      "-mmacosx-version-min=${APP_MIN_OS} -fobjc-link-runtime"

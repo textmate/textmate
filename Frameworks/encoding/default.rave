@@ -1,6 +1,5 @@
 target "${dirname}" {
 	headers src/encoding.h
 	sources src/*.{mm,capnp}
-	add FLAGS "-I${CAPNP_PATH}/include"
-	libraries "${CAPNP_PATH}/lib/libcapnp.a" "${CAPNP_PATH}/lib/libkj.a"
+	libraries capnp kj
 }
