@@ -2,6 +2,7 @@
 
 set CS_IDENTITY "${APPLE_DEVELOPER_ID}"
 add IB_FLAGS    "--minimum-deployment-target=${APP_MIN_OS}"
+add FLAGS       "-I${HOME}/.nix-profile/include"
 
 extend pretty_plist {
 	config release {
@@ -9,12 +10,16 @@ extend pretty_plist {
 	}
 }
 
+config debug {
+	capture BUILD_ARCH "uname -m"
+	add LN_FLAGS "-L${HOME}/.nix-profile/sdk/${BUILD_ARCH}/lib"
+}
+
 config release {
 	arch "arm64" "x86_64" {
-		# From https://bintray.com/homebrew/bottles/capnp#files
-		set CAPNP_PATH "${HOME}/build/capnp/${arch}/capnp/0.8.0"
- 		add FLAGS      "-target macos-${arch}"
-		add LN_FLAGS   "-target macos-${arch}"
+		add FLAGS    "-target macos-${arch}"
+		add LN_FLAGS "-target macos-${arch}"
+		add LN_FLAGS "-L${HOME}/.nix-profile/sdk/${arch}/lib"
 	}
 }
 
