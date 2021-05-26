@@ -8,7 +8,7 @@
 // = OakAutoSizingTextField =
 // ==========================
 
-@interface OakAutoSizingTextField : NSTextField
+@interface OakAutoSizingTextField : NSComboBox
 @property (nonatomic) NSSize myIntrinsicContentSize;
 @end
 
@@ -34,13 +34,12 @@
 
 static void* kFirstResponderContext = &kFirstResponderContext;
 
-@interface FFTextFieldViewController () <NSTextFieldDelegate, NSTextStorageDelegate, NSPopoverDelegate>
+@interface FFTextFieldViewController () <NSComboBoxDelegate, NSTextStorageDelegate>
 {
-	OakAutoSizingTextField* _textField;
+	NSComboBox* _textField;
 	OakSyntaxFormatter*     _syntaxFormatter;
 	OakPasteboard*          _pasteboard;
 	NSString*               _grammarName;
-	NSPopover*              _popover;
 }
 @end
 
@@ -53,45 +52,6 @@ static void* kFirstResponderContext = &kFirstResponderContext;
 		_grammarName = grammarName;
 	}
 	return self;
-}
-
-- (void)showHistory:(id)sender
-{
-	if(!OakPasteboardSelector.sharedInstance.window.isVisible)
-		[_pasteboard selectItemForControl:_textField];
-}
-
-- (void)showPopoverWithString:(NSString*)aString
-{
-	if(aString)
-	{
-		if(!_popover)
-		{
-			NSViewController* viewController = [[NSViewController alloc] init];
-			viewController.view = OakCreateLabel();
-
-			_popover = [[NSPopover alloc] init];
-			_popover.behavior = NSPopoverBehaviorTransient;
-			_popover.contentViewController = viewController;
-			_popover.delegate = self;
-		}
-
-		NSTextField* textField = (NSTextField*)_popover.contentViewController.view;
-		textField.stringValue = aString;
-		[textField sizeToFit];
-
-		[_popover showRelativeToRect:NSZeroRect ofView:_textField preferredEdge:NSMaxYEdge];
-	}
-	else
-	{
-		[_popover close];
-		_popover = nil;
-	}
-}
-
-- (void)popoverDidClose:(NSNotification*)aNotification
-{
-	_popover = nil;
 }
 
 - (void)setSyntaxHighlightEnabled:(BOOL)flag
@@ -120,11 +80,11 @@ static void* kFirstResponderContext = &kFirstResponderContext;
 	return _syntaxFormatter;
 }
 
-- (OakAutoSizingTextField*)textField
+- (NSComboBox*)textField
 {
 	if(!_textField)
 	{
-		_textField = [[OakAutoSizingTextField alloc] initWithFrame:NSZeroRect];
+		_textField = [[NSComboBox alloc] initWithFrame:NSZeroRect];
 		_textField.font       = OakControlFont();
 		_textField.formatter  = self.syntaxFormatter;
 		_textField.delegate   = self;
@@ -155,8 +115,6 @@ static void* kFirstResponderContext = &kFirstResponderContext;
 	if([_stringValue isEqualToString:newStringValue])
 		return;
 	_stringValue = newStringValue;
-	[self showPopoverWithString:nil];
-	[_textField updateIntrinsicContentSizeToEncompassString:newStringValue];
 
 	if(NSDictionary* info = [self infoForBinding:@"stringValue"])
 	{
@@ -169,6 +127,34 @@ static void* kFirstResponderContext = &kFirstResponderContext;
 				[controller setValue:newStringValue forKeyPath:keyPath];
 		}
 	}
+}
+
+- (void)comboBoxWillPopUp:(NSNotification *)aNotification
+{
+	[_textField removeAllItems];
+	[_textField addItemsWithObjectValues:[_pasteboard.entries valueForKeyPath:@"string"]];
+}
+
+- (void)comboBoxWillDismiss:(NSNotification *)aNotification
+{
+	NSMutableArray* remove = [NSMutableArray array];
+	
+	for(OakPasteboardEntry* entry in _pasteboard.entries)
+	{
+		if (![self textFieldContainsString:entry.string]) {
+			[remove addObject:entry];
+		}
+	}
+	
+	[_pasteboard removeEntries:remove];
+}
+
+-(BOOL)textFieldContainsString:(NSString*)aString
+{
+	NSUInteger index = [_textField.objectValues indexOfObjectPassingTest:^BOOL(NSString* string, NSUInteger idx, BOOL *stop) {
+		return [string isEqualToString: aString];
+	}];
+	return index != NSNotFound;
 }
 
 - (void)observeValueForKeyPath:(NSString*)keyPath ofObject:(id)object change:(NSDictionary*)change context:(void*)context
@@ -195,12 +181,24 @@ static void* kFirstResponderContext = &kFirstResponderContext;
 {
 	if(command == @selector(moveDown:))
 	{
+		if (!_textField.cell.isAccessibilityExpanded) {
+			[_textField.cell performSelector:@selector(popUp:)];
+		}
+		
 		NSRange lastNewline    = [textView.string rangeOfString:@"\n" options:NSBackwardsSearch];
 		NSRange insertionPoint = textView.selectedRanges.lastObject.rangeValue;
 
 		if(lastNewline.location == NSNotFound || lastNewline.location < NSMaxRange(insertionPoint))
-			return [self showHistory:self], YES;
+			return YES;
 	}
+	else if (command == @selector(deleteBackward:) || command == @selector(deleteForward:))
+	{
+		if (_textField.cell.isAccessibilityExpanded) {
+			[_textField removeItemAtIndex:_textField.indexOfSelectedItem];
+			return YES;
+		}
+	}
+	
 	return NO;
 }
 

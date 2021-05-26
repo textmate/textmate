@@ -64,18 +64,6 @@ enum FindActionTag
 // = FindWindowController =
 // ========================
 
-static NSButton* OakCreateHistoryButton (NSString* toolTip)
-{
-	NSButton* res = [[NSButton alloc] initWithFrame:NSZeroRect];
-	res.bezelStyle = NSBezelStyleRoundedDisclosure;
-	res.buttonType = NSButtonTypeMomentaryLight;
-	res.title      = @"";
-	res.toolTip    = toolTip;
-	res.accessibilityLabel = toolTip;
-	[res setContentCompressionResistancePriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
-	return res;
-}
-
 @interface Find () <OakFindServerProtocol, OakUserDefaultsObserver, NSWindowDelegate, NSMenuDelegate>
 {
 	NSObjectController*        _objectController;
@@ -246,15 +234,12 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 	if(!_gridView)
 	{
 		NSTextField* findLabel              = OakCreateLabel(@"Find:");
-		NSButton* findHistoryButton         = OakCreateHistoryButton(@"Show Find History");
 
 		NSButton* countButton               = OakCreateButton(@"Σ", NSBezelStyleSmallSquare);
 		countButton.toolTip                 = @"Show Results Count";
 		countButton.accessibilityLabel      = countButton.toolTip;
 
 		NSTextField* replaceLabel           = OakCreateLabel(@"Replace:");
-		NSButton* replaceHistoryButton      = OakCreateHistoryButton(@"Show Replace History");
-
 		NSTextField* optionsLabel           = OakCreateLabel(@"Options:");
 
 		NSButton* ignoreCaseCheckBox        = OakCreateCheckBox(@"Ignore Case");
@@ -285,8 +270,8 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 		[whereStackView setHuggingPriority:NSLayoutPriorityDefaultHigh-1 forOrientation:NSLayoutConstraintOrientationVertical];
 
 		_gridView = [NSGridView gridViewWithViews:@[
-			@[ findLabel,    _findTextFieldViewController.view,    findHistoryButton,   countButton ],
-			@[ replaceLabel, _replaceTextFieldViewController.view, replaceHistoryButton             ],
+			@[ findLabel,    _findTextFieldViewController.view, countButton ],
+			@[ replaceLabel, _replaceTextFieldViewController.view ],
 			@[ optionsLabel, optionsGridView                                                        ],
 			@[ whereLabel,   whereStackView,                       actionsPopUpButton               ],
 		]];
@@ -299,10 +284,9 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 		[_gridView columnAtIndex:0].xPlacement     = NSGridCellPlacementTrailing;
 		[_gridView columnAtIndex:0].leadingPadding = 20;
 		[_gridView columnAtIndex:1].leadingPadding = 4;
-		[_gridView columnAtIndex:3].leadingPadding = 4;
+		[_gridView columnAtIndex:2].leadingPadding = 4;
 		[_gridView columnAtIndex:_gridView.numberOfColumns-1].trailingPadding = 20;
 
-		[_gridView mergeCellsInHorizontalRange:NSMakeRange(2, 2) verticalRange:NSMakeRange(3, 1)];
 		[_gridView cellAtColumnIndex:2 rowIndex:3].xPlacement = NSGridCellPlacementFill;
 
 		for(NSUInteger row = 0; row < _gridView.numberOfRows; ++row)
@@ -322,8 +306,6 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 		_findTextFieldViewController.view.accessibilityTitleUIElement    = findLabel;
 		_replaceTextFieldViewController.view.accessibilityTitleUIElement = replaceLabel;
 
-		[countButton.widthAnchor constraintEqualToAnchor:findHistoryButton.widthAnchor].active = YES;
-		[countButton.heightAnchor constraintEqualToAnchor:findHistoryButton.heightAnchor].active = YES;
 		[_wherePopUpButton.widthAnchor constraintLessThanOrEqualToConstant:150].active = YES;
 
 		[self updateSearchInPopUpMenu];
@@ -358,10 +340,6 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 
 		// =============================
 
-		findHistoryButton.action    = @selector(showHistory:);
-		findHistoryButton.target    = _findTextFieldViewController;
-		replaceHistoryButton.action = @selector(showHistory:);
-		replaceHistoryButton.target = _replaceTextFieldViewController;
 		countButton.action          = @selector(countOccurrences:);
 
 		[globTextField                        bind:NSValueBinding         toObject:_objectController            withKeyPath:@"content.globHistoryList.head" options:nil];
@@ -728,7 +706,6 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 		return;
 
 	_regularExpression = flag;
-	[_findTextFieldViewController showPopoverWithString:nil];
 
 	_findTextFieldViewController.syntaxHighlightEnabled    = flag;
 	_replaceTextFieldViewController.syntaxHighlightEnabled = flag;
@@ -873,7 +850,7 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 		std::string error = regexp::validate(to_s(self.findString));
 		if(error != NULL_STR)
 		{
-			[_findTextFieldViewController showPopoverWithString:to_ns(text::format("Invalid regular expression: %s.", error.c_str()))];
+			self.statusString = to_ns(text::format("Invalid regular expression: %s.", error.c_str()));
 			return;
 		}
 	}

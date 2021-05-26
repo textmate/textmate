@@ -6,6 +6,4 @@
 @property (nonatomic) NSString* stringValue;
 
 - (instancetype)initWithPasteboard:(OakPasteboard*)pasteboard grammarName:(NSString*)grammarName;
-- (void)showHistory:(id)sender;
-- (void)showPopoverWithString:(NSString*)aString;
 @end
