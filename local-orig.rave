@@ -3,6 +3,7 @@
 set CS_IDENTITY "${APPLE_DEVELOPER_ID}"
 add IB_FLAGS    "--minimum-deployment-target=${APP_MIN_OS}"
 add FLAGS       "-I${HOME}/.nix-profile/include"
+add FLAGS       "-I/nix/store/bf3dakzk8pp0dxk2mhdy3lp3qkkq1hm6-boost-1.75.0-dev/include"
 
 extend pretty_plist {
 	config release {
