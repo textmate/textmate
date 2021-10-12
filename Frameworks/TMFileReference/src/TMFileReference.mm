@@ -33,6 +33,11 @@ NSNotificationName const TMURLWillCloseNotification = @"TMURLWillCloseNotificati
 	return bindingProxy;
 }
 
++ (TMFileReference*)fileReferenceWithImage:(NSImage*)image
+{
+	return [[TMFileReference alloc] initWithImage:image];
+}
+
 + (NSImage*)imageForURL:(NSURL*)url size:(NSSize)size
 {
 	NSImage* image = [[TMFileReference fileReferenceWithURL:url].image copy];
@@ -44,6 +49,13 @@ NSNotificationName const TMURLWillCloseNotification = @"TMURLWillCloseNotificati
 {
 	if(self = [super init])
 		_URL = url;
+	return self;
+}
+
+- (instancetype)initWithImage:(NSImage*)image
+{
+	if(self = [super init])
+		_image = image;
 	return self;
 }
 

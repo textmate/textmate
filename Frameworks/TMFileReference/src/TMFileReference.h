@@ -6,6 +6,7 @@ extern NSNotificationName const TMURLWillCloseNotification;
 
 @interface TMFileReference : NSObject
 + (instancetype)fileReferenceWithURL:(nullable NSURL*)url;
++ (instancetype)fileReferenceWithImage:(NSImage*)image;
 + (NSImage*)imageForURL:(NSURL*)url size:(NSSize)size;
 
 @property (nonatomic, readonly)                      NSImage* image;
