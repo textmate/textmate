@@ -11,6 +11,7 @@
 #import "OFB/OFBFinderTagsChooser.h"
 #import <MenuBuilder/MenuBuilder.h>
 #import <OakAppKit/NSMenuItem Additions.h>
+#import <OakAppKit/NSImage Additions.h>
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakOpenWithMenu.h>
 #import <OakAppKit/OakFinderTag.h>
@@ -103,6 +104,7 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 
 @property (nonatomic) BOOL showExcludedItems;
 
+@property (nonatomic) TMFileReference* fileReference;
 @property (nonatomic, readonly) NSArray<FileItem*>* selectedItems;
 @property (nonatomic, readonly) NSArray<FileItem*>* previewableItems;
 
@@ -198,7 +200,7 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 		_currentLocationMenuItem = [[NSMenuItem alloc] initWithTitle:@"" action:@selector(takeURLFrom:) keyEquivalent:@""];
 		_currentLocationMenuItem.target = self;
 		[_currentLocationMenuItem bind:NSTitleBinding toObject:self withKeyPath:@"fileItem.displayName" options:nil];
-		[_currentLocationMenuItem bind:NSImageBinding toObject:self withKeyPath:@"fileItem.image" options:nil];
+		[_currentLocationMenuItem bind:NSImageBinding toObject:self withKeyPath:@"fileReference.image" options:nil];
 
 		NSOutlineView* outlineView = _fileBrowserView.outlineView;
 		outlineView.dataSource   = self;
@@ -1669,6 +1671,34 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 	}
 
 	_fileItem = item;
+
+	NSURL* url = _fileItem.URL;
+	if(url.isFileURL)
+	{
+		self.fileReference = [TMFileReference fileReferenceWithURL:url];
+	}
+	else
+	{
+		NSImage* image;
+		if([url.scheme isEqualToString:@"scm"])
+		{
+			if([url.query hasSuffix:@"unstaged"] || [url.query hasSuffix:@"untracked"])
+					image = [NSWorkspace.sharedWorkspace iconForFileType:NSFileTypeForHFSTypeCode((OSType)kGenericFolderIcon)];
+			else	image = [NSImage imageNamed:@"SCMTemplate" inSameBundleAsClass:NSClassFromString(@"OakFileBrowser")];
+		}
+		else if([url.scheme isEqualToString:@"computer"])
+		{
+			image = [NSImage imageNamed:NSImageNameComputer];
+		}
+		else
+		{
+			image = [NSWorkspace.sharedWorkspace iconForFileType:NSFileTypeForHFSTypeCode((OSType)kGenericFolderIcon)];
+		}
+
+		image = [image copy];
+		image.size = NSMakeSize(16, 16);
+		self.fileReference = [TMFileReference fileReferenceWithImage:image];
+	}
 
 	[self.outlineView reloadItem:nil reloadChildren:YES];
 	[self.outlineView deselectAll:self];
