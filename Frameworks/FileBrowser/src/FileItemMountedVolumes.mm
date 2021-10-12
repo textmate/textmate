@@ -19,13 +19,6 @@
 	return [[MountedVolumesObserver alloc] initWithBlock:handler];
 }
 
-- (NSImage*)image
-{
-	NSImage* image = [[NSImage imageNamed:NSImageNameComputer] copy];
-	image.size = NSMakeSize(16, 16);
-	return image;
-}
-
 - (NSString*)localizedName
 {
 	return NSHost.currentHost.localizedName;

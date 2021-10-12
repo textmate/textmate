@@ -1,5 +1,3 @@
-#import <scm/status.h>
-
 extern NSURL* const kURLLocationComputer;
 extern NSURL* const kURLLocationFavorites;
 
@@ -13,8 +11,6 @@ extern NSURL* const kURLLocationFavorites;
 @property (nonatomic, readonly) NSURL* parentURL;
 @property (nonatomic, readonly, getter = isDirectory) BOOL directory;
 
-@property (nonatomic, readonly) NSImage* image;
-@property (nonatomic, readonly) scm::status::type SCMStatus;
 @property (nonatomic, readonly) NSString* displayName;
 
 @property (nonatomic) NSString* localizedName;
@@ -23,8 +19,6 @@ extern NSURL* const kURLLocationFavorites;
 
 @property (nonatomic, readonly) BOOL canRename;
 @property (nonatomic, readonly, getter = isApplication) BOOL application;
-
-@property (nonatomic, getter = isModified)         BOOL modified;
 
 @property (nonatomic, getter = isMissing)          BOOL missing;
 @property (nonatomic, getter = isHidden)           BOOL hidden;

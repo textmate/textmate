@@ -200,13 +200,6 @@
 	return super.localizedName;
 }
 
-- (NSImage*)image
-{
-	if([self.URL.query hasSuffix:@"unstaged"] || [self.URL.query hasSuffix:@"untracked"])
-		return super.image;
-	return [NSImage imageNamed:@"SCMTemplate" inSameBundleAsClass:NSClassFromString(@"OakFileBrowser")];
-}
-
 - (NSURL*)parentURL
 {
 	if([self.URL.query hasSuffix:@"unstaged"] || [self.URL.query hasSuffix:@"untracked"])

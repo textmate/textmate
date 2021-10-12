@@ -1,7 +1,4 @@
 #import "FileItem.h"
-#import "FileItemImage.h"
-#import "SCMManager.h"
-#import <OakAppKit/NSImage Additions.h>
 #import <OakAppKit/OakFinderTag.h>
 #import <OakFoundation/OakFoundation.h>
 #import <Preferences/Keys.h>
@@ -12,9 +9,6 @@ NSURL* const kURLLocationFavorites = [[NSURL alloc] initFileURLWithPath:[NSHomeD
 
 @interface FileItem ()
 @property (nonatomic, readonly) BOOL alwaysShowFileExtension;
-@property (nonatomic, readwrite) NSImage* image;
-@property (nonatomic, readwrite) scm::status::type SCMStatus;
-@property (nonatomic) id SCMStatusObserver;
 @end
 
 static NSMutableDictionary* SchemeToClass;
@@ -48,36 +42,9 @@ static NSMutableDictionary* SchemeToClass;
 	{
 		self.URL = url;
 
-		NSNumber* flag;
-		BOOL disableSCMStatus = [url getResourceValue:&flag forKey:@"org.textmate.disable-scm-status" error:nil] && flag.boolValue;
-
 		[self updateFileProperties];
-		[self addSCMStatusObserver:url.isFileURL && !disableSCMStatus];
 	}
 	return self;
-}
-
-- (void)dealloc
-{
-	[self addSCMStatusObserver:NO];
-}
-
-- (void)addSCMStatusObserver:(BOOL)flag
-{
-	if(_SCMStatusObserver)
-	{
-		[SCMManager.sharedInstance removeObserver:_SCMStatusObserver];
-		_SCMStatusObserver = nil;
-	}
-
-	if(flag)
-	{
-		__weak FileItem* weakSelf = self;
-		_SCMStatusObserver = [SCMManager.sharedInstance addObserverToFileAtURL:_URL usingBlock:^(scm::status::type newStatus){
-			weakSelf.SCMStatus = newStatus;
-			weakSelf.missing   = newStatus == scm::status::deleted;
-		}];
-	}
 }
 
 - (BOOL)canRename
@@ -160,13 +127,6 @@ static NSMutableDictionary* SchemeToClass;
 	return _localizedName ?: _URL.lastPathComponent;
 }
 
-- (NSImage*)image
-{
-	if(!_image)
-		_image = CreateIconImageForURL(_URL, _modified, _missing, self.isDirectory || _linkToDirectory, _symbolicLink, _SCMStatus);
-	return _image;
-}
-
 - (NSURL*)resolvedURL
 {
 	NSURL* url = _URL;
@@ -211,11 +171,6 @@ static NSMutableDictionary* SchemeToClass;
 // = Setters that invalidate other propertes =
 // ===========================================
 
-+ (NSSet*)keyPathsForValuesAffectingImage
-{
-	return [NSSet setWithObjects:@"URL", @"linkToDirectory", @"missing", @"modified", @"SCMStatus", @"symbolicLink", nil];
-}
-
 + (NSSet*)keyPathsForValuesAffectingDisplayName
 {
 	return [NSSet setWithObjects:@"localizedName", @"disambiguationSuffix", nil];
@@ -232,9 +187,6 @@ static NSMutableDictionary* SchemeToClass;
 	{
 		_URL           = newURL;
 		_localizedName = nil;
-		_image         = nil;
-
-		[self addSCMStatusObserver:_SCMStatusObserver ? YES : NO];
 
 		for(FileItem* child in _children)
 		{
@@ -252,51 +204,6 @@ static NSMutableDictionary* SchemeToClass;
 	{
 		_hiddenExtension = flag;
 		_localizedName   = nil;
-	}
-}
-
-- (void)setLinkToDirectory:(BOOL)flag
-{
-	if(_linkToDirectory != flag)
-	{
-		_linkToDirectory = flag;
-		_image           = nil;
-	}
-}
-
-- (void)setMissing:(BOOL)flag
-{
-	if(_missing != flag)
-	{
-		_missing = flag;
-		_image   = nil;
-	}
-}
-
-- (void)setModified:(BOOL)flag
-{
-	if(_modified != flag)
-	{
-		_modified = flag;
-		_image    = nil;
-	}
-}
-
-- (void)setSCMStatus:(scm::status::type)newStatus
-{
-	if(_SCMStatus != newStatus)
-	{
-		_SCMStatus = newStatus;
-		_image     = nil;
-	}
-}
-
-- (void)setSymbolicLink:(BOOL)flag
-{
-	if(_symbolicLink != flag)
-	{
-		_symbolicLink = flag;
-		_image        = nil;
 	}
 }
 @end
