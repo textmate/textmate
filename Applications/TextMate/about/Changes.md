@@ -2,6 +2,10 @@ Title: Release Notes
 
 # Changes
 
+## 2021-10-12 (v2.0.23)
+
+* Miscellaneous improvements, [see changes since v2.0.22 on GitHub](https://github.com/textmate/textmate/compare/v2.0.22...v2.0.23)
+
 ## 2021-04-16 (v2.0.22)
 
 * A few more tweaks to improve things on macOS 11 including dropping use of floating header rows in file browser (SCM Status) and search results, as these appear to cause problems on Big Sur.
