@@ -182,7 +182,7 @@ static NSImage* ImageNamed (NSString* imageName)
 		NSURL* url                  = _URL;
 		scm::status::type scmStatus = _SCMStatus;
 
-		_image = [NSImage imageWithSize:NSMakeSize(48, 48) flipped:NO drawingHandler:^BOOL(NSRect dstRect){
+		_image = [NSImage imageWithSize:NSMakeSize(16, 16) flipped:NO drawingHandler:^BOOL(NSRect dstRect){
 			BOOL drawLinkBadge = NO;
 
 			NSImage* image;
