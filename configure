@@ -13,15 +13,15 @@ done
 if [[ -e local.rave ]]; then
 	echo >&2 "Skipping writing ‘local.rave’: File already exists"
 else
-	echo >> local.rave 'add FLAGS    "-I/usr/local/include"'
-	echo >> local.rave 'add LN_FLAGS "-L/usr/local/lib"'
+	echo >> local.rave "add FLAGS    \"-I$(brew --prefix)/include"\"
+	echo >> local.rave "add LN_FLAGS \"-L$(brew --prefix)/lib\""
 
 	for hdr in boost/{crc,variant}.hpp capnp/{message,serialize-packed}.h sparsehash/dense_hash_map; do
-		test -f "/usr/local/include/${hdr}" || error "*** dependency missing: ‘/usr/local/include/${hdr}’. Install dependency and/or update ‘local.rave’ with correct path."
+		test -f "$(brew --prefix)/include/${hdr}" || error "*** dependency missing: ‘$(brew --prefix)/include/${hdr}’. Install dependency and/or update ‘local.rave’ with correct path."
 	done
 
 	for lib in capnp kj; do
-		test -f "/usr/local/lib/lib${lib}."* || error "*** dependency missing: ‘/usr/local/lib/lib${lib}.*’. Install dependency and/or update ‘local.rave’ with correct path."
+		test -f "$(brew --prefix)/lib/lib${lib}."* || error "*** dependency missing: ‘$(brew --prefix)/lib/lib${lib}.*’. Install dependency and/or update ‘local.rave’ with correct path."
 	done
 fi
 
