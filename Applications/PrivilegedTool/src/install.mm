@@ -3,6 +3,7 @@
 #include <text/format.h>
 #include <io/io.h>
 #include <authorization/constants.h>
+#include <oak/compat.h>
 
 static char const* const kPlistFormatString =
 	"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
@@ -43,7 +44,7 @@ static std::string plist_content ()
 
 static void launch_control (char const* command, std::string const& argument)
 {
-	pid_t pid = vfork();
+	pid_t pid = oak::vfork();
 	if(pid == 0)
 	{
 		execl("/bin/launchctl", "/bin/launchctl", command, argument.c_str(), nullptr);

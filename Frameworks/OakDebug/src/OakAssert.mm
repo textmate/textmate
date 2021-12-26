@@ -1,5 +1,6 @@
 #import "OakDebug.h"
 #import <oak/oak.h>
+#import <oak/compat.h>
 #import <text/format.h>
 
 @interface OakExceptionHandlerDelegate : NSObject { }
@@ -28,7 +29,7 @@ std::string OakStackDump (int linesToSkip)
 	int output[2];
 	pipe(&output[0]);
 
-	pid_t pid = vfork();
+	pid_t pid = oak::vfork();
 	if(pid == 0)
 	{
 		close(STDOUT_FILENO); close(STDERR_FILENO);

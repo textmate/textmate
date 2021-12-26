@@ -1,6 +1,7 @@
 #include <authorization/constants.h>
 #include <authorization/authorization.h>
 #include <oak/oak.h>
+#include <oak/compat.h>
 #include <text/format.h>
 #include <text/parse.h>
 #include <io/path.h>
@@ -88,7 +89,7 @@ static void install_auth_tool ()
 			exit(EX_UNAVAILABLE);
 		}
 
-		pid_t pid = vfork();
+		pid_t pid = oak::vfork();
 		if(pid == 0)
 		{
 			execl(arg0, arg0, "--install", nullptr);

@@ -2,6 +2,7 @@
 #import <document/OakDocument.h>
 #import <document/OakDocumentController.h>
 #import <oak/datatypes.h>
+#import <oak/compat.h>
 #import <cf/cf.h>
 #import <ns/ns.h>
 #import <io/environment.h>
@@ -68,7 +69,7 @@ static std::tuple<pid_t, int, int> my_fork (char const* cmd, int inputRead, std:
 
 	oak::c_array env(environment);
 
-	pid_t pid = vfork();
+	pid_t pid = oak::vfork();
 	if(pid == 0)
 	{
 		int const signals[] = { SIGINT, SIGTERM, SIGPIPE, SIGUSR1 };

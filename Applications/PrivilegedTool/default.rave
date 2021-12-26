@@ -1,5 +1,5 @@
 target "${dirname}" {
 	require authorization io text
-	sources src/*.cc
+	sources src/*.cc src/*.mm
 	executable "${target}"
 }
