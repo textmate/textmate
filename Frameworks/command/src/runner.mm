@@ -5,6 +5,7 @@
 #include <io/path.h>
 #include <io/pipe.h>
 #include <regexp/format_string.h>
+#include <oak/compat.h>
 #include <oak/datatypes.h>
 
 static std::string trim_right (std::string const& str, std::string const& trimChars = " \t\n")
@@ -42,7 +43,7 @@ static std::tuple<pid_t, int, int> my_fork (char const* cmd, int inputRead, std:
 
 	oak::c_array env(environment);
 
-	pid_t pid = vfork();
+	pid_t pid = oak::vfork();
 	if(pid == 0)
 	{
 		int const signals[] = { SIGINT, SIGTERM, SIGPIPE, SIGUSR1 };
