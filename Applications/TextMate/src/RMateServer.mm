@@ -334,16 +334,17 @@ namespace // wrap in anonymous namespace to avoid clashing with other callbacks 
 	{
 		reactivate_callback_t () : _shared_count(std::make_shared<size_t>(0))
 		{
-			_terminal = std::make_shared<NSRunningApplication*>([NSWorkspace.sharedWorkspace frontmostApplication]);
+			_terminal = [[NSWorkspace sharedWorkspace] frontmostApplication];
 
-			auto terminal = _terminal;
-			if([*terminal isEqual:NSRunningApplication.currentApplication])
+			__block auto terminal = _terminal;
+
+			if([terminal isEqual:NSRunningApplication.currentApplication])
 			{
 				// If we call ‘mate -w’ in quick succession there is a chance that we have not yet re-activated the terminal app when we are asked to open a new document. For this reason, we monitor the NSApplicationDidResignActiveNotification for 200 ms to see if the “real” frontmost application becomes active.
 
 				__weak __block id token = [NSNotificationCenter.defaultCenter addObserverForName:NSApplicationDidResignActiveNotification object:NSApp queue:nil usingBlock:^(NSNotification*){
 					[NSNotificationCenter.defaultCenter removeObserver:token];
-					*terminal = [NSWorkspace.sharedWorkspace frontmostApplication];
+					terminal = [NSWorkspace.sharedWorkspace frontmostApplication];
 				}];
 
 				dispatch_after(dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC / 5), dispatch_get_main_queue(), ^{
@@ -355,19 +356,19 @@ namespace // wrap in anonymous namespace to avoid clashing with other callbacks 
 		void watch_document (OakDocument* document)
 		{
 			auto counter  = _shared_count;
-			auto terminal = _terminal;
+			__block auto terminal = _terminal;
 
 			++*counter;
 			__weak __block id token = [NSNotificationCenter.defaultCenter addObserverForName:OakDocumentWillCloseNotification object:document queue:nil usingBlock:^(NSNotification*){
 				if(--*counter == 0)
-					[*terminal activateWithOptions:NSApplicationActivateIgnoringOtherApps];
+					[terminal activateWithOptions:NSApplicationActivateIgnoringOtherApps];
 				[NSNotificationCenter.defaultCenter removeObserver:token];
 			}];
 		}
 
 	private:
 		std::shared_ptr<size_t> _shared_count;
-		std::shared_ptr<NSRunningApplication*> _terminal;
+		NSRunningApplication* _terminal;
 	};
 }
 
