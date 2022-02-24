@@ -127,7 +127,7 @@
 	NSButton* keepCurrentDocumentSelectedCheckBox      = OakCreateCheckBox(@"Keep current document selected");
 
 	NSPopUpButton* fileBrowserPositionPopUp            = OakCreatePopUpButton();
-	NSButton* adjustWindowWhenToggleingDisplayCheckBox = OakCreateCheckBox(@"Adjust window when toggleing display");
+	NSButton* adjustWindowWhenTogglingDisplayCheckBox = OakCreateCheckBox(@"Adjust window when toggling display");
 
 	NSButton* showForSingleDocumentCheckBox            = OakCreateCheckBox(@"Show for single document");
 	NSButton* reOrderWhenOpeningAFileCheckBox          = OakCreateCheckBox(@"Re-order when opening a file");
@@ -160,7 +160,7 @@
 		@[ NSGridCell.emptyContentView,                keepCurrentDocumentSelectedCheckBox      ],
 		@[ ],
 		@[ OakCreateLabel(@"Show file browser on:"),   fileBrowserPositionPopUp                 ],
-		@[ NSGridCell.emptyContentView,                adjustWindowWhenToggleingDisplayCheckBox ],
+		@[ NSGridCell.emptyContentView,                adjustWindowWhenTogglingDisplayCheckBox  ],
 		@[ ],
 		@[ OakCreateLabel(@"Document tabs:"),          showForSingleDocumentCheckBox            ],
 		@[ NSGridCell.emptyContentView,                reOrderWhenOpeningAFileCheckBox          ],
@@ -190,7 +190,7 @@
 	[openFilesOnSingleClickCheckBox           bind:NSValueBinding       toObject:self withKeyPath:@"fileBrowserSingleClickToOpen" options:nil];
 	[keepCurrentDocumentSelectedCheckBox      bind:NSValueBinding       toObject:self withKeyPath:@"autoRevealFile"               options:nil];
 	[fileBrowserPositionPopUp                 bind:NSSelectedTagBinding toObject:self withKeyPath:@"fileBrowserPlacement"         options:@{ NSValueTransformerNameBindingOption: @"OakFileBrowserPlacementSettingsTransformer" }];
-	[adjustWindowWhenToggleingDisplayCheckBox bind:NSValueBinding       toObject:self withKeyPath:@"disableAutoResize"            options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
+	[adjustWindowWhenTogglingDisplayCheckBox  bind:NSValueBinding       toObject:self withKeyPath:@"disableAutoResize"            options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
 	[showForSingleDocumentCheckBox            bind:NSValueBinding       toObject:self withKeyPath:@"disableTabBarCollapsing"      options:nil];
 	[reOrderWhenOpeningAFileCheckBox          bind:NSValueBinding       toObject:self withKeyPath:@"disableTabReordering"         options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
 	[automaticallyCloseUnusedTabsCheckBox     bind:NSValueBinding       toObject:self withKeyPath:@"disableTabAutoClose"          options:@{ NSValueTransformerNameBindingOption: NSNegateBooleanTransformerName }];
