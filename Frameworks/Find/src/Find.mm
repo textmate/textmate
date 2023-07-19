@@ -1017,7 +1017,7 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 
 - (void)didFind:(NSUInteger)aNumber occurrencesOf:(NSString*)aFindString atPosition:(text::pos_t const&)aPosition wrapped:(BOOL)didWrap
 {
-	static std::string const formatStrings[4][3] = {
+	static std::string const formatStrings[2][3] = {
 		{ "No more occurrences of “${found}”.", "Found “${found}”${line:+ at line ${line}, column ${column}}.",               "${count} occurrences of “${found}”." },
 		{ "No more matches for “${found}”.",    "Found one match for “${found}”${line:+ at line ${line}, column ${column}}.", "${count} matches for “${found}”."    },
 	};
