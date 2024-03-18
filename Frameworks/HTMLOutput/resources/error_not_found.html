@@ -12,7 +12,7 @@
 <p>The requested file was not found: <code><script>
   var path = /[&?]path=([^&]+)/.exec(window.location.search)[1];
   path = unescape(unescape(path));
-  path = path.replace(/&/, "&amp;").replace(/</, "&lt;");
+  path = path.replace(/&/gm, "&amp;").replace(/</gm, "&lt;");
   document.write(path);
 </script></code></p>
 
