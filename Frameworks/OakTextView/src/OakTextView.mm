@@ -34,6 +34,7 @@
 #import <ns/spellcheck.h>
 #import <text/case.h>
 #import <text/classification.h>
+#import <text/ctype.h>
 #import <text/format.h>
 #import <text/newlines.h>
 #import <text/trim.h>
@@ -459,6 +460,19 @@ private:
 	ng::editor_t* _editor;
 	ng::layout_t* _layout;
 };
+
+namespace ng
+{
+	static size_t count_columns (std::shared_ptr<document_view_t>& documentView, index_t caret)
+	{
+		size_t const tabSize = documentView->tab_size();
+		std::string const str = documentView->substr(documentView->begin(documentView->convert(caret.index).line), caret.index);
+		size_t len = 0;
+		citerate(ch, diacritics::make_range(str.data(), str.data() + str.size()))
+			len += (*ch == '\t' ? tabSize - (len % tabSize) : (text::is_east_asian_width(*ch) ? 2 : 1));
+		return len;
+	}
+}
 
 @interface OakTextView () <NSTextInputClient, NSDraggingSource, NSIgnoreMisspelledWords, NSChangeSpelling, NSTextFieldDelegate, NSTouchBarDelegate, NSAccessibilityCustomRotorItemSearchDelegate, OakUserDefaultsObserver>
 {
@@ -3521,6 +3535,18 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	{
 		text::pos_t from = documentView->convert(range.first.index);
 		text::pos_t to   = documentView->convert(range.last.index);
+
+		if (from.column < 4096 && to.column < 4096) {
+			// limit tab width calculation to first 4096 characters of each line
+			size_t from_col_visual = ng::count_columns(documentView, range.first);
+			text::pos_t from_visual(from.line, from_col_visual, from.offset);
+			from = from_visual;
+
+			size_t to_col_visual = ng::count_columns(documentView, range.last);
+			text::pos_t to_visual(to.line, to_col_visual, to.offset);
+			to = to_visual;
+		}
+
 		if(range.freehanded || range.columnar)
 		{
 			from.offset = range.first.carry;
