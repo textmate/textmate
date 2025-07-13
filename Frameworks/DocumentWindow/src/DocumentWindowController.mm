@@ -1483,6 +1483,15 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	attributes.insert(_projectScopeAttributes.begin(), _projectScopeAttributes.end());
 	attributes.insert(_externalScopeAttributes.begin(), _externalScopeAttributes.end());
 
+	if (self.fileBrowserVisible) {
+		NSResponder *first = [self.window firstResponder];
+		if ([first isKindOfClass:[NSView class]] &&
+			[(NSView *)first isDescendantOf:self.fileBrowser.view])
+		{
+			attributes.insert("attr.filebrowser");
+		}
+	}
+
 	return [NSString stringWithCxxString:text::join(attributes, " ")];
 }
 
