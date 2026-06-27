@@ -16,6 +16,7 @@
 #import <OakFoundation/NSString Additions.h>
 #import <Preferences/Keys.h>
 #import <OakTextView/OakDocumentView.h>
+#import <OakTextView/OakCommandRefresh.h>
 #import <FileBrowser/FileBrowserViewController.h>
 #import <OakCommand/OakCommand.h>
 #import <HTMLOutputWindow/HTMLOutputWindow.h>
@@ -1528,6 +1529,44 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	[[self class] scheduleSessionBackup:self];
 }
 
+static NSString* const kMarkdownPreviewCommandUUID = @"B52DEA16-8480-11D9-BE59-000D93B3A10E";
+
+- (BOOL)isMarkdownDocument:(OakDocument*)document
+{
+	NSString* path = document.path;
+	if(path)
+	{
+		NSString* ext = path.pathExtension.lowercaseString;
+		if([@[@"md", @"markdown", @"mdown", @"mkd", @"mkdn"] containsObject:ext])
+			return YES;
+	}
+	return [document.fileType isEqualToString:@"text.html.markdown"];
+}
+
+- (BOOL)hasActiveMarkdownPreview
+{
+	NSUUID* uuid = [[NSUUID alloc] initWithUUIDString:kMarkdownPreviewCommandUUID];
+	return [OakCommandRefresher findRefresherForCommandUUID:uuid document:nil window:self.window] != nil;
+}
+
+- (void)updateMarkdownPreviewForDocument:(OakDocument*)document
+{
+	if([self isMarkdownDocument:document])
+	{
+		if(!self.htmlOutputVisible)
+		{
+			bundles::item_ptr item = bundles::lookup(to_s(kMarkdownPreviewCommandUUID));
+			if(item)
+				[self performBundleItem:item];
+		}
+	}
+	else
+	{
+		if([self hasActiveMarkdownPreview])
+			self.htmlOutputVisible = NO;
+	}
+}
+
 - (void)setSelectedDocument:(OakDocument*)newDocument
 {
 	ASSERT(!newDocument || newDocument.isLoaded);
@@ -1561,6 +1600,8 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 
 		self.documentView.document = _selectedDocument;
 		[[self class] scheduleSessionBackup:self];
+		[NSNotificationCenter.defaultCenter postNotificationName:OakWindowDidChangeSelectedDocumentNotification object:self.window userInfo:@{ @"document": _selectedDocument }];
+		[self updateMarkdownPreviewForDocument:_selectedDocument];
 	}
 	else
 	{

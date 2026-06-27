@@ -5,6 +5,8 @@
 #import <settings/settings.h>
 #import <ns/ns.h>
 
+NSNotificationName const OakWindowDidChangeSelectedDocumentNotification = @"OakWindowDidChangeSelectedDocumentNotification";
+
 @interface OakCommandRefresher ()
 {
 	OakCommandRefresherOptions _options;
@@ -78,6 +80,9 @@ static NSMutableSet<OakCommandRefresher*>* CommandRefreshers = [NSMutableSet set
 			[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(documentDidSave:) name:OakDocumentDidSaveNotification object:nil];
 			[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(windowWillClose:) name:NSWindowWillCloseNotification object:window];
 		}
+
+		if(_options & OakCommandRefresherOnTabSwitch)
+			[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(windowDidChangeSelectedDocument:) name:OakWindowDidChangeSelectedDocumentNotification object:window];
 	}
 	return self;
 }
@@ -132,6 +137,15 @@ static NSMutableSet<OakCommandRefresher*>* CommandRefreshers = [NSMutableSet set
 	res << _document.variables;
 	res = bundles::scope_variables(res); // Bundle items with a shellVariables setting
 	res = variables_for_path(res, to_s(_document.path)); // .tm_properties
+}
+
+- (void)windowDidChangeSelectedDocument:(NSNotification*)aNotification
+{
+	OakDocument* newDocument = aNotification.userInfo[@"document"];
+	if(!newDocument || [newDocument isEqual:_document])
+		return;
+	_document = newDocument;
+	[self executeForAction:@"TabSwitch" afterDelay:NO];
 }
 
 - (void)documentWillClose:(NSNotification*)aNotification

@@ -4568,6 +4568,8 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 				options |= OakCommandRefresherDocumentDidClose;
 			if(aBundleCommand.input == input::entire_document)
 				options |= OakCommandRefresherDocumentAsInput;
+			if(aBundleCommand.auto_refresh != auto_refresh::never)
+				options |= OakCommandRefresherOnTabSwitch;
 			[OakCommandRefresher scheduleRefreshForCommand:command document:_document window:self.window options:options variables:variables];
 		}
 	};
