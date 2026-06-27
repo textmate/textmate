@@ -1,4 +1,5 @@
 #import "HOWKScriptMessageHandler.h"
+#import "../HTMLOutput.h"
 #import "HOJSBridge.h" // for HOJSBridgeDelegate protocol
 #import "add_to_buffer.h"
 #import <OakFoundation/NSString Additions.h>
@@ -105,6 +106,11 @@
 	{
 		NSNumber* cmdId = payload[@"id"];
 		[_shellCommands[cmdId] closeInput];
+	}
+	else if([command isEqualToString:@"scrollSync"])
+	{
+		double ratio = [payload[@"ratio"] doubleValue];
+		[_scrollSyncDelegate scrollSyncDidReceiveRatio:ratio];
 	}
 }
 

@@ -204,6 +204,8 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		_titlebarViewController.view = self.tabBarView;
 		_titlebarViewController.fullScreenMinHeight = NSHeight(self.tabBarView.frame);
 		[self.window addTitlebarAccessoryViewController:_titlebarViewController];
+		self.tabBarView.translatesAutoresizingMaskIntoConstraints = NO;
+		[self.tabBarView.heightAnchor constraintEqualToConstant:self.tabBarView.intrinsicContentSize.height].active = YES;
 
 		OakAddAutoLayoutViewsToSuperview(@[ self.layoutView ], self.window.contentView);
 		self.window.initialFirstResponder = self.textView;

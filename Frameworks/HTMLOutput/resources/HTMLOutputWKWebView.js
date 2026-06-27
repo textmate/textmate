@@ -177,3 +177,80 @@ function _tmShellExit(id, status) {
 	let cmd = _shellCommands.get(id);
 	if(cmd) cmd._onExit(status);
 }
+
+// =====================
+// = Scroll Sync       =
+// =====================
+
+let _tmScrollSyncEnabled = false;
+let _tmScrollSyncIgnoreNext = false;
+
+function _tmScrollTo(ratio) {
+	_tmScrollSyncIgnoreNext = true;
+	let maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+	window.scrollTo(0, maxScroll * ratio);
+}
+
+function _tmSetScrollSyncEnabled(enabled) {
+	_tmScrollSyncEnabled = enabled;
+}
+
+// ========================
+// = Active Line Highlight =
+// ========================
+
+document.addEventListener("DOMContentLoaded", function() {
+	let style = document.createElement("style");
+	style.textContent = "._tm-active-line { background-color: rgba(255, 200, 0, 0.30) !important; border-radius: 3px; transition: background-color 0.15s ease; outline: 2px solid rgba(255, 180, 0, 0.25); outline-offset: 2px; }";
+	document.head.appendChild(style);
+});
+
+let _tmHighlightEnabled = false;
+let _tmHighlightedEl = null;
+const _tmBlockSelectors = "p, h1, h2, h3, h4, h5, h6, li, blockquote, pre, td, th, dt, dd, figcaption";
+
+function _tmHighlightLine(lineNumber, lineCount) {
+	if(!_tmHighlightEnabled) return;
+	// Only select top-level block elements so nested elements (e.g. <li> inside <ul>)
+	// don't fragment the mapping. Walk backward from the target index just like the
+	// Ruby preview command does when placing scroll_to_here.
+	// Target the content div used by the TM html output template; fall back to body
+	let container = document.getElementById("tm_webpreview_content") || document.body;
+	let blocks = Array.from(container.querySelectorAll("p, h1, h2, h3, h4, h5, h6, ul, ol, blockquote, pre, table, hr, figure"));
+	if(blocks.length === 0) return;
+
+	// Map source line → block element index.
+	// lineNumber is 0-based; use floor so the highlight leads rather than lags.
+	let ratio = lineCount > 1 ? lineNumber / lineCount : 0;
+	let idx = Math.floor(ratio * blocks.length);
+	idx = Math.max(0, Math.min(idx, blocks.length - 1));
+	let best = blocks[idx];
+
+	if(best !== _tmHighlightedEl) {
+		if(_tmHighlightedEl) _tmHighlightedEl.classList.remove("_tm-active-line");
+		best.classList.add("_tm-active-line");
+		_tmHighlightedEl = best;
+	}
+}
+
+function _tmSetHighlightEnabled(enabled) {
+	_tmHighlightEnabled = enabled;
+	if(!enabled && _tmHighlightedEl) {
+		_tmHighlightedEl.classList.remove("_tm-active-line");
+		_tmHighlightedEl = null;
+	}
+}
+
+window.addEventListener("scroll", function() {
+	if(!_tmScrollSyncEnabled) return;
+	if(_tmScrollSyncIgnoreNext) {
+		_tmScrollSyncIgnoreNext = false;
+		return;
+	}
+	let maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+	let ratio = maxScroll > 0 ? window.scrollY / maxScroll : 0;
+	webkit.messageHandlers.textmate.postMessage({
+		command: "scrollSync",
+		payload: { ratio: ratio }
+	});
+}, { passive: true });

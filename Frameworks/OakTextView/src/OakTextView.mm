@@ -3406,6 +3406,12 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 		OakDocumentView* docView = (OakDocumentView*)[self enclosingScrollView].superview;
 		if([docView respondsToSelector:@selector(updateCursorLine:)])
 			[docView updateCursorLine:caretPos.line];
+
+		NSUInteger lineCount = documentView->lines();
+		[NSNotificationCenter.defaultCenter postNotificationName:OakTextViewCaretDidChangeNotification object:self userInfo:@{
+			@"lineNumber": @(caretPos.line),
+			@"lineCount":  @(lineCount),
+		}];
 	}
 }
 
@@ -4556,7 +4562,10 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 			[NSApp postEvent:event atStart:NO];
 	};
 
+	__weak OakTextView* weakSelf = self;
 	command.terminationHandler = ^(OakCommand* command, BOOL normalExit){
+		OakTextView* strongSelf = weakSelf;
+		if(!strongSelf) return;
 		if(normalExit && aBundleCommand.auto_refresh != auto_refresh::never)
 		{
 			OakCommandRefresherOptions options = 0;
@@ -4570,7 +4579,9 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 				options |= OakCommandRefresherDocumentAsInput;
 			if(aBundleCommand.auto_refresh != auto_refresh::never)
 				options |= OakCommandRefresherOnTabSwitch;
-			[OakCommandRefresher scheduleRefreshForCommand:command document:_document window:self.window options:options variables:variables];
+			OakCommandRefresher* refresher = [OakCommandRefresher scheduleRefreshForCommand:command document:strongSelf->_document window:strongSelf.window options:options variables:variables];
+			[refresher enableScrollSyncWithTextView:strongSelf];
+			[refresher enableLineSyncWithTextView:strongSelf];
 		}
 	};
 

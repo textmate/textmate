@@ -19,6 +19,9 @@
 @property (nonatomic) std::map<std::string, std::string> environment;
 @property (nonatomic) NSArray* pendingScrollPosition;
 @property (nonatomic, getter = isVisible) BOOL visible;
+@property (nonatomic) BOOL scrollSyncEnabled;
+@property (nonatomic, weak) id<HOWKScrollSyncDelegate> scrollSyncDelegate;
+@property (nonatomic) BOOL lineSyncEnabled;
 @end
 
 @implementation OakHTMLOutputView
@@ -187,7 +190,41 @@
 		self.pendingScrollPosition = nil;
 	}
 
+	// Re-enable scroll sync and line highlight after each navigation (JS state resets on page load)
+	if(self.scrollSyncEnabled)
+		[webView evaluateJavaScript:@"_tmSetScrollSyncEnabled(true)" completionHandler:nil];
+	if(self.lineSyncEnabled)
+		[webView evaluateJavaScript:@"_tmSetHighlightEnabled(true)" completionHandler:nil];
+
 	[super webView:webView didFinishNavigation:navigation];
+}
+
+- (void)setScrollSyncEnabled:(BOOL)enabled delegate:(id<HOWKScrollSyncDelegate>)delegate
+{
+	_scrollSyncEnabled = enabled;
+	_scrollSyncDelegate = delegate;
+	self.scriptMessageHandler.scrollSyncDelegate = delegate;
+	NSString* js = enabled ? @"_tmSetScrollSyncEnabled(true)" : @"_tmSetScrollSyncEnabled(false)";
+	[self.webView evaluateJavaScript:js completionHandler:nil];
+}
+
+- (void)scrollPreviewToRatio:(double)ratio
+{
+	NSString* js = [NSString stringWithFormat:@"_tmScrollTo(%f)", ratio];
+	[self.webView evaluateJavaScript:js completionHandler:nil];
+}
+
+- (void)setLineSyncEnabled:(BOOL)enabled
+{
+	_lineSyncEnabled = enabled;
+	NSString* js = enabled ? @"_tmSetHighlightEnabled(true)" : @"_tmSetHighlightEnabled(false)";
+	[self.webView evaluateJavaScript:js completionHandler:nil];
+}
+
+- (void)highlightPreviewAtLine:(NSInteger)lineNumber lineCount:(NSInteger)lineCount
+{
+	NSString* js = [NSString stringWithFormat:@"_tmHighlightLine(%ld, %ld)", (long)lineNumber, (long)lineCount];
+	[self.webView evaluateJavaScript:js completionHandler:nil];
 }
 
 - (void)webView:(WKWebView*)webView didFailProvisionalNavigation:(WKNavigation*)navigation withError:(NSError*)error

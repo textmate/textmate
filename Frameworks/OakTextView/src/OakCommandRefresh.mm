@@ -1,4 +1,5 @@
 #import "OakCommandRefresh.h"
+#import "OakTextView.h"
 #import <OakCommand/OakCommand.h>
 #import <document/OakDocument.h>
 #import <HTMLOutput/HTMLOutput.h>
@@ -6,16 +7,19 @@
 #import <ns/ns.h>
 
 NSNotificationName const OakWindowDidChangeSelectedDocumentNotification = @"OakWindowDidChangeSelectedDocumentNotification";
+NSNotificationName const OakTextViewCaretDidChangeNotification = @"OakTextViewCaretDidChangeNotification";
 
-@interface OakCommandRefresher ()
+@interface OakCommandRefresher () <HOWKScrollSyncDelegate>
 {
 	OakCommandRefresherOptions _options;
 	std::map<std::string, std::string> _variables;
 	NSTimer* _idleTimer;
+	BOOL _ignoringEditorScroll;
 }
 @property (nonatomic, readwrite) OakCommand* command;
 @property (nonatomic) OakDocument* document;
 @property (nonatomic, weak) NSWindow* window;
+@property (nonatomic, weak) OakTextView* textView;
 @property (nonatomic) BOOL running;
 @property (nonatomic) BOOL shouldRun;
 @end
@@ -145,6 +149,20 @@ static NSMutableSet<OakCommandRefresher*>* CommandRefreshers = [NSMutableSet set
 	if(!newDocument || [newDocument isEqual:_document])
 		return;
 	_document = newDocument;
+
+	// Update text view reference to the newly active view
+	NSWindow* win = _window;
+	OakTextView* newTextView = nil;
+	if([win.firstResponder isKindOfClass:[OakTextView class]])
+		newTextView = (OakTextView*)win.firstResponder;
+	if(newTextView && newTextView != _textView)
+	{
+		[NSNotificationCenter.defaultCenter removeObserver:self name:NSViewBoundsDidChangeNotification object:nil];
+		[NSNotificationCenter.defaultCenter removeObserver:self name:OakTextViewCaretDidChangeNotification object:nil];
+		[self enableScrollSyncWithTextView:newTextView];
+		[self enableLineSyncWithTextView:newTextView];
+	}
+
 	[self executeForAction:@"TabSwitch" afterDelay:NO];
 }
 
@@ -175,7 +193,76 @@ static NSMutableSet<OakCommandRefresher*>* CommandRefreshers = [NSMutableSet set
 {
 	[_idleTimer invalidate];
 	_idleTimer = nil;
+	[NSNotificationCenter.defaultCenter removeObserver:self name:NSViewBoundsDidChangeNotification object:nil];
+	[NSNotificationCenter.defaultCenter removeObserver:self name:OakTextViewCaretDidChangeNotification object:nil];
+	[_command.htmlOutputView setScrollSyncEnabled:NO delegate:nil];
+	[_command.htmlOutputView setLineSyncEnabled:NO];
 	[CommandRefreshers removeObject:self];
+}
+
+- (void)enableScrollSyncWithTextView:(OakTextView*)textView
+{
+	_textView = textView;
+	NSClipView* clipView = textView.enclosingScrollView.contentView;
+	if(!clipView) return;
+
+	clipView.postsBoundsChangedNotifications = YES;
+	[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(editorDidScroll:) name:NSViewBoundsDidChangeNotification object:clipView];
+	[_command.htmlOutputView setScrollSyncEnabled:YES delegate:self];
+}
+
+- (void)enableLineSyncWithTextView:(OakTextView*)textView
+{
+	[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(caretDidChange:) name:OakTextViewCaretDidChangeNotification object:textView];
+	[_command.htmlOutputView setLineSyncEnabled:YES];
+}
+
+- (void)caretDidChange:(NSNotification*)aNotification
+{
+	OakHTMLOutputView* htmlView = _command.htmlOutputView;
+	if(!htmlView) return;
+
+	NSNumber* lineNumber = aNotification.userInfo[@"lineNumber"];
+	NSNumber* lineCount  = aNotification.userInfo[@"lineCount"];
+	if(!lineNumber || !lineCount) return;
+
+	[htmlView highlightPreviewAtLine:lineNumber.integerValue lineCount:lineCount.integerValue];
+}
+
+- (void)editorDidScroll:(NSNotification*)aNotification
+{
+	if(_ignoringEditorScroll) return;
+	OakHTMLOutputView* htmlView = _command.htmlOutputView;
+	if(!htmlView) return;
+
+	NSScrollView* scrollView = _textView.enclosingScrollView;
+	if(!scrollView) return;
+
+	CGFloat contentHeight = _textView.bounds.size.height;
+	CGFloat visibleHeight = scrollView.contentView.bounds.size.height;
+	CGFloat maxScroll = contentHeight - visibleHeight;
+	if(maxScroll <= 0) return;
+
+	CGFloat scrollY = scrollView.contentView.bounds.origin.y;
+	double ratio = scrollY / maxScroll;
+	[htmlView scrollPreviewToRatio:ratio];
+}
+
+// HOWKScrollSyncDelegate — called when preview is scrolled
+- (void)scrollSyncDidReceiveRatio:(double)ratio
+{
+	NSScrollView* scrollView = _textView.enclosingScrollView;
+	if(!scrollView) return;
+
+	CGFloat contentHeight = _textView.bounds.size.height;
+	CGFloat visibleHeight = scrollView.contentView.bounds.size.height;
+	CGFloat maxScroll = contentHeight - visibleHeight;
+	if(maxScroll <= 0) return;
+
+	_ignoringEditorScroll = YES;
+	[scrollView.contentView scrollToPoint:NSMakePoint(0, maxScroll * ratio)];
+	[scrollView reflectScrolledClipView:scrollView.contentView];
+	dispatch_async(dispatch_get_main_queue(), ^{ _ignoringEditorScroll = NO; });
 }
 
 - (void)execute

@@ -17,7 +17,12 @@
       "Bash(gh search:*)",
       "Bash(gh api:*)",
       "Bash(make)",
-      "Bash(make debug *)"
+      "Bash(make debug *)",
+      "Bash(plutil -convert xml1 -o /tmp/markdown_preview.plist \"/Users/sscherer/Library/Application Support/TextMate/Managed/Bundles/Markdown.tmbundle/Commands/Markdown preview.plist\")",
+      "Bash(python3 -c ' *)",
+      "Read(//Users/sscherer/Library/Logs/DiagnosticReports/**)",
+      "Bash(plutil -convert xml1 -o - \"/Users/sscherer/Library/Application Support/TextMate/Managed/Bundles/Markdown.tmbundle/Commands/Markdown preview.plist\")",
+      "Bash(python3 -c \"import sys,plistlib; p=plistlib.loads\\(sys.stdin.buffer.read\\(\\)\\); print\\(p.get\\('command',''\\)[:3000]\\)\")"
     ]
   }
 }
