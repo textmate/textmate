@@ -11,6 +11,7 @@
 - (void)setScrollSyncEnabled:(BOOL)enabled delegate:(id<HOWKScrollSyncDelegate>)delegate;
 - (void)scrollPreviewToRatio:(double)ratio;
 - (void)setLineSyncEnabled:(BOOL)enabled;
+- (void)setMarkdownSource:(NSString*)source;
 - (void)highlightPreviewAtLine:(NSInteger)lineNumber lineCount:(NSInteger)lineCount;
 
 @property (nonatomic) NSUUID* commandIdentifier; // UUID from initial load request

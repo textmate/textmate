@@ -207,25 +207,93 @@ document.addEventListener("DOMContentLoaded", function() {
 
 let _tmHighlightEnabled = false;
 let _tmHighlightedEl = null;
-const _tmBlockSelectors = "p, h1, h2, h3, h4, h5, h6, li, blockquote, pre, td, th, dt, dd, figcaption";
+// _tmLineMap: array of {start, end} (0-based source lines, inclusive) parallel to block elements
+let _tmLineMap = null;
+
+function _tmBuildLineMap(source) {
+	let lines = source.split("\n");
+	let map = [];
+	let i = 0;
+	while(i < lines.length) {
+		let line = lines[i];
+		if(line.trim() === "") { i++; continue; }
+		let start = i;
+
+		if(/^#{1,6}\s/.test(line)) {
+			// ATX heading
+			map.push({start: start, end: i});
+			i++;
+		} else if(/^(`{3,}|~{3,})/.test(line)) {
+			// Fenced code block
+			let fence = line.match(/^(`{3,}|~{3,})/)[1];
+			i++;
+			while(i < lines.length && !lines[i].startsWith(fence)) i++;
+			map.push({start: start, end: i});
+			i++;
+		} else if(/^([-*+]|\d+[.)]) /.test(line)) {
+			// List — consume items and their indented continuations
+			while(i < lines.length) {
+				if(lines[i].trim() === "") {
+					if(i + 1 < lines.length && /^([-*+]|\d+[.)]) /.test(lines[i + 1]))
+						i++;
+					else
+						break;
+				} else if(/^([-*+]|\d+[.)]) /.test(lines[i]) || /^[ \t]{2,}/.test(lines[i])) {
+					i++;
+				} else {
+					break;
+				}
+			}
+			map.push({start: start, end: i - 1});
+		} else if(/^> /.test(line)) {
+			// Blockquote
+			while(i < lines.length && /^> /.test(lines[i])) i++;
+			map.push({start: start, end: i - 1});
+		} else if(i + 1 < lines.length && /^(={3,}|-{3,})\s*$/.test(lines[i + 1])) {
+			// Setext heading
+			map.push({start: start, end: i + 1});
+			i += 2;
+		} else {
+			// Paragraph
+			while(i < lines.length && lines[i].trim() !== "" &&
+			      !/^#{1,6}\s/.test(lines[i]) &&
+			      !/^(`{3,}|~{3,})/.test(lines[i]) &&
+			      !/^([-*+]|\d+[.)]) /.test(lines[i]) &&
+			      !/^> /.test(lines[i])) {
+				i++;
+			}
+			map.push({start: start, end: i - 1});
+		}
+	}
+	return map;
+}
+
+function _tmSetMarkdownSource(source) {
+	_tmLineMap = _tmBuildLineMap(source);
+}
 
 function _tmHighlightLine(lineNumber, lineCount) {
 	if(!_tmHighlightEnabled) return;
-	// Only select top-level block elements so nested elements (e.g. <li> inside <ul>)
-	// don't fragment the mapping. Walk backward from the target index just like the
-	// Ruby preview command does when placing scroll_to_here.
-	// Target the content div used by the TM html output template; fall back to body
 	let container = document.getElementById("tm_webpreview_content") || document.body;
 	let blocks = Array.from(container.querySelectorAll("p, h1, h2, h3, h4, h5, h6, ul, ol, blockquote, pre, table, hr, figure"));
 	if(blocks.length === 0) return;
 
-	// Map source line → block element index.
-	// lineNumber is 0-based; use floor so the highlight leads rather than lags.
-	let ratio = lineCount > 1 ? lineNumber / lineCount : 0;
-	let idx = Math.floor(ratio * blocks.length);
-	idx = Math.max(0, Math.min(idx, blocks.length - 1));
-	let best = blocks[idx];
+	let idx = 0;
+	if(_tmLineMap && _tmLineMap.length > 0) {
+		// Binary search for last map entry whose start <= lineNumber
+		let lo = 0, hi = _tmLineMap.length - 1;
+		while(lo < hi) {
+			let mid = (lo + hi + 1) >> 1;
+			if(_tmLineMap[mid].start <= lineNumber) lo = mid;
+			else hi = mid - 1;
+		}
+		idx = Math.min(lo, blocks.length - 1);
+	} else {
+		let ratio = lineCount > 1 ? lineNumber / lineCount : 0;
+		idx = Math.min(Math.floor(ratio * blocks.length), blocks.length - 1);
+	}
 
+	let best = blocks[idx];
 	if(best !== _tmHighlightedEl) {
 		if(_tmHighlightedEl) _tmHighlightedEl.classList.remove("_tm-active-line");
 		best.classList.add("_tm-active-line");

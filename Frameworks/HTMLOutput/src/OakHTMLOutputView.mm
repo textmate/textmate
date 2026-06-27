@@ -22,6 +22,7 @@
 @property (nonatomic) BOOL scrollSyncEnabled;
 @property (nonatomic, weak) id<HOWKScrollSyncDelegate> scrollSyncDelegate;
 @property (nonatomic) BOOL lineSyncEnabled;
+@property (nonatomic, copy) NSString* markdownSource;
 @end
 
 @implementation OakHTMLOutputView
@@ -194,7 +195,11 @@
 	if(self.scrollSyncEnabled)
 		[webView evaluateJavaScript:@"_tmSetScrollSyncEnabled(true)" completionHandler:nil];
 	if(self.lineSyncEnabled)
+	{
 		[webView evaluateJavaScript:@"_tmSetHighlightEnabled(true)" completionHandler:nil];
+		if(self.markdownSource)
+			[self sendMarkdownSourceToWebView];
+	}
 
 	[super webView:webView didFinishNavigation:navigation];
 }
@@ -219,6 +224,25 @@
 	_lineSyncEnabled = enabled;
 	NSString* js = enabled ? @"_tmSetHighlightEnabled(true)" : @"_tmSetHighlightEnabled(false)";
 	[self.webView evaluateJavaScript:js completionHandler:nil];
+}
+
+- (void)sendMarkdownSourceToWebView
+{
+	if(!self.markdownSource) return;
+	NSData* jsonData = [NSJSONSerialization dataWithJSONObject:@[self.markdownSource] options:0 error:nil];
+	if(!jsonData) return;
+	NSString* jsonArray = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+	// jsonArray is ["the source string"] — extract the inner quoted string
+	NSString* jsonString = [jsonArray substringWithRange:NSMakeRange(1, jsonArray.length - 2)];
+	NSString* js = [NSString stringWithFormat:@"_tmSetMarkdownSource(%@)", jsonString];
+	[self.webView evaluateJavaScript:js completionHandler:nil];
+}
+
+- (void)setMarkdownSource:(NSString*)source
+{
+	_markdownSource = [source copy];
+	if(self.lineSyncEnabled)
+		[self sendMarkdownSourceToWebView];
 }
 
 - (void)highlightPreviewAtLine:(NSInteger)lineNumber lineCount:(NSInteger)lineCount

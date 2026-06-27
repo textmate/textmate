@@ -129,6 +129,7 @@ static NSMutableSet<OakCommandRefresher*>* CommandRefreshers = [NSMutableSet set
 - (void)contentDidChange:(NSNotification*)aNotification
 {
 	[self executeForAction:@"DocumentChanged" afterDelay:YES];
+	[self sendMarkdownSourceToHTMLView];
 }
 
 - (void)documentDidSave:(NSNotification*)aNotification
@@ -215,6 +216,14 @@ static NSMutableSet<OakCommandRefresher*>* CommandRefreshers = [NSMutableSet set
 {
 	[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(caretDidChange:) name:OakTextViewCaretDidChangeNotification object:textView];
 	[_command.htmlOutputView setLineSyncEnabled:YES];
+	[self sendMarkdownSourceToHTMLView];
+}
+
+- (void)sendMarkdownSourceToHTMLView
+{
+	NSString* source = _document.content;
+	if(source)
+		[_command.htmlOutputView setMarkdownSource:source];
 }
 
 - (void)caretDidChange:(NSNotification*)aNotification
