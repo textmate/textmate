@@ -16,7 +16,8 @@
       "Bash(gh pr:*)",
       "Bash(gh search:*)",
       "Bash(gh api:*)",
-      "Bash(make)"
+      "Bash(make)",
+      "Bash(make debug *)"
     ]
   }
 }
