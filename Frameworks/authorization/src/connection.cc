@@ -65,21 +65,21 @@ connection_t& connection_t::operator<< (std::string const& value)
 
 connection_t& connection_t::operator>> (bool& res)
 {
-	read(_socket, &res, sizeof(res));
+	read_bytes(&res, sizeof(res));
 	return *this;
 }
 
 connection_t& connection_t::operator>> (int& res)
 {
-	read(_socket, &res, sizeof(res));
-	res = from_network(res);
+	if(read_bytes(&res, sizeof(res)))
+		res = from_network(res);
 	return *this;
 }
 
 connection_t& connection_t::operator>> (size_t& res)
 {
-	read(_socket, &res, sizeof(res));
-	res = from_network(res);
+	if(read_bytes(&res, sizeof(res)))
+		res = from_network(res);
 	return *this;
 }
 
@@ -87,16 +87,31 @@ connection_t& connection_t::operator>> (std::string& res)
 {
 	std::string::size_type size = 0;
 	*this >> size;
-	res.resize(size);
-	for(size_t i = 0; i < size; )
+	if(!_good || size > _maximum_string_size)
 	{
-		ssize_t len = read(_socket, &res[0] + i, size - i);
-		if(len == -1)
+		_good = false;
+		res.clear();
+		return *this;
+	}
+	res.resize(size);
+	if(size && !read_bytes(&res[0], size))
+		res.clear();
+	return *this;
+}
+
+bool connection_t::read_bytes (void* bytes, size_t size)
+{
+	for(size_t i = 0; _good && i < size; )
+	{
+		ssize_t len = read(_socket, static_cast<char*>(bytes) + i, size - i);
+		if(len <= 0)
 		{
-			perror("connection_t: read");
-			abort();
+			if(len == -1 && errno == EINTR)
+				continue;
+			_good = false;
+			break;
 		}
 		i += len;
 	}
-	return *this;
+	return _good;
 }

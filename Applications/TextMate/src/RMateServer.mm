@@ -212,6 +212,7 @@ struct record_t
 	std::string command;
 	std::map<std::string, std::string> arguments;
 	temp_file_ptr file;
+	size_t dataLength = 0;
 
 	void accept_data (char const* first, char const* last)
 	{
@@ -378,11 +379,13 @@ namespace // wrap in anonymous namespace to avoid clashing with other callbacks 
 struct socket_observer_t
 {
 	socket_observer_t () : state(command), bytesLeft(0) { }
+	static size_t constexpr maxDataLength = 64 * 1024 * 1024;
+	static size_t constexpr maxLineLength = 1024 * 1024;
 
 	std::vector<record_t> records;
-	enum { command, arguments, data, done } state;
+	enum { command, arguments, data, done, invalid } state;
 	std::string line;
-	ssize_t bytesLeft;
+	size_t bytesLeft;
 
 	bool operator() (socket_t const& socket)
 	{
@@ -394,7 +397,11 @@ struct socket_observer_t
 		if(len != -1)
 		{
 			receive_data(buf, len);
+			if(state == invalid)
+				return false;
 			parse();
+			if(state == invalid)
+				return false;
 			if(state == done)
 			{
 				if(records.empty() || records.begin()->command == "open") // we treat no command as ‘open’ to bring our application to front
@@ -411,7 +418,7 @@ struct socket_observer_t
 	{
 		if(state == data)
 		{
-			ssize_t dataLen = std::min(len, bytesLeft);
+			size_t dataLen = std::min((size_t)len, bytesLeft);
 			records.back().accept_data(buf, buf + dataLen);
 			bytesLeft -= dataLen;
 			state = bytesLeft == 0 ? arguments : data;
@@ -422,6 +429,21 @@ struct socket_observer_t
 		{
 			line.insert(line.end(), buf, buf + len);
 		}
+		if(line.size() > maxLineLength)
+			state = invalid;
+	}
+
+	bool parse_data_length (std::string const& value, size_t& result)
+	{
+		if(value.empty() || !std::all_of(value.begin(), value.end(), [](char ch){ return isdigit((unsigned char)ch); }))
+			return false;
+		errno = 0;
+		char* last = nullptr;
+		unsigned long long parsed = strtoull(value.c_str(), &last, 10);
+		if(errno == ERANGE || last != value.c_str() + value.size() || parsed > maxDataLength)
+			return false;
+		result = (size_t)parsed;
+		return true;
 	}
 
 	void parse ()
@@ -460,8 +482,18 @@ struct socket_observer_t
 
 					if(key == "data")
 					{
-						bytesLeft = strtol(value.c_str(), NULL, 10);
-						size_t dataLen = std::min((ssize_t)line.size(), bytesLeft);
+						if(!parse_data_length(value, bytesLeft))
+						{
+							state = invalid;
+							return;
+						}
+						if(bytesLeft > maxDataLength - records.back().dataLength)
+						{
+							state = invalid;
+							return;
+						}
+						records.back().dataLength += bytesLeft;
+						size_t dataLen = std::min(line.size(), bytesLeft);
 						records.back().accept_data(line.data(), line.data() + dataLen);
 						line.erase(line.begin(), line.begin() + dataLen);
 						bytesLeft -= dataLen;

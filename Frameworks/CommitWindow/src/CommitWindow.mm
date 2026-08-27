@@ -38,8 +38,14 @@
 
 + (actionCommandObj*)actionCommandWithString:(NSString*)aString
 {
+	if(![aString isKindOfClass:NSString.class])
+		return nil;
 	NSRange range = [aString rangeOfString:@":"];
+	if(range.location == NSNotFound)
+		return nil;
 	NSArray* commandComponents = [[aString substringFromIndex:NSMaxRange(range)] componentsSeparatedByString:@","];
+	if(commandComponents.count < 2 || [commandComponents[1] length] == 0)
+		return nil;
 	NSString* statuses = [aString substringToIndex:range.location];
 	NSArray* command = [commandComponents subarrayWithRange:NSMakeRange(1, [commandComponents count] - 1)];
 	return [[actionCommandObj alloc] initWithName:[commandComponents objectAtIndex:0] command:command andTargetStatuses:[NSSet setWithArray:[statuses componentsSeparatedByString:@","]]];
@@ -91,6 +97,7 @@ static void* kOakCommitWindowIncludeItemObserverContext = &kOakCommitWindowInclu
 @property (nonatomic) std::map<std::string, std::string> environment;
 @property (nonatomic) NSArrayController*                 arrayController;
 @property (nonatomic) NSString*                          clientPortName;
+@property (nonatomic) NSString*                          clientToken;
 
 @property (nonatomic) NSPopUpButton*                     previousCommitMessagesPopUpButton;
 @property (nonatomic) OakDocumentView*                   documentView;
@@ -130,6 +137,7 @@ static void* kOakCommitWindowIncludeItemObserverContext = &kOakCommitWindowInclu
 		_commitButtonPrefix = @"Commit";
 
 		self.clientPortName = someOptions[kOakCommitWindowClientPortName];
+		self.clientToken = someOptions[kOakCommitWindowClientToken];
 		[self parseArguments:someOptions[kOakCommitWindowArguments]];
 		self.environment = convert(someOptions[kOakCommitWindowEnvironment]);
 
@@ -437,9 +445,6 @@ static void* kOakCommitWindowIncludeItemObserverContext = &kOakCommitWindowInclu
 
 	NSMutableArray* actions = [NSMutableArray array];
 
-	if([args count] < 2)
-		[self cancel:nil];
-
 	while(arg = [enumerator nextObject])
 	{
 		if([arg isEqualToString:@"--show-continue-button"])
@@ -451,7 +456,10 @@ static void* kOakCommitWindowIncludeItemObserverContext = &kOakCommitWindowInclu
 			if(NSString* value = [enumerator nextObject])
 			{
 				if([arg isEqualToString:@"--action-cmd"])
-						[actions addObject:[actionCommandObj actionCommandWithString:value]];
+				{
+					if(actionCommandObj* action = [actionCommandObj actionCommandWithString:value])
+						[actions addObject:action];
+				}
 				else	[self.options addEntriesFromDictionary:@{arg : value}];
 			}
 			else
@@ -465,7 +473,7 @@ static void* kOakCommitWindowIncludeItemObserverContext = &kOakCommitWindowInclu
 		}
 	}
 
-	if(actions != nil | [actions count] != 0)
+	if([actions count] != 0)
 		[self.options setObject:actions forKey:@"--action-cmd"];
 }
 
@@ -478,7 +486,7 @@ static void* kOakCommitWindowIncludeItemObserverContext = &kOakCommitWindowInclu
 	BOOL didSelectFiles = selectedFiles != _environment.end();
 
 	NSArray* statuses = [[self.options objectForKey:@"--status"] componentsSeparatedByString:@":"];
-	for(NSUInteger i = 0; i < [statuses count]; i++)
+	for(NSUInteger i = 0; i < std::min([statuses count], [self.parameters count]); i++)
 	{
 		NSString* status = [statuses objectAtIndex:i];
 		CWItem* item = [CWItem itemWithPath:[self.parameters objectAtIndex:i] andSCMStatus:status commit:([status hasPrefix:@"X"] || ([status hasPrefix:@"?"] && !didSelectFiles)) ? NO : YES];
@@ -568,7 +576,7 @@ static void* kOakCommitWindowIncludeItemObserverContext = &kOakCommitWindowInclu
 					[outputArray addObject:[NSString stringWithCxxString:path::escape(to_s(item.path))]];
 			}
 			[outputArray addObject:@"\n"];
-			[proxy connectFromServerWithOptions:@{
+			[proxy connectFromServerWithToken:self.clientToken options:@{
 				kOakCommitWindowStandardOutput: [outputArray componentsJoinedByString:@" "],
 				kOakCommitWindowReturnCode:     @0,
 				kOakCommitWindowContinue:       @(continueFlag),
@@ -576,7 +584,7 @@ static void* kOakCommitWindowIncludeItemObserverContext = &kOakCommitWindowInclu
 		}
 		else
 		{
-			[proxy connectFromServerWithOptions:@{
+			[proxy connectFromServerWithToken:self.clientToken options:@{
 				kOakCommitWindowReturnCode:     @1,
 			}];
 		}
@@ -689,6 +697,8 @@ static void* kOakCommitWindowIncludeItemObserverContext = &kOakCommitWindowInclu
 	if(NSString* diffCommand = [self.options objectForKey:@"--diff-cmd"])
 	{
 		std::vector<std::string> diffCmd = text::split(to_s(diffCommand), ",");
+		if(diffCmd.empty() || diffCmd.front().empty())
+			return;
 		diffCmd.front() = absolute_path_for_tool(diffCmd.front(), _environment);
 
 		NSInteger row = [_tableView rowForView:sender] == -1 ? _tableView.clickedRow : [_tableView rowForView:sender];
@@ -746,6 +756,8 @@ static void* kOakCommitWindowIncludeItemObserverContext = &kOakCommitWindowInclu
 	actionCommandObj* obj = [sender representedObject];
 	for(NSString* str in obj.command)
 		command.push_back(to_s(str));
+	if(command.empty() || command.front().empty())
+		return;
 	command.front() = absolute_path_for_tool(command.front(), _environment);
 
 	NSInteger row = [_tableView clickedColumn] == -1 ? [_tableView selectedRow] : [_tableView clickedRow];
@@ -765,6 +777,7 @@ static void* kOakCommitWindowIncludeItemObserverContext = &kOakCommitWindowInclu
 		{
 			NSAlert* alert = [NSAlert tmAlertWithMessageText:@"Cannot understand output from command" informativeText:[NSString stringWithCxxString:cmdString] buttons:@"OK", nil];
 			[alert beginSheetModalForWindow:self.window completionHandler:^(NSModalResponse returnCode){}];
+			return;
 		}
 		NSString* newStatus = [outputStatus substringToIndex:rangeOfStatus.location];
 		CWItem* item = [[_arrayController arrangedObjects] objectAtIndex:row];
@@ -874,6 +887,7 @@ static void* kOakCommitWindowIncludeItemObserverContext = &kOakCommitWindowInclu
 
 @interface OakCommitWindowServer ()
 @property (nonatomic) NSConnection* connection;
+@property (nonatomic) NSString* authenticationToken;
 @end
 
 @implementation OakCommitWindowServer
@@ -887,20 +901,44 @@ static void* kOakCommitWindowIncludeItemObserverContext = &kOakCommitWindowInclu
 {
 	if(self = [super init])
 	{
+		_authenticationToken = NSUUID.UUID.UUIDString;
 		_connection = [NSConnection new];
 		[_connection setRootObject:self];
 
-		NSString* serviceName = [NSString stringWithFormat:@"%@.CommitWindow.%d", NSBundle.mainBundle.bundleIdentifier, getpid()];
+		NSString* serviceName = [NSString stringWithFormat:@"%@.CommitWindow.%@", NSBundle.mainBundle.bundleIdentifier, NSUUID.UUID.UUIDString];
 		if([_connection registerName:serviceName] == NO)
 			os_log_error(OS_LOG_DEFAULT, "Failed to setup connection ‘%@’", serviceName);
+		else
+		{
+			auto environment = oak::basic_environment();
+			environment["TM_COMMIT_WINDOW_SERVICE"] = to_s(serviceName);
+			environment["TM_COMMIT_WINDOW_TOKEN"] = to_s(_authenticationToken);
+			oak::set_basic_environment(environment);
+		}
 	}
 	return self;
 }
 
-- (void)connectFromClientWithOptions:(NSDictionary*)someOptions
+- (BOOL)connectFromClientWithToken:(NSString*)token options:(NSDictionary*)someOptions
 {
+	if(![token isKindOfClass:NSString.class] || ![token isEqualToString:_authenticationToken] || ![someOptions isKindOfClass:NSDictionary.class])
+		return NO;
+
+	NSString* clientPort = someOptions[kOakCommitWindowClientPortName];
+	NSString* clientToken = someOptions[kOakCommitWindowClientToken];
+	NSArray* arguments = someOptions[kOakCommitWindowArguments];
+	NSDictionary* environment = someOptions[kOakCommitWindowEnvironment];
+	if(![clientPort isKindOfClass:NSString.class] || ![clientToken isKindOfClass:NSString.class] || ![arguments isKindOfClass:NSArray.class] || ![environment isKindOfClass:NSDictionary.class] || arguments.count < 2 || arguments.count > 4096 || environment.count > 4096)
+		return NO;
+	for(id argument in arguments)
+		if(![argument isKindOfClass:NSString.class] || [argument length] > 65536)
+			return NO;
+	for(id key in environment)
+		if(![key isKindOfClass:NSString.class] || ![environment[key] isKindOfClass:NSString.class] || [key length] > 4096 || [environment[key] length] > 65536)
+			return NO;
+
 	NSWindow* projectWindow = [NSApp mainWindow];
-	if(NSString* identifier = [someOptions valueForKeyPath:@"environment.TM_PROJECT_UUID"])
+	if(NSString* identifier = environment[@"TM_PROJECT_UUID"])
 	{
 		for(NSWindow* window in [NSApp orderedWindows])
 		{
@@ -917,5 +955,6 @@ static void* kOakCommitWindowIncludeItemObserverContext = &kOakCommitWindowInclu
 
 	OakCommitWindow* commitWindow = [[OakCommitWindow alloc] initWithOptions:someOptions];
 	[commitWindow beginSheetModalForWindow:projectWindow completionHandler:^(NSModalResponse returnCode){ }];
+	return YES;
 }
 @end

@@ -7,6 +7,7 @@ static double const AppVersion = 1.1;
 @property (nonatomic) NSString*     portName;
 @property (nonatomic) NSConnection* connection;
 @property (nonatomic) NSInteger     returnCode;
+@property (nonatomic) NSString*     authenticationToken;
 @end
 
 @implementation OakCommitWindowClient
@@ -14,7 +15,8 @@ static double const AppVersion = 1.1;
 {
 	if(self = [super init])
 	{
-		_portName   = [NSString stringWithFormat:@"com.macromates.commit-window-client.%d", getpid()];
+		_portName   = [NSString stringWithFormat:@"com.macromates.commit-window-client.%@", NSUUID.UUID.UUIDString];
+		_authenticationToken = NSUUID.UUID.UUIDString;
 		_connection = [NSConnection new];
 
 		[_connection setRootObject:self];
@@ -27,8 +29,18 @@ static double const AppVersion = 1.1;
 	return self;
 }
 
-- (void)connectFromServerWithOptions:(NSDictionary*)someOptions
+- (void)connectFromServerWithToken:(NSString*)token options:(NSDictionary*)someOptions
 {
+	if(![token isKindOfClass:NSString.class] || ![token isEqualToString:self.authenticationToken] || ![someOptions isKindOfClass:NSDictionary.class])
+		return;
+	if(someOptions[kOakCommitWindowStandardError] && ![someOptions[kOakCommitWindowStandardError] isKindOfClass:NSString.class])
+		return;
+	if(someOptions[kOakCommitWindowStandardOutput] && ![someOptions[kOakCommitWindowStandardOutput] isKindOfClass:NSString.class])
+		return;
+	if(![someOptions[kOakCommitWindowReturnCode] isKindOfClass:NSNumber.class])
+		return;
+	if(someOptions[kOakCommitWindowContinue] && ![someOptions[kOakCommitWindowContinue] isKindOfClass:NSNumber.class])
+		return;
 	if(NSString* err = someOptions[kOakCommitWindowStandardError])
 		fprintf(stderr, "%s", [err UTF8String]);
 
@@ -74,15 +86,26 @@ int main (int argc, char* argv[])
 
 			NSDictionary* plist = @{
 				kOakCommitWindowClientPortName: client.portName,
+				kOakCommitWindowClientToken:    client.authenticationToken,
 				kOakCommitWindowArguments:      arg,
 				kOakCommitWindowEnvironment:    [[NSProcessInfo processInfo] environment],
 			};
 
-			NSString* serviceName = [NSString stringWithFormat:@"%@.CommitWindow.%@", NSProcessInfo.processInfo.environment[@"TM_APP_IDENTIFIER"], NSProcessInfo.processInfo.environment[@"TM_PID"]];
+			NSString* serviceName = NSProcessInfo.processInfo.environment[@"TM_COMMIT_WINDOW_SERVICE"];
+			NSString* authenticationToken = NSProcessInfo.processInfo.environment[@"TM_COMMIT_WINDOW_TOKEN"];
+			if(!serviceName || !authenticationToken)
+			{
+				fprintf(stderr, "%s: missing commit-window capability\n", getprogname());
+				return EX_UNAVAILABLE;
+			}
 			if(id proxy = [NSConnection rootProxyForConnectionWithRegisteredName:serviceName host:nil])
 			{
 				[proxy setProtocolForProxy:@protocol(OakCommitWindowServerProtocol)];
-				[proxy connectFromClientWithOptions:plist];
+				if(![proxy connectFromClientWithToken:authenticationToken options:plist])
+				{
+					fprintf(stderr, "%s: commit-window server rejected request\n", getprogname());
+					return EX_UNAVAILABLE;
+				}
 
 				while(client.connection)
 					[[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
