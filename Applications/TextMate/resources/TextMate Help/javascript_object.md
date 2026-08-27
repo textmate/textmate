@@ -1,54 +1,21 @@
-title: Commands: JavaScript API for HTML Output
+title: Commands: HTML Output Security and Compatibility
 
-# TextMate JavaScript Object API
+# HTML Output Security and Compatibility
 
-The object has the following methods available:
+TextMate 3 displays ordinary command output in a native SwiftUI view. Output is treated as text and does not execute scripts.
 
-	system()                 See below for information.
-	log(msg)                 Adds a message to the system console (using NSLog).
-	open(path, options)      Opens a file on disk as a document in the current application.
-	                         options may be either a selection range string or a (line) number.
+Commands that explicitly request HTML output may use the legacy compatibility renderer. Treat HTML produced by bundles or external tools as untrusted content.
 
-In addition, these properties are exposed:
+## JavaScript API Removal
 
-	busy       (boolean)     The busy spinner in the output window will be displayed when this is true.
-	progress   (double, 0-1) Controls the value displayed in the determinate progress indicator.
+The former `TextMate` JavaScript object and its `system`, `open`, `log`, progress, and process-control APIs are no longer exposed. This prevents rendered content from invoking native application operations or launching commands through a privileged JavaScript bridge.
 
-## TextMate.system()
+Bundle commands should perform required work in the command itself and write their final result to standard output. Use a text output mode whenever interactive HTML is unnecessary.
 
-Also see <http://developer.apple.com/documentation/AppleApplications/Conceptual/Dashboard_ProgTopics/Articles/CommandLine.html>.
+## Compatibility Guidance
 
-### Synchronous Operation
-
-Example:
-
-	obj = TextMate.system("/usr/bin/id -un", null);
-
-Result is an object with following properties:
-
-	outputString:  The output of the command, as placed on stdout.
-	errorString:   The output of the command, as placed on stderr.
-	status:        The exit status of the command.
-
-### Asynchronous Operation
-
-Example:
-
-	obj = TextMate.system("/usr/bin/id -un", handler);
-
-Handler is called when the command is finished and given an object with the following properties:
-
-	outputString:  The last output of the command, as placed on stdout.
-	errorString:   The last output of the command, as placed on stderr.
-	status:        The exit status of the command.
-
-Result is an object with following properties/methods:
-
-	outputString:  The current string written to stdout (standard output) by the command.
-	errorString:   The current string written to stderr (standard error output) by the command.
-	status:        The command’s exit status, as defined by the command.
-	onreadoutput:  A function called whenever the command writes to stdout. The handler must accept a single argument; when called, the argument contains the current string placed on stdout.
-	onreaderror:   A function called whenever the command writes to stderr. The handler must accept a single argument; when called, the argument contains the current string placed on stderr.
-	cancel():      Cancels the execution of the command.
-	write(string): Writes a string to stdin (standard input).
-	close():       Closes stdin (EOF).
+* Prefer plain-text command output for logs, diagnostics, and generated content.
+* Keep HTML self-contained and avoid depending on application-injected objects.
+* Do not place secrets in HTML output.
+* Escape untrusted values before including them in markup.
+* Migrate interactive tools to native bundle commands or dedicated plug-in UI.

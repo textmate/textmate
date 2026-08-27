@@ -5,17 +5,11 @@
 	<key>beforeRunningCommand</key>
 	<string>nop</string>
 	<key>command</key>
-	<string>#!/usr/bin/env ruby18 -wKU
-require "#{ENV['TM_SUPPORT_PATH']}/lib/escape.rb"
-require "shellwords"
+	<string>#!/usr/bin/ruby --disable=gems
+require "#{ENV.fetch('TM_BUNDLE_SUPPORT')}/avian"
 
-abort "Select one or more items in file browser" unless ENV.has_key? 'TM_SELECTED_FILES'
-
-paths = Shellwords.shellwords(ENV['TM_SELECTED_FILES'])
-tags  = paths.map { |path| "&lt;img src='file://#{e_url path}'&gt;\n" }
-title = paths.size &gt; 1 ? "Selected Images" : File.basename(paths.first)
-
-puts "&lt;html&gt;\n&lt;head&gt;&lt;title&gt;#{title}&lt;/title&gt;&lt;/head&gt;\n&lt;body&gt;&lt;center&gt;\n#{tags.join("&lt;br&gt;\n")}&lt;/center&gt;&lt;/body&gt;\n&lt;/html&gt;"
+paths = Avian.selected_paths(ENV['TM_SELECTED_FILES'])
+puts Avian.images_html(paths)
 </string>
 	<key>hideFromUser</key>
 	<string>1</string>

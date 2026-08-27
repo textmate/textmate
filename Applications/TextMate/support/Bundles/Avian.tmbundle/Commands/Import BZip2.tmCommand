@@ -5,8 +5,10 @@
 	<key>beforeRunningCommand</key>
 	<string>nop</string>
 	<key>command</key>
-	<string>#!/bin/bash
-exec /usr/bin/bunzip2
+	<string>#!/usr/bin/ruby --disable=gems
+require "#{ENV.fetch('TM_BUNDLE_SUPPORT')}/avian"
+
+STDOUT.binmode.write(Avian.decompress(:bzip2, STDIN.binmode.read))
 </string>
 	<key>contentMatch</key>
 	<string>\ABZh[1-9]</string>

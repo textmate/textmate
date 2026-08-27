@@ -11,6 +11,27 @@
 static NSString* const kMASPreferencesFrameTopLeftKey = @"MASPreferences Frame Top Left";
 static NSString* const kMASPreferencesSelectedViewKey = @"MASPreferences Selected Identifier View";
 
+static NSString* SystemImageNameForSettingsPane (NSString* identifier)
+{
+	return [@{
+		@"Files":           @"doc.on.doc",
+		@"Projects":        @"folder",
+		@"Bundles":         @"shippingbox",
+		@"Variables":       @"list.bullet.rectangle",
+		@"Software Update": @"arrow.triangle.2.circlepath",
+		@"Terminal":        @"terminal"
+	} objectForKey:identifier];
+}
+
+static NSColor* SystemImageColorForSettingsPane (NSString* identifier)
+{
+	return [@{
+		@"Files": NSColor.systemBlueColor, @"Projects": NSColor.systemOrangeColor,
+		@"Bundles": NSColor.systemPurpleColor, @"Variables": NSColor.systemTealColor,
+		@"Software Update": NSColor.systemGreenColor, @"Terminal": NSColor.systemPinkColor
+	} objectForKey:identifier];
+}
+
 // =============================
 // = PreferencesViewController =
 // =============================
@@ -43,7 +64,7 @@ static NSString* const kMASPreferencesSelectedViewKey = @"MASPreferences Selecte
 	[NSUserDefaults.standardUserDefaults setObject:_selectedViewIdentifier forKey:kMASPreferencesSelectedViewKey];
 
 	NSViewController* newViewController = [self viewControllerForIdentifier:viewIdentifier];
-	self.title = newViewController.title ?: @"Preferences";
+	self.title = newViewController.title ?: @"Settings";
 
 	self.subview = newViewController.view;
 
@@ -85,6 +106,9 @@ static NSString* const kMASPreferencesSelectedViewKey = @"MASPreferences Selecte
 	PreferencesViewController* contentViewController = [[PreferencesViewController alloc] init];
 
 	NSWindow* window = [NSPanel windowWithContentViewController:contentViewController];
+	window.title = @"Settings";
+	window.tabbingMode = NSWindowTabbingModeDisallowed;
+	window.animationBehavior = NSWindowAnimationBehaviorUtilityWindow;
 	if(NSString* topLeft = [NSUserDefaults.standardUserDefaults stringForKey:kMASPreferencesFrameTopLeftKey])
 		[window setFrameTopLeftPoint:NSPointFromString(topLeft)];
 
@@ -104,14 +128,11 @@ static NSString* const kMASPreferencesSelectedViewKey = @"MASPreferences Selecte
 		for(NSViewController* viewController in viewControllers)
 			[contentViewController addChildViewController:viewController];
 
-		NSToolbar* toolbar = [[NSToolbar alloc] initWithIdentifier:@"Preferneces"];
+		NSToolbar* toolbar = [[NSToolbar alloc] initWithIdentifier:@"TextMate Settings"];
 		toolbar.allowsUserCustomization = NO;
 		toolbar.delegate                = self;
-
-		BOOL hasToolbarImages = NO;
-		for(NSViewController* viewController in viewControllers)
-			hasToolbarImages = hasToolbarImages || [viewController respondsToSelector:@selector(toolbarItemImage)];
-		toolbar.displayMode = hasToolbarImages ? NSToolbarDisplayModeIconAndLabel : NSToolbarDisplayModeLabelOnly;
+		toolbar.displayMode             = NSToolbarDisplayModeIconAndLabel;
+		toolbar.sizeMode                = NSToolbarSizeModeDefault;
 
 		window.collectionBehavior = NSWindowCollectionBehaviorMoveToActiveSpace|NSWindowCollectionBehaviorFullScreenAuxiliary;
 		window.delegate           = self;
@@ -182,7 +203,17 @@ static NSString* const kMASPreferencesSelectedViewKey = @"MASPreferences Selecte
 	if(NSViewController <PreferencesPaneProtocol>* viewController = [_preferencesViewController viewControllerForIdentifier:itemIdentifier])
 	{
 		res.label = viewController.title;
-		if([viewController respondsToSelector:@selector(toolbarItemImage)])
+		res.paletteLabel = viewController.title;
+		res.toolTip = [NSString stringWithFormat:@"Show %@ settings", viewController.title];
+
+		NSString* systemImageName = SystemImageNameForSettingsPane(itemIdentifier);
+		res.image = systemImageName ? [NSImage imageWithSystemSymbolName:systemImageName accessibilityDescription:res.toolTip] : nil;
+		if(res.image)
+		{
+			res.image = [res.image imageWithSymbolConfiguration:[NSImageSymbolConfiguration configurationWithHierarchicalColor:SystemImageColorForSettingsPane(itemIdentifier)]];
+			[res.image setTemplate:NO];
+		}
+		if(!res.image && [viewController respondsToSelector:@selector(toolbarItemImage)])
 			res.image = viewController.toolbarItemImage;
 	}
 

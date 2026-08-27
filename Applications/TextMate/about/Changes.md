@@ -2,6 +2,18 @@ Title: Release Notes
 
 # Changes
 
+## 2026-08-27 — Version 3.0
+
+* Replaced the registration page with a native About experience that clearly identifies TextMate as free and open-source software with no license key requirement.
+* Added distinct color treatments to Settings icons for faster visual navigation.
+
+## 2026-08-27 (v3.0)
+
+* Added native SwiftUI command output and removed the privileged HTML-output JavaScript bridge.
+* Hardened remote editing, privileged-helper framing, update verification, dialog IPC, and commit-window IPC.
+* Restored generated test targets and fixed sanitizer-detected iterator and rectangle defects.
+* Updated the Settings window and bundled Help for TextMate 3.
+
 ## 2021-04-16 (v2.0.22)
 
 * A few more tweaks to improve things on macOS 11 including dropping use of floating header rows in file browser (SCM Status) and search results, as these appear to cause problems on Big Sur.
@@ -1961,5 +1973,3 @@ Notable changes since to TextMate 1.5.10:
 * **Foreign Input Modes**
 
 	Display of CJK and “advanced” input modes is now be supported (although only limited testing has been done).
-
-

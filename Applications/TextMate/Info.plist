@@ -17,7 +17,7 @@
 	<key>CFBundleHelpBookFolder</key>
 	<string>${TARGET_NAME} Help</string>
 	<key>CFBundleHelpBookName</key>
-	<string>${TARGET_NAME} 2 Help</string>
+	<string>${TARGET_NAME} 3 Help</string>
 	<key>CFBundleIconFile</key>
 	<string>TextMate</string>
 	<key>CFBundleInfoDictionaryVersion</key>
