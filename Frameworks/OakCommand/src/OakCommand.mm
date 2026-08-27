@@ -202,6 +202,21 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 	if(bytes && !_htmlOutputView)
 		_htmlOutputView = [self htmlOutputView:YES forIdentifier:self.identifier];
 
+	if(_htmlOutputView.usesNativeOutput)
+	{
+		if(bytes)
+		{
+			if(!_htmlOutputView.isRunningCommand)
+				[_htmlOutputView beginNativeOutputWithTitle:to_ns(_bundleCommand.name) command:self];
+			[_htmlOutputView appendNativeOutputBytes:bytes length:len];
+		}
+		else
+		{
+			[_htmlOutputView finishNativeOutput];
+		}
+		return;
+	}
+
 	if(_updateHTMLViewAtomically)
 	{
 		if(bytes)
@@ -235,7 +250,6 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 			[NSURLProtocol setProperty:to_ns(_bundleCommand.name) forKey:@"processName" inRequest:_urlRequest];
 			[NSURLProtocol setProperty:self forKey:@"command" inRequest:_urlRequest];
 
-			_htmlOutputView.disableJavaScriptAPI = _bundleCommand.disable_javascript_api;
 			[_htmlOutputView loadRequest:_urlRequest environment:_environment autoScrolls:_bundleCommand.auto_scroll_output];
 		}
 

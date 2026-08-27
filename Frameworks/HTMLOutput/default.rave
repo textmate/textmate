@@ -4,7 +4,7 @@ target "${dirname}" {
 
 	files resources/* "Resources"
 
-	sources src/**/*.mm
+	sources src/**/*.mm ../../Applications/TextMate/SwiftUI/Sources/TextMateUI/*.swift
 	tests tests/*.cc
-	frameworks Cocoa WebKit
+	frameworks Cocoa SwiftUI WebKit
 }
