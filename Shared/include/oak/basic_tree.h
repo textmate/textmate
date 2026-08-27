@@ -110,17 +110,29 @@ namespace oak
 		static bool eq (node_t* lhs, node_t* rhs) { return (lhs->is_null() && rhs->is_null()) || lhs == rhs; }
 
 	public:
-		struct iterator : std::iterator<std::bidirectional_iterator_tag, value_type>
+		struct iterator
 		{
+			struct arrow_proxy
+			{
+				arrow_proxy (value_type const& value) : value(value) { }
+				value_type* operator-> () { return &value; }
+				value_type const* operator-> () const { return &value; }
+				value_type value;
+			};
+
+			using iterator_category = std::bidirectional_iterator_tag;
+			using value_type        = typename basic_tree_t::value_type;
+			using difference_type   = std::ptrdiff_t;
+			using pointer           = arrow_proxy;
+			using reference         = value_type;
+
 			iterator (node_t* node, basic_tree_t* tree) : _node(node), _info(_KeyT(), _node->_relative_key, _node->_value), _tree(tree) { }
 
 			bool operator== (iterator const& rhs) const { return  eq(_node, rhs._node); }
 			bool operator!= (iterator const& rhs) const { return !eq(_node, rhs._node); }
 
-			value_type& operator*  ()             { ASSERT(*this != _tree->end()); return _info;  }
-			value_type* operator-> ()             { ASSERT(*this != _tree->end()); return &_info; }
-			value_type const& operator*  () const { ASSERT(*this != _tree->end()); return _info;  }
-			value_type const* operator-> () const { ASSERT(*this != _tree->end()); return &_info; }
+			value_type operator*  () const { ASSERT(*this != _tree->end()); return _info; }
+			arrow_proxy operator-> () const { ASSERT(*this != _tree->end()); return arrow_proxy(_info); }
 
 			iterator& operator++ ()
 			{

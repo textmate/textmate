@@ -99,7 +99,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 			.submenu = {
 				{ @"About TextMate",        @selector(orderFrontAboutPanel:)               },
 				{ /* -------- */ },
-				{ @"Preferences…",          @selector(showPreferences:),            @","   },
+				{ @"Settings…",             @selector(showPreferences:),            @","   },
 				{ @"Check for Update",      @selector(performSoftwareUpdateCheck:)         },
 				{ @"Check for Test Build",  @selector(performSoftwareUpdateCheck:),       .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption, .alternate = YES },
 				{ /* -------- */ },

@@ -631,6 +631,32 @@ class CompileClang < Compiler
   end
 end
 
+class CompileSwift < Compiler
+  transforms '.swift' => '.o'
+
+  def universal?
+    true
+  end
+
+  def transform(file, config, builddir)
+    companion_sources = Array(config[:swift_sources]).reject { |source| source == file }
+    architecture = config['arch'] || `uname -m`.strip
+    sdk_path = `xcrun --sdk macosx --show-sdk-path`.strip
+    flags = []
+    flags << config['SWIFT_FLAGS'] if config.include?('SWIFT_FLAGS')
+    flags << "-sdk #{sdk_path.shellescape} -target #{architecture}-apple-macosx#{config['APP_MIN_OS']}"
+    flags << companion_sources.map(&:shellescape)
+
+    super.merge(
+      flags:        flags.join(' '),
+      command:      'MACOSX_DEPLOYMENT_TARGET=$min_os xcrun --sdk macosx swiftc -parse-as-library -whole-module-optimization -emit-object $in $flags -o $out',
+      min_os:       config['APP_MIN_OS'],
+      description:  'Compile Swift ‘${in}’…',
+      dependencies: companion_sources,
+    )
+  end
+end
+
 class CompileRagel < Compiler
   transforms '.rl' => '.cc', '.mm.rl' => '.mm', '.cc.rl' => '.cc'
 
@@ -856,13 +882,14 @@ module Target
       if sources = target[:sources]
         include_dirs = required_targets(target, targets, include_weak: true).map { |archs| include_dir(archs) }.reject { |e| e.nil? }.sort
         config = target[:variables].merge(prelude: target[:prelude], inference: target[:inference], include: include_dirs.sort.uniq)
+        config[:swift_sources] = sources.select { |file| file.end_with?('.swift') }
 
         # ===============
         # = Cap’n Proto =
         # ===============
 
         generated_headers = []
-        sources, non_sources = sources.partition { |file| file.end_with?('.c', '.m', '.cc', '.mm') }
+        sources, non_sources = sources.partition { |file| file.end_with?('.c', '.m', '.cc', '.mm', '.swift') }
 
         unless non_sources.empty?
           non_sources.each do |file|
@@ -881,7 +908,9 @@ module Target
 
         # ===============
 
+        primary_swift_source = config[:swift_sources].first
         sources.each do |file|
+          next if file.end_with?('.swift') && file != primary_swift_source
           if links = Compiler.transform(file, config, target[:builddir])
             objects << links.last[:out]
             link = links.shift
@@ -1207,6 +1236,77 @@ module Target
     target[:build][:runner]
   end
 
+  def tests(archs, targets)
+    target = archs.values.first
+
+    unless target[:build][:tests]
+      test_stamp, rules = nil, []
+
+      if test_sources = target[:tests]
+		language_extension = test_sources.any? { |source| source.end_with?('.m', '.mm') } ? '.mm' : '.cc'
+		generated = File.join(target[:builddir], '_Tests', target[:name], 'runner' + language_extension)
+        rules << {
+          name:         'GenerateTestRunner',
+          in:           test_sources,
+          out:          generated,
+          command:      "#{__dir__}/gen_test $in > $out~ && mv $out~ $out",
+          description:  'Generate tests for ‘${target}’…',
+          target:       target[:name],
+          dependencies: "#{__dir__}/gen_test",
+        }
+
+        include_dirs = [ include_dir(archs), *required_targets(target, targets, include_weak: true).map { |required| include_dir(required) } ].compact.sort.uniq
+        config = target[:variables].merge(prelude: target[:prelude], inference: target[:inference], include: include_dirs)
+        links = Compiler.transform(generated, config, target[:builddir])
+        if links
+          runner_object = links.last[:out]
+          first = links.shift
+          rules += [ first.merge(order_only: [ generated, *Array(first[:order_only]) ]), *links ]
+
+          required = required_targets(target, targets, include_self: true).map { |required_archs| required_archs[target[:arch]] }
+          objects = required.flat_map { |required_target| objects(required_target, targets) }
+          frameworks = required.flat_map { |required_target| required_target[:frameworks] }.compact.sort.uniq
+          libraries = required.flat_map { |required_target| required_target[:libraries] }.compact.sort.uniq
+          static, libraries = libraries.partition { |library| library =~ /\.a$/ }
+          flags = required.map { |required_target| required_target[:variables]['LN_FLAGS'] }.compact.flat_map { |value| value.split(' ') }.uniq
+          dependencies = required.flat_map { |required_target| required_target.dig(:inference, 'LN_FLAGS') || [] }.uniq.sort
+          flags += frameworks.map { |framework| "-framework #{framework.shellescape}" }
+          flags += libraries.map { |library| "-l#{library.shellescape}" }
+          flags += static
+
+          test_executable = File.join(target[:builddir], '_Tests', target[:name], 'tests')
+          rules << {
+            name:         'LinkTests',
+            in:           [ runner_object, *objects ].sort.uniq,
+            out:          test_executable,
+            flags:        flags.join(' '),
+            command:      'xcrun --sdk macosx clang -o $out $flags $in',
+            description:  'Link tests for ‘${target}’…',
+            target:       target[:name],
+            dependencies: dependencies,
+          }
+
+          test_stamp = test_executable + '.ok'
+          rules << {
+            name:        'RunTests',
+            in:          test_executable,
+            out:         test_stamp,
+            command:     '$in && touch $out',
+            description: 'Run tests for ‘${target}’…',
+            target:      target[:name],
+            pool:        'console',
+          }
+          rules << { name: 'phony', in: test_stamp, out: target[:identifier] + '/test' }
+        end
+      end
+
+      target[:build][:rules] += rules
+      target[:build][:tests] = test_stamp
+    end
+
+    target[:build][:tests]
+  end
+
   def notarize(archs, targets)
     target = archs.values.first
 
@@ -1488,6 +1588,7 @@ if __FILE__ == $PROGRAM_NAME
 
   targets.each do |target_name, archs|
     Target.expand(archs, targets)
+    Target.tests(archs, targets)
     Target.notarize(archs, targets)
     Target.runner(archs, targets)
     Target.signature(archs, targets)
@@ -1562,7 +1663,7 @@ if __FILE__ == $PROGRAM_NAME
   if new_outputs && old_outputs
     lost_outputs = old_outputs - new_outputs
     lost_outputs.each do |path|
-      if File.exists?(path)
+      if File.exist?(path)
         STDERR << "Remove old target ‘#{path}’…\n"
         # FIXME Does not seem to work with symbolic links (Proxy.png → Settings.png)
         File.unlink(path)

@@ -5,13 +5,12 @@
 	<key>beforeRunningCommand</key>
 	<string>nop</string>
 	<key>command</key>
-	<string>#!/usr/bin/env ruby18 -wKU
-require "#{ENV['TM_SUPPORT_PATH']}/lib/ui.rb"
-require "shellwords"
+	<string>#!/usr/bin/ruby --disable=gems
+require "#{ENV.fetch('TM_BUNDLE_SUPPORT')}/avian"
 
-passwd = TextMate::UI.request_string :title =&gt; "Password", :prompt =&gt; "Enter password to encrypt file:"
-abort "No password." if passwd.nil?
-STDOUT &lt;&lt; %x{ /usr/bin/openssl enc -e -aes128 -pass pass:#{passwd.shellescape} }
+plaintext = STDIN.binmode.read
+password = Avian.prompt_password('Enter password to encrypt document:')
+STDOUT.binmode.write(Avian.encrypt(plaintext, password))
 </string>
 	<key>hideFromUser</key>
 	<string>1</string>

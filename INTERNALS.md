@@ -1,7 +1,43 @@
-Developer Documentation
-=======================
+# TextMate Internals
 
-TextMate is written in Objective-C++: the low-level data structures (mostly non-GUI specific code) are written in C++, the GUI part in Objective-C++ (the C++ part here coming from the need to use the low-level C++ data structures).
+TextMate combines a C++ editor core with an AppKit and Objective-C++ application shell. New native surfaces are added incrementally in SwiftUI and hosted through narrow C interfaces. The project uses Rave to generate an out-of-tree Ninja build graph and currently targets macOS 14 or later.
+
+## Source layout
+
+* `Applications/TextMate/` contains the application shell, resources, Help, built-in bundles, and the `TextMateUI` Swift package.
+* `Frameworks/` contains editor, document, layout, bundle, command, update, networking, and UI components.
+* `PlugIns/` contains the Dialog plug-ins used by bundle commands.
+* `Shared/` contains common headers and low-level data structures.
+* `bin/rave` is the build-graph generator; component `default.rave` files declare sources, dependencies, tests, and resources.
+* `vendor/` and Git submodules contain pinned external dependencies.
+
+## UI architecture
+
+AppKit remains responsible for the document and editor lifecycle. SwiftUI views live under `Applications/TextMate/SwiftUI/Sources/TextMateUI/` and are hosted from Objective-C++ through explicitly owned C entry points. This keeps Swift types out of legacy headers and lets native surfaces move independently from the editor core.
+
+Command output uses a native SwiftUI model and view by default. The remaining legacy HTML renderer is a compatibility path and does not receive the removed privileged JavaScript-to-native bridge. New HTML surfaces must use tightly constrained WKWebView content and explicit actions. See `Applications/TextMate/SwiftUI/MIGRATION.md` for the phased migration.
+
+## Trust boundaries
+
+Treat remote editing, privileged-helper messages, update archives, Dialog/Commit Window IPC, bundle commands, filenames, and rendered HTML as untrusted inputs. Protocols must authenticate peers where applicable, validate lengths and types before allocation or use, reject path traversal, and avoid passing secrets through process arguments or environment variables.
+
+Bundle commands should execute tools with argv arrays, escape generated HTML, encode URLs, reserve output names atomically, and publish output only after the operation succeeds.
+
+## Build and tests
+
+`./configure` validates dependencies and asks Rave to generate `build.ninja`. Release builds use optimization, ThinLTO, and dead-code stripping. Debug builds enable Address Sanitizer. Both use a macOS 14 deployment target.
+
+Generated framework test targets use the `<component>/test` form. SwiftUI tests run through Swift Package Manager:
+
+```sh
+ninja TextMate
+ninja bundles/test HTMLOutput/test authorization/test
+swift test --package-path Applications/TextMate/SwiftUI
+```
+
+Keep generated files out of the repository and use `git diff --check` before committing.
+
+## Editor model
 
 ## Model
 

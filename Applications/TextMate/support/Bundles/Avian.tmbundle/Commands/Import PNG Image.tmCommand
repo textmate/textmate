@@ -5,9 +5,10 @@
 	<key>beforeRunningCommand</key>
 	<string>nop</string>
 	<key>command</key>
-	<string>#!/bin/bash
-echo "PNG Image: ‘${TM_DISPLAYNAME}’"
-sips -g pixelWidth -g pixelHeight "$TM_FILEPATH"|egrep 'pixel(Width|Height)'
+	<string>#!/usr/bin/ruby --disable=gems
+require "#{ENV.fetch('TM_BUNDLE_SUPPORT')}/avian"
+
+print Avian.png_description(ENV['TM_FILEPATH'], ENV.fetch('TM_DISPLAYNAME', 'Untitled'))
 </string>
 	<key>contentMatch</key>
 	<string>\A\x{89}PNG\r\n\x{1A}\n</string>

@@ -18,7 +18,7 @@ namespace network
 	{
 		struct user_data_t
 		{
-			user_data_t (key_chain_t const& keychain, double* progress, double start_progress, double stop_progress, bool const* stop_flag, int tbz_fd, int tmp_fd) : progress(progress), start_progress(start_progress), stop_progress(stop_progress), stop_flag(stop_flag), tbz_fd(tbz_fd), tmp_fd(tmp_fd), verify_signature(keychain, kHTTPSigneeHeader, kHTTPSignatureHeader)
+			user_data_t (key_chain_t const& keychain, double* progress, double start_progress, double stop_progress, bool const* stop_flag, int tmp_fd) : progress(progress), start_progress(start_progress), stop_progress(stop_progress), stop_flag(stop_flag), tmp_fd(tmp_fd), verify_signature(keychain, kHTTPSigneeHeader, kHTTPSignatureHeader)
 			{
 				verify_signature.setup();
 			}
@@ -45,7 +45,6 @@ namespace network
 
 			std::string etag = NULL_STR;
 
-			int tbz_fd;
 			int tmp_fd;
 
 			network::check_signature_t verify_signature;
@@ -98,11 +97,46 @@ namespace network
 		{
 			user_data_t& data = *static_cast<user_data_t*>(udata);
 
-			write(data.tbz_fd, ptr, size * nmemb);
 			write(data.tmp_fd, ptr, size * nmemb);
 			data.verify_signature.receive_data((char const*)ptr, size * nmemb);
 			data.receive(size * nmemb);
 			return data.should_stop() ? 0 : size * nmemb;
+		}
+
+		static bool send_archive_to_extractor (std::string const& archive, tbz_t& tbz, user_data_t& data)
+		{
+			int fd = open(archive.c_str(), O_RDONLY|O_CLOEXEC);
+			if(fd == -1)
+				return false;
+
+			bool success = true;
+			char bytes[4096];
+			while(success && !data.should_stop())
+			{
+				ssize_t len = read(fd, bytes, sizeof(bytes));
+				if(len == 0)
+					break;
+				if(len == -1)
+				{
+					if(errno == EINTR)
+						continue;
+					success = false;
+					break;
+				}
+
+				for(ssize_t offset = 0; success && offset < len; )
+				{
+					ssize_t written = write(tbz.input_fd(), bytes + offset, len - offset);
+					if(written == -1 && errno == EINTR)
+						continue;
+					if(written <= 0)
+						success = false;
+					else
+						offset += written;
+				}
+			}
+			close(fd);
+			return success && !data.should_stop();
 		}
 	}
 
@@ -122,7 +156,7 @@ namespace network
 			// = Curl =
 			// ========
 
-			user_data_t data(keyChain, progress, progressStart, progressStop, stopFlag, tbz.input_fd(), tmpInput);
+			user_data_t data(keyChain, progress, progressStart, progressStop, stopFlag, tmpInput);
 
 			curl_easy_setopt(handle, CURLOPT_URL,              url.c_str());
 			curl_easy_setopt(handle, CURLOPT_FOLLOWLOCATION,   true);
@@ -181,27 +215,11 @@ namespace network
 					path::set_attr(tmpPath, kHTTPEntityTagAttribute, data.etag);
 					path::set_attr(tmpPath, kHTTPSigneeHeader,       data.verify_signature.signee());
 					path::set_attr(tmpPath, kHTTPSignatureHeader,    data.verify_signature.signature());
-					path::rename_or_copy(tmpPath, destination);
-				}
-			}
-			else if(serverReply == 304)
-			{
-				struct stat buf;
-				int fd = open(destination.c_str(), O_RDONLY|O_CLOEXEC);
-				if(fd != -1 && fstat(fd, &buf) != -1)
-				{
-					char bytes[4096];
-					data.total = buf.st_size;
-					while(data.received < data.total && !data.should_stop())
+					if(!path::rename_or_copy(tmpPath, destination))
 					{
-						ssize_t len = read(fd, bytes, sizeof(bytes));
-						if(len == -1)
-							break;
-
-						write(tbz.input_fd(), bytes, len);
-						data.receive(len);
+						goodSignature = false;
+						error = "Unable to store verified archive.";
 					}
-					close(fd);
 				}
 			}
 			else if(serverReply != 0)
@@ -212,12 +230,19 @@ namespace network
 			if(!goodSignature) // If not, tmpPath has been moved to destination
 				unlink(tmpPath.c_str());
 
-			if(tbz.wait_for_tbz())
+			bool trustedArchive = serverReply == 304 || goodSignature;
+			bool sentToExtractor = trustedArchive && send_archive_to_extractor(destination, tbz, data);
+			if(!trustedArchive)
 			{
-				if(serverReply == 304 || goodSignature)
-					res = tbzDestination;
+				// Close the unused extractor pipe. No response bytes have crossed the
+				// signature boundary, so tar exits without processing archive data.
+				tbz.wait_for_tbz();
 			}
-			else if(serverReply == 200 || serverReply == 304)
+			else if(sentToExtractor && tbz.wait_for_tbz())
+			{
+				res = tbzDestination;
+			}
+			else if(trustedArchive)
 			{
 				error = "Extracting archive.";
 			}

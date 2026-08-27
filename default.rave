@@ -1,10 +1,11 @@
-set APP_MIN_OS    "10.12"
+set APP_MIN_OS    "14.0"
 set CS_IDENTITY   "-"
 
 set C_FLAGS       "-std=c99"
 set CXX_FLAGS     "-std=c++2a"
 set OBJC_FLAGS    "${C_FLAGS} -fobjc-abi-version=3 -fobjc-arc"
 set OBJCXX_FLAGS  "${OBJC_FLAGS} ${CXX_FLAGS} -fobjc-call-cxx-cdtors"
+set SWIFT_FLAGS   "-module-name TextMateUI"
 
 add FLAGS         "-funsigned-char"
 add FLAGS         "-Wall -Wwrite-strings -Wformat -Winit-self -Wmissing-include-dirs"

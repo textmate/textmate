@@ -1,13 +1,23 @@
 #import "OakHTMLOutputView.h"
 #import "browser/HOStatusBar.h"
 #import "helpers/HOAutoScroll.h"
-#import "helpers/HOJSBridge.h"
 #import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakAppKit/NSAlert Additions.h>
 #import <oak/debug.h>
 
-@interface HOStatusBar (BusyAndProgressProperties) <HOJSBridgeDelegate>
+extern "C" void* TMCommandOutputCreate(void);
+extern "C" void* TMCommandOutputView(void* controller);
+extern "C" void TMCommandOutputBegin(void* controller, char const* title);
+extern "C" void TMCommandOutputAppend(void* controller, void const* bytes, NSInteger length);
+extern "C" void TMCommandOutputFinish(void* controller);
+extern "C" void TMCommandOutputRelease(void* controller);
+
+static NSString* const OakUseNativeCommandOutputKey = @"OakUseNativeCommandOutput";
+
+@protocol TMCommandTerminating <NSObject>
+@property (nonatomic, readonly) NSUUID* identifier;
+- (void)terminate;
 @end
 
 @interface OakHTMLOutputView ()
@@ -16,9 +26,19 @@
 @property (nonatomic) std::map<std::string, std::string> environment;
 @property (nonatomic) NSRect pendingVisibleRect;
 @property (nonatomic, getter = isVisible) BOOL visible;
+@property (nonatomic) void* nativeOutputController;
+@property (nonatomic) NSView* nativeOutputView;
+@property (nonatomic) id<TMCommandTerminating> nativeCommand;
+@property (nonatomic) NSString* nativeOutputTitle;
 @end
 
 @implementation OakHTMLOutputView
++ (void)initialize
+{
+	if(self == OakHTMLOutputView.class)
+		[NSUserDefaults.standardUserDefaults registerDefaults:@{ OakUseNativeCommandOutputKey: @YES }];
+}
+
 + (NSSet*)keyPathsForValuesAffectingMainFrameTitle
 {
 	return [NSSet setWithObjects:@"webView.mainFrameTitle", nil];
@@ -29,8 +49,63 @@
 	if(self = [super initWithFrame:aRect])
 	{
 		_reusable = YES;
+		if(self.usesNativeOutput)
+		{
+			self.nativeOutputController = TMCommandOutputCreate();
+			self.nativeOutputView = (__bridge NSView*)TMCommandOutputView(self.nativeOutputController);
+			self.nativeOutputView.translatesAutoresizingMaskIntoConstraints = NO;
+			[self addSubview:self.nativeOutputView];
+			[NSLayoutConstraint activateConstraints:@[
+				[self.nativeOutputView.leadingAnchor constraintEqualToAnchor:self.leadingAnchor],
+				[self.nativeOutputView.trailingAnchor constraintEqualToAnchor:self.trailingAnchor],
+				[self.nativeOutputView.topAnchor constraintEqualToAnchor:self.topAnchor],
+				[self.nativeOutputView.bottomAnchor constraintEqualToAnchor:self.bottomAnchor],
+			]];
+			self.webView.hidden = YES;
+			self.statusBar.hidden = YES;
+		}
 	}
 	return self;
+}
+
+- (void)dealloc
+{
+	if(self.nativeOutputController)
+		TMCommandOutputRelease(self.nativeOutputController);
+}
+
+- (BOOL)usesNativeOutput
+{
+	return [NSUserDefaults.standardUserDefaults boolForKey:OakUseNativeCommandOutputKey];
+}
+
+- (void)beginNativeOutputWithTitle:(NSString*)title command:(id<TMCommandTerminating>)command
+{
+	if(!self.nativeOutputController)
+		return;
+	self.nativeCommand = command;
+	if([command respondsToSelector:@selector(identifier)])
+		self.commandIdentifier = [command identifier];
+	self.nativeOutputTitle = title ?: @"Command Output";
+	self.runningCommand = YES;
+	[self willChangeValueForKey:@"mainFrameTitle"];
+	TMCommandOutputBegin(self.nativeOutputController, self.nativeOutputTitle.UTF8String);
+	[self didChangeValueForKey:@"mainFrameTitle"];
+}
+
+- (void)appendNativeOutputBytes:(void const*)bytes length:(size_t)length
+{
+	if(self.nativeOutputController && bytes && length)
+		TMCommandOutputAppend(self.nativeOutputController, bytes, (NSInteger)length);
+}
+
+- (void)finishNativeOutput
+{
+	if(!self.nativeOutputController)
+		return;
+	TMCommandOutputFinish(self.nativeOutputController);
+	self.runningCommand = NO;
+	self.nativeCommand = nil;
 }
 
 - (void)loadRequest:(NSURLRequest*)aRequest environment:(std::map<std::string, std::string> const&)anEnvironment autoScrolls:(BOOL)flag
@@ -53,9 +128,11 @@
 - (void)stopLoadingWithUserInteraction:(BOOL)askUserFlag completionHandler:(void(^)(BOOL didStop))handler
 {
 	NSURLRequest* request = self.webView.mainFrame.dataSource.initialRequest;
-	if(id command = [NSURLProtocol propertyForKey:@"command" inRequest:request])
+	id<TMCommandTerminating> command = self.nativeCommand ?: [NSURLProtocol propertyForKey:@"command" inRequest:request];
+	if(command)
 	{
-		NSAlert* alert = askUserFlag ? [NSAlert tmAlertWithMessageText:[NSString stringWithFormat:@"Stop “%@”?", [NSURLProtocol propertyForKey:@"processName" inRequest:request]] informativeText:@"The job that the task is performing will not be completed." buttons:@"Stop", @"Cancel", nil] : nil;
+		NSString* processName = self.nativeOutputTitle ?: [NSURLProtocol propertyForKey:@"processName" inRequest:request];
+		NSAlert* alert = askUserFlag ? [NSAlert tmAlertWithMessageText:[NSString stringWithFormat:@"Stop “%@”?", processName] informativeText:@"The job that the task is performing will not be completed." buttons:@"Stop", @"Cancel", nil] : nil;
 
 		__weak __block id token = [NSNotificationCenter.defaultCenter addObserverForName:@"OakCommandDidTerminateNotification" object:command queue:nil usingBlock:^(NSNotification* notification){
 			if(alert)
@@ -69,7 +146,10 @@
 			[alert beginSheetModalForWindow:self.window completionHandler:^(NSModalResponse returnCode){
 				if(returnCode == NSAlertFirstButtonReturn) /* "Stop" */
 				{
-					[self.webView.mainFrame stopLoading];
+					if(self.usesNativeOutput)
+						[command terminate];
+					else
+						[self.webView.mainFrame stopLoading];
 				}
 				else
 				{
@@ -80,7 +160,10 @@
 		}
 		else
 		{
-			[self.webView.mainFrame stopLoading];
+			if(self.usesNativeOutput)
+				[command terminate];
+			else
+				[self.webView.mainFrame stopLoading];
 		}
 	}
 	else
@@ -97,6 +180,8 @@
 
 - (NSString*)mainFrameTitle
 {
+	if(self.usesNativeOutput)
+		return self.nativeOutputTitle ?: @"Command Output";
 	if(OakIsEmptyString(self.webView.mainFrameTitle))
 	{
 		WebFrame* frame = self.webView.mainFrame;
@@ -129,30 +214,13 @@
 	[self setUpdatesProgress:!self.isRunningCommand];
 }
 
-- (void)webView:(WebView*)sender didClearWindowObject:(WebScriptObject*)windowScriptObject forFrame:(WebFrame*)frame
-{
-	if(self.disableJavaScriptAPI)
-		return;
-
-	NSString* scheme = [[[[[self.webView mainFrame] dataSource] request] URL] scheme];
-	if(self.isRunningCommand || [@[ @"tm-file", @"file" ] containsObject:scheme])
-	{
-		HOJSBridge* bridge = [HOJSBridge new];
-		[bridge setDelegate:self.statusBar];
-		[bridge setEnvironment:_environment];
-		[windowScriptObject setValue:bridge forKey:@"TextMate"];
-	}
-}
-
 - (void)webView:(WebView*)sender didFinishLoadForFrame:(WebFrame*)frame
 {
-	self.runningCommand = NO;
-	self.autoScrollHelper = nil;
-
 	// Sending goBack:/goForward: to a WebView does not call this WebFrameLoadDelegate method
 	if(frame == [sender mainFrame])
 	{
-		[self webView:sender didClearWindowObject:[frame windowObject] forFrame:frame];
+		self.runningCommand = NO;
+		self.autoScrollHelper = nil;
 
 		// This happens when we redirect to a PDF file
 		if(self.window.firstResponder == self.window)
@@ -178,15 +246,21 @@
 
 - (void)webView:(WebView*)sender didFailProvisionalLoadWithError:(NSError*)error forFrame:(WebFrame*)frame
 {
-	self.runningCommand = NO;
-	self.autoScrollHelper = nil;
+	if(frame == sender.mainFrame)
+	{
+		self.runningCommand = NO;
+		self.autoScrollHelper = nil;
+	}
 	[super webView:sender didFailProvisionalLoadWithError:error forFrame:frame];
 }
 
 - (void)webView:(WebView*)sender didFailLoadWithError:(NSError*)error forFrame:(WebFrame*)frame
 {
-	self.runningCommand = NO;
-	self.autoScrollHelper = nil;
+	if(frame == sender.mainFrame)
+	{
+		self.runningCommand = NO;
+		self.autoScrollHelper = nil;
+	}
 	[super webView:sender didFailLoadWithError:error forFrame:frame];
 }
 

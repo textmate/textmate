@@ -1,9 +1,9 @@
 title: TextMate Help
-meta: AppleTitle="TextMate 2 Help", AppleIcon="TextMate Help/images/tm_small.png"
+meta: AppleTitle="TextMate 3 Help", AppleIcon="TextMate Help/images/tm_small.png"
 
 # TextMate Help
 
-Some non-visible stuff.
+This help book covers TextMate 3. Use **TextMate → Settings…** (⌘,) to configure files, projects, bundles, environment variables, updates, and command-line tools.
 
 ## Mouse Gestures
 
@@ -61,7 +61,7 @@ Using ⌘T with find clipboard containing `«file»:«line»` will use that as d
 * [Bundle Dependencies][]
 * [Format String Syntax][]
 * [Glob String Syntax][]
-* [JavaScript Object][]
+* [HTML Output Security and Compatibility][]
 * [Scope Selector Syntax][]
 * [Selection String Syntax][]
 * [Folder Specific Properties][]
@@ -72,7 +72,7 @@ Using ⌘T with find clipboard containing `«file»:«line»` will use that as d
 [Bundle Dependencies]:        bundle_dependencies.html
 [Format String Syntax]:       format_string_syntax.html
 [Glob String Syntax]:         glob_string_syntax.html
-[JavaScript Object]:          javascript_object.html
+[HTML Output Security and Compatibility]: javascript_object.html
 [Scope Selector Syntax]:      scope_selector_syntax.html
 [Selection String Syntax]:    selection_string_syntax.html
 [Folder Specific Properties]: properties.html

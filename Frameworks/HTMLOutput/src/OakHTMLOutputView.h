@@ -8,5 +8,4 @@
 @property (nonatomic) NSUUID* commandIdentifier; // UUID from initial load request
 @property (nonatomic, getter = isRunningCommand, readonly) BOOL runningCommand;
 @property (nonatomic, getter = isReusable) BOOL reusable;
-@property (nonatomic) BOOL disableJavaScriptAPI;
 @end

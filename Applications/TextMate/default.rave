@@ -1,11 +1,11 @@
 target "${dirname}" {
-	require BundleEditor BundleMenu BundlesManager CommitWindow CrashReporter DocumentWindow Find HTMLOutputWindow MenuBuilder OakAppKit OakCommand OakFilterList OakFoundation OakSystem OakTextView Preferences SoftwareUpdate authorization bundles cf command crash document io kvdb license network ns plist regexp scm settings text theme
+	require BundleEditor BundleMenu BundlesManager CommitWindow CrashReporter DocumentWindow Find HTMLOutputWindow MenuBuilder OakAppKit OakCommand OakFilterList OakFoundation OakSystem OakTextView Preferences SoftwareUpdate authorization bundles cf command crash document io kvdb network ns plist regexp scm settings text theme
 
 	set HTML_HEADER     "${dir}/templates/header.html"
 	set HTML_FOOTER     "${dir}/templates/footer.html"
 
-	set     TEXTMATE_CHANGES "${dir}/about/Changes.md"
-	capture TEXTMATE_VERSION "grep -om1 '^## .* (v.*)$' '${TEXTMATE_CHANGES}'|sed 's/.*(v\\(.*\))/\\1/'"
+	set TEXTMATE_CHANGES "${dir}/about/Changes.md"
+	set TEXTMATE_VERSION "3.0"
 
 	config "debug" {
 		add PLIST_FLAGS "-d'CS_GET_TASK_ALLOW=true'"

@@ -12,7 +12,8 @@ struct connection_t
 	connection_t (int socket = -1);
 	connection_t (std::string const& socketPath);
 
-	explicit operator bool () const { return _socket; }
+	explicit operator bool () const { return _good && _socket; }
+	void set_maximum_string_size (size_t size) { _maximum_string_size = size; }
 
 	connection_t& operator<< (bool value);
 	connection_t& operator<< (int value);
@@ -50,7 +51,13 @@ struct connection_t
 	connection_t& operator>> (T& container)
 	{
 		int count = 0;
-		for(*this >> count; count; --count)
+		*this >> count;
+		if(!_good || count < 0 || count > 4096)
+		{
+			_good = false;
+			return *this;
+		}
+		for(; count; --count)
 		{
 			typename container_traits<T>::insert_type value;
 			container.insert(container.end(), (*this >> value, value));
@@ -59,7 +66,11 @@ struct connection_t
 	}
 
 private:
+	bool read_bytes (void* bytes, size_t size);
+
 	socket_t _socket;
+	bool _good = true;
+	size_t _maximum_string_size = 64 * 1024;
 };
 
 #endif /* end of include guard: CONNECTION_H_B2QX4NXP */

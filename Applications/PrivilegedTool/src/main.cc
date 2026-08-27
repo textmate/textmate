@@ -12,6 +12,8 @@ extern char* optarg;
 extern int optind;
 
 static bool running = true;
+static volatile sig_atomic_t active_children = 0;
+static sig_atomic_t const max_children = 16;
 
 static void handle_signal (int theSignal)
 {
@@ -23,7 +25,8 @@ static void reap_children (int theSignal)
 	pid_t pid;
 	int status;
 	while((pid = waitpid(-1, &status, WNOHANG)) > 0)
-		;
+		if(active_children > 0)
+			--active_children;
 }
 
 static void version ()
@@ -66,19 +69,32 @@ static int setup_socket ()
 
 static void handle_connection (int fd)
 {
+	timeval timeout = { 5, 0 };
+	setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
+
 	connection_t conn(fd);
 	conn << "AuthServer" << kAuthServerMajor << kAuthServerMinor;
 
 	std::string command;
 	conn >> command;
+	if(!conn)
+		return;
 	if(command == "auth")
 	{
 		std::string authString;
 		conn >> authString;
+		if(!conn)
+			return;
 
 		osx::authorization_t auth(authString);
 		if(!auth.check_right(kAuthRightName))
 			return;
+
+		// File contents are read only after authorization. Keep the decoder's
+		// conservative pre-authentication limit for the command and credential.
+		conn.set_maximum_string_size(512 * 1024 * 1024);
+		timeout = { 60, 0 };
+		setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
 	}
 	else
 	{
@@ -87,11 +103,15 @@ static void handle_connection (int fd)
 
 	std::string action;
 	conn >> action;
+	if(!conn)
+		return;
 
 	if(action == "read")
 	{
 		std::string path;
 		conn >> path;
+		if(!conn)
+			return;
 
 		conn << path::content(path) << path::attributes(path);
 	}
@@ -100,6 +120,8 @@ static void handle_connection (int fd)
 		std::string path, content, error = NULL_STR;
 		std::map<std::string, std::string> attributes;
 		conn >> path >> content >> attributes;
+		if(!conn)
+			return;
 
 		if(!path::set_content(path, content))
 			error = text::format("set_content() failed: %s", strerror(errno));
@@ -175,11 +197,31 @@ int main (int argc, char const* argv[])
 			char dummy[256];
 			socklen_t len = sizeof(dummy);
 			int newFd = accept(fd, (sockaddr*)&dummy[0], &len);
-			// if(fork() == 0)
+			if(newFd == -1)
+				continue;
+			if(active_children >= max_children)
 			{
-				handle_connection(newFd);
-				// _exit(EXIT_SUCCESS);
+				close(newFd);
+				continue;
 			}
+
+			sigset_t child_signal, previous_signals;
+			sigemptyset(&child_signal);
+			sigaddset(&child_signal, SIGCHLD);
+			sigprocmask(SIG_BLOCK, &child_signal, &previous_signals);
+			pid_t pid = fork();
+			if(pid == 0)
+			{
+				sigprocmask(SIG_SETMASK, &previous_signals, nullptr);
+				close(fd);
+				handle_connection(newFd);
+				close(newFd);
+				_exit(EXIT_SUCCESS);
+			}
+			close(newFd);
+			if(pid > 0)
+				++active_children;
+			sigprocmask(SIG_SETMASK, &previous_signals, nullptr);
 		}
 	}
 

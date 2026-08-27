@@ -35,3 +35,31 @@ void test_connection ()
 		waitpid(pid, &status, 0);
 	}
 }
+
+void test_connection_rejects_oversized_string_before_allocation ()
+{
+	int sockets[2];
+	socketpair(AF_UNIX, SOCK_STREAM, 0, &sockets[0]);
+
+	size_t size = CFSwapInt64HostToBig(64 * 1024 + 1);
+	write(sockets[0], &size, sizeof(size));
+	close(sockets[0]);
+
+	connection_t conn(sockets[1]);
+	std::string value;
+	conn >> value;
+	OAK_ASSERT(!conn);
+	OAK_ASSERT(value.empty());
+}
+
+void test_connection_treats_eof_as_failure ()
+{
+	int sockets[2];
+	socketpair(AF_UNIX, SOCK_STREAM, 0, &sockets[0]);
+	close(sockets[0]);
+
+	connection_t conn(sockets[1]);
+	std::string value;
+	conn >> value;
+	OAK_ASSERT(!conn);
+}

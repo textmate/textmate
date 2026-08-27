@@ -3,8 +3,11 @@
 #import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
 #import <BundlesManager/BundlesManager.h>
-#import <license/LicenseManager.h>
 #import <ns/ns.h>
+
+extern "C" void* TMAboutCreate(void);
+extern "C" void* TMAboutView(void* controller);
+extern "C" void TMAboutRelease(void* controller);
 
 static NSString* const kUserDefaultsReleaseNotesDigestKey = @"releaseNotesDigest";
 
@@ -21,6 +24,8 @@ static NSData* Digest (NSString* someString)
 @property (nonatomic) NSToolbar* toolbar;
 @property (nonatomic) NSSegmentedControl* segmentedControl;
 @property (nonatomic) WKWebView* webView;
+@property (nonatomic) NSView* nativeAboutView;
+@property (nonatomic) void* nativeAboutController;
 @property (nonatomic) NSString* selectedPage;
 @end
 
@@ -51,7 +56,7 @@ static NSData* Digest (NSString* someString)
 - (id)init
 {
 	NSRect visibleRect = [[NSScreen mainScreen] visibleFrame];
-	NSRect rect = NSMakeRect(0, 0, std::min<CGFloat>(700, NSWidth(visibleRect)), std::min<CGFloat>(800, NSHeight(visibleRect)));
+	NSRect rect = NSMakeRect(0, 0, std::min<CGFloat>(780, NSWidth(visibleRect)), std::min<CGFloat>(680, NSHeight(visibleRect)));
 
 	CGFloat dy = NSHeight(visibleRect) - NSHeight(rect);
 
@@ -61,7 +66,7 @@ static NSData* Digest (NSString* someString)
 	NSWindow* win = [[NSPanel alloc] initWithContentRect:rect styleMask:(NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable|NSWindowStyleMaskMiniaturizable|NSWindowStyleMaskFullSizeContentView) backing:NSBackingStoreBuffered defer:NO];
 	if((self = [super initWithWindow:win]))
 	{
-		_segmentLabels    = @[ @"About", @"Changes", @"Bundles", @"Registration", @"Legal", @"Contributions" ];
+		_segmentLabels    = @[ @"About", @"Changes", @"Bundles", @"Legal", @"Contributions" ];
 		_segmentedControl = [NSSegmentedControl segmentedControlWithLabels:_segmentLabels trackingMode:NSSegmentSwitchTrackingSelectOne target:self action:@selector(takeSelectedSegmentFrom:)];
 
 		self.toolbar = [[NSToolbar alloc] initWithIdentifier:@"About TextMate"];
@@ -75,6 +80,8 @@ static NSData* Digest (NSString* someString)
 		[win setAutorecalculatesKeyViewLoop:YES];
 		[win setHidesOnDeactivate:NO];
 		[win setTitleVisibility:NSWindowTitleHidden];
+		win.title = @"About TextMate";
+		win.toolbarStyle = NSWindowToolbarStyleUnified;
 
 		WKWebViewConfiguration* webConfig = [[WKWebViewConfiguration alloc] init];
 		[webConfig.userContentController addScriptMessageHandler:self name:@"textmate"];
@@ -91,7 +98,6 @@ static NSData* Digest (NSString* someString)
 				NSDictionary* variables = @{
 					@"version":   [NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"],
 					@"copyright": [NSBundle.mainBundle objectForInfoDictionaryKey:@"NSHumanReadableCopyright"],
-					@"licensees": LicenseManager.sharedInstance.owner ?: [NSNull null],
 				};
 
 				[variables enumerateKeysAndObjectsUsingBlock:^(NSString* key, NSString* value, BOOL* stop){
@@ -114,7 +120,10 @@ static NSData* Digest (NSString* someString)
 		[self.webView.widthAnchor constraintGreaterThanOrEqualToConstant:200].active = YES;
 		[self.webView.heightAnchor constraintGreaterThanOrEqualToConstant:200].active = YES;
 
-		[win setContentView:self.webView];
+		self.nativeAboutController = TMAboutCreate();
+		self.nativeAboutView = (__bridge NSView*)TMAboutView(self.nativeAboutController);
+		self.nativeAboutView.autoresizingMask = NSViewWidthSizable|NSViewHeightSizable;
+		[win setContentView:self.nativeAboutView];
 	}
 	return self;
 }
@@ -124,6 +133,8 @@ static NSData* Digest (NSString* someString)
 	[_webView.configuration.userContentController removeAllUserScripts];
 	_webView.navigationDelegate = nil;
 	[_webView stopLoading];
+	if(_nativeAboutController)
+		TMAboutRelease(_nativeAboutController);
 }
 
 - (void)showAboutWindow:(id)sender
@@ -160,13 +171,18 @@ static NSData* Digest (NSString* someString)
 		@"About":         @"About/About",
 		@"Changes":       @"About/Changes",
 		@"Bundles":       @"About/Bundles",
-		@"Registration":  @"About/Registration",
 		@"Legal":         @"About/Legal",
 		@"Contributions": @"About/Contributions"
 	};
 
-	if(NSString* file = pages[pageName])
+	if([pageName isEqualToString:@"About"])
 	{
+		self.window.contentView = self.nativeAboutView;
+		_segmentedControl.selectedSegment = [_segmentLabels indexOfObject:pageName];
+	}
+	else if(NSString* file = pages[pageName])
+	{
+		self.window.contentView = self.webView;
 		if(NSURL* url = [NSBundle.mainBundle URLForResource:file withExtension:@"html"])
 			[self.webView loadRequest:[NSURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:60]];
 
@@ -324,10 +340,6 @@ static NSDictionary* RemoveOldCommits (NSDictionary* src)
 			static os_log_t log = os_log_create("com.macromates.JavaScript", "log");
 			os_log(log, "%{public}@: %{public}@", self.webView.title, payload[@"message"]);
 		}
-	}
-	else if([command isEqualToString:@"addLicense"])
-	{
-		[LicenseManager.sharedInstance showAddLicenseWindow:self];
 	}
 }
 @end

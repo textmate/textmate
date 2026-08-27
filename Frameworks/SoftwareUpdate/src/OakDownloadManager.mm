@@ -184,10 +184,8 @@ static NSString* GetHardwareInfo (int field, BOOL isInteger = NO)
 
 - (void)URLSession:(NSURLSession*)session dataTask:(NSURLSessionDataTask*)dataTask didReceiveData:(NSData*)data
 {
-	NSFileHandle* fileHandle = self.extractorFileHandle;
-	if(fileHandle && !_progress.isCancelled)
+	if(!_progress.isCancelled)
 	{
-		[fileHandle writeData:data];
 		[_data appendData:data];
 
 		if(dataTask.countOfBytesExpectedToReceive != NSURLSessionTransferSizeUnknown)
@@ -228,13 +226,12 @@ static NSString* GetHardwareInfo (int field, BOOL isInteger = NO)
 
 - (void)URLSession:(NSURLSession*)session task:(NSURLSessionTask*)dataTask didCompleteWithError:(NSError*)downloadError
 {
-	[_extractorFileHandle closeFile];
 	_progress.totalUnitCount = dataTask.countOfBytesReceived;
 
-	if(NSError* error = _extractorError ?: (_extractorTask ? downloadError : [NSError errorWithDomain:@"OakDownloadManager" code:0 userInfo:@{ NSLocalizedDescriptionKey: @"Unable to launch tar." }]))
+	if(downloadError)
 	{
-		os_log_error(OS_LOG_DEFAULT, "Failed to download %{public}@: %{public}@", dataTask.originalRequest.URL, error.localizedDescription);
-		_completionHandler(nil, error);
+		os_log_error(OS_LOG_DEFAULT, "Failed to download %{public}@: %{public}@", dataTask.originalRequest.URL, downloadError.localizedDescription);
+		_completionHandler(nil, downloadError);
 	}
 	else if(![OakDownloadManager.sharedInstance data:_data hasValidBase64EncodedSignature:_signature usingPublicKeyString:_publicKeys[_signee]])
 	{
@@ -243,6 +240,20 @@ static NSString* GetHardwareInfo (int field, BOOL isInteger = NO)
 	}
 	else
 	{
+		NSFileHandle* fileHandle = self.extractorFileHandle;
+		if(!fileHandle)
+		{
+			NSError* error = _extractorError ?: [NSError errorWithDomain:@"OakDownloadManager" code:0 userInfo:@{ NSLocalizedDescriptionKey: @"Unable to launch tar." }];
+			_completionHandler(nil, error);
+			return;
+		}
+
+		NSData* verifiedArchive = _data;
+		dispatch_group_async(_extractorDispatchGroup, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+			[fileHandle writeData:verifiedArchive];
+			[fileHandle closeFile];
+		});
+
 		dispatch_group_notify(_extractorDispatchGroup, dispatch_get_main_queue(), ^{
 			if(_extractorTask.terminationStatus == 0)
 			{
