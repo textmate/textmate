@@ -4,15 +4,101 @@ Title: Release Notes
 
 ## 2026-08-27 — Version 3.0
 
-* Replaced the registration page with a native About experience that clearly identifies TextMate as free and open-source software with no license key requirement.
-* Added distinct color treatments to Settings icons for faster visual navigation.
+TextMate 3 modernizes the application while retaining the editor, bundle system,
+and workflows familiar to TextMate users. This release establishes macOS 14 as
+the modernization baseline and includes the following changes.
 
-## 2026-08-27 (v3.0)
+### Native interface
 
-* Added native SwiftUI command output and removed the privileged HTML-output JavaScript bridge.
-* Hardened remote editing, privileged-helper framing, update verification, dialog IPC, and commit-window IPC.
-* Restored generated test targets and fixed sanitizer-detected iterator and rectangle defects.
-* Updated the Settings window and bundled Help for TextMate 3.
+* Added the `TextMateUI` Swift package as the foundation for incremental SwiftUI
+  adoption without rewriting the AppKit editor.
+* Replaced command output's privileged JavaScript bridge with a native SwiftUI
+  output view and an explicitly managed AppKit host.
+* Added streaming UTF-8 decoding, running/finished state, selectable monospaced
+  output, and a native Clear action to command output.
+* Replaced the main About page with a native SwiftUI design containing the app
+  icon, version/build information, project links, copyright, and open-source
+  licensing status.
+* Removed the obsolete Registration tab, add-license JavaScript API, and license
+  framework dependency. TextMate is free and open-source and no license key is
+  required.
+* Renamed Preferences to Settings and refreshed the Settings window behavior,
+  toolbar metadata, tooltips, and window styling.
+* Replaced monochrome Settings artwork with distinct, accessible SF Symbols and
+  color treatments for Files, Projects, Bundles, Variables, Software Update,
+  and Terminal.
+
+### Security and trust boundaries
+
+* Removed `HOJSBridge`, eliminating unrestricted native-object exposure from
+  legacy HTML command output.
+* Restricted local HTML navigation and external URL handling at the WebKit
+  boundary.
+* Added authenticated framing and stricter validation to privileged-helper IPC.
+* Hardened `rmate` request parsing, limits, temporary-file handling, and protocol
+  validation.
+* Added per-session authentication and input validation to Commit Window IPC.
+* Updated Dialog2 IPC authentication and moved the application to the hardened
+  dialog submodule revision.
+* Hardened software-update downloads and archive extraction with stricter URL,
+  redirect, response, path, and file validation.
+* Improved download failure handling so incomplete or invalid update artifacts
+  are rejected before installation.
+
+### Bundled tools
+
+* Reworked the built-in Avian bundle around a shared, self-contained Ruby support
+  library using the system Ruby without third-party gems.
+* Replaced legacy encryption writes with a versioned authenticated format using
+  PBKDF2-HMAC-SHA256, independent AES-256-CBC and HMAC-SHA256 keys, and
+  encrypt-then-MAC verification.
+* Retained read-only compatibility with historical OpenSSL `Salted__` documents.
+* Prevented passwords from appearing in process arguments or environment values.
+* Added atomic archive-name reservation and argv-based process execution to avoid
+  shell injection and accidental overwrites.
+* Hardened gzip, bzip2, PNG, image-preview, and archive commands so partial or
+  invalid output is not emitted on failure.
+* Added HTML escaping and URL encoding to generated image previews.
+* Removed stale Avian menu entries and synchronized bundle ordering with the
+  commands actually shipped.
+
+### Build system and tests
+
+* Updated the Rave generator for current dependency declarations, Swift sources,
+  test discovery, dependency files, and regenerated Ninja graphs.
+* Restored generated CxxTest targets and fixed runner generation for modern
+  compilers.
+* Added Swift package coverage for split UTF-8 input and command-output lifecycle
+  behavior.
+* Added authorization framing tests plus regression tests for rectangle and
+  numeric tree edge cases.
+* Fixed sanitizer-detected iterator invalidation and ownership defects in the
+  command runner and legacy tree implementation.
+* Updated ignored build artifacts so generated Swift and test state does not
+  dirty the source tree.
+
+### Documentation and compatibility
+
+* Set the application version to 3.0 and renamed the bundled help book to
+  TextMate 3 Help.
+* Updated Help terminology, `mate`/`rmate` documentation, and HTML-output security
+  guidance for the native command-output path.
+* Added a SwiftUI migration document describing the incremental architecture and
+  remaining WebView-to-WKWebView work.
+* Preserved the legacy HTML-output implementation as an explicit compatibility
+  path while making native output the default.
+* Preserved GPLv3 licensing and third-party legal notices.
+
+### Verification
+
+* Verified a complete TextMate 3.0 debug build with the current Xcode toolchain
+  and a macOS 14 deployment target.
+* Passed the bundle, HTML-output, SwiftUI model, authorization, and focused Avian
+  security test suites.
+* Verified the assembled application and embedded Dialog plug-ins with strict,
+  deep code-signature validation.
+
+Modernization commits: `63cdd4a8`, `5fe42ac8`, `9f19ecc4`, and `25cfe521`.
 
 ## 2021-04-16 (v2.0.22)
 

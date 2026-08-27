@@ -1,75 +1,91 @@
-# Contributing
+# Contributing to TextMate
 
-You can send pull requests via GitHub. Patches should:
+TextMate welcomes focused pull requests through GitHub. Read the build instructions in [README.md](README.md), initialize all submodules, and verify the affected targets before submitting a change.
 
-1. Follow the style of the existing code.
-2. One commit should do exactly one thing.
-3. Commit messages should start with a summary line below 70 characters followed by a blank line, and then the reasoning/analysis for why the change was made (if appropriate).
-4. Commits that fix a bug in a previous commit should:
-    1. If existing commit is already upstream: Start with `fixup!` and then the summary line of the commit it fixes. If you are writing your commit message in TextMate then type `fix⇥` to get the prefix and a menu allowing you to pick the summary line from one of the last 15 commits. If you commit from a terminal you can use `git commit --fixup=«commit»`
-    2. If existing commit is a local commit: You should amend the existing commit! Either use `git commit --amend` or do a `fixup!` followed by `git rebase -i` (to merge in the fixup). I.e. do not send a pull request where some of the commits you want us to pull fixes bugs introduced in other commits you also want us to pull.
-5. Rebase your branch against the upstream’s master. We don’t want to pull redundant merge commits.
-6. **Be clear about what license applies to your patch:** The files within this repository are under the [GPL 3][] (or later) but (as the original creator) we are still allowed to create non-free derivatives. However, if patches are given to us under GPL then those cannot make it into any non-free derivatives we may later wish to create. So to make it easier for us (and avoid any legal issues) we prefer if patches are released as public domain.
+## Development baseline
 
-There is the [textmate][] mailing list and [#textmate][] IRC channel at [freenode.net][] where this project can be discussed.
+TextMate 3 development currently targets macOS 14 or later and requires a current full Xcode installation. The application combines AppKit, Objective-C++, C++, and incremental SwiftUI modules; Rave generates the Ninja build graph.
 
-## GitHub Workflow
+Build and run the primary checks with:
 
-Developing patches should follow this workflow:
+```sh
+./configure
+ninja TextMate
+ninja bundles/test HTMLOutput/test authorization/test
+swift test --package-path Applications/TextMate/SwiftUI
+```
 
-### Initial Setup
+Run additional generated tests for every framework you change. Use `ninja -t targets all` to discover available targets.
 
-1.	Fork on GitHub (click Fork button)
-2.	Clone to computer: `git clone git@github.com:«github account»/textmate.git`
-3.	cd into your repo: `cd textmate`
-4.	Set up remote upstream: `git remote add -f upstream git://github.com/textmate/textmate.git`
+## Patch expectations
 
-### Adding a Feature
+1. Follow the style of the code being changed.
+2. Keep each commit focused on one coherent change.
+3. Start commit messages with an imperative summary shorter than 70 characters. Add a blank line and explain the reason, risk, and compatibility impact when useful.
+4. Include regression tests where practical, especially for parsers, IPC, file handling, security boundaries, and data structures.
+5. Preserve user data and existing bundle behavior unless the change explicitly documents a migration.
+6. Do not weaken trust boundaries to preserve compatibility. Rendered HTML and bundle content must not receive unrestricted native execution privileges.
+7. Keep submodule updates isolated and identify the exact upstream revision and reason.
+8. Avoid unrelated generated-file, formatting, or Xcode project churn.
 
-1.	Create a branch for the new feature: `git checkout -b my_new_feature`
-2.	Work on your feature, add and commit as usual
+For a defect in a commit already published upstream, use `git commit --fixup=<commit>` when appropriate. Amend or autosquash defects in unpublished local commits before opening the pull request.
 
-Creating a branch is not strictly necessary, but it makes it easy to delete your branch when the feature has been merged into upstream, diff your branch with the version that actually ended in upstream, and to submit pull requests for multiple features (branches).
+## GitHub workflow
 
-### Pushing to GitHub
+Fork the repository, then clone your fork with submodules and add the official repository as `upstream`:
 
-8.	Push branch to GitHub: `git push origin my_new_feature`
-9.	Issue pull request: Click Pull Request button on GitHub
+```sh
+git clone --recursive git@github.com:YOUR-ACCOUNT/textmate.git
+cd textmate
+git remote add upstream https://github.com/textmate/textmate.git
+git fetch upstream
+```
 
-### Useful Commands
+Create a descriptive branch, make and verify the change, then rebase it on the current upstream branch before pushing:
 
-If a lot of changes has happened upstream you can replay your local changes on top of these, this is done with `rebase`, e.g.:
+```sh
+git switch -c feature/short-description
+git fetch upstream
+git rebase upstream/master
+git push --set-upstream origin feature/short-description
+```
 
-	git fetch upstream
-	git rebase upstream/master
+Open a pull request that states:
 
-This will fetch changes and re-apply your commits on top of these.
+* The problem and user-visible result.
+* The implementation approach and important trade-offs.
+* Tests and manual verification performed.
+* Security, compatibility, deployment-target, or migration implications.
+* Any submodule revisions included.
 
-This is generally better than merge, as it will give a clear picture of which commits are local to your branch. It will also “prune” any of your local commits if the same changes have been applied upstream.
+Never include credentials, signing identities, private documents, local build products, or machine-specific configuration in a commit.
 
-You can use `-i` with `rebase` for an “interactive” rebase. This allows you to drop, re-arrange, merge, and reword commits, e.g.:
+## SwiftUI and AppKit changes
 
-	git rebase -i upstream/master
+TextMate is being modernized incrementally. Keep the editor core in place and use narrow interfaces when hosting SwiftUI from AppKit. New native surfaces belong in `Applications/TextMate/SwiftUI/Sources/TextMateUI/` and need focused tests under `Applications/TextMate/SwiftUI/Tests/`.
 
-## Changing a xib File
+Do not restore the removed privileged JavaScript bridge. If HTML must remain for compatibility, use tightly constrained WKWebView content and explicit native actions. See [Applications/TextMate/SwiftUI/MIGRATION.md](Applications/TextMate/SwiftUI/MIGRATION.md).
 
-When you change a `xib` file then please look at the diff before you push. If the diff seems to have a lot of changes unrelated to what actually did change, please revert back to `HEAD` and open the pristine `xib` in Xcode and save that (without changing anything).
+## XIB changes
 
-Commit this saved `xib` with a commit message of `Save xib file with Xcode «version»`. Here version is the version of Xcode you are using, but be sure you don’t downgrade the format. To check the version that `resources/English.lproj/MainMenu.xib` was last saved with, you can run (add appropriate grep if desired):
+Review every XIB diff before committing. Xcode may rewrite unrelated document metadata or constraints. Separate a necessary format upgrade from the functional change when possible, and state the Xcode version used. Do not downgrade a document’s existing format.
 
-	git log --oneline resources/English.lproj/MainMenu.xib
+## Bundle changes
 
-You can safely assume that all `xib` files without such message are saved with Xcode 4.4 or earlier (i.e. you won’t downgrade them).
+Treat bundle commands as code that processes untrusted filenames and document content:
 
-After this, re-apply your change and commit. If the change is non-trivial it is a good idea to write how you made the change in the commit body. E.g. a commit message could be:
+* Pass arguments as argv values instead of constructing shell source.
+* Escape HTML and encode URLs before generating previews.
+* Avoid placing passwords, tokens, or private content in arguments, logs, or environment values.
+* Write output atomically and reject partial results on failure.
+* Preserve compatibility only when it does not bypass authentication or integrity checks.
 
-	Disable install button when we can’t install
-	
-	The install button’s “enabled” property
-	has been bound to the “canInstall”
-	property of File’s Owner.
+## Contribution licensing
 
-[GPL 3]:          http://www.gnu.org/copyleft/gpl.html
-[textmate]:       http://lists.macromates.com/listinfo/textmate
-[#textmate]:      irc://irc.freenode.net/#textmate
-[freenode.net]:   http://freenode.net/
+The application does not require product registration or a license key. That is separate from source-code licensing: repository files remain under GPLv3-or-later as described in [COPYING](COPYING) and [LICENSE](LICENSE).
+
+The historical project policy prefers patches dedicated to the public domain so the original copyright holder retains flexibility for other distributions. If you cannot make that dedication, clearly state the license under which you are submitting the patch in the pull request. Do not contribute code you do not have the right to license.
+
+## Support
+
+Use [GitHub Issues](https://github.com/textmate/textmate/issues) for reproducible defects and the [MacroMates support page](https://macromates.com/support) for general product support. Please follow the project’s [bug-reporting guidance](https://github.com/textmate/textmate/wiki/writing-bug-reports).
