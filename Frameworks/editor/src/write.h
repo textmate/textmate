@@ -1,9 +1,9 @@
 #ifndef NG_WRITE_H_N8L9UVMF
 #define NG_WRITE_H_N8L9UVMF
 
-#include <buffer/buffer.h>
-#include <selection/selection.h>
-#include <command/parser.h>
+#include <buffer/src/buffer.h>
+#include <selection/src/selection.h>
+#include <command/src/parser.h>
 
 namespace ng
 {

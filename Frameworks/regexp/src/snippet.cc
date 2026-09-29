@@ -1,7 +1,7 @@
 #include "snippet.h"
 #include "dependency_graph.h"
 #include <oak/oak.h>
-#include <text/parse.h>
+#include <text/src/parse.h>
 #include <oak/debug.h>
 
 namespace snippet
@@ -363,7 +363,10 @@ namespace snippet
 						field = s.fields.begin();
 
 					if(field->second->range != currentFieldRange)
-						return s.current_field = field->first, true;
+					{
+						s.current_field = field->first;
+						return true;
+					}
 
 					if((n = field->first) == 0)
 						break;

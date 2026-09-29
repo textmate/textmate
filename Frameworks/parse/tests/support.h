@@ -1,8 +1,8 @@
 #ifndef TEST_SUPPORT_CC_1DYF6K30
 #define TEST_SUPPORT_CC_1DYF6K30
 
-#include <parse/grammar.h>
-#include <parse/parse.h>
+#include <parse/src/grammar.h>
+#include <parse/src/parse.h>
 
 static std::string to_s (std::string const& buf, std::map<size_t, scope::scope_t> const& scopes)
 {

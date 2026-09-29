@@ -1,7 +1,7 @@
 #ifndef BUNDLEMENU_H_BI4UDOAR
 #define BUNDLEMENU_H_BI4UDOAR
 
-#import <bundles/bundles.h>
+#import <bundles/src/bundles.h>
 
 @interface BundleMenuDelegate : NSObject <NSMenuDelegate>
 @property (class, readonly) BundleMenuDelegate* sharedInstance;

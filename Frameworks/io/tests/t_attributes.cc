@@ -1,4 +1,4 @@
-#include <io/path.h>
+#include <io/src/path.h>
 #include <test/jail.h>
 
 void test_attributes ()

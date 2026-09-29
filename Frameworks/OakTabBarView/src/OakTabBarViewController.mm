@@ -1,5 +1,5 @@
 #import "OakTabBarViewController.h"
-#import <OakAppKit/NSMenuItem Additions.h>
+#import <OakAppKit/src/NSMenuItem Additions.h>
 
 @interface NSArray<ObjectType> (SafeAccessor)
 - (ObjectType)mySafeObjectAtIndex:(NSUInteger)index;
@@ -36,8 +36,12 @@
 
 - (void)loadView
 {
-	self.tabBarView.frameSize = self.tabBarView.intrinsicContentSize;
-	self.fullScreenMinHeight = self.tabBarView.intrinsicContentSize.height;
+	// intrinsicContentSize.width is NSViewNoIntrinsicMetric (-1) — only the
+	// height matters; a negative frame width trips AppKit’s geometry check.
+	NSSize const tabBarSize = self.tabBarView.intrinsicContentSize;
+	CGFloat const tabBarHeight = OakTabBarView.preferredHeight;
+	self.tabBarView.frameSize = NSMakeSize(std::max<CGFloat>(tabBarSize.width, 0), tabBarHeight);
+	self.fullScreenMinHeight = tabBarHeight;
 	self.view = self.tabBarView;
 }
 

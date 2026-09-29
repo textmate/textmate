@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>beforeRunningCommand</key>
+	<string>nop</string>
+	<key>command</key>
+<string>#!/bin/bash
+filename="${TM_FILEPATH:-${TM_DIRECTORY:-$PWD}/untitled.py}"
+
+format_config=()
+case "${TM_SOFT_TABS:-}" in
+	YES) format_config+=(--config 'format.indent-style = "space"') ;;
+	NO)  format_config+=(--config 'format.indent-style = "tab"') ;;
+esac
+
+if [[ "${TM_TAB_SIZE:-}" =~ ^[1-9][0-9]*$ ]]; then
+	format_config+=(--config "indent-width = $TM_TAB_SIZE")
+fi
+
+if ! "${TM_RUFF:-ruff}" format --quiet "${format_config[@]}" --stdin-filename "$filename" -; then
+	. "$TM_SUPPORT_PATH/lib/bash_init.sh"
+	exit_show_tool_tip
+fi
+</string>
+	<key>input</key>
+	<string>document</string>
+	<key>inputFormat</key>
+	<string>text</string>
+	<key>name</key>
+	<string>Format Python with Ruff</string>
+	<key>outputCaret</key>
+	<string>interpolateByLine</string>
+	<key>outputFormat</key>
+	<string>text</string>
+	<key>outputLocation</key>
+	<string>replaceDocument</string>
+	<key>requiredCommands</key>
+	<array>
+		<dict>
+			<key>command</key>
+			<string>ruff</string>
+			<key>locations</key>
+			<array>
+				<string>/opt/homebrew/bin/ruff</string>
+				<string>/usr/local/bin/ruff</string>
+				<string>$HOME/.local/bin/ruff</string>
+			</array>
+			<key>moreInfoURL</key>
+			<string>https://docs.astral.sh/ruff/formatter/</string>
+			<key>variable</key>
+			<string>TM_RUFF</string>
+		</dict>
+	</array>
+	<key>scope</key>
+	<string>source.python</string>
+	<key>uuid</key>
+	<string>EB6CE41D-1207-457D-A52F-8B061DF2E470</string>
+	<key>version</key>
+	<integer>2</integer>
+</dict>
+</plist>

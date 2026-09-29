@@ -1,5 +1,5 @@
 #import "OakAbbreviations.h"
-#import <OakFoundation/OakFoundation.h>
+#import <OakFoundation/src/OakFoundation.h>
 #import <oak/debug.h>
 
 static NSString* const FCAbbreviationKey   = @"short";

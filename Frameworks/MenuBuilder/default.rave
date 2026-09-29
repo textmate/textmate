@@ -1,5 +1,0 @@
-target "${dirname}" {
-	headers src/{MenuBuilder,MBMenuDelegate}.h
-	sources src/*.mm
-	frameworks Cocoa
-}

@@ -1,9 +1,9 @@
 #include "../src/drivers/api.h"
-#include <scm/scm.h>
+#include <scm/src/scm.h>
 #include <test/jail.h>
-#include <io/path.h>
-#include <io/exec.h>
-#include <text/format.h>
+#include <io/src/path.h>
+#include <io/src/exec.h>
+#include <text/src/format.h>
 
 void test_basic_status ()
 {

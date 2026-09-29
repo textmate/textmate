@@ -2,9 +2,9 @@
 #define PARAGRAPH_H_PZ1GB7JU
 
 #include "ct.h"
-#include <buffer/buffer.h>
-#include <selection/types.h>
-#include <theme/theme.h>
+#include <buffer/src/buffer.h>
+#include <selection/src/types.h>
+#include <theme/src/theme.h>
 namespace ng
 {
 	struct line_record_t

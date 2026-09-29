@@ -1,15 +1,15 @@
 #include "settings.h"
 #include "parser.h"
 #include "track_paths.h"
-#include <plist/plist.h>
+#include <plist/src/plist.h>
 #include <oak/oak.h>
-#include <regexp/format_string.h>
-#include <regexp/glob.h>
-#include <text/parse.h>
-#include <text/format.h>
+#include <regexp/src/format_string.h>
+#include <regexp/src/glob.h>
+#include <text/src/parse.h>
+#include <text/src/format.h>
 #include <oak/debug.h>
-#include <io/io.h>
-#include <cf/cf.h>
+#include <io/src/io.h>
+#include <cf/src/cf.h>
 
 namespace
 {
@@ -88,9 +88,9 @@ namespace
 
 		section_t (std::string const& path, std::vector<assignment_t> const& variables, std::string const& section = NULL_STR) : path(path), variables(variables), section(section)
 		{
-			if(has_scope_selector = is_scope_selector(section))
+			if((has_scope_selector = is_scope_selector(section)))
 				scope_selector = section;
-			else if(has_file_glob = (section != NULL_STR))
+			else if((has_file_glob = (section != NULL_STR)))
 				file_glob = section;
 		}
 
@@ -293,7 +293,7 @@ std::vector<setting_info_t> settings_info_for_path (std::string const& path, sco
 }
 
 // ===================================
-// = Helper Funtions for raw get/set =
+// = Helper Functions for raw get/set =
 // ===================================
 
 static std::string quote_string (std::string const& src)
@@ -304,8 +304,9 @@ static std::string quote_string (std::string const& src)
 	std::string res = "'";
 	for(size_t i = 0; i < src.size(); ++i)
 	{
-		if(strchr("'\n", src[i]) || i+1 != src.size() && src[i] == '\\' && strchr("\\'\n", src[i+1]))
+		if(strchr("'\n", src[i]) || (i+1 != src.size() && src[i] == '\\' && strchr("\\'\n", src[i+1]))) {
 			res.append("\\");
+		}
 		res += src[i];
 	}
 	res.append("'");
@@ -396,7 +397,7 @@ void settings_t::set (std::string const& key, std::string const& value, std::str
 
 		bool operator< (ordered_section_t const& rhs) const
 		{
-			if(_is_top_level && rhs._is_top_level || _is_scope_selector && rhs._is_scope_selector)
+			if((_is_top_level && rhs._is_top_level) || (_is_scope_selector && rhs._is_scope_selector))
 				return title < rhs.title;
 			else if(_is_top_level || rhs._is_scope_selector)
 				return true;

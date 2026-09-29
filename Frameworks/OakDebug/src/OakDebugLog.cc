@@ -15,9 +15,9 @@ std::map<std::string, bool>& OakDebugBaseClass::registry ()
 
 		char* tok;
 		char* debug;
-		if(debug = getenv("DebugFlags"))
+		if((debug = getenv("DebugFlags")))
 		{
-			while(tok = strtok(debug, ", ;"))
+			while((tok = strtok(debug, ", ;")))
 			{
 				(*Registry)[tok] = true;
 				debug = nullptr;

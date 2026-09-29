@@ -14,7 +14,7 @@ namespace ng
 		explicit operator bool () const            { return index != SIZE_T_MAX; }
 		bool operator== (index_t const& rhs) const { return index == rhs.index && carry == rhs.carry; }
 		bool operator!= (index_t const& rhs) const { return !(*this == rhs); }
-		bool operator< (index_t const& rhs) const  { return index < rhs.index || index == rhs.index && carry < rhs.carry; }
+		bool operator< (index_t const& rhs) const  { return index < rhs.index || (index == rhs.index && carry < rhs.carry); }
 		bool operator<= (index_t const& rhs) const { return *this < rhs || *this == rhs; }
 		index_t operator+ (ssize_t i) const        { return index_t(index + i, carry); }
 
@@ -36,7 +36,7 @@ namespace ng
 		explicit operator bool () const            { return first ? true : false; }
 		bool operator== (range_t const& tmp) const { auto lhs = normalized(), rhs = tmp.normalized(); return lhs.first == rhs.first && lhs.last == rhs.last && lhs.columnar == rhs.columnar && lhs.freehanded == rhs.freehanded; }
 		bool operator!= (range_t const& tmp) const { auto lhs = normalized(), rhs = tmp.normalized(); return lhs.first != rhs.first || lhs.last != rhs.last || lhs.columnar != rhs.columnar || lhs.freehanded != rhs.freehanded; }
-		bool operator< (range_t const& tmp) const  { auto lhs = normalized(), rhs = tmp.normalized(); return lhs.first < rhs.first || lhs.first == rhs.first && lhs.last < rhs.last; }
+		bool operator< (range_t const& tmp) const  { auto lhs = normalized(), rhs = tmp.normalized(); return lhs.first < rhs.first || (lhs.first == rhs.first && lhs.last < rhs.last); }
 		range_t operator+ (ssize_t i) const        { return range_t(first + i, last + i, columnar, freehanded, unanchored, color); }
 
 		range_t& operator= (index_t const& rhs)    { first = last = rhs; return *this; }

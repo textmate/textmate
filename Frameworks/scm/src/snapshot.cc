@@ -1,6 +1,6 @@
 #include "snapshot.h"
-#include <io/path.h>
-#include <io/entries.h>
+#include <io/src/path.h>
+#include <io/src/entries.h>
 
 namespace fs
 {

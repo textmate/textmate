@@ -2,31 +2,31 @@
 #import "PropertiesViewController.h"
 #import "OakRot13Transformer.h"
 #import "be_entry.h"
-#import <OakFoundation/NSString Additions.h>
-#import <OakFoundation/OakStringListTransformer.h>
-#import <OakAppKit/NSAlert Additions.h>
-#import <OakAppKit/NSImage Additions.h>
-#import <OakAppKit/OakSound.h>
-#import <OakAppKit/OakUIConstructionFunctions.h>
-#import <OakTextView/OakDocumentView.h>
-#import <TMFileReference/TMFileReference.h>
-#import <document/OakDocument.h>
-#import <document/OakDocumentController.h>
-#import <BundlesManager/BundlesManager.h>
-#import <command/runner.h> // fix_shebang
-#import <plist/ascii.h>
-#import <plist/delta.h>
-#import <regexp/format_string.h>
-#import <text/decode.h>
-#import <cf/cf.h>
-#import <ns/ns.h>
-#import <io/environment.h>
-#import <settings/settings.h>
+#import <OakFoundation/src/NSString Additions.h>
+#import <OakFoundation/src/OakStringListTransformer.h>
+#import <OakAppKit/src/NSAlert Additions.h>
+#import <OakAppKit/src/NSImage Additions.h>
+#import <OakAppKit/src/OakSound.h>
+#import <OakAppKit/src/OakUIConstructionFunctions.h>
+#import <OakTextView/src/OakDocumentView.h>
+#import <TMFileReference/src/TMFileReference.h>
+#import <document/src/OakDocument.h>
+#import <document/src/OakDocumentController.h>
+#import <BundlesManager/src/BundlesManager.h>
+#import <command/src/runner.h> // fix_shebang
+#import <plist/src/ascii.h>
+#import <plist/src/delta.h>
+#import <regexp/src/format_string.h>
+#import <text/src/decode.h>
+#import <cf/src/cf.h>
+#import <ns/src/ns.h>
+#import <io/src/environment.h>
+#import <settings/src/settings.h>
 #import <oak/debug.h>
 
 @class OakCommand;
 
-@interface BundleEditor () <NSWindowDelegate, OakTextViewDelegate>
+@interface BundleEditor () <NSWindowDelegate, OakTextViewDelegate, NSEditor>
 {
 	NSViewController*      _browserViewController;
 	NSViewController*      _documentViewController;
@@ -214,7 +214,7 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 		browser = [[NSBrowser alloc] initWithFrame:NSZeroRect];
 		browser.autoresizingMask = NSViewWidthSizable|NSViewHeightSizable;
 
-		if(@available(macos 11, *))
+		if(@available(macOS 11, *))
 		{
 			_browserViewController.view = browser;
 		}

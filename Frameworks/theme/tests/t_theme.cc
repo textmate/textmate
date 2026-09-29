@@ -1,5 +1,5 @@
 #include "CGColorRefToString.h"
-#include <theme/theme.h>
+#include <theme/src/theme.h>
 
 void test_missing_theme_item_still_sets_gutter_colors ()
 {

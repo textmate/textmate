@@ -1,10 +1,10 @@
 #include "buffer.h"
 #include "meta_data.h"
 #include <oak/oak.h>
-#include <text/utf8.h>
-#include <text/parse.h>
-#include <regexp/format_string.h>
-#include <parse/grammar.h>
+#include <text/src/utf8.h>
+#include <text/src/parse.h>
+#include <regexp/src/format_string.h>
+#include <parse/src/grammar.h>
 
 namespace ng
 {

@@ -1,5 +1,5 @@
 #import "SearchField.h"
-#import <OakAppKit/OakAppKit.h>
+#import <OakAppKit/src/OakAppKit.h>
 
 static id TranslateAXRange(NSRange range, NSUInteger length, id (^process)(NSUInteger left, NSRange range, NSUInteger right), NSUInteger leftMargin = 1, NSUInteger rightMargin = 1)
 {

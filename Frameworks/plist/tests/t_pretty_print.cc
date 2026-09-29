@@ -1,4 +1,4 @@
-#include <plist/plist.h>
+#include <plist/src/plist.h>
 
 static std::string regular (std::string const& plistSrc)  { return to_s(plist::parse(plistSrc)); }
 static std::string enhanced (std::string const& plistSrc) { return to_s(plist::parse(plistSrc), plist::kPreferSingleQuotedStrings); }

@@ -1,5 +1,5 @@
-#include <editor/editor.h>
-#include <command/runner.h>
+#include <editor/src/editor.h>
+#include <command/src/runner.h>
 
 void test_replace_selection_command ()
 {

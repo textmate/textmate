@@ -2,6 +2,7 @@
 #include "frequencies.capnp.h"
 #include <capnp/message.h>
 #include <capnp/serialize-packed.h>
+#include <stdexcept>
 
 static uint32_t const kCapnpClassifierFormatVersion = 1;
 
@@ -205,19 +206,25 @@ namespace encoding
 
 	void classifier_t::save (std::string const& path) const
 	{
+		auto capnp_count = [](size_t count) -> uint32_t {
+			if(count > UINT32_MAX)
+				throw std::length_error("Encoding frequency list exceeds Cap'n Proto limits");
+			return static_cast<uint32_t>(count);
+		};
+
 		capnp::MallocMessageBuilder message;
 		auto freq = message.initRoot<Frequencies>();
 		freq.setVersion(kCapnpClassifierFormatVersion);
-		auto charsets = freq.initCharsets(_charsets.size());
-		size_t i = 0;
+		auto charsets = freq.initCharsets(capnp_count(_charsets.size()));
+		uint32_t i = 0;
 
 		for(auto const& pair : _charsets)
 		{
 			auto entry = charsets[i++];
 			entry.setCharset(pair.first);
 
-			auto words = entry.initWords(pair.second.words.size());
-			size_t j = 0;
+			auto words = entry.initWords(capnp_count(pair.second.words.size()));
+			uint32_t j = 0;
 			for(auto const& word : pair.second.words)
 			{
 				auto tmp = words[j++];
@@ -225,7 +232,7 @@ namespace encoding
 				tmp.setCount(word.second);
 			}
 
-			auto bytes = entry.initBytes(pair.second.bytes.size());
+			auto bytes = entry.initBytes(capnp_count(pair.second.bytes.size()));
 			j = 0;
 			for(auto const& byte : pair.second.bytes)
 			{
@@ -315,7 +322,7 @@ namespace encoding
 		_saveDatabaseTimer = nil;
 	}
 
-	if(_needsSaveDatabase = flag)
+	if((_needsSaveDatabase = flag))
 		_saveDatabaseTimer = [NSTimer scheduledTimerWithTimeInterval:5 target:self selector:@selector(saveDatabaseTimerDidFire:) userInfo:nil repeats:NO];
 }
 

@@ -1,8 +1,8 @@
 #ifndef NG_BUFFER_FOLDS_H_3NU0J3FS
 #define NG_BUFFER_FOLDS_H_3NU0J3FS
 
-#include <buffer/buffer.h>
-#include <regexp/regexp.h>
+#include <buffer/src/buffer.h>
+#include <regexp/src/regexp.h>
 #include <oak/basic_tree.h>
 
 namespace ng

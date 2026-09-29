@@ -2,6 +2,30 @@
 
 namespace text
 {
+	std::optional<bool> detect_soft_tabs (std::string const& text)
+	{
+		size_t tabs = 0, spaces = 0;
+		for(size_t line = 0; line < text.size(); )
+		{
+			size_t first = line;
+			while(line < text.size() && text[line] != '\n' && text[line] != '\r')
+				++line;
+
+			size_t content = first;
+			while(content < line && (text[content] == ' ' || text[content] == '\t'))
+				++content;
+			if(content < line && content != first)
+				text[first] == '\t' ? ++tabs : ++spaces;
+
+			while(line < text.size() && (text[line] == '\n' || text[line] == '\r'))
+				++line;
+		}
+
+		if(tabs == spaces)
+			return std::nullopt;
+		return spaces > tabs;
+	}
+
 	std::string indent_t::create (size_t atColumn, size_t units) const
 	{
 		size_t baseColumn    = atColumn - (atColumn % indent_size());

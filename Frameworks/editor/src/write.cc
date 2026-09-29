@@ -1,6 +1,6 @@
 #include "write.h"
-#include <text/utf8.h>
-#include <text/ctype.h>
+#include <text/src/utf8.h>
+#include <text/src/my_ctype.h>
 
 namespace ng
 {
@@ -27,6 +27,8 @@ namespace ng
 		{
 			switch(actualUnit)
 			{
+				case input::selection:
+				case input::nothing:         break;
 				case input::character:        range = extend_if_empty(buffer, range, kSelectionExtendRight).last();        break;
 				case input::word:             range = word_at(buffer, range);                                              break;
 				case input::line:             range = extend_if_empty(buffer, range, kSelectionExtendToLineExclLF).last(); break;

@@ -1,8 +1,8 @@
 #import "FileItem.h"
 #import "SCMManager.h"
-#import <OakAppKit/NSImage Additions.h>
-#import <io/path.h>
-#import <ns/ns.h>
+#import <OakAppKit/src/NSImage Additions.h>
+#import <io/src/path.h>
+#import <ns/src/ns.h>
 
 // ================
 // = SCM Observer =

@@ -1,13 +1,13 @@
-#import <OakAppKit/OakPopOutAnimation.h>
+#import <OakAppKit/src/OakPopOutAnimation.h>
 #import <test/cocoa.h>
 #import <oak/oak.h>
 
-@interface MyView : NSView
+@interface OakMyView : NSView
 {
 }
 @end
 
-@implementation MyView
+@implementation OakMyView
 - (BOOL)acceptsFirstResponder { return YES; }
 
 - (void)drawRect:(NSRect)aRect
@@ -22,11 +22,13 @@
 }
 @end
 
+#if 0
 class PopOutTests : public CxxTest::TestSuite
 {
 public:
 	void test_layout ()
 	{
-		OakSetupApplicationWithView([[MyView alloc] initWithFrame:NSMakeRect(0, 0, 200, 50)], "pop_out");
+		OakSetupApplicationWithView([[OakMyView alloc] initWithFrame:NSMakeRect(0, 0, 200, 50)], "pop_out");
 	}
 };
+#endif

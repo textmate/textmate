@@ -1,5 +1,15 @@
 #include <text/indent.h>
 
+void test_detect_soft_tabs ()
+{
+	OAK_ASSERT(!text::detect_soft_tabs("left\naligned\n"));
+	OAK_ASSERT(text::detect_soft_tabs("  first\r\n    second\r\n") == true);
+	OAK_ASSERT(text::detect_soft_tabs("  first\n    second\n\tcontinuation\n") == true);
+	OAK_ASSERT(text::detect_soft_tabs("\tfirst\n\tsecond\n  continuation\n") == false);
+	OAK_ASSERT(!text::detect_soft_tabs("  spaces\n\ttab\n"));
+	OAK_ASSERT(!text::detect_soft_tabs("  \n\t\n"));
+}
+
 void test_tab_follows_indent ()
 {
 	text::indent_t indent(4);

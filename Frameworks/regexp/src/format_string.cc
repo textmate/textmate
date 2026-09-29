@@ -4,12 +4,12 @@
 #include "regexp.h"
 
 #include <oak/oak.h>
-#include <text/case.h>
-#include <text/utf8.h>
-#include <text/transcode.h>
-#include <text/encode.h>
-#include <text/format.h>
-#include <cf/cf.h>
+#include <text/src/case.h>
+#include <text/src/utf8.h>
+#include <text/src/transcode.h>
+#include <text/src/encode.h>
+#include <text/src/format.h>
+#include <cf/src/cf.h>
 
 struct expand_visitor : boost::static_visitor<void>
 {
@@ -438,7 +438,7 @@ namespace format_string
 
 				case '$': case '(': case '\\':
 				{
-					if(format[i] != '\\' || i+1 != format.size() && strchr("\\$(trn", format[i+1]))
+					if(format[i] != '\\' || (i+1 != format.size() && strchr("\\$(trn", format[i+1])))
 						res.append("\\");
 				}
 				/* continue */

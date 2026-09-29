@@ -1,8 +1,8 @@
-#include <file/type.h>
-#include <plist/plist.h>
+#include <file/src/type.h>
+#include <plist/src/plist.h>
 #include <test/jail.h>
-#include <regexp/glob.h>
-#include <settings/settings.h>
+#include <regexp/src/glob.h>
+#include <settings/src/settings.h>
 
 void test_file_type ()
 {

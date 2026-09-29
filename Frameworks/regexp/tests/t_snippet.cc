@@ -1,4 +1,4 @@
-#include <regexp/snippet.h>
+#include <regexp/src/snippet.h>
 
 void test_snippet ()
 {

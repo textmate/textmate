@@ -1,5 +1,5 @@
 #include <test/bundle_index.h>
-#include <file/type.h>
+#include <file/src/type.h>
 
 void setup_fixtures ()
 {

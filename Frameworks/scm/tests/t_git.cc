@@ -1,8 +1,8 @@
 #include "../src/drivers/api.h"
-#include <scm/scm.h>
-#include <text/format.h>
-#include <io/io.h>
-#include <io/exec.h>
+#include <scm/src/scm.h>
+#include <text/src/format.h>
+#include <io/src/io.h>
+#include <io/src/exec.h>
 #include <test/jail.h>
 
 struct setup_t

@@ -2,7 +2,7 @@
 #define OSX_AUTHORIZATION_H_ST1ZIKX9
 
 #include <oak/oak.h>
-#include <text/format.h>
+#include <text/src/format.h>
 
 namespace osx
 {

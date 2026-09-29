@@ -39,7 +39,7 @@ namespace
 				NSArray* pathsToWatch = [_observedURLs.allObjects valueForKey:@"path"];
 
 				FSEventStreamContext contextInfo = { 0, this, nullptr, nullptr, nullptr };
-				if(_eventStream = FSEventStreamCreate(kCFAllocatorDefault, &fs_events_t::callback, &contextInfo, (__bridge CFArrayRef)pathsToWatch, kFSEventStreamEventIdSinceNow, 0.5, kFSEventStreamCreateFlagNone))
+				if((_eventStream = FSEventStreamCreate(kCFAllocatorDefault, &fs_events_t::callback, &contextInfo, (__bridge CFArrayRef)pathsToWatch, kFSEventStreamEventIdSinceNow, 0.5, kFSEventStreamCreateFlagNone)))
 				{
 					FSEventStreamScheduleWithRunLoop(_eventStream, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
 					FSEventStreamStart(_eventStream);

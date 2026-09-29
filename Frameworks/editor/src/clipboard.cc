@@ -1,7 +1,7 @@
 #include "clipboard.h"
-#include <text/utf8.h>
-#include <text/hexdump.h>
-#include <text/format.h>
+#include <text/src/utf8.h>
+#include <text/src/hexdump.h>
+#include <text/src/format.h>
 
 std::string const kClipboardOptionIndent    = "indent";
 std::string const kClipboardOptionComplete  = "complete";

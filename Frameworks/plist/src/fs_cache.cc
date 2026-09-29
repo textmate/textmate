@@ -1,10 +1,11 @@
 #include "fs_cache.h"
-#include "cache.capnp.h"
+#include <plist/src/cache.capnp.h>
 #include <capnp/message.h>
 #include <capnp/serialize-packed.h>
-#include <io/entries.h>
-#include <text/format.h>
+#include <io/src/entries.h>
+#include <text/src/format.h>
 #include <oak/debug.h>
+#include <stdexcept>
 
 static std::string read_link (std::string const& path)
 {
@@ -203,12 +204,18 @@ namespace plist
 
 	void cache_t::save_capnp (std::string const& path) const
 	{
+		auto capnp_count = [](size_t count) -> uint32_t {
+			if(count > UINT32_MAX)
+				throw std::length_error("Property cache list exceeds Cap'n Proto limits");
+			return static_cast<uint32_t>(count);
+		};
+
 		capnp::MallocMessageBuilder message;
 		auto cache = message.initRoot<Cache>();
 		cache.setVersion(kCapnpCacheFormatVersion);
-		auto entries = cache.initEntries(_cache.size());
+		auto entries = cache.initEntries(capnp_count(_cache.size()));
 
-		size_t i = 0;
+		uint32_t i = 0;
 		for(auto pair : _cache)
 		{
 			auto entry = entries[i++];
@@ -220,8 +227,8 @@ namespace plist
 				file.setModified(pair.second.modified());
 
 				auto const& plist = pair.second.content();
-				auto content = file.initContent(plist.size());
-				size_t j = 0;
+				auto content = file.initContent(capnp_count(plist.size()));
+				uint32_t j = 0;
 				for(auto src : plist)
 				{
 					auto dst = content[j++];
@@ -251,8 +258,8 @@ namespace plist
 				dir.setEventId(pair.second.event_id());
 
 				auto const& v = pair.second.entries();
-				auto items = dir.initItems(v.size());
-				for(size_t j = 0; j < v.size(); ++j)
+				auto items = dir.initItems(capnp_count(v.size()));
+				for(uint32_t j = 0; j < v.size(); ++j)
 					items.set(j, v[j]);
 			}
 			else if(pair.second.is_link())

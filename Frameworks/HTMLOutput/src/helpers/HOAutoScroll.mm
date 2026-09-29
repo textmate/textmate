@@ -24,7 +24,7 @@
 	if(aWebFrame == _webFrame)
 		return;
 
-	if(_webFrame = aWebFrame)
+	if((_webFrame = aWebFrame))
 	{
 		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(webViewDidChangeFrame:) name:NSViewFrameDidChangeNotification object:nil];
 		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(webViewDidChangeBounds:) name:NSViewBoundsDidChangeNotification object:nil];

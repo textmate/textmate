@@ -1,6 +1,6 @@
 #include "locations.h"
-#include <io/path.h>
-#include <OakSystem/application.h>
+#include <io/src/path.h>
+#include <OakSystem/src/application.h>
 #include <oak/duration.h>
 #include <oak/debug.h>
 

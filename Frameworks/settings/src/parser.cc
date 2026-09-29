@@ -14,7 +14,8 @@
 
 static bool backtrack (char const*& p, char const* bt)
 {
-	return (p = bt), false;
+	p = bt;
+	return false;
 }
 
 static bool parse_ws (char const*& p, char const* pe)
@@ -26,7 +27,10 @@ static bool parse_ws (char const*& p, char const* pe)
 
 static bool parse_char (char const*& p, char const*& pe, char const* ch)
 {
-	return parse_ws(p, pe) && p != pe && strchr(ch, *p) ? (++p, true) : false;
+	if(!parse_ws(p, pe) || p == pe || !strchr(ch, *p))
+		return false;
+	++p;
+	return true;
 }
 
 static bool parse_until (char const*& p, char const*& pe, char const* stopChars, std::string& res)
@@ -52,19 +56,19 @@ static bool parse_comment (char const*& p, char const*& pe)
 static bool parse_string_single (char const*& p, char const* pe, std::string& res)
 {
 	char const* bt = p;
-	return parse_ws(p, pe) && parse_char(p, pe, "'") && parse_until(p, pe, "'\n", res) && parse_char(p, pe, "'") || backtrack(p, bt);
+	return (parse_ws(p, pe) && parse_char(p, pe, "'") && parse_until(p, pe, "'\n", res) && parse_char(p, pe, "'")) || backtrack(p, bt);
 }
 
 static bool parse_string_double (char const*& p, char const* pe, std::string& res)
 {
 	char const* bt = p;
-	return parse_ws(p, pe) && parse_char(p, pe, "\"") && parse_until(p, pe, "\"\n", res) && parse_char(p, pe, "\"") || backtrack(p, bt);
+	return (parse_ws(p, pe) && parse_char(p, pe, "\"") && parse_until(p, pe, "\"\n", res) && parse_char(p, pe, "\"")) || backtrack(p, bt);
 }
 
 static bool parse_string_unquoted (char const*& p, char const* pe, std::string& res)
 {
 	char const* bt = p;
-	return parse_ws(p, pe) && p != pe && *p != '\n' && parse_until(p, pe, " \t\n", res) && !res.empty() || backtrack(p, bt);
+	return (parse_ws(p, pe) && p != pe && *p != '\n' && parse_until(p, pe, " \t\n", res) && !res.empty()) || backtrack(p, bt);
 }
 
 static bool parse_string (char const*& p, char const* pe, std::string& res)
@@ -75,14 +79,14 @@ static bool parse_string (char const*& p, char const* pe, std::string& res)
 static bool parse_key (char const*& p, char const* pe, std::string& res)
 {
 	char const* bt = p;
-	bool match = parse_ws(p, pe) && p != pe && *p != '\n' && parse_until(p, pe, "= \t\n", res) && !res.empty() || backtrack(p, bt);
+	bool match = (parse_ws(p, pe) && p != pe && *p != '\n' && parse_until(p, pe, "= \t\n", res) && !res.empty()) || backtrack(p, bt);
 	return match;
 }
 
 static bool parse_assignment (char const*& p, char const* pe, std::pair<std::string, std::string>& res)
 {
 	char const* bt = p;
-	return parse_key(p, pe, res.first) && parse_char(p, pe, "=") && parse_string(p, pe, res.second) || backtrack(p, bt);
+	return (parse_key(p, pe, res.first) && parse_char(p, pe, "=") && parse_string(p, pe, res.second)) || backtrack(p, bt);
 }
 
 static bool parse_header (char const*& p, char const* pe, std::vector<std::string>& res)

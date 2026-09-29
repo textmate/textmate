@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="22505" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="22505"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <customObject id="-2" userLabel="File's Owner" customClass="PropertiesViewController">
+            <connections>
+                <outlet property="alignmentView" destination="153" id="180"/>
+                <outlet property="objectController" destination="99" id="100"/>
+                <outlet property="view" destination="1" id="98"/>
+            </connections>
+        </customObject>
+        <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
+        <customObject id="-3" userLabel="Application" customClass="NSObject"/>
+        <customView id="1" userLabel="Grammar Properties">
+            <rect key="frame" x="0.0" y="0.0" width="343" height="268"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+            <subviews>
+                <textField focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="152" userLabel="Grammar Text Field">
+                    <rect key="frame" x="138" y="247" width="185" height="21"/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="155">
+                        <font key="font" metaFont="system"/>
+                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                    <connections>
+                        <binding destination="99" name="value" keyPath="selection.scopeName" id="178"/>
+                    </connections>
+                </textField>
+                <textField focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="156" userLabel="First Line Match Text Field">
+                    <rect key="frame" x="138" y="216" width="185" height="21"/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="159">
+                        <font key="font" metaFont="system"/>
+                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                    <connections>
+                        <binding destination="99" name="value" keyPath="selection.firstLineMatch" id="176"/>
+                    </connections>
+                </textField>
+                <textField focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="182" userLabel="Injection Selector Text Field">
+                    <rect key="frame" x="138" y="20" width="185" height="21"/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="185">
+                        <font key="font" metaFont="system"/>
+                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                    <connections>
+                        <binding destination="99" name="value" keyPath="selection.injectionSelector" id="187"/>
+                    </connections>
+                </textField>
+                <scrollView autohidesScrollers="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="134" userLabel="File Types Scroll View">
+                    <rect key="frame" x="138" y="77" width="185" height="131"/>
+                    <clipView key="contentView" id="Yve-4R-tYh">
+                        <rect key="frame" x="1" y="1" width="183" height="129"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" id="137">
+                                <rect key="frame" x="0.0" y="0.0" width="183" height="129"/>
+                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                <size key="intercellSpacing" width="3" height="2"/>
+                                <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
+                                <tableColumns>
+                                    <tableColumn width="142" minWidth="40" maxWidth="1000" id="139">
+                                        <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="File Types">
+                                            <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
+                                            <color key="backgroundColor" white="0.33333298560000002" alpha="1" colorSpace="calibratedWhite"/>
+                                        </tableHeaderCell>
+                                        <textFieldCell key="dataCell" lineBreakMode="truncatingTail" selectable="YES" editable="YES" alignment="left" title="Text Cell" id="142">
+                                            <font key="font" metaFont="system"/>
+                                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                            <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                        </textFieldCell>
+                                        <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
+                                        <connections>
+                                            <binding destination="130" name="value" keyPath="arrangedObjects.extension" id="143"/>
+                                        </connections>
+                                    </tableColumn>
+                                </tableColumns>
+                            </tableView>
+                        </subviews>
+                    </clipView>
+                    <scroller key="horizontalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="YES" id="136">
+                        <rect key="frame" x="1" y="116" width="171" height="15"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </scroller>
+                    <scroller key="verticalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" doubleValue="0.32307692307692293" horizontal="NO" id="135">
+                        <rect key="frame" x="172" y="1" width="15" height="115"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </scroller>
+                </scrollView>
+                <button translatesAutoresizingMaskIntoConstraints="NO" id="132">
+                    <rect key="frame" x="138" y="49" width="20" height="20"/>
+                    <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="NSAddTemplate" imagePosition="only" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="133">
+                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                        <font key="font" metaFont="system"/>
+                    </buttonCell>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="20" id="yeo-dO-nca"/>
+                    </constraints>
+                    <connections>
+                        <action selector="add:" target="130" id="148"/>
+                    </connections>
+                </button>
+                <button translatesAutoresizingMaskIntoConstraints="NO" id="144">
+                    <rect key="frame" x="157" y="49" width="20" height="20"/>
+                    <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="NSRemoveTemplate" imagePosition="only" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="145">
+                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                        <font key="font" metaFont="system"/>
+                    </buttonCell>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="20" id="Sdd-Re-bn0"/>
+                    </constraints>
+                    <connections>
+                        <action selector="remove:" target="130" id="149"/>
+                        <binding destination="130" name="enabled" keyPath="canRemove" id="151"/>
+                    </connections>
+                </button>
+                <textField focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="153">
+                    <rect key="frame" x="18" y="250" width="114" height="16"/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Grammar:" id="154">
+                        <font key="font" metaFont="system"/>
+                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+                <textField focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="157">
+                    <rect key="frame" x="18" y="219" width="114" height="16"/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="First Line Match:" id="158">
+                        <font key="font" metaFont="system"/>
+                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+                <textField focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="160">
+                    <rect key="frame" x="18" y="192" width="114" height="16"/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="File Types:" id="161">
+                        <font key="font" metaFont="system"/>
+                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+                <textField focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="183">
+                    <rect key="frame" x="18" y="23" width="114" height="16"/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Injection Selector:" id="184">
+                        <font key="font" metaFont="system"/>
+                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+            </subviews>
+            <constraints>
+                <constraint firstItem="182" firstAttribute="leading" secondItem="152" secondAttribute="leading" id="226-lP-kqT"/>
+                <constraint firstItem="152" firstAttribute="top" secondItem="1" secondAttribute="top" id="4RP-pP-S0C"/>
+                <constraint firstItem="144" firstAttribute="leading" secondItem="132" secondAttribute="trailing" constant="-1" id="Btq-1S-2MQ"/>
+                <constraint firstItem="182" firstAttribute="trailing" secondItem="152" secondAttribute="trailing" id="GTq-36-tSi"/>
+                <constraint firstItem="144" firstAttribute="centerY" secondItem="132" secondAttribute="centerY" id="HIp-ic-cgg"/>
+                <constraint firstItem="156" firstAttribute="firstBaseline" secondItem="157" secondAttribute="firstBaseline" id="J3J-An-VaF"/>
+                <constraint firstItem="134" firstAttribute="top" secondItem="160" secondAttribute="top" id="JMW-pm-Ybv"/>
+                <constraint firstItem="156" firstAttribute="trailing" secondItem="152" secondAttribute="trailing" id="JaY-3K-hsw"/>
+                <constraint firstItem="183" firstAttribute="trailing" secondItem="157" secondAttribute="trailing" id="NgX-sC-m5o"/>
+                <constraint firstItem="153" firstAttribute="leading" secondItem="157" secondAttribute="leading" id="O9M-3k-iLz"/>
+                <constraint firstItem="182" firstAttribute="firstBaseline" secondItem="183" secondAttribute="firstBaseline" id="QPT-0g-qN8"/>
+                <constraint firstItem="134" firstAttribute="leading" secondItem="152" secondAttribute="leading" id="R7G-nS-7oN"/>
+                <constraint firstAttribute="trailing" secondItem="152" secondAttribute="trailing" constant="20" symbolic="YES" id="T3G-7c-Z1p"/>
+                <constraint firstItem="134" firstAttribute="top" secondItem="156" secondAttribute="bottom" constant="8" symbolic="YES" id="UDg-i3-BJf"/>
+                <constraint firstItem="160" firstAttribute="leading" secondItem="157" secondAttribute="leading" id="Uoz-K9-0aa"/>
+                <constraint firstItem="134" firstAttribute="trailing" secondItem="152" secondAttribute="trailing" id="WV0-OU-F2t"/>
+                <constraint firstItem="153" firstAttribute="leading" secondItem="1" secondAttribute="leading" constant="20" symbolic="YES" id="Ww2-Hi-clC"/>
+                <constraint firstItem="156" firstAttribute="leading" secondItem="152" secondAttribute="leading" id="doX-PB-Csa"/>
+                <constraint firstAttribute="bottom" secondItem="182" secondAttribute="bottom" constant="20" symbolic="YES" id="eqF-oB-Xac"/>
+                <constraint firstItem="153" firstAttribute="trailing" secondItem="157" secondAttribute="trailing" id="kLm-Pt-mMk"/>
+                <constraint firstItem="132" firstAttribute="top" secondItem="134" secondAttribute="bottom" constant="8" symbolic="YES" id="kc8-bB-8Ol"/>
+                <constraint firstItem="183" firstAttribute="leading" secondItem="157" secondAttribute="leading" id="kp6-Lg-KTN"/>
+                <constraint firstItem="156" firstAttribute="top" secondItem="152" secondAttribute="bottom" constant="10" symbolic="YES" id="l1u-j5-bFv"/>
+                <constraint firstItem="132" firstAttribute="leading" secondItem="152" secondAttribute="leading" id="mRt-N0-2NN"/>
+                <constraint firstItem="182" firstAttribute="top" secondItem="132" secondAttribute="bottom" constant="8" symbolic="YES" id="uRU-0k-PPO"/>
+                <constraint firstItem="152" firstAttribute="leading" secondItem="153" secondAttribute="trailing" constant="8" symbolic="YES" id="vnV-Qy-mkI"/>
+                <constraint firstItem="160" firstAttribute="trailing" secondItem="157" secondAttribute="trailing" id="vp9-pv-Ryd"/>
+                <constraint firstItem="152" firstAttribute="firstBaseline" secondItem="153" secondAttribute="firstBaseline" id="y9F-2S-Ytq"/>
+            </constraints>
+            <point key="canvasLocation" x="112" y="154"/>
+        </customView>
+        <objectController id="99">
+            <declaredKeys>
+                <string>disableAutoIndent</string>
+                <string>fileTypes</string>
+                <string>scopeName</string>
+                <string>firstLineMatch</string>
+                <string>injectionSelector</string>
+            </declaredKeys>
+            <connections>
+                <binding destination="-2" name="contentObject" keyPath="properties" id="109"/>
+            </connections>
+        </objectController>
+        <arrayController avoidsEmptySelection="NO" id="130" userLabel="File Types Array Controller">
+            <declaredKeys>
+                <string>extension</string>
+            </declaredKeys>
+            <connections>
+                <binding destination="99" name="contentArray" keyPath="selection.fileTypes" id="181">
+                    <dictionary key="options">
+                        <bool key="NSHandlesContentAsCompoundValue" value="YES"/>
+                    </dictionary>
+                </binding>
+            </connections>
+        </arrayController>
+    </objects>
+    <resources>
+        <image name="NSAddTemplate" width="18" height="17"/>
+        <image name="NSRemoveTemplate" width="18" height="5"/>
+    </resources>
+</document>

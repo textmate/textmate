@@ -1,4 +1,4 @@
-#include <scm/scm.h>
+#include <scm/src/scm.h>
 #include <test/jail.h>
 
 void test_disabling_scm ()

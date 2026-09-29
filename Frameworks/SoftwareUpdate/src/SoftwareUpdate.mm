@@ -1,10 +1,10 @@
 #import "SoftwareUpdate.h"
 #import "OakDownloadManager.h"
-#import <OakAppKit/NSImage Additions.h>
-#import <OakAppKit/OakAppKit.h>
-#import <OakAppKit/OakSound.h>
-#import <OakAppKit/OakTransitionViewController.h>
-#import <OakAppKit/OakUIConstructionFunctions.h>
+#import <OakAppKit/src/NSImage Additions.h>
+#import <OakAppKit/src/OakAppKit.h>
+#import <OakAppKit/src/OakSound.h>
+#import <OakAppKit/src/OakTransitionViewController.h>
+#import <OakAppKit/src/OakUIConstructionFunctions.h>
 
 NSString* const kUserDefaultsLastSoftwareUpdateCheckKey                        = @"SoftwareUpdateLastPoll";
 NSString* const kUserDefaultsSoftwareUpdateSuspendUntilKey                     = @"SoftwareUpdateSuspendUntil";
@@ -76,6 +76,8 @@ NSString* const kSoftwareUpdateChannelCanary                                   =
 	[_updateCheckScheduler invalidate];
 	_updateCheckScheduler = nil;
 
+#if 0
+	// App updates are disabled for this fork until we decide on a new update mechanism.
 	if(_automaticUpdateCheckEnabled = flag)
 	{
 		_updateCheckScheduler = [[NSBackgroundActivityScheduler alloc] initWithIdentifier:[NSString stringWithFormat:@"%@.%@", NSBundle.mainBundle.bundleIdentifier, @"SoftwareUpdate"]];
@@ -110,10 +112,14 @@ NSString* const kSoftwareUpdateChannelCanary                                   =
 			}];
 		}];
 	}
+#endif
+	_automaticUpdateCheckEnabled = NO;
 }
 
 - (void)checkForUpdate:(id)sender
 {
+#if 0
+	// App updates are disabled for this fork until we decide on a new update mechanism.
 	BOOL isOptionDown = OakIsAlternateKeyOrMouseEvent(NSEventModifierFlagOption);
 	BOOL isShiftDown  = OakIsAlternateKeyOrMouseEvent(NSEventModifierFlagShift);
 
@@ -123,10 +129,13 @@ NSString* const kSoftwareUpdateChannelCanary                                   =
 				[alertViewController presentError:error];
 		else	[alertViewController presentUIForBackgroundCheck:NO remoteURL:remoteURL remoteVersion:remoteVersion redownloadEnabled:isShiftDown];
 	}];
+#endif
 }
 
 - (void)checkForTestBuild:(BOOL)testBuild completionHandler:(void(^)(NSURL* remoteURL, NSString* remoteVersion, NSError* error))completionHandler
 {
+#if 0
+	// App updates are disabled for this fork until we decide on a new update mechanism.
 	NSString* updateChannel = testBuild ? kSoftwareUpdateChannelCanary : [NSUserDefaults.standardUserDefaults stringForKey:kUserDefaultsSoftwareUpdateChannelKey];
 	if(!updateChannel)
 		return completionHandler(nil, nil, [NSError errorWithDomain:@"SoftwareUpdate" code:0 userInfo:@{ NSLocalizedDescriptionKey: @"No channel configured." }]);
@@ -180,6 +189,9 @@ NSString* const kSoftwareUpdateChannelCanary                                   =
 		}];
 		[dataTask resume];
 	});
+#endif
+	if(completionHandler)
+		completionHandler(nil, nil, [NSError errorWithDomain:@"SoftwareUpdate" code:0 userInfo:@{ NSLocalizedDescriptionKey: @"Software update is disabled." }]);
 }
 @end
 
@@ -386,7 +398,7 @@ NSString* const kSoftwareUpdateChannelCanary                                   =
 	if(_updateBadgeVisible == flag)
 		return;
 
-	if(_updateBadgeVisible = flag)
+	if((_updateBadgeVisible = flag))
 	{
 		if(NSImage* dlBadge = [NSImage imageNamed:@"Update Badge" inSameBundleAsClass:[self class]])
 		{
@@ -480,6 +492,8 @@ NSString* const kSoftwareUpdateChannelCanary                                   =
 
 - (void)downloadSoftwareUpdateAtURL:(NSURL*)downloadURL
 {
+#if 0
+	// App updates are disabled for this fork until we decide on a new update mechanism.
 	_remoteURL = downloadURL;
 
 	id <NSProgressReporting> progressReporting = [OakDownloadManager.sharedInstance downloadArchiveAtURL:downloadURL forReplacingURL:NSBundle.mainBundle.bundleURL publicKeys:self.publicKeys completionHandler:^(NSURL* extractedArchiveURL, NSError* error){
@@ -520,6 +534,7 @@ NSString* const kSoftwareUpdateChannelCanary                                   =
 	self.buttons[1].title         = @"Cancel";
 	self.buttons[1].action        = @selector(cancel:);
 	self.buttons[1].keyEquivalent = @"\e";
+#endif
 }
 
 - (BOOL)isInstallableApplicationAtURL:(NSURL*)applicationURL
@@ -534,6 +549,8 @@ NSString* const kSoftwareUpdateChannelCanary                                   =
 
 - (void)takeURLToInstallFrom:(NSButton*)sender
 {
+#if 0
+	// App updates are disabled for this fork until we decide on a new update mechanism.
 	NSURL* applicationURL = sender.cell.representedObject;
 
 	if([self isInstallableApplicationAtURL:applicationURL])
@@ -595,6 +612,7 @@ NSString* const kSoftwareUpdateChannelCanary                                   =
 			return returnCode == NSAlertSecondButtonReturn; // Close window if clicking “Cancel”
 		}];
 	}
+#endif
 }
 @end
 
@@ -678,7 +696,7 @@ NSString* const kSoftwareUpdateChannelCanary                                   =
 	if(_progress && !newProgress)
 		[self checkProgressTimerDidFire:nil];
 
-	if(_progress = newProgress)
+	if((_progress = newProgress))
 	{
 		[self checkProgressTimerDidFire:nil];
 

@@ -1,6 +1,6 @@
 #import "FileBrowserOutlineView.h"
-#import <text/utf8.h>
-#import <ns/ns.h>
+#import <text/src/utf8.h>
+#import <ns/src/ns.h>
 
 @implementation FileBrowserOutlineView
 - (void)expandItem:(id)someItem expandChildren:(BOOL)flag
@@ -94,8 +94,8 @@
 	{
 		NSMutableArray* urls = [NSMutableArray array];
 		NSPasteboard* pboard = session.draggingPasteboard;
-		for(NSString* path in [pboard availableTypeFromArray:@[ NSFilenamesPboardType ]] ? [pboard propertyListForType:NSFilenamesPboardType] : @[ ])
-			[urls addObject:[NSURL fileURLWithPath:path]];
+		for(NSURL* url in [pboard readObjectsForClasses:@[ [NSURL class] ] options:@{ NSPasteboardURLReadingFileURLsOnlyKey: @YES }])
+			[urls addObject:url];
 		[(id <FileBrowserOutlineViewDelegate>)self.delegate outlineView:self didTrashURLs:urls];
 	}
 	[super draggingSession:session endedAtPoint:screenPoint operation:operation];

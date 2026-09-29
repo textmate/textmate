@@ -2,9 +2,9 @@
 #include "drivers/api.h"
 #include "snapshot.h"
 #include "fs_events.h"
-#include <io/path.h>
-#include <text/format.h>
-#include <settings/settings.h>
+#include <io/src/path.h>
+#include <text/src/format.h>
+#include <settings/src/settings.h>
 
 namespace scm
 {
@@ -76,7 +76,7 @@ namespace scm
 	{
 		if(_shared_info)
 			_shared_info->remove_client(this);
-		if(_shared_info = sharedInfo)
+		if((_shared_info = sharedInfo))
 			_shared_info->add_client(this);
 	}
 

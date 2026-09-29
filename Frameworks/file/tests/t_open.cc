@@ -1,8 +1,8 @@
-#include <file/open.h>
-#include <io/path.h>
-#include <text/hexdump.h>
+#include <file/src/open.h>
+#include <io/src/path.h>
+#include <text/src/hexdump.h>
 #include <test/jail.h>
-#include <cf/run_loop.h>
+#include <cf/src/run_loop.h>
 
 struct stall_t : file::open_callback_t
 {

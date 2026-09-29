@@ -1,5 +1,5 @@
-#include <buffer/buffer.h>
-#include <selection/selection.h>
+#include <buffer/src/buffer.h>
+#include <selection/src/selection.h>
 
 void test_column_movement ()
 {

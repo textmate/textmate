@@ -1,5 +1,5 @@
-#import <buffer/buffer.h>
-#import <text/format.h>
+#import <buffer/src/buffer.h>
+#import <text/src/format.h>
 #import <test/bundle_index.h>
 #import <oak/duration.h>
 

@@ -4,11 +4,11 @@
 #include "user_agent.h"
 #include "proxy.h"
 #include "tbz.h"
-#include <io/path.h>
-#include <io/move_path.h>
-#include <text/case.h>
-#include <text/decode.h>
-#include <text/format.h>
+#include <io/src/path.h>
+#include <io/src/move_path.h>
+#include <text/src/case.h>
+#include <text/src/decode.h>
+#include <text/src/format.h>
 
 namespace network
 {
@@ -176,7 +176,7 @@ namespace network
 			bool goodSignature = false;
 			if(serverReply == 200)
 			{
-				if(goodSignature = data.verify_signature.receive_end(error))
+				if((goodSignature = data.verify_signature.receive_end(error)))
 				{
 					path::set_attr(tmpPath, kHTTPEntityTagAttribute, data.etag);
 					path::set_attr(tmpPath, kHTTPSigneeHeader,       data.verify_signature.signee());

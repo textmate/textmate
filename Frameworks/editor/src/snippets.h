@@ -1,9 +1,9 @@
 #ifndef SNIPPETS_H_UC2RJ8ET
 #define SNIPPETS_H_UC2RJ8ET
 
-#include <regexp/snippet.h>
-#include <buffer/buffer.h>
-#include <selection/selection.h>
+#include <regexp/src/snippet.h>
+#include <buffer/src/buffer.h>
+#include <selection/src/selection.h>
 
 namespace ng
 {

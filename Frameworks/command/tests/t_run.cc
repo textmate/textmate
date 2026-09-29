@@ -1,8 +1,8 @@
-#include <command/runner.h>
-#include <command/parser.h>
-#include <settings/settings.h>
-#include <cf/cf.h>
-#include <OakSystem/application.h>
+#include <command/src/runner.h>
+#include <command/src/parser.h>
+#include <settings/src/settings.h>
+#include <cf/src/cf.h>
+#include <OakSystem/src/application.h>
 
 static std::string as_str (output::type output)
 {

@@ -1,9 +1,9 @@
 #include "folds.h"
-#include <bundles/wrappers.h>
-#include <regexp/indent.h>
-#include <plist/ascii.h>
-#include <text/ctype.h>
-#include <text/format.h>
+#include <bundles/src/wrappers.h>
+#include <regexp/src/indent.h>
+#include <plist/src/ascii.h>
+#include <text/src/my_ctype.h>
+#include <text/src/format.h>
 #include <oak/algorithm.h>
 #include <oak/oak.h>
 
@@ -58,7 +58,7 @@ namespace ng
 		size_t bol = _buffer.begin(n), eol = _buffer.eol(n);
 		for(auto const& pair : _folded)
 		{
-			if(pair.first <= bol && bol <= pair.second || pair.first <= eol && eol <= pair.second)
+			if((pair.first <= bol && bol <= pair.second) || (pair.first <= eol && eol <= pair.second))
 				return true;
 		}
 		return false;
@@ -128,7 +128,7 @@ namespace ng
 		std::vector< std::pair<size_t, size_t> > newFoldings;
 		for(auto const& pair : _folded)
 		{
-			if(from == pair.first && pair.second <= to || from <= pair.first && pair.second == to)
+			if((from == pair.first && pair.second <= to) || (from <= pair.first && pair.second == to))
 					found = true;
 			else	newFoldings.push_back(pair);
 		}
@@ -145,7 +145,7 @@ namespace ng
 
 		for(auto const& pair : _folded)
 		{
-			if(pair.first <= from && from < pair.second || pair.first < to && to <= pair.second)
+			if((pair.first <= from && from < pair.second) || (pair.first < to && to <= pair.second))
 					res.push_back(pair);
 			else	newFoldings.push_back(pair);
 		}

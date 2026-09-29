@@ -1,4 +1,6 @@
-@interface OFBActionsView : NSVisualEffectView
+#import <Cocoa/Cocoa.h>
+
+@interface OFBActionsView : NSView
 @property (nonatomic) NSButton* createButton;
 @property (nonatomic) NSPopUpButton* actionsPopUpButton;
 @property (nonatomic) NSButton* reloadButton;

@@ -1,13 +1,13 @@
 #include "io.h"
 #include "intermediate.h"
 #include "entries.h"
-#include <OakFoundation/OakFoundation.h>
+#include <OakFoundation/src/OakFoundation.h>
 #include <oak/debug.h>
-#include <text/tokenize.h>
-#include <text/format.h>
-#include <regexp/regexp.h>
-#include <regexp/format_string.h>
-#include <cf/cf.h>
+#include <text/src/tokenize.h>
+#include <text/src/format.h>
+#include <regexp/src/regexp.h>
+#include <regexp/src/format_string.h>
+#include <cf/src/cf.h>
 
 namespace path
 {
@@ -489,7 +489,8 @@ namespace path
 		{
 			if(*s1First != *s2First)
 				break;
-			++s1First, ++s2First;
+			++s1First;
+			++s2First;
 		}
 		return std::count(s1.rbegin(), s1First, '/');
 	}
@@ -508,7 +509,8 @@ namespace path
 					return true;
 				else if(*s1First != *s2First)
 					return false;
-				++s1First, ++s2First;
+				++s1First;
+				++s2First;
 			}
 			return s1First == s1Last && s2First != s2Last;
 		});
@@ -596,9 +598,10 @@ namespace path
 		if(size <= 0)
 			return NULL_STR;
 
-		char data[size];
-		getxattr(path.c_str(), attr.c_str(), data, size, 0, 0);
-		return std::string(data, data + size);
+		std::string data(size, '\0');
+		if(getxattr(path.c_str(), attr.c_str(), &data[0], data.size(), 0, 0) != size)
+			return NULL_STR;
+		return data;
 	}
 
 	void set_attr (std::string const& path, std::string const& attr, std::string const& value)
@@ -618,26 +621,26 @@ namespace path
 			ssize_t listSize = flistxattr(fd, nullptr, 0, 0);
 			if(listSize > 0)
 			{
-				char mem[listSize];
-				if(flistxattr(fd, mem, listSize, 0) == listSize)
+				std::vector<char> mem(listSize);
+				if(flistxattr(fd, mem.data(), mem.size(), 0) == listSize)
 				{
 					size_t i = 0;
 					while(i < listSize)
 					{
-						ssize_t size = fgetxattr(fd, mem + i, nullptr, 0, 0, 0);
+						ssize_t size = fgetxattr(fd, mem.data() + i, nullptr, 0, 0, 0);
 						if(size > 0)
 						{
 							std::string value(size, '\0');
-							if(fgetxattr(fd, mem + i, &value.front(), value.size(), 0, 0) == size)
-								res.emplace(mem + i, value);
+							if(fgetxattr(fd, mem.data() + i, &value.front(), value.size(), 0, 0) == size)
+								res.emplace(mem.data() + i, value);
 							else
-								perrorf("path::attributes: fgetxattr(\"%s\", \"%s\")", path.c_str(), mem + i);
+								perrorf("path::attributes: fgetxattr(\"%s\", \"%s\")", path.c_str(), mem.data() + i);
 						}
 						else if(size == -1)
 						{
-							perrorf("path::attributes: fgetxattr(\"%s\", \"%s\")", path.c_str(), mem + i);
+							perrorf("path::attributes: fgetxattr(\"%s\", \"%s\")", path.c_str(), mem.data() + i);
 						}
-						i += strlen(mem + i) + 1;
+						i += strlen(mem.data() + i) + 1;
 					}
 				}
 			}

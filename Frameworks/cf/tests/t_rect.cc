@@ -1,5 +1,5 @@
 #include <cf/cgrect.h>
-#include <text/format.h>
+#include <text/src/format.h>
 
 static void set (std::vector<std::string>& canvas, CGRect const& r, char m = 'x')
 {

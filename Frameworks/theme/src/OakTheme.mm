@@ -1,6 +1,6 @@
 #import "OakTheme.h"
 #import "theme.h" // kSystemUIThemeUUID
-#import <ns/ns.h>
+#import <ns/src/ns.h>
 
 typedef NS_OPTIONS(NSUInteger, OakThemeStyleOptions) {
 	OakThemeStyleBold          = 0x0001,

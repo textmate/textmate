@@ -1,7 +1,7 @@
 #import "OakPasteboard.h"
 #import "OakPasteboardSelector.h"
-#import <crash/info.h>
-#import <ns/ns.h>
+#import <crash/src/info.h>
+#import <ns/src/ns.h>
 #import <oak/oak.h>
 #import <oak/debug.h>
 #import <sqlite3.h>
@@ -84,7 +84,7 @@ static NSArray* RunSQLStatement (sqlite3* db, char const* query, std::map<std::s
 					}
 					else if([value isKindOfClass:[NSData class]])
 					{
-						sqlite3_bind_blob(stmt, i+1, [value bytes], [value length], SQLITE_STATIC);
+						sqlite3_bind_blob64(stmt, i+1, [value bytes], [value length], SQLITE_STATIC);
 					}
 					else if([value isKindOfClass:[NSNumber class]])
 					{
@@ -429,8 +429,8 @@ namespace
 	return sharedInstances[aName];
 }
 
-+ (OakPasteboard*)generalPasteboard  { return [OakPasteboard pasteboardWithName:@"General" systemPasteboard:[NSPasteboard pasteboardWithName:NSGeneralPboard]  avoidsDuplicates:NO];  }
-+ (OakPasteboard*)findPasteboard     { return [OakPasteboard pasteboardWithName:@"Find"    systemPasteboard:[NSPasteboard pasteboardWithName:NSFindPboard]     avoidsDuplicates:YES]; }
++ (OakPasteboard*)generalPasteboard  { return [OakPasteboard pasteboardWithName:@"General" systemPasteboard:[NSPasteboard pasteboardWithName:NSPasteboardNameGeneral] avoidsDuplicates:NO];  }
++ (OakPasteboard*)findPasteboard     { return [OakPasteboard pasteboardWithName:@"Find"    systemPasteboard:[NSPasteboard pasteboardWithName:NSPasteboardNameFind]    avoidsDuplicates:YES]; }
 + (OakPasteboard*)replacePasteboard  { return [OakPasteboard pasteboardWithName:@"Replace" systemPasteboard:[NSPasteboard pasteboardWithName:OakReplacePboard] avoidsDuplicates:YES]; }
 
 - (instancetype)initWithName:(NSString*)aName systemPasteboard:(NSPasteboard*)pboard avoidsDuplicates:(BOOL)flag

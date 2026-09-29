@@ -1,8 +1,8 @@
 #include "editor.h"
-#include <bundles/bundles.h>
-#include <text/classification.h>
-#include <text/utf8.h>
-#include <text/ctype.h>
+#include <bundles/src/bundles.h>
+#include <text/src/classification.h>
+#include <text/src/utf8.h>
+#include <text/src/my_ctype.h>
 
 namespace ng
 {

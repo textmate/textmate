@@ -1,7 +1,7 @@
 #include "be_entry.h"
-#include <text/ctype.h>
-#include <io/entries.h>
-#include <io/path.h>
+#include <text/src/my_ctype.h>
+#include <io/src/entries.h>
+#include <io/src/path.h>
 
 namespace be
 {

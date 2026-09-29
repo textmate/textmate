@@ -2,7 +2,7 @@
 #define RENDER_H_V8XB081V
 
 #include <oak/debug.h>
-#include <theme/theme.h>
+#include <theme/src/theme.h>
 
 namespace render
 {

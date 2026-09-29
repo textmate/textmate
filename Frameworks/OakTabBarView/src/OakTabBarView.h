@@ -3,6 +3,7 @@
 @protocol OakTabBarViewDelegate, OakTabBarViewDataSource;
 
 @interface OakTabBarView : NSView
+@property (class, nonatomic, readonly) CGFloat preferredHeight;
 @property (nonatomic, weak) id <OakTabBarViewDelegate> delegate;
 @property (nonatomic, weak) id <OakTabBarViewDataSource> dataSource;
 @property (nonatomic, readonly) NSInteger countOfVisibleTabs;

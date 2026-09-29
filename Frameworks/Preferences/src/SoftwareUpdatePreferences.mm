@@ -1,10 +1,10 @@
 #import "SoftwareUpdatePreferences.h"
 #import "Keys.h"
-#import <OakAppKit/NSImage Additions.h>
-#import <OakAppKit/OakUIConstructionFunctions.h>
-#import <OakFoundation/OakStringListTransformer.h>
-#import <SoftwareUpdate/SoftwareUpdate.h>
-#import <MenuBuilder/MenuBuilder.h>
+#import <OakAppKit/src/NSImage Additions.h>
+#import <OakAppKit/src/OakUIConstructionFunctions.h>
+#import <OakFoundation/src/OakStringListTransformer.h>
+#import <SoftwareUpdate/src/SoftwareUpdate.h>
+#import <MenuBuilder/src/MenuBuilder.h>
 
 @interface SoftwareUpdatePreferences ()
 {
@@ -42,7 +42,7 @@
 		return nil;
 
 #if defined(MAC_OS_X_VERSION_10_15) && (MAC_OS_X_VERSION_10_15 <= MAC_OS_X_VERSION_MAX_ALLOWED)
-	if(@available(macos 10.15, *))
+	if(@available(macOS 10.15, *))
 	{
 		return -[date timeIntervalSinceNow] < 5 ? @"Just now" : [[[NSRelativeDateTimeFormatter alloc] init] localizedStringForDate:date relativeToDate:NSDate.now];
 	}
@@ -139,8 +139,8 @@
 	[contactStackView setHuggingPriority:NSLayoutPriorityDefaultHigh-1 forOrientation:NSLayoutConstraintOrientationVertical];
 
 	MBMenu const updateChannelMenuItems = {
-		{ @"Normal releases", .tag = 0 },
-		{ @"Prereleases",     .tag = 1 },
+		MBMenuItem{ @"Normal releases" }.withTag(0),
+		MBMenuItem{ @"Prereleases" }.withTag(1),
 	};
 	MBCreateMenu(updateChannelMenuItems, updateChannelPopUp.menu);
 

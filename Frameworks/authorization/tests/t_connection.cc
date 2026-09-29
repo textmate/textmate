@@ -1,4 +1,4 @@
-#include <authorization/connection.h>
+#include <authorization/src/connection.h>
 
 #define SOCKET_PATH "/tmp/auth_server.sock"
 

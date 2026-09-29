@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="24765" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+    <dependencies>
+        <deployment identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="24765"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <customObject id="-2" userLabel="File's Owner" customClass="SettingsWindowController">
+            <connections>
+                <outlet property="tableView" destination="ignored-names-table" id="owner-table"/>
+                <outlet property="window" destination="settings-window" id="owner-window"/>
+            </connections>
+        </customObject>
+        <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
+        <customObject id="-3" userLabel="Application" customClass="NSObject"/>
+        <window title="Settings" allowsToolTipsWhenApplicationIsInactive="NO" restorable="NO" releasedWhenClosed="NO" animationBehavior="default" id="settings-window">
+            <windowStyleMask key="styleMask" titled="YES" closable="YES"/>
+            <rect key="contentRect" x="100" y="100" width="440" height="260"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1410"/>
+            <view key="contentView" id="settings-content-view">
+                <rect key="frame" x="0.0" y="0.0" width="506" height="260"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="ignored-names-title">
+                        <rect key="frame" x="18" y="224" width="470" height="16"/>
+                        <textFieldCell key="cell" lineBreakMode="clipping" title="Ignored files and folders:" id="ignored-names-title-cell">
+                            <font key="font" metaFont="systemBold"/>
+                            <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                        </textFieldCell>
+                    </textField>
+                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="ignored-names-explanation">
+                        <rect key="frame" x="18" y="204" width="470" height="16"/>
+                        <textFieldCell key="cell" title="Folder comparisons skip entries with these exact names at every folder level." id="ignored-names-explanation-cell">
+                            <font key="font" metaFont="system"/>
+                            <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
+                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                        </textFieldCell>
+                    </textField>
+                    <scrollView autohidesScrollers="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ignored-names-scroll-view">
+                        <rect key="frame" x="20" y="48" width="466" height="148"/>
+                        <clipView key="contentView" id="ignored-names-clip-view">
+                            <rect key="frame" x="1" y="1" width="464" height="146"/>
+                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                            <subviews>
+                                <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" autosaveColumns="NO" id="ignored-names-table">
+                                    <rect key="frame" x="0.0" y="0.0" width="464" height="146"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                    <size key="intercellSpacing" width="3" height="2"/>
+                                    <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
+                                    <tableColumns>
+                                        <tableColumn identifier="name" width="423" minWidth="40" maxWidth="1000" id="ignored-name-column">
+                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Name">
+                                                <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
+                                                <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
+                                            </tableHeaderCell>
+                                            <textFieldCell key="dataCell" lineBreakMode="truncatingMiddle" selectable="YES" editable="YES" alignment="left" title="Name" id="ignored-name-cell">
+                                                <font key="font" metaFont="system"/>
+                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                            </textFieldCell>
+                                            <tableColumnResizingMask key="resizingMask" resizeWithTable="YES"/>
+                                        </tableColumn>
+                                    </tableColumns>
+                                    <connections>
+                                        <outlet property="dataSource" destination="-2" id="table-data-source"/>
+                                    </connections>
+                                </tableView>
+                            </subviews>
+                        </clipView>
+                        <scroller key="horizontalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="YES" id="ignored-names-horizontal-scroller">
+                            <rect key="frame" x="1" y="130" width="464" height="17"/>
+                            <autoresizingMask key="autoresizingMask"/>
+                        </scroller>
+                        <scroller key="verticalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="NO" id="ignored-names-vertical-scroller">
+                            <rect key="frame" x="385" y="1" width="15" height="123"/>
+                            <autoresizingMask key="autoresizingMask"/>
+                        </scroller>
+                    </scrollView>
+                    <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="add-ignored-name-button">
+                        <rect key="frame" x="20" y="16" width="28" height="24"/>
+                        <buttonCell key="cell" type="push" bezelStyle="rounded" image="NSAddTemplate" imagePosition="only" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="add-ignored-name-button-cell">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                        <constraints>
+                            <constraint firstAttribute="width" constant="28" id="add-button-width"/>
+                        </constraints>
+                        <connections>
+                            <action selector="addIgnoredFileName:" target="-2" id="add-ignored-name-action"/>
+                        </connections>
+                    </button>
+                    <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="remove-ignored-name-button">
+                        <rect key="frame" x="52" y="16" width="28" height="24"/>
+                        <buttonCell key="cell" type="push" bezelStyle="rounded" image="NSRemoveTemplate" imagePosition="only" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="remove-ignored-name-button-cell">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                        <constraints>
+                            <constraint firstAttribute="width" constant="28" id="remove-button-width"/>
+                        </constraints>
+                        <connections>
+                            <action selector="removeIgnoredFileNames:" target="-2" id="remove-ignored-name-action"/>
+                        </connections>
+                    </button>
+                    <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="restore-defaults-button">
+                        <rect key="frame" x="362" y="16" width="124" height="24"/>
+                        <buttonCell key="cell" type="push" title="Restore Defaults" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="restore-defaults-button-cell">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                        <connections>
+                            <action selector="restoreDefaults:" target="-2" id="restore-defaults-action"/>
+                        </connections>
+                    </button>
+                </subviews>
+                <constraints>
+                    <constraint firstItem="ignored-names-explanation" firstAttribute="trailing" secondItem="ignored-names-title" secondAttribute="trailing" id="Wtr-8u-zPc"/>
+                    <constraint firstAttribute="bottom" secondItem="add-ignored-name-button" secondAttribute="bottom" constant="16" id="add-bottom"/>
+                    <constraint firstItem="add-ignored-name-button" firstAttribute="leading" secondItem="ignored-names-scroll-view" secondAttribute="leading" id="add-leading"/>
+                    <constraint firstItem="add-ignored-name-button" firstAttribute="top" secondItem="ignored-names-scroll-view" secondAttribute="bottom" constant="8" id="add-top"/>
+                    <constraint firstItem="ignored-names-explanation" firstAttribute="leading" secondItem="ignored-names-title" secondAttribute="leading" id="explanation-leading"/>
+                    <constraint firstItem="ignored-names-explanation" firstAttribute="top" secondItem="ignored-names-title" secondAttribute="bottom" constant="4" id="explanation-top"/>
+                    <constraint firstAttribute="trailing" secondItem="ignored-names-explanation" secondAttribute="trailing" constant="20" symbolic="YES" id="explanation-trailing"/>
+                    <constraint firstItem="restore-defaults-button" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="remove-ignored-name-button" secondAttribute="trailing" constant="12" symbolic="YES" id="pFS-wD-lkm"/>
+                    <constraint firstItem="remove-ignored-name-button" firstAttribute="centerY" secondItem="add-ignored-name-button" secondAttribute="centerY" id="remove-center-y"/>
+                    <constraint firstItem="remove-ignored-name-button" firstAttribute="leading" secondItem="add-ignored-name-button" secondAttribute="trailing" constant="4" id="remove-leading"/>
+                    <constraint firstItem="restore-defaults-button" firstAttribute="centerY" secondItem="add-ignored-name-button" secondAttribute="centerY" id="restore-center-y"/>
+                    <constraint firstItem="restore-defaults-button" firstAttribute="trailing" secondItem="ignored-names-scroll-view" secondAttribute="trailing" id="restore-trailing"/>
+                    <constraint firstItem="ignored-names-scroll-view" firstAttribute="leading" secondItem="settings-content-view" secondAttribute="leading" constant="20" id="scroll-leading"/>
+                    <constraint firstItem="ignored-names-scroll-view" firstAttribute="top" secondItem="ignored-names-explanation" secondAttribute="bottom" constant="8" id="scroll-top"/>
+                    <constraint firstAttribute="trailing" secondItem="ignored-names-scroll-view" secondAttribute="trailing" constant="20" symbolic="YES" id="scroll-trailing"/>
+                    <constraint firstItem="ignored-names-title" firstAttribute="leading" secondItem="settings-content-view" secondAttribute="leading" constant="20" symbolic="YES" id="title-leading"/>
+                    <constraint firstItem="ignored-names-title" firstAttribute="top" secondItem="settings-content-view" secondAttribute="top" constant="20" symbolic="YES" id="title-top"/>
+                </constraints>
+            </view>
+            <connections>
+                <outlet property="initialFirstResponder" destination="ignored-names-table" id="initial-first-responder"/>
+            </connections>
+            <point key="canvasLocation" x="140" y="170"/>
+        </window>
+    </objects>
+    <resources>
+        <image name="NSAddTemplate" width="18" height="17"/>
+        <image name="NSRemoveTemplate" width="18" height="5"/>
+    </resources>
+</document>

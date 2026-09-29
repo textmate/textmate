@@ -1,4 +1,4 @@
-#include <bundles/bundles.h>
+#include <bundles/src/bundles.h>
 #include <test/bundle_index.h>
 #include <test/jail.h>
 

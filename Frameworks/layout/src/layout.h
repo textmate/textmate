@@ -2,10 +2,11 @@
 #define LAYOUT_H_VWUBRBQ1
 
 #include "paragraph.h"
-#include <buffer/buffer.h>
-#include <selection/selection.h>
-#include <theme/theme.h>
+#include <buffer/src/buffer.h>
+#include <selection/src/selection.h>
+#include <theme/src/theme.h>
 #include <oak/basic_tree.h>
+#include <functional>
 namespace ct { struct metrics_t; struct line_t; };
 
 enum kRectsIncludeMode { kRectsIncludeAll, kRectsIncludeCarets, kRectsIncludeSelections };
@@ -66,7 +67,7 @@ namespace ng
 		// ======================
 
 		void update_metrics (CGRect visibleRect);
-		void draw (ng::context_t const& context, CGRect rectangle, bool isFlipped, ng::ranges_t const& selection, ng::ranges_t const& highlightRanges = ng::ranges_t(), bool drawBackground = true);
+		void draw (ng::context_t const& context, CGRect rectangle, bool isFlipped, ng::ranges_t const& selection, ng::ranges_t const& highlightRanges = ng::ranges_t(), bool drawBackground = true, std::function<void()> const& drawBackgroundDecorations = {});
 		ng::index_t index_at_point (CGPoint point) const;
 		CGRect rect_at_index (ng::index_t const& index, bool bol_as_eol = false, bool wantsBaseline = false) const;
 		CGRect rect_for_range (size_t first, size_t last, bool bol_as_eol = false) const;
@@ -137,7 +138,7 @@ namespace ng
 
 		typedef oak::basic_tree_t<row_key_t, paragraph_t> row_tree_t;
 
-		CGFloat content_width () const         { return ceil(std::max(_rows.aggregated()._width, _viewport_size.width - _margin.left - _margin.right)); }
+		CGFloat content_width () const         { return std::max(ceil(_rows.aggregated()._width), _viewport_size.width - _margin.left - _margin.right); }
 		CGFloat content_height () const        { return ceil(std::max(_rows.aggregated()._height, _viewport_size.height - _margin.top - _margin.bottom)); }
 
 		row_tree_t::iterator row_for_offset (size_t i) const;
@@ -160,6 +161,7 @@ namespace ng
 		bool repair_folds (size_t from, size_t to);
 		void refresh_line_at_index (size_t index, bool fullRefresh);
 		void did_fold (size_t from, size_t to);
+		std::vector<CGRect> current_line_rects_for_ranges (ng::ranges_t const& ranges) const;
 
 		static int row_y_comp (CGFloat y, row_key_t const& offset, row_key_t const& node)       { return y < offset._height ? -1 : (y == offset._height ? 0 : +1); }
 		static int row_offset_comp (size_t i, row_key_t const& offset, row_key_t const& node)   { return i < offset._length ? -1 : (i == offset._length ? 0 : +1); }
@@ -192,6 +194,7 @@ namespace ng
 		size_t _pre_refresh_revision;
 		size_t _pre_refresh_caret;
 		std::vector<CGRect> _pre_refresh_carets;
+		std::vector<CGRect> _pre_refresh_current_line;
 		std::vector<CGRect> _pre_refresh_selections;
 		std::vector<CGRect> _pre_refresh_highlight_border;
 		std::vector<CGRect> _pre_refresh_highlight_interior;

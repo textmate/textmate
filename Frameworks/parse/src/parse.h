@@ -1,7 +1,7 @@
 #ifndef GRAMMAR_TYPES_H_4M8CRK03
 #define GRAMMAR_TYPES_H_4M8CRK03
 
-#include <scope/scope.h>
+#include <scope/src/scope.h>
 #include <oak/debug.h>
 
 namespace parse

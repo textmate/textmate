@@ -1,13 +1,13 @@
 #import "OakChooser.h"
 #import "ui/TableView.h"
 #import "ui/SearchField.h"
-#import <OakAppKit/NSColor Additions.h>
-#import <OakAppKit/OakAppKit.h>
-#import <OakAppKit/OakUIConstructionFunctions.h>
-#import <OakFoundation/OakFoundation.h>
-#import <OakFoundation/NSString Additions.h>
-#import <ns/ns.h>
-#import <text/ranker.h>
+#import <OakAppKit/src/NSColor Additions.h>
+#import <OakAppKit/src/OakAppKit.h>
+#import <OakAppKit/src/OakUIConstructionFunctions.h>
+#import <OakFoundation/src/OakFoundation.h>
+#import <OakFoundation/src/NSString Additions.h>
+#import <ns/src/ns.h>
+#import <text/src/ranker.h>
 
 @interface OakFileTableCellView ()
 @property (nonatomic) NSTextField* folderTextField;
@@ -66,7 +66,7 @@
 - (void)setBackgroundStyle:(NSBackgroundStyle)backgroundStyle
 {
 	[super setBackgroundStyle:backgroundStyle];
-	if(backgroundStyle == NSBackgroundStyleDark)
+	if(backgroundStyle == NSBackgroundStyleEmphasized)
 	{
 		self.textField.objectValue       = [self selectedStringForString:[self valueForKeyPath:@"objectValue.name"]];
 		self.folderTextField.textColor   = [NSColor colorWithCalibratedWhite:0.9 alpha:1];
@@ -80,11 +80,9 @@
 	}
 }
 
-- (id)accessibilityAttributeValue:(NSString*)attribute
+- (NSArray*)accessibilityChildren
 {
-	if([attribute isEqualToString:NSAccessibilityChildrenAttribute])
-			return @[ self.textField.cell, self.folderTextField.cell, self.closeButton.cell, self.imageView.cell ];
-	else	return [super accessibilityAttributeValue:attribute];
+	return @[ self.textField.cell, self.folderTextField.cell, self.closeButton.cell, self.imageView.cell ];
 }
 @end
 
@@ -287,7 +285,7 @@ static void* kFirstResponderObserverContext = &kFirstResponderObserverContext;
 		_footerView = [[NSVisualEffectView alloc] initWithFrame:NSZeroRect];
 		_footerView.blendingMode = NSVisualEffectBlendingModeWithinWindow;
 		_footerView.material     = NSVisualEffectMaterialTitlebar;
-		if(@available(macos 10.14, *))
+		if(@available(macOS 10.14, *))
 			_footerView.material = NSVisualEffectMaterialHeaderView;
 
 		NSView* contentView = self.window.contentView;
@@ -392,7 +390,7 @@ static void* kFirstResponderObserverContext = &kFirstResponderObserverContext;
 {
 	NSIndexSet* oldSelectedRowIndexes = _tableView.selectedRowIndexes;
 	NSArray* selectedItems;
-	if([oldSelectedRowIndexes count] > 1 || [oldSelectedRowIndexes count] == 1 && [oldSelectedRowIndexes firstIndex] > 0)
+	if([oldSelectedRowIndexes count] > 1 || ([oldSelectedRowIndexes count] == 1 && [oldSelectedRowIndexes firstIndex] > 0))
 		selectedItems = [_items objectsAtIndexes:oldSelectedRowIndexes];
 
 	_items = anArray;

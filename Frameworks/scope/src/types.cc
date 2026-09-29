@@ -1,6 +1,6 @@
 #include "types.h"
 #include <oak/oak.h>
-#include <text/format.h>
+#include <text/src/format.h>
 
 namespace scope
 {

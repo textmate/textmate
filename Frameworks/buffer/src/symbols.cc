@@ -1,8 +1,8 @@
 #include "meta_data.h"
-#include <regexp/format_string.h>
-#include <bundles/bundles.h>
+#include <regexp/src/format_string.h>
+#include <bundles/src/bundles.h>
 #include <oak/oak.h>
-#include <text/ctype.h>
+#include <text/src/my_ctype.h>
 #include <oak/duration.h>
 
 namespace
@@ -78,7 +78,10 @@ namespace
 	private:
 		static bool parse_char (char const*& it, char const* last, char ch)
 		{
-			return it != last && *it == ch ? (++it, true) : false;
+			if(it == last || *it != ch)
+				return false;
+			++it;
+			return true;
 		}
 
 		struct record_t

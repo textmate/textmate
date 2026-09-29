@@ -1,9 +1,9 @@
 #import "FFResultsViewController.h"
 #import "FFResultNode.h"
-#import <document/OakDocument.h>
-#import <OakAppKit/OakAppKit.h>
-#import <OakAppKit/OakUIConstructionFunctions.h>
-#import <OakAppKit/NSColor Additions.h>
+#import <document/src/OakDocument.h>
+#import <OakAppKit/src/OakAppKit.h>
+#import <OakAppKit/src/OakUIConstructionFunctions.h>
+#import <OakAppKit/src/NSColor Additions.h>
 
 static NSString* const kUserDefaultsSearchResultsFontNameKey = @"searchResultsFontName";
 static NSString* const kUserDefaultsSearchResultsFontSizeKey = @"searchResultsFontSize";
@@ -20,7 +20,7 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 	return index > 0 ? node.parent.children[index - 1] : nil;
 }
 
-@interface FFResultsViewController () <NSOutlineViewDataSource, NSOutlineViewDelegate>
+@interface FFResultsViewController () <NSOutlineViewDataSource, NSOutlineViewDelegate, NSMenuItemValidation>
 {
 	NSScrollView*  _scrollView;
 	NSOutlineView* _outlineView;
@@ -317,7 +317,7 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 		_outlineView.rowHeight                          = std::max(lineHeight, 14.0);
 		_outlineView.columnAutoresizingStyle            = NSTableViewNoColumnAutoresizing;
 
-		if(@available(macos 11.0, *))
+		if(@available(macOS 11.0, *))
 		{
 			_outlineView.style = NSTableViewStylePlain;
 			_outlineView.floatsGroupRows = NO;

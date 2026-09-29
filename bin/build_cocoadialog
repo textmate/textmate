@@ -1,0 +1,211 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PREFIX="${PREFIX:-$ROOT/vendor/prebuilt}"
+BUILD_ROOT="${BUILD_ROOT:-$PREFIX/build/cocoadialog}"
+SOURCE_ROOT="${SOURCE_ROOT:-$PREFIX/src}"
+APP_DST="${APP_DST:-$ROOT/Bundles/Core/bundle-support.tmbundle/Support/shared/bin/CocoaDialog.app}"
+
+COCOADIALOG_REPO="${COCOADIALOG_REPO:-https://github.com/cocoadialog/cocoadialog.git}"
+COCOADIALOG_REVISION="${COCOADIALOG_REVISION:-1207409e42ffd8412eeea75f77f3e27dbbb65753}"
+COCOADIALOG_SCHEME="${COCOADIALOG_SCHEME:-Release}"
+DEPLOYMENT_TARGET="${MACOSX_DEPLOYMENT_TARGET:-12.4}"
+ARCHS="${ARCHS:-arm64 x86_64}"
+XCODEBUILD_FLAGS=()
+if [[ "${XCODEBUILD_VERBOSE:-NO}" != "YES" ]]; then
+	XCODEBUILD_FLAGS=(-quiet)
+fi
+
+# Default to an ad-hoc hardened-runtime signature for the checked-in helper.
+# Release archives re-sign the copied helper with the selected Developer ID.
+CODE_SIGN_IDENTITY="${CODE_SIGN_IDENTITY:--}"
+
+log()
+{
+	printf '\033[1m==>\033[0m %s\n' "$*" >&2
+}
+
+fail()
+{
+	printf 'error: %s\n' "$*" >&2
+	exit 1
+}
+
+require_tool()
+{
+	command -v "$1" >/dev/null 2>&1 || fail "missing required tool: $1"
+}
+
+set_plist_value()
+{
+	local plist="$1"
+	local key="$2"
+	local value="$3"
+
+	if /usr/libexec/PlistBuddy -c "Set :$key $value" "$plist" >/dev/null 2>&1; then
+		return
+	fi
+
+	/usr/libexec/PlistBuddy -c "Add :$key string $value" "$plist" >/dev/null
+}
+
+checkout_source()
+{
+	local src="$SOURCE_ROOT/cocoadialog"
+
+	mkdir -p "$SOURCE_ROOT"
+	if [[ ! -d "$src/.git" ]]; then
+		log "Cloning CocoaDialog"
+		git clone "$COCOADIALOG_REPO" "$src"
+	fi
+
+	log "Checking out CocoaDialog $COCOADIALOG_REVISION"
+	git -C "$src" fetch --tags --quiet
+	git -C "$src" checkout --quiet "$COCOADIALOG_REVISION"
+	git -C "$src" reset --hard --quiet "$COCOADIALOG_REVISION"
+	git -C "$src" clean -fdx --quiet
+
+	log "Applying TextMate CocoaDialog patch"
+	git -C "$src" apply --check "$ROOT/Bundles/Core/bundle-support.tmbundle/Support/shared/bin/CocoaDialog-source.patch"
+	git -C "$src" apply "$ROOT/Bundles/Core/bundle-support.tmbundle/Support/shared/bin/CocoaDialog-source.patch"
+
+	printf '%s\n' "$src"
+}
+
+build_app()
+{
+	local src="$1"
+	local products="$BUILD_ROOT/products"
+	local intermediates="$BUILD_ROOT/intermediates"
+	local pods_project="$src/Pods/Pods.xcodeproj"
+	local build_ref=()
+	local project
+	local workspace
+
+	rm -rf "$products" "$intermediates"
+
+	log "Installing CocoaPods dependencies"
+	( cd "$src" && pod install ) >&2 || fail "pod install failed"
+
+	if [[ -d "$pods_project" ]]; then
+		log "Building CocoaPods support libraries"
+		xcodebuild \
+			"${XCODEBUILD_FLAGS[@]}" \
+			-project "$pods_project" \
+			-scheme Pods-cocoadialog \
+			-configuration Release \
+			-derivedDataPath "$BUILD_ROOT/DerivedData" \
+			SYMROOT="$products" \
+			OBJROOT="$intermediates/Pods" \
+			MACOSX_DEPLOYMENT_TARGET="$DEPLOYMENT_TARGET" \
+			ARCHS="$ARCHS" \
+			ONLY_ACTIVE_ARCH=NO \
+			CODE_SIGNING_ALLOWED=NO \
+			build >&2 || fail "CocoaDialog Pods build failed"
+	fi
+
+	project="$(find "$src" -maxdepth 1 -type d -name '*.xcodeproj' -print -quit)"
+	workspace="$(find "$src" -maxdepth 1 -type d -name '*.xcworkspace' -print -quit)"
+	if [[ -n "$project" ]]; then
+		build_ref=(-project "$project")
+	elif [[ -n "$workspace" ]]; then
+		build_ref=(-workspace "$workspace")
+	else
+		fail "could not find CocoaDialog workspace or project"
+	fi
+
+	log "Building CocoaDialog for $ARCHS"
+	xcodebuild \
+		"${XCODEBUILD_FLAGS[@]}" \
+		"${build_ref[@]}" \
+		-scheme "$COCOADIALOG_SCHEME" \
+		-configuration Release \
+		-derivedDataPath "$BUILD_ROOT/DerivedData" \
+		SYMROOT="$products" \
+		OBJROOT="$intermediates" \
+		MACOSX_DEPLOYMENT_TARGET="$DEPLOYMENT_TARGET" \
+		ARCHS="$ARCHS" \
+		ONLY_ACTIVE_ARCH=NO \
+		CODE_SIGNING_ALLOWED=NO \
+		build >&2 || fail "CocoaDialog build failed"
+
+	local built_app
+	built_app="$(find "$products/Release" -maxdepth 1 -type d -name '*.app' -print -quit)"
+	[[ -n "$built_app" ]] || fail "could not find built CocoaDialog app in $products/Release"
+	printf '%s\n' "$built_app"
+}
+
+prepare_textmate_app()
+{
+	local built_app="$1"
+	local staged_app="$BUILD_ROOT/CocoaDialog.app"
+	local executable
+
+	log "Preparing TextMate CocoaDialog.app"
+	rm -rf "$staged_app"
+	rsync -a "$built_app/" "$staged_app/"
+
+	executable="$staged_app/Contents/MacOS/cocoadialog"
+	if [[ -f "$executable" ]]; then
+		mv "$executable" "$staged_app/Contents/MacOS/CocoaDialog"
+	fi
+	[[ -f "$staged_app/Contents/MacOS/CocoaDialog" ]] || fail "could not find CocoaDialog executable"
+
+	set_plist_value "$staged_app/Contents/Info.plist" CFBundleExecutable CocoaDialog
+	set_plist_value "$staged_app/Contents/Info.plist" CFBundleName CocoaDialog
+	set_plist_value "$staged_app/Contents/Info.plist" CFBundleDisplayName CocoaDialog
+	set_plist_value "$staged_app/Contents/Info.plist" LSMinimumSystemVersion "$DEPLOYMENT_TARGET"
+
+	printf '%s\n' "$staged_app"
+}
+
+sign_app()
+{
+	local app="$1"
+	local timestamp_flag="--timestamp=none"
+
+	if [[ "$CODE_SIGN_IDENTITY" != "-" ]]; then
+		timestamp_flag="--timestamp"
+	fi
+
+	log "Signing CocoaDialog.app with hardened runtime"
+	/usr/bin/codesign --force --sign "$CODE_SIGN_IDENTITY" --options runtime "$timestamp_flag" "$app"
+	/usr/bin/codesign --verify --strict --verbose=2 "$app"
+}
+
+install_app()
+{
+	local app="$1"
+
+	log "Installing CocoaDialog.app"
+	mkdir -p "$(dirname "$APP_DST")"
+	rsync -a --delete "$app/" "$APP_DST/"
+
+	/usr/bin/codesign -dv --verbose=4 "$APP_DST" 2>&1 | grep 'flags=' || true
+	file "$APP_DST/Contents/MacOS/CocoaDialog"
+}
+
+main()
+{
+	require_tool git
+	require_tool pod
+	require_tool xcodebuild
+	require_tool rsync
+	require_tool file
+
+	mkdir -p "$BUILD_ROOT"
+
+	local src
+	local built_app
+	local staged_app
+	src="$(checkout_source)"
+	built_app="$(build_app "$src")"
+	staged_app="$(prepare_textmate_app "$built_app")"
+	sign_app "$staged_app"
+	install_app "$staged_app"
+
+	log "Done"
+}
+
+main "$@"

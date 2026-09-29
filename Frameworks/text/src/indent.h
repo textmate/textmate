@@ -1,8 +1,13 @@
 #ifndef TEXT_INDENT_H_VYHC46E4
 #define TEXT_INDENT_H_VYHC46E4
 
+#include <optional>
+#include <string>
+
 namespace text
 {
+	std::optional<bool> detect_soft_tabs (std::string const& text);
+
 	struct indent_t
 	{
 		indent_t (size_t tabSize = 8, size_t indentSize = SIZE_T_MAX, bool softTabs = false, bool tabFollowsIndent = true) : _tab_size(tabSize), _indent_size(indentSize), _soft_tabs(softTabs), _tab_follows_indent(tabFollowsIndent)

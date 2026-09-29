@@ -1,5 +1,5 @@
 #include <test/jail.h>
-#include <io/events.h>
+#include <io/src/events.h>
 
 #ifndef BSTR
 #define BSTR(b) ((b)?"YES":"NO")

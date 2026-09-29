@@ -1,4 +1,4 @@
-#include <selection/selection.h>
+#include <selection/src/selection.h>
 
 static std::string search (std::string const& needle, std::string haystack, find::options_t options = find::none, bool* didWrap = nullptr)
 {

@@ -1,8 +1,8 @@
 #import "FFTextFieldViewController.h"
-#import <OakAppKit/OakSyntaxFormatter.h>
-#import <OakAppKit/OakPasteboard.h>
-#import <OakAppKit/OakPasteboardSelector.h>
-#import <OakAppKit/OakUIConstructionFunctions.h>
+#import <OakAppKit/src/OakSyntaxFormatter.h>
+#import <OakAppKit/src/OakPasteboard.h>
+#import <OakAppKit/src/OakPasteboardSelector.h>
+#import <OakAppKit/src/OakUIConstructionFunctions.h>
 
 // ==========================
 // = OakAutoSizingTextField =
@@ -199,12 +199,15 @@ static void* kFirstResponderContext = &kFirstResponderContext;
 		NSRange insertionPoint = textView.selectedRanges.lastObject.rangeValue;
 
 		if(lastNewline.location == NSNotFound || lastNewline.location < NSMaxRange(insertionPoint))
-			return [self showHistory:self], YES;
+		{
+			[self showHistory:self];
+			return YES;
+		}
 	}
 	return NO;
 }
 
-- (void)textStorageDidProcessEditing:(NSNotification*)aNotification
+- (void)textStorage:(NSTextStorage*)textStorage didProcessEditing:(NSTextStorageEditActions)editedMask range:(NSRange)editedRange changeInLength:(NSInteger)delta
 {
 	[self addStylesToFieldEditor];
 }

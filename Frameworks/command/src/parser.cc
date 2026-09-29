@@ -1,6 +1,6 @@
 #include "parser.h"
-#include <bundles/bundles.h>
-#include <text/case.h>
+#include <bundles/src/bundles.h>
+#include <text/src/case.h>
 
 static size_t index_of (size_t i, std::string const& needle)
 {
@@ -91,7 +91,7 @@ plist::dictionary_t convert_command_from_v1 (plist::dictionary_t plist)
 	}
 
 	bool flag;
-	plist["autoScrollOutput"] = plist::get_key_path(plist, "dontFollowNewOutput", flag) && !flag || plist::get_key_path(plist, "autoScrollOutput", flag) && flag;
+	plist["autoScrollOutput"] = (plist::get_key_path(plist, "dontFollowNewOutput", flag) && !flag) || (plist::get_key_path(plist, "autoScrollOutput", flag) && flag);
 
 	return plist;
 }

@@ -1,8 +1,8 @@
 #include "scope.h"
 #include "parse.h"
-#include <text/format.h>
-#include <text/parse.h>
-#include <text/tokenize.h>
+#include <text/src/format.h>
+#include <text/src/parse.h>
+#include <text/src/tokenize.h>
 #include <oak/oak.h>
 
 namespace scope
@@ -77,7 +77,7 @@ namespace scope
 
 	scope_t::scope_t (scope_t const& rhs)
 	{
-		if(node = rhs.node)
+		if((node = rhs.node))
 			node->retain();
 	}
 
@@ -93,7 +93,7 @@ namespace scope
 		{
 			if(node)
 				node->release();
-			if(node = rhs.node)
+			if((node = rhs.node))
 				node->retain();
 		}
 		return *this;
@@ -126,7 +126,7 @@ namespace scope
 	{
 		ASSERT(node);
 		node_t* old = node;
-		if(node = node->parent())
+		if((node = node->parent()))
 			node->retain();
 		old->release();
 	}
@@ -206,7 +206,10 @@ namespace scope
 
 		auto fromIter = fromScopes.rbegin(), toIter = toScopes.rbegin();
 		while(fromIter != fromScopes.rend() && toIter != toScopes.rend() && *fromIter == *toIter)
-			++fromIter, ++toIter;
+		{
+			++fromIter;
+			++toIter;
+		}
 
 		std::string res = "";
 		for(auto it = fromScopes.begin(); it != fromIter.base(); ++it)

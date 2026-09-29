@@ -1,4 +1,4 @@
-#import <scm/status.h>
+#import <scm/src/status.h>
 
 @interface SCMRepository : NSObject
 @property (nonatomic, readonly) NSURL* URL;

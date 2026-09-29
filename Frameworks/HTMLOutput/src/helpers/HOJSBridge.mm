@@ -1,14 +1,14 @@
 #import "HOJSBridge.h"
 #import "add_to_buffer.h"
-#import <OakAppKit/NSAlert Additions.h>
-#import <OakFoundation/NSString Additions.h>
+#import <OakAppKit/src/NSAlert Additions.h>
+#import <OakFoundation/src/NSString Additions.h>
 #import <oak/debug.h>
-#import <document/OakDocument.h>
-#import <document/OakDocumentController.h>
-#import <text/utf8.h>
-#import <ns/ns.h>
-#import <cf/run_loop.h>
-#import <io/exec.h>
+#import <document/src/OakDocument.h>
+#import <document/src/OakDocumentController.h>
+#import <text/src/utf8.h>
+#import <ns/src/ns.h>
+#import <cf/src/run_loop.h>
+#import <io/src/exec.h>
 
 @interface HOJSShellCommand : NSObject
 - (id)initShellCommand:(NSString*)aCommand withEnvironment:(const std::map<std::string, std::string>&)someEnvironment andExitHandler:(id)aHandler;
@@ -171,7 +171,7 @@
 	if(self = [super init])
 	{
 		self.exitHandler = aHandler;
-		if(process = io::spawn(std::vector<std::string>{ "/bin/sh", "-c", to_s(aCommand) }, someEnvironment))
+		if((process = io::spawn(std::vector<std::string>{ "/bin/sh", "-c", to_s(aCommand) }, someEnvironment)))
 		{
 			auto runLoop = std::make_shared<cf::run_loop_t>(kCFRunLoopDefaultMode, 15);
 			auto weakRunLoop = std::weak_ptr<cf::run_loop_t>(runLoop);
@@ -318,13 +318,13 @@
 
 - (void)setOnreadoutput:(id)aHandler
 {
-	if(onreadoutput = aHandler)
+	if((onreadoutput = aHandler))
 		[onreadoutput callWebScriptMethod:@"call" withArguments:@[ onreadoutput, [self outputString] ]];
 }
 
 - (void)setOnreaderror:(id)aHandler
 {
-	if(onreaderror = aHandler)
+	if((onreaderror = aHandler))
 		[onreaderror callWebScriptMethod:@"call" withArguments:@[ onreaderror, [self errorString] ]];
 }
 

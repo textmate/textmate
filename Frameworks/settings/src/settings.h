@@ -2,10 +2,10 @@
 #define SETTINGS_H_F99MMG5F
 
 #include "keys.h"
-#include <io/io.h>
+#include <io/src/io.h>
 #include <oak/oak.h>
-#include <text/format.h>
-#include <scope/scope.h>
+#include <text/src/format.h>
+#include <scope/src/scope.h>
 
 struct settings_t
 {

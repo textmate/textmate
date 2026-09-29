@@ -1,8 +1,8 @@
 #include "plist.h"
 #include <oak/oak.h>
-#include <text/format.h>
-#include <text/hexdump.h>
-#include <text/utf8.h>
+#include <text/src/format.h>
+#include <text/src/hexdump.h>
+#include <text/src/utf8.h>
 
 namespace
 {
@@ -70,11 +70,11 @@ static std::string double_quote_escape (std::string const& ch)
 
 			if(0x20 <= val && val <= 0x7E)
 				return ch;
-			else if(iscntrl(val) || 0x7F < val && CFCharacterSetIsLongCharacterMember(control_set, val))
+			else if(iscntrl(val) || (0x7F < val && CFCharacterSetIsLongCharacterMember(control_set, val)))
 				return text::format("\\x%02X", val);
 			else if(0xE000 <= val && val <= 0xF8FF)
 				return text::format("\\U%04X", val);
-			else if(0x0F0000 <= val && val <= 0x0FFFFD || 0x100000 <= val && val <= 0x10FFFD)
+			else if((0x0F0000 <= val && val <= 0x0FFFFD) || (0x100000 <= val && val <= 0x10FFFD))
 				return text::format("\\U%06X", val);
 			else if(CFCharacterSetIsLongCharacterMember(illegal_set, val))
 				return text::format("\\U%04X", val);

@@ -3,7 +3,7 @@
 
 #include "date.h"
 #include "uuid.h"
-#include <text/format.h>
+#include <text/src/format.h>
 #include <oak/debug.h>
 
 namespace plist

@@ -1,8 +1,8 @@
 #ifndef BUNDLES_WRAPPERS_H_IFW4TEJN
 #define BUNDLES_WRAPPERS_H_IFW4TEJN
 
-#include <scope/scope.h>
-#include <plist/plist.h>
+#include <scope/src/scope.h>
+#include <plist/src/plist.h>
 
 namespace bundles
 {

@@ -205,7 +205,7 @@ static NSImage* ImageNamed (NSString* imageName)
 						imageName = imageName ?: customBindings[pathName.pathExtension];
 					}
 
-					if(image = ImageNamed(imageName))
+					if((image = ImageNamed(imageName)))
 					{
 						NSURLFileResourceType type;
 						if([url getResourceValue:&type forKey:NSURLFileResourceTypeKey error:&error])
@@ -237,9 +237,12 @@ static NSImage* ImageNamed (NSString* imageName)
 
 			if(scmStatus != scm::status::none)
 			{
-				NSImage* badge;
+				NSImage* badge = nil;
 				switch(scmStatus)
 				{
+					case scm::status::unknown:
+					case scm::status::none:
+					case scm::status::ignored:      break;
 					case scm::status::conflicted:   badge = ImageNamed(@"scm-badge-conflicted");  break;
 					case scm::status::modified:     badge = ImageNamed(@"scm-badge-modified");    break;
 					case scm::status::added:        badge = ImageNamed(@"scm-badge-added");       break;

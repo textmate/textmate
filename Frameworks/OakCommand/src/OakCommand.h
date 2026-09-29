@@ -1,4 +1,4 @@
-#include <command/parser.h>
+#include <command/src/parser.h>
 
 extern NSNotificationName const OakCommandDidTerminateNotification;
 extern NSString* const OakCommandErrorDomain;

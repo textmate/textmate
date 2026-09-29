@@ -1,6 +1,6 @@
 #import "Keys.h"
-#import <OakTabBarView/OakTabBarView.h>
-#import <BundlesManager/BundlesManager.h>
+#import <OakTabBarView/src/OakTabBarView.h>
+#import <BundlesManager/src/BundlesManager.h>
 
 static NSArray* default_environment ()
 {
@@ -14,6 +14,7 @@ static NSArray* default_environment ()
 		@{ @"enabled": @NO, @"name": @"TM_GIT",          @"value": @"/opt/local/bin/git"               },
 		@{ @"enabled": @NO, @"name": @"TM_HG",           @"value": @"/opt/local/bin/hg"                },
 		@{ @"enabled": @NO, @"name": @"TM_MAKE_FLAGS",   @"value": @"rj8"                              },
+		@{ @"enabled": @NO, @"name": @"TM_PYRIGHT_PYTHON_VERSION", @"value": @"3.13"                  },
 	];
 }
 
@@ -66,13 +67,11 @@ NSString* const kUserDefaultsFileBrowserSingleClickToOpenKey   = @"fileBrowserSi
 NSString* const kUserDefaultsFileBrowserOpenAnimationDisabled  = @"fileBrowserOpenAnimationDisabled";
 NSString* const kUserDefaultsFileBrowserStyleKey               = @"fileBrowserStyle";
 NSString* const kUserDefaultsHTMLOutputPlacementKey            = @"htmlOutputPlacement";
-NSString* const kUserDefaultsDisableFileBrowserWindowResizeKey = @"disableFileBrowserWindowResize";
 NSString* const kUserDefaultsAutoRevealFileKey                 = @"autoRevealFile";
 NSString* const kUserDefaultsDisableTabReorderingKey           = @"disableTabReordering";
 NSString* const kUserDefaultsDisableTabAutoCloseKey            = @"disableTabAutoClose";
 NSString* const kUserDefaultsDisableTabBarCollapsingKey        = @"disableTabBarCollapsing";
 NSString* const kUserDefaultsAllowExpandingLinksKey            = @"allowExpandingLinks";
-NSString* const kUserDefaultsAllowExpandingPackagesKey         = @"allowExpandingPackages";
 
 // ===========
 // = Bundles =

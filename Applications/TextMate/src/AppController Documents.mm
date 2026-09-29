@@ -1,13 +1,14 @@
 #import "AppController.h"
-#import <DocumentWindow/DocumentWindowController.h>
+#import "TextMateResponderActions.h"
+#import <DocumentWindow/src/DocumentWindowController.h>
 #import "ODBEditorSuite.h"
-#import <Preferences/Keys.h>
-#import <OakAppKit/NSSavePanel Additions.h>
-#import <OakFoundation/NSString Additions.h>
-#import <ns/ns.h>
-#import <text/decode.h>
-#import <document/OakDocument.h>
-#import <document/OakDocumentController.h>
+#import <Preferences/src/Keys.h>
+#import <OakAppKit/src/NSSavePanel Additions.h>
+#import <OakFoundation/src/NSString Additions.h>
+#import <ns/src/ns.h>
+#import <text/src/decode.h>
+#import <document/src/OakDocument.h>
+#import <document/src/OakDocumentController.h>
 
 @implementation AppController (Documents)
 - (void)newDocument:(id)sender

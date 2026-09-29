@@ -1,9 +1,9 @@
 #include "meta_data.h"
-#include <bundles/bundles.h>
+#include <bundles/src/bundles.h>
 #include <oak/oak.h>
-#include <text/ctype.h>
+#include <text/src/my_ctype.h>
 #include <oak/duration.h>
-#include <ns/spellcheck.h>
+#include <ns/src/spellcheck.h>
 #include <oak/debug.h>
 
 namespace ng

@@ -1,7 +1,7 @@
 #include "application.h"
-#include <io/io.h>
-#include <cf/cf.h>
-#include <text/format.h>
+#include <io/src/io.h>
+#include <cf/src/cf.h>
+#include <text/src/format.h>
 #include <oak/datatypes.h>
 #include <oak/debug.h>
 

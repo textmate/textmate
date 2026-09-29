@@ -1,18 +1,18 @@
 #include "editor.h"
 #include "transform.h"
 #include "indent.h"
-#include <bundles/bundles.h>
-#include <command/runner.h>
-#include <text/case.h>
-#include <text/ctype.h>
-#include <text/classification.h>
-#include <text/utf8.h>
-#include <text/hexdump.h>
-#include <text/newlines.h>
-#include <text/parse.h>
-#include <text/tokenize.h>
-#include <text/trim.h>
-#include <io/exec.h>
+#include <bundles/src/bundles.h>
+#include <command/src/runner.h>
+#include <text/src/case.h>
+#include <text/src/my_ctype.h>
+#include <text/src/classification.h>
+#include <text/src/utf8.h>
+#include <text/src/hexdump.h>
+#include <text/src/newlines.h>
+#include <text/src/parse.h>
+#include <text/src/tokenize.h>
+#include <text/src/trim.h>
+#include <io/src/exec.h>
 
 namespace ng
 {
@@ -160,7 +160,7 @@ namespace ng
 				size_t& index = mark.position.index;
 				if(std::clamp(index, from, to) == index)
 				{
-					if(mark.type == mark_t::kUnpairedMark || index != from && index != to)
+					if(mark.type == mark_t::kUnpairedMark || (index != from && index != to))
 					{
 						index = from + len - std::min(to - index, len);
 					}
@@ -242,7 +242,7 @@ namespace ng
 					// FIXME This is a heuristic to figure out which of the returned ranges correspond to our caret, as multiple ranges will be returned when the snippet has mirrors. Ideally we would update the API to return the new caret range. Though I am postponing that to a potential refactor that would also allow snippets to work with multiple carets.
 
 					original = ng::range_t(from + pad.size(), caret, false, orgRange.freehanded, true);
-					goodCaretMatch = snippets.current().min().index < from + pad.size() && caret < snippets.current().max().index || (from + pad.size() != caret && (snippets.current().min().index < from + pad.size() || caret < snippets.current().max().index));
+					goodCaretMatch = (snippets.current().min().index < from + pad.size() && caret < snippets.current().max().index) || (from + pad.size() != caret && (snippets.current().min().index < from + pad.size() || caret < snippets.current().max().index));
 				}
 				adjustment += str.size() - (to - from);
 			}
@@ -333,7 +333,7 @@ namespace ng
 
 	bool editor_t::disallow_tab_expansion () const
 	{
-		if(!_snippets.empty() && _snippets.current() == ranges().last() && !_snippets.in_last_placeholder() || ranges().last().unanchored)
+		if((!_snippets.empty() && _snippets.current() == ranges().last() && !_snippets.in_last_placeholder()) || ranges().last().unanchored)
 			return true;
 		return false;
 	}
@@ -1295,11 +1295,17 @@ namespace ng
 		for(auto const& pair : clips)
 		{
 			text::pos_t pos = _buffer.convert(pair.first);
-			int line        = pos.line;
-			int col         = visual_distance(_buffer, _buffer.begin(line), pair.first, false);
+			size_t line     = pos.line;
+			size_t col      = visual_distance(_buffer, _buffer.begin(line), pair.first, false);
 
-			line = std::clamp(line + deltaY, 0, int(_buffer.lines()-1));
-			col  = std::max(col + deltaX, 0);
+			if(deltaY < 0)
+				line -= std::min(line, static_cast<size_t>(-static_cast<int64_t>(deltaY)));
+			else
+				line += std::min(static_cast<size_t>(deltaY), _buffer.lines() - 1 - line);
+			if(deltaX < 0)
+				col -= std::min(col, static_cast<size_t>(-static_cast<int64_t>(deltaX)));
+			else
+				col += static_cast<size_t>(deltaX);
 			replacements.emplace(visual_advance(_buffer, _buffer.begin(line), col, false), pair.second);
 		}
 		_selections = this->replace(replacements, true);

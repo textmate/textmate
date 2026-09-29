@@ -1,4 +1,4 @@
-#include <bundles/wrappers.h>
+#include <bundles/src/wrappers.h>
 
 static bundles::item_ptr find (std::string const& name)
 {

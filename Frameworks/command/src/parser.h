@@ -1,10 +1,10 @@
 #ifndef COMMAND_PARSER_H_NXZKS6AZ
 #define COMMAND_PARSER_H_NXZKS6AZ
 
-#include <plist/plist.h>
-#include <plist/uuid.h>
-#include <scope/scope.h>
-#include <bundles/bundles.h>
+#include <plist/src/plist.h>
+#include <plist/src/uuid.h>
+#include <scope/src/scope.h>
+#include <bundles/src/bundles.h>
 
 namespace pre_exec      { enum type { nop = 0, save_document, save_project }; }
 namespace input         { enum type { selection = 0, entire_document, scope, line, word, character, nothing }; }

@@ -1,13 +1,13 @@
 #include "updater.h"
 #include "download.h"
-#include <io/path.h>
-#include <io/move_path.h>
-#include <io/entries.h>
-#include <network/download_tbz.h>
-#include <plist/ascii.h>
-#include <text/format.h>
-#include <text/ctype.h>
-#include <text/decode.h>
+#include <io/src/path.h>
+#include <io/src/move_path.h>
+#include <io/src/entries.h>
+#include <network/src/download_tbz.h>
+#include <plist/src/ascii.h>
+#include <text/src/format.h>
+#include <text/src/my_ctype.h>
+#include <text/src/decode.h>
 
 static char const* kBundleAttributeOrigin  = "org.textmate.bundle.origin";
 static char const* kBundleAttributeUpdated = "org.textmate.bundle.updated";

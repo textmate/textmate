@@ -2,10 +2,10 @@
 #import "OakEncodingPopUpButton.h"
 #import "OakUIConstructionFunctions.h"
 #import "NSSavePanel Additions.h"
-#import <OakFoundation/OakStringListTransformer.h>
-#import <settings/settings.h>
+#import <OakFoundation/src/OakStringListTransformer.h>
+#import <settings/src/settings.h>
 #import <oak/oak.h>
-#import <ns/ns.h>
+#import <ns/src/ns.h>
 
 @interface OakEncodingSaveOptionsViewController : NSViewController <NSOpenSavePanelDelegate>
 {

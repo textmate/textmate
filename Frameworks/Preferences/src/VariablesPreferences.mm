@@ -1,8 +1,8 @@
 #import "VariablesPreferences.h"
 #import "Keys.h"
-#import <OakAppKit/NSImage Additions.h>
-#import <OakAppKit/OakUIConstructionFunctions.h>
-#import <ns/ns.h>
+#import <OakAppKit/src/NSImage Additions.h>
+#import <OakAppKit/src/OakUIConstructionFunctions.h>
+#import <ns/src/ns.h>
 
 static NSString* const kVariableKeyEnabled = @"enabled";
 static NSString* const kVariableKeyName    = @"name";

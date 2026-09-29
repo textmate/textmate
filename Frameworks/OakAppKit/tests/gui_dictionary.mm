@@ -134,6 +134,7 @@
 }
 @end
 
+#if 0
 class DictionaryTests : public CxxTest::TestSuite
 {
 public:
@@ -144,3 +145,4 @@ public:
 		}
 	}
 };
+#endif

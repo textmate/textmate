@@ -1,11 +1,11 @@
 #include "api.h"
-#include <settings/settings.h>
-#include <text/case.h>
-#include <text/format.h>
-#include <text/tokenize.h>
-#include <text/trim.h>
-#include <io/path.h>
-#include <io/exec.h>
+#include <settings/src/settings.h>
+#include <text/src/case.h>
+#include <text/src/format.h>
+#include <text/src/tokenize.h>
+#include <text/src/trim.h>
+#include <io/src/path.h>
+#include <io/src/exec.h>
 #include <oak/oak.h>
 
 namespace scm

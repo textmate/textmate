@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>beforeRunningCommand</key>
+	<string>nop</string>
+	<key>command</key>
+	<string><![CDATA[#!/bin/bash
+
+# Pick a project directory with AppKit's directory chooser, copy inherited
+# checker settings into it, and fall back to starter settings when necessary.
+
+# Start at the active document. A project can contain nested Python projects,
+# so its root may be above the configuration we want to inherit.
+INITIAL_LOCATION="${TM_DIRECTORY:-${TM_PROJECT_DIRECTORY:-$HOME}}"
+[[ -d "$INITIAL_LOCATION" ]] || INITIAL_LOCATION="$HOME"
+TARGET=$(/usr/bin/osascript -l AppleScript - "$INITIAL_LOCATION" <<'APPLESCRIPT'
+on run argv
+	set initialLocation to (POSIX file (item 1 of argv)) as alias
+	try
+		set chosenFolder to choose folder with prompt "Choose the folder where local Pyright and Ruff settings should be written." default location initialLocation
+		return POSIX path of chosenFolder
+	on error number -128
+		return ""
+	end try
+end run
+APPLESCRIPT
+)
+PANEL_STATUS=$?
+if [[ $PANEL_STATUS -ne 0 ]]; then
+	echo "Could not open the configuration location chooser."
+	exit $PANEL_STATUS
+fi
+
+[[ -n "$TARGET" ]] || exit 0
+
+export TARGET
+/usr/bin/python3 <<'PYEOF'
+import os
+import re
+import tempfile
+
+target = os.path.abspath(os.environ["TARGET"])
+pyright_default = """\
+{
+    "typeCheckingMode": "basic",
+    "pythonVersion": "3.13"
+}
+"""
+ruff_default = """\
+# Exact port of the VSCode flake8 settings:
+#   --ignore=W191,E266,E501,E265,E722,W503,E303,E262,E701,E741,E261
+# flake8 checks E, W, F by default, so select those explicitly (Ruff's own
+# default is narrower). W503 omitted — not implemented in Ruff.
+# Ruff gates most pycodestyle formatting rules behind preview mode AND
+# requires them to be selected by exact code (prefix "E" won't include them).
+
+[lint]
+preview = true
+select = [
+\t"E",    # pycodestyle errors (stable rules)
+\t"W",    # pycodestyle warnings (stable rules)
+\t"F",    # pyflakes (unused imports/variables, undefined names, …)
+\t# preview-gated pycodestyle rules flake8 would check:
+\t"E111", # indentation is not a multiple of the indent size
+\t"E112", # expected an indented block
+\t"E113", # unexpectedly indented
+\t"E114", # indentation is not a multiple of the indent size (comment)
+\t"E115", # expected an indented block (comment)
+\t"E116", # unexpected indentation (comment)
+\t"E117", # over-indented
+\t"E124", # closing bracket does not match visual indentation
+\t"E128", # continuation line under-indented for visual indent
+\t"E201", # whitespace after '('
+\t"E202", # whitespace before ')'
+\t"E203", # whitespace before ':' ',' ';'
+\t"E211", # whitespace before '(' or '['
+\t"E221", # multiple spaces before operator
+\t"E222", # multiple spaces after operator
+\t"E223", # tab before operator
+\t"E224", # tab after operator
+\t"E225", # missing whitespace around operator
+\t"E226", # missing whitespace around arithmetic operator
+\t"E227", # missing whitespace around bitwise or shift operator
+\t"E228", # missing whitespace around modulo operator
+\t"E231", # missing whitespace after ',' ';' or ':'
+\t"E241", # multiple spaces after comma
+\t"E242", # tab after comma
+\t"E251", # unexpected spaces around keyword / parameter equals
+\t"E252", # missing whitespace around parameter equals
+\t"E301", # expected 1 blank line between methods
+\t"E302", # expected 2 blank lines before top-level definition
+\t"E303", # too many blank lines (ignored below, kept for completeness)
+\t"E304", # blank lines after function decorator
+\t"E305", # expected 2 blank lines after class or function definition
+\t"E306", # expected 1 blank line before nested definition
+\t"E502", # redundant backslash between brackets
+\t"W391", # blank line at end of file
+]
+ignore = [
+\t"W191", # tab indentation
+\t"E266", # too many leading # for block comment
+\t"E501", # line too long
+\t"E265", # block comment should start with '# '
+\t"E722", # bare except
+\t"E303", # too many blank lines
+\t"E262", # inline comment should start with '# '
+\t"E701", # multiple statements on one line (colon)
+\t"E741", # ambiguous variable name
+\t"E261", # two spaces before inline comment
+]
+"""
+
+def ancestors(directory):
+    while True:
+        yield directory
+        parent = os.path.dirname(directory)
+        if parent == directory:
+            return
+        directory = parent
+
+def pyproject_configures(path, tool):
+    try:
+        with open(path, encoding="utf-8-sig") as stream:
+            contents = stream.read()
+    except OSError:
+        return False
+    tool_pattern = "(?:%s|\"%s\"|'%s')" % (
+        re.escape(tool),
+        re.escape(tool),
+        re.escape(tool),
+    )
+    return re.search(
+        r"^\s*\[\s*tool\s*\.\s*%s\s*(?:\.|\])" % tool_pattern,
+        contents,
+        re.MULTILINE,
+    ) is not None
+
+def pyproject_tool_sections(path, tool):
+    with open(path, encoding="utf-8-sig") as stream:
+        lines = stream.readlines()
+    header = re.compile(r"^\s*\[\[?[^\]]+\]\]?\s*(?:#.*)?$")
+    tool_header = re.compile(
+        r"^\s*\[\s*tool\s*\.\s*(?:%s|\"%s\"|'%s')\s*(?:\.|\])"
+        % (re.escape(tool), re.escape(tool), re.escape(tool))
+    )
+    boundaries = [index for index, line in enumerate(lines) if header.match(line)]
+    boundaries.append(len(lines))
+    sections = []
+    for position, start in enumerate(boundaries[:-1]):
+        if tool_header.match(lines[start]):
+            sections.append("".join(lines[start:boundaries[position + 1]]).rstrip())
+    if not sections:
+        raise ValueError("could not extract [tool.%s] settings from %s" % (tool, path))
+    return "\n\n".join(sections) + "\n"
+
+def find_pyright_config():
+    for directory in ancestors(target):
+        candidate = os.path.join(directory, "pyrightconfig.json")
+        if os.path.isfile(candidate):
+            return candidate
+        candidate = os.path.join(directory, "pyproject.toml")
+        if os.path.isfile(candidate) and pyproject_configures(candidate, "pyright"):
+            return candidate
+
+    # Match Check Python on Save: loose files can inherit a configuration from
+    # TM_PYRIGHT_PROJECT or the bundle's conventional user-level location.
+    fallback = os.environ.get("TM_PYRIGHT_PROJECT")
+    if fallback:
+        fallback = os.path.abspath(os.path.expanduser(fallback))
+        if os.path.isfile(fallback):
+            return fallback
+    fallback = os.path.expanduser(
+        "~/Library/Application Support/TextMate/pyrightconfig.json"
+    )
+    if os.path.isfile(fallback):
+        return fallback
+    return None
+
+def find_ruff_config():
+    for directory in ancestors(target):
+        for name in (".ruff.toml", "ruff.toml"):
+            candidate = os.path.join(directory, name)
+            if os.path.isfile(candidate):
+                return candidate
+        candidate = os.path.join(directory, "pyproject.toml")
+        if os.path.isfile(candidate) and pyproject_configures(candidate, "ruff"):
+            return candidate
+    return None
+
+def write_config(name, contents):
+    destination = os.path.join(target, name)
+    mode = (os.stat(destination).st_mode & 0o777) if os.path.exists(destination) else 0o644
+    fd, temporary_path = tempfile.mkstemp(prefix=".%s." % name, dir=target, text=True)
+    try:
+        with os.fdopen(fd, "w") as stream:
+            stream.write(contents)
+        os.chmod(temporary_path, mode)
+        os.replace(temporary_path, destination)
+    except BaseException:
+        try:
+            os.unlink(temporary_path)
+        except OSError:
+            pass
+        raise
+    return destination
+
+try:
+    pyright_config = find_pyright_config()
+    ruff_config = find_ruff_config()
+    actions = []
+    local_pyproject = os.path.join(target, "pyproject.toml")
+    pyproject_additions = []
+
+    if not pyright_config:
+        pyright_config = write_config("pyrightconfig.json", pyright_default)
+        actions.append("Created default Pyright settings:\n%s" % pyright_config)
+    elif os.path.dirname(pyright_config) != target:
+        source = pyright_config
+        if os.path.basename(source) == "pyproject.toml":
+            pyproject_additions.append(("Pyright", source, pyproject_tool_sections(source, "pyright")))
+            pyright_config = local_pyproject
+        else:
+            with open(source, encoding="utf-8-sig") as stream:
+                pyright_config = write_config("pyrightconfig.json", stream.read())
+            actions.append("Copied Pyright settings:\n%s\n→ %s" % (source, pyright_config))
+
+    if not ruff_config:
+        ruff_config = write_config("ruff.toml", ruff_default)
+        actions.append("Created default Ruff settings:\n%s" % ruff_config)
+    elif os.path.dirname(ruff_config) != target:
+        source = ruff_config
+        if os.path.basename(source) == "pyproject.toml":
+            pyproject_additions.append(("Ruff", source, pyproject_tool_sections(source, "ruff")))
+            ruff_config = local_pyproject
+        else:
+            name = os.path.basename(source)
+            with open(source, encoding="utf-8-sig") as stream:
+                ruff_config = write_config(name, stream.read())
+            actions.append("Copied Ruff settings:\n%s\n→ %s" % (source, ruff_config))
+
+    if pyproject_additions:
+        if os.path.isfile(local_pyproject):
+            with open(local_pyproject, encoding="utf-8-sig") as stream:
+                contents = stream.read().rstrip()
+        else:
+            contents = ""
+        copied_sections = "\n\n".join(item[2].rstrip() for item in pyproject_additions) + "\n"
+        contents = (contents + "\n\n" + copied_sections) if contents else copied_sections
+        write_config("pyproject.toml", contents)
+        for tool, source, _ in pyproject_additions:
+            actions.append("Copied %s settings:\n%s\n→ %s" % (tool, source, local_pyproject))
+except (OSError, ValueError) as error:
+    print("Could not write the Python configuration files:\n%s" % error)
+    raise SystemExit(1)
+
+if actions:
+    print("\n\n".join(actions))
+else:
+    print("No files created; configurations already exist in the selected folder.")
+print("\nPyright: %s\nRuff: %s" % (pyright_config, ruff_config))
+PYEOF
+]]></string>
+	<key>input</key>
+	<string>none</string>
+	<key>name</key>
+	<string>Write Default Configuration Files…</string>
+	<key>outputLocation</key>
+	<string>toolTip</string>
+	<key>scope</key>
+	<string></string>
+	<key>uuid</key>
+	<string>6D29FF2C-4954-4DAA-A45C-D1FD45153932</string>
+	<key>version</key>
+	<integer>2</integer>
+</dict>
+</plist>

@@ -1,12 +1,13 @@
 #import "InstallBundleItems.h"
+#import <oak/TextMateResponderActions.h>
 #import "BundlesManager.h"
-#import <OakAppKit/NSAlert Additions.h>
-#import <OakFoundation/NSString Additions.h>
-#import <bundles/bundles.h>
-#import <text/ctype.h>
-#import <regexp/format_string.h>
-#import <io/io.h>
-#import <ns/ns.h>
+#import <OakAppKit/src/NSAlert Additions.h>
+#import <OakFoundation/src/NSString Additions.h>
+#import <bundles/src/bundles.h>
+#import <text/src/my_ctype.h>
+#import <regexp/src/format_string.h>
+#import <io/src/io.h>
+#import <ns/src/ns.h>
 
 static std::map<std::string, bundles::item_ptr> installed_items ()
 {

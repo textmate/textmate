@@ -1,7 +1,0 @@
-target "${dirname}" {
-	require_headers scm
-	headers src/TMFileReference.h
-	sources src/*.mm
-	files resources/* "Resources/DocumentTypes"
-	frameworks Cocoa
-}

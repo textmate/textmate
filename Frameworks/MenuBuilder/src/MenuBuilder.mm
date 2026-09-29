@@ -17,7 +17,7 @@ NSMenuItem* MBCreateMenuItem (MBMenuItem const& item)
 	menuItem.state                     = item.state;
 	menuItem.representedObject         = item.representedObject;
 
-	if(@available(macos 10.13, *))
+	if(@available(macOS 10.13, *))
 	{
 		if(item.hidden && (![item.keyEquivalent isEqualToString:@""] || item.key))
 			menuItem.allowsKeyEquivalentWhenHidden = YES;
@@ -34,6 +34,7 @@ NSMenuItem* MBCreateMenuItem (MBMenuItem const& item)
 
 		switch(item.systemMenu)
 		{
+			case MBMenuTypeRegular:  break;
 			case MBMenuTypeServices:   NSApp.servicesMenu                       = submenu; break;
 			case MBMenuTypeFont:       NSFontManager.sharedFontManager.fontMenu = submenu; break;
 			case MBMenuTypeWindows:    NSApp.windowsMenu                        = submenu; break;

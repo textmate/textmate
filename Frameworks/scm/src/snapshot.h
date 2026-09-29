@@ -27,7 +27,7 @@ namespace fs
 			node_type_t type () const                            { return _type; }
 			time_t modified () const                             { return _modified; }
 			nodes_ptr entries () const                           { return _entries; }
-			bool operator== (node_t const& rhs) const            { return _name == rhs._name && _type == rhs._type && _modified == rhs._modified && (!_entries && !rhs._entries || _entries && rhs._entries && *_entries == *rhs._entries); }
+			bool operator== (node_t const& rhs) const            { return _name == rhs._name && _type == rhs._type && _modified == rhs._modified && ((!_entries && !rhs._entries) || (_entries && rhs._entries && *_entries == *rhs._entries)); }
 			bool operator!= (node_t const& rhs) const            { return !(*this == rhs); }
 
 			std::string to_s (size_t indent = 0) const;

@@ -1,4 +1,4 @@
-#import <scm/status.h>
+#import <scm/src/status.h>
 
 NS_ASSUME_NONNULL_BEGIN
 

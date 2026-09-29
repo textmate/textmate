@@ -1,4 +1,4 @@
-#include <io/io.h>
+#include <io/src/io.h>
 #include <test/jail.h>
 
 void touch (std::string const& path)

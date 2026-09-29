@@ -1,10 +1,10 @@
 #import "FileBrowserViewController.h"
 #import "FileBrowserNotifications.h"
 #import "FileItem.h"
-#import <OakAppKit/OakSound.h>
-#import <OakAppKit/NSAlert Additions.h>
-#import <io/path.h>
-#import <ns/ns.h>
+#import <OakAppKit/src/OakSound.h>
+#import <OakAppKit/src/NSAlert Additions.h>
+#import <io/src/path.h>
+#import <ns/src/ns.h>
 
 @implementation FileBrowserViewController (DiskOperations)
 - (NSArray<NSURL*>*)performOperation:(FBOperation)op withURLs:(NSDictionary<NSURL*, NSURL*>*)urls unique:(BOOL)makeUnique select:(BOOL)selectDestinationURLs

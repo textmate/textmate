@@ -1,7 +1,0 @@
-target "${dirname}" {
-	require text
-	headers src/*.h
-	sources src/*.cc
-	tests tests/*.cc
-	frameworks CoreFoundation ApplicationServices
-}

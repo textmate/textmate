@@ -2,8 +2,8 @@
 #define PARSE_PRIVATE_H_XR3VJA2H
 
 #include "parse.h"
-#include <scope/scope.h>
-#include <regexp/regexp.h>
+#include <scope/src/scope.h>
+#include <regexp/src/regexp.h>
 
 namespace parse
 {

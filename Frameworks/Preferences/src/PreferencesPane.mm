@@ -1,8 +1,8 @@
 #import "PreferencesPane.h"
-#import <OakFoundation/NSString Additions.h>
-#import <OakAppKit/OakUIConstructionFunctions.h>
-#import <ns/ns.h>
-#import <settings/settings.h>
+#import <OakFoundation/src/NSString Additions.h>
+#import <OakAppKit/src/OakUIConstructionFunctions.h>
+#import <ns/src/ns.h>
+#import <settings/src/settings.h>
 
 NSView* OakSetupGridViewWithSeparators (NSGridView* gridView, std::vector<NSUInteger> rows)
 {

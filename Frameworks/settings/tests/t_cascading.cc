@@ -1,4 +1,4 @@
-#include <settings/settings.h>
+#include <settings/src/settings.h>
 #include <test/jail.h>
 
 void test_scope_selector_ranking ()

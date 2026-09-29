@@ -4,9 +4,9 @@
 #import "OakScopeBarView.h"
 #import "OakUIConstructionFunctions.h"
 #import "OakSyntaxFormatter.h"
-#import <OakFoundation/OakFoundation.h>
-#import <OakFoundation/NSString Additions.h>
-#import <ns/ns.h>
+#import <OakFoundation/src/OakFoundation.h>
+#import <OakFoundation/src/NSString Additions.h>
+#import <ns/src/ns.h>
 
 static NSUserInterfaceItemIdentifier const kTableColumnIdentifierMain = @"main";
 static NSUserInterfaceItemIdentifier const kTableColumnIdentifierFlag = @"flag";
@@ -336,7 +336,7 @@ static NSMutableDictionary* SharedChoosers;
 		_footerView = [[NSVisualEffectView alloc] initWithFrame:NSZeroRect];
 		_footerView.blendingMode = NSVisualEffectBlendingModeWithinWindow;
 		_footerView.material     = NSVisualEffectMaterialTitlebar;
-		if(@available(macos 10.14, *))
+		if(@available(macOS 10.14, *))
 			_footerView.material = NSVisualEffectMaterialHeaderView;
 
 		NSView* contentView = self.window.contentView;

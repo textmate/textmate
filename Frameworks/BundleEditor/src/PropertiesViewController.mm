@@ -1,5 +1,5 @@
 #import "PropertiesViewController.h"
-#import <OakAppKit/OakKeyEquivalentView.h>
+#import <OakAppKit/src/OakKeyEquivalentView.h>
 
 @implementation PropertiesViewController
 - (id)initWithName:(NSString*)aName

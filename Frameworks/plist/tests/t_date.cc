@@ -1,4 +1,4 @@
-#include <plist/date.h>
+#include <plist/src/date.h>
 
 void test_date_value ()
 {

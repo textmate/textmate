@@ -1,5 +1,5 @@
 #import "OakSound.h"
-#import <io/path.h>
+#import <io/src/path.h>
 
 void OakPlayUISound (OakSoundIdentifier aSound)
 {

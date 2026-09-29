@@ -1,5 +1,5 @@
-#import <regexp/find.h> // for find::options_t
-#import <text/types.h>
+#import <regexp/src/find.h> // for find::options_t
+#import <text/src/types.h>
 
 enum find_operation_t {
 	kFindOperationCount,

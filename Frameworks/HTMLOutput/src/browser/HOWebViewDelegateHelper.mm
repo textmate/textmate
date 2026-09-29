@@ -1,8 +1,8 @@
 #import "HOWebViewDelegateHelper.h"
 #import "HOBrowserView.h"
-#import <OakAppKit/NSAlert Additions.h>
-#import <OakFoundation/NSString Additions.h>
-#import <io/path.h>
+#import <OakAppKit/src/NSAlert Additions.h>
+#import <OakFoundation/src/NSString Additions.h>
+#import <io/src/path.h>
 #import <oak/debug.h>
 
 static NSString* const kUserDefaultsDefaultURLProtocolKey = @"defaultURLProtocol";

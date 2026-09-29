@@ -1,8 +1,8 @@
 #include "query.h"
-#include <text/ctype.h>
-#include <text/parse.h>
-#include <text/trim.h>
-#include <regexp/format_string.h>
+#include <text/src/my_ctype.h>
+#include <text/src/parse.h>
+#include <text/src/trim.h>
+#include <regexp/src/format_string.h>
 #include <oak/callbacks.h>
 
 namespace bundles
@@ -16,12 +16,12 @@ namespace bundles
 
 	static bool is_deleted (item_ptr item)
 	{
-		return item->deleted() || item->bundle() && item->bundle()->deleted();
+		return item->deleted() || (item->bundle() && item->bundle()->deleted());
 	}
 
 	static bool is_disabled (item_ptr item)
 	{
-		return item->disabled() || item->bundle() && item->bundle()->disabled();
+		return item->disabled() || (item->bundle() && item->bundle()->disabled());
 	}
 
 	namespace
@@ -240,7 +240,7 @@ namespace bundles
 	{
 		for(auto const& item : AllItems)
 		{
-			if(is_deleted(item) || !includeDisabledItems && is_disabled(item))
+			if(is_deleted(item) || (!includeDisabledItems && is_disabled(item)))
 				continue;
 
 			if(auto rank = item->does_match(field, value, scope, kind, bundle))
@@ -297,7 +297,7 @@ namespace bundles
 		std::vector<item_ptr> res;
 		for(auto const& item : cache().menu(_uuid))
 		{
-			if(is_deleted(item) || !includeDisabledItems && is_disabled(item))
+			if(is_deleted(item) || (!includeDisabledItems && is_disabled(item)))
 				continue;
 			res.push_back(item);
 		}
@@ -312,7 +312,7 @@ namespace bundles
 	std::string menu_path (item_ptr item)
 	{
 		std::deque<std::string> path;
-		while(item = lookup(item->parent_menu()))
+		while((item = lookup(item->parent_menu())))
 			path.push_front(item->name());
 		return text::join(path, " ‣ ");
 	}

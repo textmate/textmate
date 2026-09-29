@@ -1,7 +1,7 @@
 #include "filter_check_signature.h"
-#include <cf/cf.h>
-#include <text/decode.h>
-#include <text/format.h>
+#include <cf/src/cf.h>
+#include <text/src/decode.h>
+#include <text/src/format.h>
 #include <oak/debug.h>
 
 namespace network
@@ -42,9 +42,15 @@ namespace network
 	bool check_signature_t::receive_end (std::string& error)
 	{
 		if(_signee == NULL_STR)
-			return (error = "Missing signee."), false;
+		{
+			error = "Missing signee.";
+			return false;
+		}
 		if(_signature == NULL_STR)
-			return (error = "Missing signature."), false;
+		{
+			error = "Missing signature.";
+			return false;
+		}
 
 		bool res = false;
 

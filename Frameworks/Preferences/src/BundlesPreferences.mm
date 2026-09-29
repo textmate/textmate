@@ -1,8 +1,8 @@
 #import "BundlesPreferences.h"
-#import <BundlesManager/BundlesManager.h>
-#import <OakFoundation/OakFoundation.h>
-#import <OakAppKit/OakUIConstructionFunctions.h>
-#import <OakAppKit/OakScopeBarView.h>
+#import <BundlesManager/src/BundlesManager.h>
+#import <OakFoundation/src/OakFoundation.h>
+#import <OakAppKit/src/OakUIConstructionFunctions.h>
+#import <OakAppKit/src/OakScopeBarView.h>
 
 static NSUserInterfaceItemIdentifier const kTableColumnIdentifierInstalled   = @"Installed";
 static NSUserInterfaceItemIdentifier const kTableColumnIdentifierBundleName  = @"BundleName";
@@ -57,7 +57,7 @@ static NSUserInterfaceItemIdentifier const kTableColumnIdentifierDescription = @
 	{
 		NSString* dateString = [NSDateFormatter localizedStringFromDate:date dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterShortStyle];
 #if defined(MAC_OS_X_VERSION_10_15) && (MAC_OS_X_VERSION_10_15 <= MAC_OS_X_VERSION_MAX_ALLOWED)
-		if(@available(macos 10.15, *))
+		if(@available(macOS 10.15, *))
 			dateString = -[date timeIntervalSinceNow] < 5 ? @"Just now" : [[[NSRelativeDateTimeFormatter alloc] init] localizedStringForDate:date relativeToDate:NSDate.now];
 #endif
 		return [NSString stringWithFormat:@"Bundle index last updated: %@", dateString];
@@ -399,7 +399,7 @@ static NSUserInterfaceItemIdentifier const kTableColumnIdentifierDescription = @
 	else if([aTableColumn.identifier isEqualToString:kTableColumnIdentifierInstalled])
 	{
 		Bundle* bundle = _arrayController.arrangedObjects[rowIndex];
-		[aCell setEnabled:!bundle.isMandatory || !bundle.isInstalled];
+		[aCell setEnabled:!bundle.isBundled && (!bundle.isMandatory || !bundle.isInstalled)];
 	}
 }
 
@@ -408,7 +408,7 @@ static NSUserInterfaceItemIdentifier const kTableColumnIdentifierDescription = @
 	if([aTableColumn.identifier isEqualToString:kTableColumnIdentifierInstalled])
 	{
 		Bundle* bundle = _arrayController.arrangedObjects[rowIndex];
-		return bundle.installedCellState != NSControlStateValueMixed;
+		return !bundle.isBundled && bundle.installedCellState != NSControlStateValueMixed;
 	}
 	return NO;
 }

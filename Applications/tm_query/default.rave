@@ -1,5 +1,0 @@
-target "${dirname}" {
-	require settings
-	sources src/*.cc
-	executable "${target}"
-}

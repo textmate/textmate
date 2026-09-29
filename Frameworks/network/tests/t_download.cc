@@ -1,5 +1,5 @@
-#include <network/download.h>
-#include <text/format.h>
+#include <network/src/download.h>
+#include <text/src/format.h>
 #include <test/web_server.h>
 #include <test/jail.h>
 

@@ -1,7 +1,7 @@
 #ifndef TEST_BUNDLE_INDEX_H_FIMSPZJT
 #define TEST_BUNDLE_INDEX_H_FIMSPZJT
 
-#include <bundles/bundles.h>
+#include <bundles/src/bundles.h>
 #include <plist/ascii.h>
 
 namespace test

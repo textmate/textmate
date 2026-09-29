@@ -1,5 +1,5 @@
 #import "LiveSearchView.h"
-#import <OakAppKit/OakUIConstructionFunctions.h>
+#import <OakAppKit/src/OakUIConstructionFunctions.h>
 
 @interface LiveSearchView ()
 @property (nonatomic) NSView* divider;

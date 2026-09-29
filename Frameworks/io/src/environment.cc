@@ -1,9 +1,9 @@
 #include "environment.h"
 #include "path.h"
-#include <cf/cf.h>
-#include <regexp/format_string.h>
-#include <regexp/glob.h>
-#include <text/parse.h>
+#include <cf/src/cf.h>
+#include <regexp/src/format_string.h>
+#include <regexp/src/glob.h>
+#include <text/src/parse.h>
 #include <oak/oak.h>
 #include <crt_externs.h>
 

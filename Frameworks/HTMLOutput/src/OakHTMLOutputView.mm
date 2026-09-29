@@ -2,9 +2,9 @@
 #import "browser/HOStatusBar.h"
 #import "helpers/HOAutoScroll.h"
 #import "helpers/HOJSBridge.h"
-#import <OakFoundation/OakFoundation.h>
-#import <OakFoundation/NSString Additions.h>
-#import <OakAppKit/NSAlert Additions.h>
+#import <OakFoundation/src/OakFoundation.h>
+#import <OakFoundation/src/NSString Additions.h>
+#import <OakAppKit/src/NSAlert Additions.h>
 #import <oak/debug.h>
 
 @interface HOStatusBar (BusyAndProgressProperties) <HOJSBridgeDelegate>

@@ -1,12 +1,12 @@
 #include "api.h"
 #include <oak/oak.h>
-#include <text/format.h>
-#include <text/parse.h>
-#include <text/trim.h>
-#include <text/tokenize.h>
-#include <regexp/format_string.h>
-#include <io/io.h>
-#include <cf/cf.h>
+#include <text/src/format.h>
+#include <text/src/parse.h>
+#include <text/src/trim.h>
+#include <text/src/tokenize.h>
+#include <regexp/src/format_string.h>
+#include <io/src/io.h>
+#include <cf/src/cf.h>
 #include <oak/debug.h>
 
 static scm::status::type parse_status_string (std::string const& status)

@@ -1,5 +1,5 @@
-#include <regexp/indent.h>
-#include <text/format.h>
+#include <regexp/src/indent.h>
+#include <text/src/format.h>
 #include <oak/oak.h>
 
 struct line_t

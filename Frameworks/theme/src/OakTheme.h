@@ -1,5 +1,5 @@
-#include <bundles/bundles.h>
-#include <scope/scope.h>
+#include <bundles/src/bundles.h>
+#include <scope/src/scope.h>
 
 @class OakThemeStyles;
 

@@ -1,5 +1,5 @@
 #include "indent.h"
-#include <bundles/bundles.h>
+#include <bundles/src/bundles.h>
 
 namespace indent
 {

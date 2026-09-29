@@ -1,8 +1,8 @@
 #ifndef INDENT_H_8HVG320W
 #define INDENT_H_8HVG320W
 
-#include <regexp/indent.h>
-#include <scope/scope.h>
+#include <regexp/src/indent.h>
+#include <scope/src/scope.h>
 
 namespace indent
 {

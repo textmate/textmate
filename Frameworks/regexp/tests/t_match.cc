@@ -1,4 +1,4 @@
-#include <regexp/regexp.h>
+#include <regexp/src/regexp.h>
 
 void test_match ()
 {

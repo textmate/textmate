@@ -1,5 +1,5 @@
-#include <regexp/glob.h>
-#include <text/format.h>
+#include <regexp/src/glob.h>
+#include <text/src/format.h>
 
 static std::string expand (std::string const& str)
 {

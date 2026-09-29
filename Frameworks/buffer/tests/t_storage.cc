@@ -1,8 +1,8 @@
-#include <buffer/storage.h>
+#include <buffer/src/storage.h>
 #include <oak/basic_tree.h>
-#include <io/path.h>
-#include <text/format.h>
-#include <regexp/format_string.h>
+#include <io/src/path.h>
+#include <text/src/format.h>
+#include <regexp/src/format_string.h>
 
 struct key_t
 {

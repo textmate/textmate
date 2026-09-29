@@ -146,7 +146,7 @@
 		}
 	};
 
-	if(@available(macos 10.15, *))
+	if(@available(macOS 10.15, *))
 	{
 		if(window && window.isVisible)
 		{

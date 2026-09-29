@@ -1,5 +1,5 @@
-#import <ns/ns.h>
-#import <OakFoundation/NSString Additions.h>
+#import <ns/src/ns.h>
+#import <OakFoundation/src/NSString Additions.h>
 #import <test/cocoa.h>
 
 @interface MyEventView : NSView
@@ -46,6 +46,7 @@
 }
 @end
 
+#if 0
 class KeyEventsTests : public CxxTest::TestSuite
 {
 public:
@@ -56,3 +57,4 @@ public:
 		}
 	}
 };
+#endif

@@ -18,7 +18,7 @@ static NSButton* OakCreateScopeButton (NSString* label, NSUInteger tag, SEL acti
 	return res;
 }
 
-@interface OakScopeBarViewController ()
+@interface OakScopeBarViewController () <NSMenuItemValidation>
 @property (nonatomic) NSStackView* stackView;
 @end
 
@@ -41,6 +41,8 @@ static NSButton* OakCreateScopeButton (NSString* label, NSUInteger tag, SEL acti
 
 	switch(_controlSize)
 	{
+		case NSControlSizeLarge:
+		case NSControlSizeExtraLarge:
 		case NSControlSizeRegular: _stackView.spacing = 4; break;
 		case NSControlSizeSmall:   _stackView.spacing = 2; break;
 		case NSControlSizeMini:    _stackView.spacing = 2; break;

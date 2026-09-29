@@ -1,0 +1,20 @@
+{	CFBundleName                  = "CompareMate";
+	CFBundleVersion               = "1.0";
+	CFBundleIdentifier            = "org.example.CompareMate";
+
+	CFBundleExecutable            = "${TARGET_NAME}";
+	CFBundleIconFile              = "";
+
+	// CFBundleHelpBookName
+	// CFBundleHelpBookFolder
+	// LSMinimumSystemVersion
+	// NSContactsUsageDescription
+
+	CFBundleDevelopmentRegion     = "English";
+	CFBundleInfoDictionaryVersion = "6.0";
+	CFBundlePackageType           = "APPL";
+	CFBundleSignature             = "????";
+
+	NSMainNibFile                 = "MainMenu";
+	NSPrincipalClass              = "NSApplication";
+}

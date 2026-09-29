@@ -1,9 +1,9 @@
 #include "grammar.h"
 #include "private.h"
-#include <regexp/regexp.h>
-#include <regexp/format_string.h>
-#include <bundles/bundles.h>
-#include <text/utf8.h>
+#include <regexp/src/regexp.h>
+#include <regexp/src/format_string.h>
+#include <bundles/src/bundles.h>
+#include <text/src/utf8.h>
 #include <oak/oak.h>
 
 static size_t const kParserMaxLineSize = 4096;
@@ -93,7 +93,7 @@ namespace parse
 
 	bool equal (stack_ptr lhs, stack_ptr rhs)
 	{
-		return lhs == rhs || lhs && rhs && *lhs == *rhs;
+		return lhs == rhs || (lhs && rhs && *lhs == *rhs);
 	}
 
 	static bool pattern_is_format_string (std::string const& ptrn)
@@ -427,7 +427,7 @@ namespace parse
 			if(m.match.begin() < i)
 			{
 				regexp::pattern_t const& ptrn = m.is_end_pattern ? stack->end_pattern : m.rule->match_pattern;
-				if(m.match = regexp::search(ptrn, first, last, first + i, last, anchor_options(firstLine, stack->anchor == i, first, last)))
+				if((m.match = regexp::search(ptrn, first, last, first + i, last, anchor_options(firstLine, stack->anchor == i, first, last))))
 					rules.insert(m);
 				continue;
 			}
@@ -510,7 +510,7 @@ namespace parse
 
 				apply_captures(scope, m.match, rule->captures, scopes, firstLine);
 
-				if(m.match = regexp::search(m.rule->match_pattern, first, last, first + i, last, anchor_options(firstLine, stack->anchor == i, first, last)))
+				if((m.match = regexp::search(m.rule->match_pattern, first, last, first + i, last, anchor_options(firstLine, stack->anchor == i, first, last))))
 					rules.insert(m);
 
 				continue; // no context change, so skip finding rules for this context

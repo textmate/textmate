@@ -1,7 +1,7 @@
 #ifndef NS_PLIST_H_JY52POBO
 #define NS_PLIST_H_JY52POBO
 
-#include <plist/plist.h>
+#include <plist/src/plist.h>
 
 namespace ns
 {

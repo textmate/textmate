@@ -1,13 +1,14 @@
 #import "OTVStatusBar.h"
-#import <OakAppKit/OakAppKit.h>
-#import <OakAppKit/NSImage Additions.h>
-#import <OakAppKit/NSMenuItem Additions.h>
-#import <OakAppKit/OakUIConstructionFunctions.h>
-#import <OakFoundation/NSString Additions.h>
-#import <MenuBuilder/MenuBuilder.h>
-#import <bundles/bundles.h>
-#import <text/ctype.h>
-#import <ns/ns.h>
+#import <oak/TextMateResponderActions.h>
+#import <OakAppKit/src/OakAppKit.h>
+#import <OakAppKit/src/NSImage Additions.h>
+#import <OakAppKit/src/NSMenuItem Additions.h>
+#import <OakAppKit/src/OakUIConstructionFunctions.h>
+#import <OakFoundation/src/NSString Additions.h>
+#import <MenuBuilder/src/MenuBuilder.h>
+#import <bundles/src/bundles.h>
+#import <text/src/my_ctype.h>
+#import <ns/src/ns.h>
 
 static NSTextField* OakCreateTextField (NSString* label)
 {
@@ -23,7 +24,7 @@ static NSTextField* OakCreateTextField (NSString* label)
 	[[res cell] setLineBreakMode:NSLineBreakByTruncatingMiddle];
 
 	// This is to match the other controls in the status bar
-	if(@available(macos 10.14, *))
+	if(@available(macOS 10.14, *))
 		res.textColor = NSColor.secondaryLabelColor;
 
 	return res;
@@ -59,6 +60,8 @@ static NSButton* OakCreateImageToggleButton (NSImage* image, NSString* accessibi
 @property (nonatomic) NSPopUpButton* bundleItemsPopUp;
 @property (nonatomic) NSPopUpButton* symbolPopUp;
 @property (nonatomic) NSButton*      macroRecordingButton;
+@property (nonatomic) NSButton*      navigationBackButton;
+@property (nonatomic) NSButton*      navigationForwardButton;
 @end
 
 @implementation OTVStatusBar
@@ -86,6 +89,24 @@ static NSButton* OakCreateImageToggleButton (NSImage* image, NSString* accessibi
 		self.macroRecordingButton         = OakCreateImageToggleButton(recordMacroImage, @"Record a macro");
 		self.macroRecordingButton.action  = @selector(toggleMacroRecording:);
 		self.macroRecordingButton.toolTip = @"Click to start recording a macro";
+		self.navigationBackButton         = [NSButton new];
+		self.navigationBackButton.buttonType = NSButtonTypeMomentaryChange;
+		self.navigationBackButton.bordered   = NO;
+		self.navigationBackButton.image      = [NSImage imageNamed:NSImageNameGoLeftTemplate];
+		self.navigationBackButton.imagePosition = NSImageOnly;
+		self.navigationBackButton.action     = @selector(goBackInNavigationHistory:);
+		self.navigationBackButton.toolTip    = @"Go Back in Navigation History";
+		self.navigationBackButton.accessibilityLabel = self.navigationBackButton.toolTip;
+		self.navigationBackButton.enabled    = NO;
+		self.navigationForwardButton         = [NSButton new];
+		self.navigationForwardButton.buttonType = NSButtonTypeMomentaryChange;
+		self.navigationForwardButton.bordered   = NO;
+		self.navigationForwardButton.image      = [NSImage imageNamed:NSImageNameGoRightTemplate];
+		self.navigationForwardButton.imagePosition = NSImageOnly;
+		self.navigationForwardButton.action     = @selector(goForwardInNavigationHistory:);
+		self.navigationForwardButton.toolTip    = @"Go Forward in Navigation History";
+		self.navigationForwardButton.accessibilityLabel = self.navigationForwardButton.toolTip;
+		self.navigationForwardButton.enabled    = NO;
 
 		NSFontDescriptor* descriptor = [self.selectionField.font.fontDescriptor fontDescriptorByAddingAttributes:@{
 			NSFontFeatureSettingsAttribute: @[ @{ NSFontFeatureTypeIdentifierKey: @(kNumberSpacingType), NSFontFeatureSelectorIdentifierKey: @(kMonospacedNumbersSelector) } ]
@@ -110,6 +131,7 @@ static NSButton* OakCreateImageToggleButton (NSImage* image, NSString* accessibi
 
 		NSView* topDivider   = OakCreateNSBoxSeparator();
 		NSTextField* line    = OakCreateTextField(@"Line:");
+		NSView* navigationDivider = OakCreateNSBoxSeparator();
 		NSView* dividerOne   = OakCreateNSBoxSeparator();
 		NSView* dividerTwo   = OakCreateNSBoxSeparator();
 		NSView* dividerThree = OakCreateNSBoxSeparator();
@@ -118,6 +140,9 @@ static NSButton* OakCreateImageToggleButton (NSImage* image, NSString* accessibi
 
 		NSDictionary* views = @{
 			@"topDivider":   topDivider,
+			@"back":         self.navigationBackButton,
+			@"forward":      self.navigationForwardButton,
+			@"navigationDivider": navigationDivider,
 			@"line":         line,
 			@"selection":    self.selectionField,
 			@"dividerOne":   dividerOne,
@@ -133,7 +158,7 @@ static NSButton* OakCreateImageToggleButton (NSImage* image, NSString* accessibi
 		};
 
 		OakAddAutoLayoutViewsToSuperview([views allValues], self);
-		OakSetupKeyViewLoop(@[ self, _grammarPopUp, _tabSizePopUp, _bundleItemsPopUp, _symbolPopUp, _macroRecordingButton ]);
+		OakSetupKeyViewLoop(@[ self, _navigationBackButton, _navigationForwardButton, _grammarPopUp, _tabSizePopUp, _bundleItemsPopUp, _symbolPopUp, _macroRecordingButton ]);
 
 		[self.selectionField setContentHuggingPriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
 		[self.selectionField setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow+2 forOrientation:NSLayoutConstraintOrientationHorizontal];
@@ -144,7 +169,7 @@ static NSButton* OakCreateImageToggleButton (NSImage* image, NSString* accessibi
 		[self.symbolPopUp setContentHuggingPriority:NSLayoutPriorityDefaultLow-1 forOrientation:NSLayoutConstraintOrientationHorizontal];
 		[self.symbolPopUp setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow-1 forOrientation:NSLayoutConstraintOrientationHorizontal];
 
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-10-[line]-[selection(>=50,<=225)]-8-[dividerOne(==1)]-2-[grammar(>=125@400,>=50,<=225)]-5-[dividerTwo(==1)]-2-[tabSize]-4-[dividerThree(==1)]-5-[items(==31)]-4-[dividerFour(==1)]-2-[symbol(>=125@450,>=50)]-5-[dividerFive(==1)]-6-[recording]-7-|" options:0 metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-3-[back(==22)]-2-[forward(==back)]-2-[navigationDivider(==1)]-8-[line]-[selection(>=50,<=225)]-8-[dividerOne(==1)]-2-[grammar(>=125@400,>=50,<=225)]-5-[dividerTwo(==1)]-2-[tabSize]-4-[dividerThree(==1)]-5-[items(==31)]-4-[dividerFour(==1)]-2-[symbol(>=125@450,>=50)]-5-[dividerFive(==1)]-6-[recording]-7-|" options:0 metrics:nil views:views]];
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[topDivider]|" options:0 metrics:nil views:views]];
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[topDivider(==1)]" options:0 metrics:nil views:views]];
 
@@ -152,8 +177,8 @@ static NSButton* OakCreateImageToggleButton (NSImage* image, NSString* accessibi
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[line]-[selection]-(>=1)-[grammar]-(>=1)-[tabSize]-(>=1)-[symbol]" options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
 
 		// Center non-text control
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[selection]-(>=1)-[dividerOne]-(>=1)-[dividerTwo]-(>=1)-[dividerThree]-(>=1)-[items]-(>=1)-[dividerFour]-(>=1)-[dividerFive]-(>=1)-[recording]" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-5-[dividerOne(==15,==dividerTwo,==dividerThree,==dividerFour,==dividerFive)]-5-|" options:0 metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[back]-(>=1)-[forward]-(>=1)-[navigationDivider]-(>=1)-[selection]-(>=1)-[dividerOne]-(>=1)-[dividerTwo]-(>=1)-[dividerThree]-(>=1)-[items]-(>=1)-[dividerFour]-(>=1)-[dividerFive]-(>=1)-[recording]" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-5-[navigationDivider(==15,==dividerOne,==dividerTwo,==dividerThree,==dividerFour,==dividerFive)]-5-|" options:0 metrics:nil views:views]];
 
 		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(grammarPopUpButtonWillPopUp:) name:NSPopUpButtonWillPopUpNotification object:self.grammarPopUp];
 		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(bundleItemsPopUpButtonWillPopUp:) name:NSPopUpButtonWillPopUpNotification object:self.bundleItemsPopUp];
@@ -167,15 +192,16 @@ static NSButton* OakCreateImageToggleButton (NSImage* image, NSString* accessibi
 	MBMenu const items = {
 		{ @"Current Indent" },
 		{ @"Indent Size",  @selector(nop:) },
-		{ @"2",            @selector(takeTabSizeFrom:), .tag = 2, .indent = 1, .target = self.target },
-		{ @"3",            @selector(takeTabSizeFrom:), .tag = 3, .indent = 1, .target = self.target },
-		{ @"4",            @selector(takeTabSizeFrom:), .tag = 4, .indent = 1, .target = self.target },
-		{ @"8",            @selector(takeTabSizeFrom:), .tag = 8, .indent = 1, .target = self.target },
-		{ @"Other…",       @selector(showTabSizeSelectorPanel:),  .indent = 1, .target = self.target },
+		MBMenuItem{ @"2",            @selector(takeTabSizeFrom:) }.withTag(2).withIndent(1).withTarget(self.target),
+		MBMenuItem{ @"3",            @selector(takeTabSizeFrom:) }.withTag(3).withIndent(1).withTarget(self.target),
+		MBMenuItem{ @"4",            @selector(takeTabSizeFrom:) }.withTag(4).withIndent(1).withTarget(self.target),
+		MBMenuItem{ @"8",            @selector(takeTabSizeFrom:) }.withTag(8).withIndent(1).withTarget(self.target),
+		MBMenuItem{ @"Other…",       @selector(showTabSizeSelectorPanel:) }.withIndent(1).withTarget(self.target),
 		{ /* -------- */ },
 		{ @"Indent Using", @selector(nop:) },
-		{ @"Tabs",         @selector(setIndentWithTabs:),         .indent = 1, .target = self.target },
-		{ @"Spaces",       @selector(setIndentWithSpaces:),       .indent = 1, .target = self.target },
+		MBMenuItem{ @"Auto",         @selector(setIndentAutomatically:) }.withIndent(1).withTarget(self.target),
+		MBMenuItem{ @"Tabs",         @selector(setIndentWithTabs:) }.withIndent(1).withTarget(self.target),
+		MBMenuItem{ @"Spaces",       @selector(setIndentWithSpaces:) }.withIndent(1).withTarget(self.target),
 	};
 	self.tabSizePopUp.menu = MBCreateMenu(items);
 }
@@ -184,6 +210,25 @@ static NSButton* OakCreateImageToggleButton (NSImage* image, NSString* accessibi
 {
 	_target = newTarget;
 	[self setupTabSizeMenu:self];
+}
+
+- (void)setNavigationTarget:(id)newTarget
+{
+	_navigationTarget = newTarget;
+	self.navigationBackButton.target = newTarget;
+	self.navigationForwardButton.target = newTarget;
+}
+
+- (void)setCanNavigateBack:(BOOL)flag
+{
+	_canNavigateBack = flag;
+	self.navigationBackButton.enabled = flag;
+}
+
+- (void)setCanNavigateForward:(BOOL)flag
+{
+	_canNavigateForward = flag;
+	self.navigationForwardButton.enabled = flag;
 }
 
 - (void)updateMacroRecordingAnimation:(NSTimer*)aTimer
@@ -316,7 +361,10 @@ static NSButton* OakCreateImageToggleButton (NSImage* image, NSString* accessibi
 
 - (void)updateTabSettings
 {
-	self.tabSizePopUp.title = [NSString stringWithFormat:@"%@:\u2003%lu", _softTabs ? @"Soft Tabs" : @"Tab Size", _tabSize];
+	NSString* label = _softTabs ? @"Soft Tabs" : @"Tab Size";
+	if(_automaticallyDetectsIndentation)
+		label = _softTabs ? @"Auto (Spaces)" : @"Auto (Tabs)";
+	self.tabSizePopUp.title = [NSString stringWithFormat:@"%@:\u2003%lu", label, _tabSize];
 }
 
 - (void)setTabSize:(NSUInteger)size
@@ -328,6 +376,12 @@ static NSButton* OakCreateImageToggleButton (NSImage* image, NSString* accessibi
 - (void)setSoftTabs:(BOOL)flag
 {
 	_softTabs = flag;
+	[self updateTabSettings];
+}
+
+- (void)setAutomaticallyDetectsIndentation:(BOOL)flag
+{
+	_automaticallyDetectsIndentation = flag;
 	[self updateTabSettings];
 }
 

@@ -209,6 +209,7 @@ namespace scope
 
 			switch(filter)
 			{
+				case unset: return false;
 				case left:  return selector->does_match(lhs, lhs, rank);
 				case right: return selector->does_match(rhs, rhs, rank);
 				case both:  return selector->does_match(lhs, lhs, rank) && selector->does_match(rhs, rhs, rank);

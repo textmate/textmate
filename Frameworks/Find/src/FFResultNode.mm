@@ -1,12 +1,12 @@
 #import "FFResultNode.h"
-#import <OakFoundation/NSString Additions.h>
-#import <OakAppKit/NSColor Additions.h>
-#import <document/OakDocument.h>
-#import <ns/ns.h>
-#import <text/tokenize.h>
-#import <text/format.h>
-#import <text/utf8.h>
-#import <regexp/format_string.h>
+#import <OakFoundation/src/NSString Additions.h>
+#import <OakAppKit/src/NSColor Additions.h>
+#import <document/src/OakDocument.h>
+#import <ns/src/ns.h>
+#import <text/src/tokenize.h>
+#import <text/src/format.h>
+#import <text/src/utf8.h>
+#import <regexp/src/format_string.h>
 
 namespace
 {

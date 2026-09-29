@@ -1,9 +1,9 @@
 #include "exec.h"
 #include "environment.h"
 #include "pipe.h"
-#include <text/format.h>
+#include <text/src/format.h>
 #include <oak/datatypes.h>
-#include <crash/info.h>
+#include <crash/src/info.h>
 
 namespace io
 {
@@ -29,11 +29,11 @@ namespace io
 					{
 						if(posix_spawnattr_setflags(&flags, POSIX_SPAWN_SETSIGDEF|POSIX_SPAWN_CLOEXEC_DEFAULT) == 0)
 						{
-							char* argv[args.size() + 1];
-							std::transform(args.begin(), args.end(), &argv[0], [](std::string const& str){ return (char*)str.c_str(); });
+							std::vector<char*> argv(args.size() + 1);
+							std::transform(args.begin(), args.end(), argv.begin(), [](std::string const& str){ return (char*)str.c_str(); });
 							argv[args.size()] = nullptr;
 
-							rc = posix_spawn(&res.pid, argv[0], &fileActions, &flags, argv, oak::c_array(environment));
+							rc = posix_spawn(&res.pid, argv[0], &fileActions, &flags, argv.data(), oak::c_array(environment));
 							if(rc != 0)
 								perrorf("io::spawn: posix_spawn(\"%s\")", argv[0]);
 						}

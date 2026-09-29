@@ -1,10 +1,10 @@
 #include "type.h"
 #include "path_info.h"
-#include <settings/settings.h>
-#include <bundles/bundles.h>
-#include <regexp/regexp.h>
-#include <regexp/glob.h>
-#include <cf/cf.h>
+#include <settings/src/settings.h>
+#include <bundles/src/bundles.h>
+#include <regexp/src/regexp.h>
+#include <regexp/src/glob.h>
+#include <cf/src/cf.h>
 #include <oak/debug.h>
 
 // =====================
@@ -35,7 +35,7 @@ static size_t lines_matched_by_regexp (std::string const& pattern)
 			continue;
 		}
 
-		if(esc && ch == 'n' || ch == '\n')
+		if((esc && ch == 'n') || ch == '\n')
 			++newlines;
 		esc = false;
 	}

@@ -1,5 +1,5 @@
 #import "FileItemImage.h"
-#import <TMFileReference/TMFileReference.h>
+#import <TMFileReference/src/TMFileReference.h>
 
 NSImage* CreateIconImageForURL (NSURL* url, BOOL isModified, BOOL isMissing, BOOL isDirectory, BOOL isSymbolicLink, scm::status::type scmStatus)
 {

@@ -1,8 +1,8 @@
 #import "OakFinderTag.h"
 #import "NSColor Additions.h"
-#import <OakFoundation/OakFoundation.h>
-#import <io/path.h>
-#import <ns/ns.h>
+#import <OakFoundation/src/OakFoundation.h>
+#import <io/src/path.h>
+#import <ns/src/ns.h>
 
 @interface OakFinderTag ()
 @property (nonatomic) NSUInteger label;

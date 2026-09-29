@@ -2,40 +2,43 @@
 #import "OakMainMenu.h"
 #import "Favorites.h"
 #import "AboutWindowController.h"
+#import "TextMateResponderActions.h"
 #import "TMPlugInController.h"
 #import "RMateServer.h"
-#import <BundleEditor/BundleEditor.h>
-#import <BundlesManager/BundlesManager.h>
-#import <CrashReporter/CrashReporter.h>
-#import <DocumentWindow/DocumentWindowController.h>
-#import <Find/Find.h>
-#import <CommitWindow/CommitWindow.h>
-#import <OakAppKit/NSAlert Additions.h>
-#import <OakAppKit/NSMenuItem Additions.h>
-#import <OakAppKit/OakAppKit.h>
-#import <OakAppKit/OakPasteboard.h>
-#import <OakFilterList/BundleItemChooser.h>
-#import <OakFoundation/OakFoundation.h>
-#import <OakFoundation/NSString Additions.h>
-#import <OakTextView/OakDocumentView.h>
-#import <MenuBuilder/MenuBuilder.h>
-#import <MenuBuilder/MBMenuDelegate.h>
-#import <Preferences/Keys.h>
-#import <Preferences/Preferences.h>
-#import <Preferences/TerminalPreferences.h>
-#import <SoftwareUpdate/SoftwareUpdate.h>
-#import <document/OakDocument.h>
-#import <document/OakDocumentController.h>
-#import <bundles/query.h>
-#import <io/path.h>
-#import <regexp/glob.h>
-#import <network/tbz.h>
-#import <ns/ns.h>
-#import <settings/settings.h>
+#import <BundleEditor/src/BundleEditor.h>
+#import <BundlesManager/src/BundlesManager.h>
+#import <CrashReporter/src/CrashReporter.h>
+#import <DocumentWindow/src/DocumentWindowController.h>
+#import <Find/src/Find.h>
+#import <CommitWindow/src/CommitWindow.h>
+#import <OakAppKit/src/NSAlert Additions.h>
+#import <OakAppKit/src/NSMenuItem Additions.h>
+#import <OakAppKit/src/OakAppKit.h>
+#import <OakAppKit/src/OakPasteboard.h>
+#import <OakFilterList/src/BundleItemChooser.h>
+#import <OakFoundation/src/OakFoundation.h>
+#import <OakFoundation/src/NSString Additions.h>
+#import <OakTextView/src/OakDocumentView.h>
+#import <MenuBuilder/src/MenuBuilder.h>
+#import <MenuBuilder/src/MBMenuDelegate.h>
+#import <Preferences/src/Keys.h>
+#import <Preferences/src/Preferences.h>
+#import <Preferences/src/TerminalPreferences.h>
+#if 0
+// App updates are disabled for this fork until we decide on a new update mechanism.
+#import <SoftwareUpdate/src/SoftwareUpdate.h>
+#endif
+#import <document/src/OakDocument.h>
+#import <document/src/OakDocumentController.h>
+#import <bundles/src/query.h>
+#import <io/src/path.h>
+#import <regexp/src/glob.h>
+#import <ns/src/ns.h>
+#import <settings/src/settings.h>
 #import <oak/debug.h>
 #import <oak/oak.h>
-#import <scm/scm.h>
-#import <text/types.h>
+#import <scm/src/scm.h>
+#import <text/src/types.h>
 
 void OakOpenDocuments (NSArray* paths, BOOL treatFilePackageAsFolder)
 {
@@ -86,7 +89,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 	return NO;
 }
 
-@interface AppController () <OakUserDefaultsObserver>
+@interface AppController () <OakUserDefaultsObserver, NSMenuItemValidation>
 @property (nonatomic) BOOL didFinishLaunching;
 @property (nonatomic) BOOL keyWindowHasBackAndForwardActions;
 @end
@@ -95,85 +98,76 @@ BOOL HasDocumentWindow (NSArray* windows)
 - (NSMenu*)mainMenu
 {
 	MBMenu const items = {
-		{ @"TextMate",
-			.submenu = {
+		MBMenuItem{ @"TextMate" }.withSubmenu({
 				{ @"About TextMate",        @selector(orderFrontAboutPanel:)               },
 				{ /* -------- */ },
 				{ @"Preferences…",          @selector(showPreferences:),            @","   },
+#if 0
+				// App updates are disabled for this fork until we decide on a new update mechanism.
 				{ @"Check for Update",      @selector(performSoftwareUpdateCheck:)         },
-				{ @"Check for Test Build",  @selector(performSoftwareUpdateCheck:),       .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption, .alternate = YES },
+				MBMenuItem{ @"Check for Test Build", @selector(performSoftwareUpdateCheck:) }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagOption).withAlternate(YES),
+#endif
 				{ /* -------- */ },
-				{ @"Services",              .systemMenu = MBMenuTypeServices               },
+				MBMenuItem{ @"Services" }.withSystemMenu(MBMenuTypeServices),
 				{ /* -------- */ },
 				{ @"Hide TextMate",         @selector(hide:),                       @"h"   },
-				{ @"Hide Others",           @selector(hideOtherApplications:),      @"h", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption },
+				MBMenuItem{ @"Hide Others", @selector(hideOtherApplications:), @"h" }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagOption),
 				{ @"Show All",              @selector(unhideAllApplications:),             },
 				{ /* -------- */ },
 				{ @"Quit TextMate",         @selector(terminate:),                  @"q"   },
-			}
-		},
-		{ @"File",
-			.submenu = {
+		}),
+		MBMenuItem{ @"File" }.withSubmenu({
 				{ @"New",                     @selector(newDocument:),              @"n"   },
-				{ @"New File Browser",        @selector(newFileBrowser:),           @"n", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption|NSEventModifierFlagControl, .alternate = YES },
-				{ @"New Tab",                 @selector(newDocumentInTab:),         @"n", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption },
+				MBMenuItem{ @"New File Browser", @selector(newFileBrowser:), @"n" }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagOption|NSEventModifierFlagControl).withAlternate(YES),
+				MBMenuItem{ @"New Tab", @selector(newDocumentInTab:), @"n" }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagOption),
 				{ /* -------- */ },
 				{ @"Open…",                   @selector(openDocument:),             @"o"   },
 				{ @"Open Quickly…",           @selector(goToFile:),                 @"t"   },
-				{ @"Open Recent",
-					.systemMenu = MBMenuTypeOpenRecent, .submenu = {
+				MBMenuItem{ @"Open Recent" }.withSystemMenu(MBMenuTypeOpenRecent).withSubmenu({
 						{ @"Clear Menu", @selector(clearRecentDocuments:) },
-					}
-				},
+				}),
 				{ @"Open Recent Project…",    @selector(openFavorites:),            @"O"   },
 				{ /* -------- */ },
 				{ @"Close",                   @selector(performClose:),             @"w"   },
 				{ @"Close Window",            @selector(performCloseWindow:),       @"W"   },
-				{ @"Close All Tabs",          @selector(performCloseAllTabs:),      @"w", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption|NSEventModifierFlagControl },
-				{ @"Close Other Tabs",        @selector(performCloseOtherTabsXYZ:), @"w", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagControl },
+				MBMenuItem{ @"Close All Tabs", @selector(performCloseAllTabs:), @"w" }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagOption|NSEventModifierFlagControl),
+				MBMenuItem{ @"Close Other Tabs", @selector(performCloseOtherTabsXYZ:), @"w" }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagControl),
 				{ @"Close Tabs to the Right", @selector(performCloseTabsToTheRight:)       },
-				{ @"Close Tabs to the Left",  @selector(performCloseTabsToTheLeft:),      .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption, .alternate = YES },
+				MBMenuItem{ @"Close Tabs to the Left", @selector(performCloseTabsToTheLeft:) }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagOption).withAlternate(YES),
 				{ /* -------- */ },
 				{ @"Sticky",                  @selector(toggleSticky:)                     },
 				{ /* -------- */ },
 				{ @"Save",                    @selector(saveDocument:),             @"s"   },
 				{ @"Save As…",                @selector(saveDocumentAs:),           @"S"   },
-				{ @"Save All",                @selector(saveAllDocuments:),         @"s", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption },
+				MBMenuItem{ @"Save All", @selector(saveAllDocuments:), @"s" }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagOption),
 				{ @"Revert",                  @selector(revertDocumentToSaved:)            },
 				{ /* -------- */ },
-				{ @"Page Setup…",             @selector(runPageLayout:),                  .target = NSApp.delegate },
+				MBMenuItem{ @"Page Setup…", @selector(runPageLayout:) }.withTarget(NSApp.delegate),
 				{ @"Print…",                  @selector(printDocument:),            @"p"   },
-			}
-		},
-		{ @"Edit",
-			.submenu = {
+		}),
+		MBMenuItem{ @"Edit" }.withSubmenu({
 				{ @"Undo",   @selector(undo:),   @"z" },
 				{ @"Redo",   @selector(redo:),   @"Z" },
 				{ /* -------- */ },
 				{ @"Cut",    @selector(cut:),    @"x" },
 				{ @"Copy",   @selector(copy:),   @"c" },
-				{ @"Paste",
-					.submenu = {
+				MBMenuItem{ @"Paste" }.withSubmenu({
 						{ @"Paste",                   @selector(paste:),                @"v"   },
-						{ @"Paste Without Indenting", @selector(pasteWithoutReindent:), @"v", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagControl, .alternate = YES },
-						{ @"Paste Next",              @selector(pasteNext:),            @"v", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption },
+						MBMenuItem{ @"Paste Without Indenting", @selector(pasteWithoutReindent:), @"v" }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagControl).withAlternate(YES),
+						MBMenuItem{ @"Paste Next", @selector(pasteNext:), @"v" }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagOption),
 						{ @"Paste Previous",          @selector(pastePrevious:),        @"V"   },
 						{ /* -------- */ },
-						{ @"Show History",            @selector(showClipboardHistory:), @"v", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption|NSEventModifierFlagControl },
-					}
-				},
-				{ @"Delete", @selector(delete:), .key = NSBackspaceCharacter },
+						MBMenuItem{ @"Show History", @selector(showClipboardHistory:), @"v" }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagOption|NSEventModifierFlagControl),
+				}),
+				MBMenuItem{ @"Delete", @selector(delete:) }.withKey(NSBackspaceCharacter),
 				{ /* -------- */ },
-				{ @"Macros",
-					.submenu = {
-						{ @"Start Recording", @selector(toggleMacroRecording:), @"m", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption },
+				MBMenuItem{ @"Macros" }.withSubmenu({
+						MBMenuItem{ @"Start Recording", @selector(toggleMacroRecording:), @"m" }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagOption),
 						{ @"Replay Macro",    @selector(playScratchMacro:),     @"M"   },
-						{ @"Save Macro…",     @selector(saveScratchMacro:),     @"m", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagControl },
-					}
-				},
+						MBMenuItem{ @"Save Macro…", @selector(saveScratchMacro:), @"m" }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagControl),
+				}),
 				{ /* -------- */ },
-				{ @"Select",
-					.submenu = {
+				MBMenuItem{ @"Select" }.withSubmenu({
 						{ @"Word",                    @selector(selectWord:)                  },
 						{ @"Line",                    @selector(selectHardLine:)              },
 						{ @"Paragraph",               @selector(selectParagraph:)             },
@@ -181,163 +175,139 @@ BOOL HasDocumentWindow (NSArray* windows)
 						{ @"Enclosing Typing Pairs",  @selector(selectBlock:),           @"B" },
 						{ @"All",                     @selector(selectAll:),             @"a" },
 						{ /* -------- */ },
-						{ @"Toggle Column Selection", @selector(toggleColumnSelection:), .modifierFlags = NSEventModifierFlagOption },
-					}
-				},
-				{ @"Find",
-					.submenu = {
-						{ @"Find and Replace…",           @selector(orderFrontFindPanel:),          @"f", .tag = FFSearchTargetDocument },
-						{ @"Find in Project…",            @selector(orderFrontFindPanel:),          @"F", .tag = FFSearchTargetProject  },
-						{ @"Find in Folder…",             @selector(orderFrontFindPanel:),                .tag = FFSearchTargetOther    },
+						MBMenuItem{ @"Toggle Column Selection", @selector(toggleColumnSelection:) }.withModifierFlags(NSEventModifierFlagOption),
+				}),
+				MBMenuItem{ @"Find" }.withSubmenu({
+						MBMenuItem{ @"Find and Replace…", @selector(orderFrontFindPanel:), @"f" }.withTag(FFSearchTargetDocument),
+						MBMenuItem{ @"Find in Project…", @selector(orderFrontFindPanel:), @"F" }.withTag(FFSearchTargetProject),
+						MBMenuItem{ @"Find in Folder…", @selector(orderFrontFindPanel:) }.withTag(FFSearchTargetOther),
 						{ /* -------- */ },
-						{ @"Show Find History",           @selector(showFindHistory:),              @"f", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption|NSEventModifierFlagControl },
+						MBMenuItem{ @"Show Find History", @selector(showFindHistory:), @"f" }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagOption|NSEventModifierFlagControl),
 						{ /* -------- */ },
-						{ @"Incremental Search",          @selector(incrementalSearch:),            @"s", .modifierFlags = NSEventModifierFlagControl },
-						{ @"Incremental Search Previous", @selector(incrementalSearchPrevious:),    @"S", .modifierFlags = NSEventModifierFlagControl },
+						MBMenuItem{ @"Incremental Search", @selector(incrementalSearch:), @"s" }.withModifierFlags(NSEventModifierFlagControl),
+						MBMenuItem{ @"Incremental Search Previous", @selector(incrementalSearchPrevious:), @"S" }.withModifierFlags(NSEventModifierFlagControl),
 						{ /* -------- */ },
 						{ @"Find Next",                   @selector(findNext:),                     @"g"   },
 						{ @"Find Previous",               @selector(findPrevious:),                 @"G"   },
-						{ @"Find All",                    @selector(findAllInSelection:),           @"f", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption },
+						MBMenuItem{ @"Find All", @selector(findAllInSelection:), @"f" }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagOption),
 						{ /* -------- */ },
-						{ @"Find Options",
-							.submenu = {
-								{ @"Ignore Case",        @selector(toggleFindOption:), @"c", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption, .tag =   2 },
-								{ @"Regular Expression", @selector(toggleFindOption:), @"r", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption, .tag =   8 },
-								{ @"Ignore Whitespace",  @selector(toggleFindOption:),                                                                              .tag =   4 },
-								{ @"Wrap Around",        @selector(toggleFindOption:), @"a", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption, .tag = 128 },
-							}
-						},
+						MBMenuItem{ @"Find Options" }.withSubmenu({
+								MBMenuItem{ @"Ignore Case", @selector(toggleFindOption:), @"c" }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagOption).withTag(2),
+								MBMenuItem{ @"Regular Expression", @selector(toggleFindOption:), @"r" }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagOption).withTag(8),
+								MBMenuItem{ @"Ignore Whitespace", @selector(toggleFindOption:) }.withTag(4),
+								MBMenuItem{ @"Wrap Around", @selector(toggleFindOption:), @"a" }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagOption).withTag(128),
+						}),
 						{ /* -------- */ },
-						{ @"Replace",                     @selector(replace:),                      @"g", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption },
+						MBMenuItem{ @"Replace", @selector(replace:), @"g" }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagOption),
 						{ @"Replace & Find",              @selector(replaceAndFind:)                       },
-						{ @"Replace All",                 @selector(replaceAll:),                   @"g", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagControl },
-						{ @"Replace All in Selection",    @selector(replaceAllInSelection:),        @"G", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagControl },
+						MBMenuItem{ @"Replace All", @selector(replaceAll:), @"g" }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagControl),
+						MBMenuItem{ @"Replace All in Selection", @selector(replaceAllInSelection:), @"G" }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagControl),
 						{ /* -------- */ },
 						{ @"Use Selection for Find",      @selector(copySelectionToFindPboard:),    @"e"   },
 						{ @"Use Selection for Replace",   @selector(copySelectionToReplacePboard:), @"E"   },
-					}
-				},
-				{ @"Spelling",
-					.submenuRef = &spellingMenu, .submenu = {
+				}),
+				MBMenuItem{ @"Spelling" }.withSubmenuRef(&spellingMenu).withSubmenu({
 						{ @"Spelling…",                   @selector(showGuessPanel:),                @":"   },
 						{ @"Check Document Now",          @selector(checkSpelling:),                 @";"   },
 						{ /* -------- */ },
-						{ @"Check Spelling While Typing", @selector(toggleContinuousSpellChecking:), @";", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption },
+						MBMenuItem{ @"Check Spelling While Typing", @selector(toggleContinuousSpellChecking:), @";" }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagOption),
 						{ /* -------- */ },
-					}
-				},
-			}
-		},
-		{ @"View",
-			.submenu = {
-				{ @"Font",
-					.systemMenu = MBMenuTypeFont, .submenu = {
-						{ @"Show Fonts",   @selector(orderFrontFontPanel:),      .target = NSFontManager.sharedFontManager },
+				}),
+		}),
+		MBMenuItem{ @"View" }.withSubmenu({
+				MBMenuItem{ @"Font" }.withSystemMenu(MBMenuTypeFont).withSubmenu({
+						MBMenuItem{ @"Show Fonts", @selector(orderFrontFontPanel:) }.withTarget(NSFontManager.sharedFontManager),
 						{ /* -------- */ },
 						{ @"Bigger",       @selector(makeTextLarger:),       @"+" },
 						{ @"Smaller",      @selector(makeTextSmaller:),      @"-" },
 						{ @"Default Size", @selector(makeTextStandardSize:), @"0" },
-					}
-				},
-				{ @"Show File Browser",      @selector(toggleFileBrowser:),    @"d", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption|NSEventModifierFlagControl },
-				{ @"Show HTML Output",       @selector(toggleHTMLOutput:),     @"h", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption|NSEventModifierFlagControl },
-				{ @"Show Line Numbers",      @selector(toggleLineNumbers:),    @"l", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption },
+				}),
+				MBMenuItem{ @"Show File Browser", @selector(toggleFileBrowser:), @"d" }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagOption|NSEventModifierFlagControl),
+				MBMenuItem{ @"Show HTML Output", @selector(toggleHTMLOutput:), @"h" }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagOption|NSEventModifierFlagControl),
+				MBMenuItem{ @"Show Line Numbers", @selector(toggleLineNumbers:), @"l" }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagOption),
+				{ @"Show Scope Bar", @selector(toggleScopeBar:) },
 				{ /* -------- */ },
-				{ @"Show Invisibles",        @selector(toggleShowInvisibles:), @"i", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption },
+				MBMenuItem{ @"Show Invisibles", @selector(toggleShowInvisibles:), @"i" }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagOption),
 				{ /* -------- */ },
-				{ @"Enable Soft Wrap",       @selector(toggleSoftWrap:),       @"w", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption },
+				MBMenuItem{ @"Enable Soft Wrap", @selector(toggleSoftWrap:), @"w" }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagOption),
 				{ @"Show Wrap Column",       @selector(toggleShowWrapColumn:)         },
 				{ @"Show Indent Guides",     @selector(toggleShowIndentGuides:)       },
-				{ @"Wrap Column",
-					.submenuRef = &wrapColumnMenu, .submenu = {
+				MBMenuItem{ @"Wrap Column" }.withSubmenuRef(&wrapColumnMenu).withSubmenu({
 						{ @"Use Window Frame", @selector(takeWrapColumnFrom:)   },
 						{ /* -------- */ },
-						{ @"40",               @selector(takeWrapColumnFrom:), .tag = 40 },
-						{ @"80",               @selector(takeWrapColumnFrom:), .tag = 80 },
+						MBMenuItem{ @"40", @selector(takeWrapColumnFrom:) }.withTag(40),
+						MBMenuItem{ @"80", @selector(takeWrapColumnFrom:) }.withTag(80),
 						{ /* -------- */ },
-						{ @"Other…",           @selector(takeWrapColumnFrom:), .tag = -1 },
-					}
-				},
+						MBMenuItem{ @"Other…", @selector(takeWrapColumnFrom:) }.withTag(-1),
+				}),
 				{ /* -------- */ },
-				{ @"Tab Size",
-					.submenu = {
-						{ @"2",      @selector(takeTabSizeFrom:),        .tag = 2 },
-						{ @"3",      @selector(takeTabSizeFrom:),        .tag = 3 },
-						{ @"4",      @selector(takeTabSizeFrom:),        .tag = 4 },
-						{ @"5",      @selector(takeTabSizeFrom:),        .tag = 5 },
-						{ @"6",      @selector(takeTabSizeFrom:),        .tag = 6 },
-						{ @"7",      @selector(takeTabSizeFrom:),        .tag = 7 },
-						{ @"8",      @selector(takeTabSizeFrom:),        .tag = 8 },
+				MBMenuItem{ @"Tab Size" }.withSubmenu({
+						MBMenuItem{ @"2", @selector(takeTabSizeFrom:) }.withTag(2),
+						MBMenuItem{ @"3", @selector(takeTabSizeFrom:) }.withTag(3),
+						MBMenuItem{ @"4", @selector(takeTabSizeFrom:) }.withTag(4),
+						MBMenuItem{ @"5", @selector(takeTabSizeFrom:) }.withTag(5),
+						MBMenuItem{ @"6", @selector(takeTabSizeFrom:) }.withTag(6),
+						MBMenuItem{ @"7", @selector(takeTabSizeFrom:) }.withTag(7),
+						MBMenuItem{ @"8", @selector(takeTabSizeFrom:) }.withTag(8),
 						{ /* -------- */ },
 						{ @"Other…", @selector(showTabSizeSelectorPanel:) },
-					}
-				},
-				{ @"Theme",                  .submenuRef = &themesMenu                },
+				}),
+				MBMenuItem{ @"Theme" }.withSubmenuRef(&themesMenu),
 				{ /* -------- */ },
-				{ @"Fold Current Block",     @selector(toggleCurrentFolding:), .modifierFlags = 0, .key = NSF1FunctionKey },
-				{ @"Toggle Foldings at Level",
-					.submenu = {
-						{ @"All Levels", @selector(takeLevelToFoldFrom:), @"0", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption },
-						{ @"1",          @selector(takeLevelToFoldFrom:), @"1", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption, .tag = 1 },
-						{ @"2",          @selector(takeLevelToFoldFrom:), @"2", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption, .tag = 2 },
-						{ @"3",          @selector(takeLevelToFoldFrom:), @"3", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption, .tag = 3 },
-						{ @"4",          @selector(takeLevelToFoldFrom:), @"4", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption, .tag = 4 },
-						{ @"5",          @selector(takeLevelToFoldFrom:), @"5", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption, .tag = 5 },
-						{ @"6",          @selector(takeLevelToFoldFrom:), @"6", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption, .tag = 6 },
-						{ @"7",          @selector(takeLevelToFoldFrom:), @"7", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption, .tag = 7 },
-						{ @"8",          @selector(takeLevelToFoldFrom:), @"8", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption, .tag = 8 },
-						{ @"9",          @selector(takeLevelToFoldFrom:), @"9", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption, .tag = 9 },
-					}
-				},
+				MBMenuItem{ @"Fold Current Block", @selector(toggleCurrentFolding:) }.withModifierFlags(0).withKey(NSF1FunctionKey),
+				MBMenuItem{ @"Toggle Foldings at Level" }.withSubmenu({
+						MBMenuItem{ @"All Levels", @selector(takeLevelToFoldFrom:), @"0" }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagOption),
+						MBMenuItem{ @"1", @selector(takeLevelToFoldFrom:), @"1" }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagOption).withTag(1),
+						MBMenuItem{ @"2", @selector(takeLevelToFoldFrom:), @"2" }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagOption).withTag(2),
+						MBMenuItem{ @"3", @selector(takeLevelToFoldFrom:), @"3" }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagOption).withTag(3),
+						MBMenuItem{ @"4", @selector(takeLevelToFoldFrom:), @"4" }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagOption).withTag(4),
+						MBMenuItem{ @"5", @selector(takeLevelToFoldFrom:), @"5" }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagOption).withTag(5),
+						MBMenuItem{ @"6", @selector(takeLevelToFoldFrom:), @"6" }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagOption).withTag(6),
+						MBMenuItem{ @"7", @selector(takeLevelToFoldFrom:), @"7" }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagOption).withTag(7),
+						MBMenuItem{ @"8", @selector(takeLevelToFoldFrom:), @"8" }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagOption).withTag(8),
+						MBMenuItem{ @"9", @selector(takeLevelToFoldFrom:), @"9" }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagOption).withTag(9),
+				}),
 				{ /* -------- */ },
 				{ @"Toggle Scroll Past End", @selector(toggleScrollPastEnd:)          },
 				{ /* -------- */ },
-				{ @"View Source",            @selector(viewSource:),           @"u", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption },
-				{ @"Enter Full Screen",      @selector(toggleFullScreen:),     @"f", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagControl },
+				MBMenuItem{ @"View Source", @selector(viewSource:), @"u" }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagOption),
+				MBMenuItem{ @"Enter Full Screen", @selector(toggleFullScreen:), @"f" }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagControl),
 				{ /* -------- */ },
 				{ @"Customize Touch Bar…",   @selector(toggleTouchBarCustomizationPalette:) },
-			}
-		},
-		{ @"Navigate",
-			.submenu = {
+		}),
+		MBMenuItem{ @"Navigate" }.withSubmenu({
 				{ @"Jump to Line…",              @selector(orderFrontGoToLinePanel:),      @"l" },
 				{ @"Jump to Symbol…",            @selector(showSymbolChooser:),            @"T" },
 				{ @"Jump to Selection",          @selector(centerSelectionInVisibleArea:), @"j" },
 				{ /* -------- */ },
-				{ @"Set Bookmark",               @selector(toggleCurrentBookmark:),                                                   .key = NSF2FunctionKey },
-				{ @"Jump to Next Bookmark",      @selector(goToNextBookmark:),             .modifierFlags = 0,                        .key = NSF2FunctionKey },
-				{ @"Jump to Previous Bookmark",  @selector(goToPreviousBookmark:),         .modifierFlags = NSEventModifierFlagShift, .key = NSF2FunctionKey },
-				{ @"Jump to Bookmark",           .delegate = [MBMenuDelegate delegateUsingSelector:@selector(updateBookmarksMenu:)] },
+				MBMenuItem{ @"Set Bookmark", @selector(toggleCurrentBookmark:) }.withKey(NSF2FunctionKey),
+				MBMenuItem{ @"Jump to Next Bookmark", @selector(goToNextBookmark:) }.withModifierFlags(0).withKey(NSF2FunctionKey),
+				MBMenuItem{ @"Jump to Previous Bookmark", @selector(goToPreviousBookmark:) }.withModifierFlags(NSEventModifierFlagShift).withKey(NSF2FunctionKey),
+				MBMenuItem{ @"Jump to Bookmark" }.withDelegate([MBMenuDelegate delegateUsingSelector:@selector(updateBookmarksMenu:)]),
 				{ /* -------- */ },
-				{ @"Jump to Next Mark",          @selector(jumpToNextMark:),               .modifierFlags = 0,                        .key = NSF3FunctionKey },
-				{ @"Jump to Previous Mark",      @selector(jumpToPreviousMark:),           .modifierFlags = NSEventModifierFlagShift, .key = NSF3FunctionKey },
+				MBMenuItem{ @"Jump to Next Mark", @selector(jumpToNextMark:) }.withModifierFlags(0).withKey(NSF3FunctionKey),
+				MBMenuItem{ @"Jump to Previous Mark", @selector(jumpToPreviousMark:) }.withModifierFlags(NSEventModifierFlagShift).withKey(NSF3FunctionKey),
 				{ /* -------- */ },
-				{ @"Scroll",
-					.submenu = {
-						{ @"Line Up",      @selector(scrollLineUp:),      .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption|NSEventModifierFlagControl, .key = NSUpArrowFunctionKey    },
-						{ @"Line Down",    @selector(scrollLineDown:),    .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption|NSEventModifierFlagControl, .key = NSDownArrowFunctionKey  },
-						{ @"Column Left",  @selector(scrollColumnLeft:),  .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption|NSEventModifierFlagControl, .key = NSLeftArrowFunctionKey  },
-						{ @"Column Right", @selector(scrollColumnRight:), .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption|NSEventModifierFlagControl, .key = NSRightArrowFunctionKey },
-					}
-				},
+				MBMenuItem{ @"Scroll" }.withSubmenu({
+						MBMenuItem{ @"Line Up", @selector(scrollLineUp:) }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagOption|NSEventModifierFlagControl).withKey(NSUpArrowFunctionKey),
+						MBMenuItem{ @"Line Down", @selector(scrollLineDown:) }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagOption|NSEventModifierFlagControl).withKey(NSDownArrowFunctionKey),
+						MBMenuItem{ @"Column Left", @selector(scrollColumnLeft:) }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagOption|NSEventModifierFlagControl).withKey(NSLeftArrowFunctionKey),
+						MBMenuItem{ @"Column Right", @selector(scrollColumnRight:) }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagOption|NSEventModifierFlagControl).withKey(NSRightArrowFunctionKey),
+				}),
 				{ /* -------- */ },
-				{ @"Go to Related File",         @selector(goToRelatedFile:),              .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption, .key = NSUpArrowFunctionKey },
+				MBMenuItem{ @"Go to Related File", @selector(goToRelatedFile:) }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagOption).withKey(NSUpArrowFunctionKey),
 				{ /* -------- */ },
-				{ @"Move Focus to File Browser", @selector(moveFocus:),                    .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption, .key = NSTabCharacter },
-			}
-		},
-		{ @"Text",
-			.submenu = {
+				MBMenuItem{ @"Move Focus to File Browser", @selector(moveFocus:) }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagOption).withKey(NSTabCharacter),
+		}),
+		MBMenuItem{ @"Text" }.withSubmenu({
 				{ @"Transpose",                            @selector(transpose:)                        },
 				{ /* -------- */ },
-				{ @"Move Selection",
-					.submenu = {
-						{ @"Up",    @selector(moveSelectionUp:),    .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagControl, .key = NSUpArrowFunctionKey    },
-						{ @"Down",  @selector(moveSelectionDown:),  .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagControl, .key = NSDownArrowFunctionKey  },
-						{ @"Left",  @selector(moveSelectionLeft:),  .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagControl, .key = NSLeftArrowFunctionKey  },
-						{ @"Right", @selector(moveSelectionRight:), .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagControl, .key = NSRightArrowFunctionKey },
-					}
-				},
+				MBMenuItem{ @"Move Selection" }.withSubmenu({
+						MBMenuItem{ @"Up", @selector(moveSelectionUp:) }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagControl).withKey(NSUpArrowFunctionKey),
+						MBMenuItem{ @"Down", @selector(moveSelectionDown:) }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagControl).withKey(NSDownArrowFunctionKey),
+						MBMenuItem{ @"Left", @selector(moveSelectionLeft:) }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagControl).withKey(NSLeftArrowFunctionKey),
+						MBMenuItem{ @"Right", @selector(moveSelectionRight:) }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagControl).withKey(NSRightArrowFunctionKey),
+				}),
 				{ /* -------- */ },
 				{ @"Toggle Case of Character / Selection", @selector(changeCaseOfLetter:)               },
 				{ @"Toggle Case of Word / Selection",      @selector(changeCaseOfWord:)                 },
@@ -355,18 +325,16 @@ BOOL HasDocumentWindow (NSArray* windows)
 				{ @"Unwrap Paragraph",                     @selector(unwrapText:)                       },
 				{ /* -------- */ },
 				{ @"Filter Through Command…",              @selector(orderFrontRunCommandWindow:), @"|" },
-			}
-		},
-		{ @"File Browser",
-			.submenu = {
-				{ @"New File",         @selector(newDocumentInDirectory:), @"n", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagControl },
+		}),
+		MBMenuItem{ @"File Browser" }.withSubmenu({
+				MBMenuItem{ @"New File", @selector(newDocumentInDirectory:), @"n" }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagControl),
 				{ @"New Folder",       @selector(newFolder:),              @"N"   },
 				{ /* -------- */ },
 				{ @"Back",             @selector(goBack:)                         },
 				{ @"Forward",          @selector(goForward:)                      },
-				{ @"Enclosing Folder", @selector(goToParentFolder:),       .key = NSUpArrowFunctionKey },
+				MBMenuItem{ @"Enclosing Folder", @selector(goToParentFolder:) }.withKey(NSUpArrowFunctionKey),
 				{ /* -------- */ },
-				{ @"Select Document",  @selector(revealFileInProject:),    @"r", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagControl },
+				MBMenuItem{ @"Select Document", @selector(revealFileInProject:), @"r" }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagControl),
 				{ @"Select None",      @selector(deselectAll:),            @"A"   },
 				{ /* -------- */ },
 				{ @"Project Folder",   @selector(goToProjectFolder:),      @"P"   },
@@ -378,39 +346,32 @@ BOOL HasDocumentWindow (NSArray* windows)
 				{ /* -------- */ },
 				{ @"Go to Folder…",    @selector(orderFrontGoToFolder:)           },
 				{ @"Reload",           @selector(reload:)                         },
-			}
-		},
-		{ @"Bundles",
-			.submenuRef = &bundlesMenu, .submenu = {
-				{ @"Select Bundle Item…", @selector(showBundleItemChooser:), @"t", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagControl },
-				{ @"Edit Bundles…",       @selector(showBundleEditor:),      @"b", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption|NSEventModifierFlagControl },
+		}),
+		MBMenuItem{ @"Bundles" }.withSubmenuRef(&bundlesMenu).withSubmenu({
+				MBMenuItem{ @"Select Bundle Item…", @selector(showBundleItemChooser:), @"t" }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagControl),
+				MBMenuItem{ @"Edit Bundles…", @selector(showBundleEditor:), @"b" }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagOption|NSEventModifierFlagControl),
 				{ /* -------- */ },
-			}
-		},
-		{ @"Window",
-			.systemMenu = MBMenuTypeWindows, .submenu = {
+		}),
+		MBMenuItem{ @"Window" }.withSystemMenu(MBMenuTypeWindows).withSubmenu({
 				{ @"Minimize",               @selector(miniaturize:),           @"m" },
 				{ @"Zoom",                   @selector(performZoom:)                 },
 				{ /* -------- */ },
-				{ @"Show Previous Tab",      @selector(selectPreviousTab:),     .modifierFlags = NSEventModifierFlagControl|NSEventModifierFlagShift,  .key = NSTabCharacter,                        },
-				{ @"Show Next Tab",          @selector(selectNextTab:),         .modifierFlags = NSEventModifierFlagControl,                           .key = NSTabCharacter,                        },
-				{ @"Show Previous Tab",      @selector(selectPreviousTab:),     .modifierFlags = NSEventModifierFlagOption|NSEventModifierFlagCommand, .key = NSLeftArrowFunctionKey,  .hidden = YES },
-				{ @"Show Next Tab",          @selector(selectNextTab:),         .modifierFlags = NSEventModifierFlagOption|NSEventModifierFlagCommand, .key = NSRightArrowFunctionKey, .hidden = YES },
-				{ @"Show Previous Tab",      @selector(selectPreviousTab:),     @"{", .hidden = YES },
-				{ @"Show Next Tab",          @selector(selectNextTab:),         @"}", .hidden = YES },
-				{ @"Show Tab",               .delegate = [MBMenuDelegate delegateUsingSelector:@selector(updateShowTabMenu:)] },
+				MBMenuItem{ @"Show Previous Tab", @selector(selectPreviousTab:) }.withModifierFlags(NSEventModifierFlagControl|NSEventModifierFlagShift).withKey(NSTabCharacter),
+				MBMenuItem{ @"Show Next Tab", @selector(selectNextTab:) }.withModifierFlags(NSEventModifierFlagControl).withKey(NSTabCharacter),
+				MBMenuItem{ @"Show Previous Tab", @selector(selectPreviousTab:) }.withModifierFlags(NSEventModifierFlagOption|NSEventModifierFlagCommand).withKey(NSLeftArrowFunctionKey).withHidden(YES),
+				MBMenuItem{ @"Show Next Tab", @selector(selectNextTab:) }.withModifierFlags(NSEventModifierFlagOption|NSEventModifierFlagCommand).withKey(NSRightArrowFunctionKey).withHidden(YES),
+				MBMenuItem{ @"Show Previous Tab", @selector(selectPreviousTab:), @"{" }.withHidden(YES),
+				MBMenuItem{ @"Show Next Tab", @selector(selectNextTab:), @"}" }.withHidden(YES),
+				MBMenuItem{ @"Show Tab" }.withDelegate([MBMenuDelegate delegateUsingSelector:@selector(updateShowTabMenu:)]),
 				{ /* -------- */ },
 				{ @"Move Tab to New Window", @selector(moveDocumentToNewWindow:)     },
 				{ @"Merge All Windows",      @selector(mergeAllWindows:)             },
 				{ /* -------- */ },
 				{ @"Bring All to Front",     @selector(arrangeInFront:)              },
-			}
-		},
-		{ @"Help",
-			.systemMenu = MBMenuTypeHelp, .submenu = {
+		}),
+		MBMenuItem{ @"Help" }.withSystemMenu(MBMenuTypeHelp).withSubmenu({
 				{ @"TextMate Help", @selector(showHelp:), @"?" },
-			}
-		},
+		}),
 	};
 
 	NSMenu* menu = MBCreateMenu(items, [[OakMainMenu alloc] initWithTitle:@"AMainMenu"]);
@@ -422,13 +383,13 @@ BOOL HasDocumentWindow (NSArray* windows)
 }
 
 - (NSMenu*)applicationDockMenu:(NSApplication*)anApplication
-{
-	MBMenu const items = {
-		{ @"New File", @selector(newDocumentAndActivate:),  .target = self },
-		{ @"Open…",    @selector(openDocumentAndActivate:), .target = self },
-	};
-	return MBCreateMenu(items);
-}
+	{
+		MBMenu const items = {
+			MBMenuItem{ @"New File", @selector(newDocumentAndActivate:) }.withTarget(self),
+			MBMenuItem{ @"Open…", @selector(openDocumentAndActivate:) }.withTarget(self),
+		};
+		return MBCreateMenu(items);
+	}
 
 - (void)setKeyWindowHasBackAndForwardActions:(BOOL)flag
 {
@@ -478,8 +439,12 @@ BOOL HasDocumentWindow (NSArray* windows)
 {
 	BOOL disableRmate        = [NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsDisableRMateServerKey];
 	NSString* rmateInterface = [NSUserDefaults.standardUserDefaults stringForKey:kUserDefaultsRMateServerListenKey];
-	int rmatePort            = [NSUserDefaults.standardUserDefaults integerForKey:kUserDefaultsRMateServerPortKey];
-	setup_rmate_server(!disableRmate, rmatePort, [rmateInterface isEqualToString:kRMateServerListenRemote]);
+	NSInteger rmatePort      = [NSUserDefaults.standardUserDefaults integerForKey:kUserDefaultsRMateServerPortKey];
+	if(rmatePort < 0)
+		rmatePort = 0;
+	else if(rmatePort > 0xFFFF)
+		rmatePort = 0xFFFF;
+	setup_rmate_server(!disableRmate, static_cast<uint16_t>(rmatePort), [rmateInterface isEqualToString:kRMateServerListenRemote]);
 }
 
 - (void)applicationWillFinishLaunching:(NSNotification*)aNotification
@@ -487,6 +452,8 @@ BOOL HasDocumentWindow (NSArray* windows)
 	if(NSMenu* menu = [self mainMenu])
 		NSApp.mainMenu = menu;
 
+#if 0
+	// App updates are disabled for this fork until we decide on a new update mechanism.
 	NSOperatingSystemVersion osVersion = NSProcessInfo.processInfo.operatingSystemVersion;
 	NSString* parms = [NSString stringWithFormat:@"v=%@&os=%ld.%ld.%ld", [[[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"] stringByAddingPercentEncodingWithAllowedCharacters:NSCharacterSet.URLQueryAllowedCharacterSet], osVersion.majorVersion, osVersion.minorVersion, osVersion.patchVersion];
 
@@ -495,6 +462,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 		kSoftwareUpdateChannelPrerelease: [NSURL URLWithString:[NSString stringWithFormat:@"" REST_API "/releases/beta?%@", parms]],
 		kSoftwareUpdateChannelCanary:     [NSURL URLWithString:[NSString stringWithFormat:@"" REST_API "/releases/nightly?%@", parms]],
 	};
+#endif
 
 	settings_t::set_default_settings_path([[[NSBundle mainBundle] pathForResource:@"Default" ofType:@"tmProperties"] fileSystemRepresentation]);
 	settings_t::set_global_settings_path(path::join(path::home(), "Library/Application Support/TextMate/Global.tmProperties"));
@@ -507,46 +475,6 @@ BOOL HasDocumentWindow (NSArray* windows)
 
 	[TMPlugInController.sharedInstance loadAllPlugIns:nil];
 
-	std::string dest = path::join(path::home(), "Library/Application Support/TextMate/Managed");
-	if(!path::exists(dest))
-	{
-		if(NSString* archive = [[NSBundle mainBundle] pathForResource:@"DefaultBundles" ofType:@"tbz"])
-		{
-			path::make_dir(dest);
-
-			network::tbz_t tbz(dest);
-			if(tbz)
-			{
-				int fd = open([archive fileSystemRepresentation], O_RDONLY|O_CLOEXEC);
-				if(fd != -1)
-				{
-					char buf[4096];
-					ssize_t len;
-					while((len = read(fd, buf, sizeof(buf))) > 0)
-					{
-						if(write(tbz.input_fd(), buf, len) != len)
-						{
-							os_log_error(OS_LOG_DEFAULT, "Failed writing bytes to tar");
-							break;
-						}
-					}
-					close(fd);
-				}
-
-				std::string output, error;
-				if(!tbz.wait_for_tbz(&output, &error))
-					os_log_error(OS_LOG_DEFAULT, "tar: %{public}s%{public}s", output.c_str(), error.c_str());
-			}
-			else
-			{
-				os_log_error(OS_LOG_DEFAULT, "Unable to launch tar");
-			}
-		}
-		else
-		{
-			os_log_error(OS_LOG_DEFAULT, "No ‘DefaultBundles.tbz’ in TextMate.app");
-		}
-	}
 	[BundlesManager.sharedInstance loadBundlesIndex];
 
 	if(BOOL restoreSession = ![NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsDisableSessionRestoreKey])
@@ -587,7 +515,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 {
 	NSWindow.allowsAutomaticWindowTabbing = NO;
 
-	if([NSApp respondsToSelector:@selector(setAutomaticCustomizeTouchBarMenuItemEnabled)]) // MAC_OS_X_VERSION_10_12_1
+	if([NSApp respondsToSelector:@selector(setAutomaticCustomizeTouchBarMenuItemEnabled:)]) // MAC_OS_X_VERSION_10_12_1
 		NSApp.automaticCustomizeTouchBarMenuItemEnabled = YES;
 
 	if(!HasDocumentWindow([NSApp orderedWindows]))
@@ -610,7 +538,6 @@ BOOL HasDocumentWindow (NSArray* windows)
 	[TerminalPreferences updateMateIfRequired];
 	[AboutWindowController showChangesIfUpdated];
 
-	[CrashReporter.sharedInstance applicationDidFinishLaunching:aNotification];
 	[CrashReporter.sharedInstance postNewCrashReportsToURLString:[NSString stringWithFormat:@"%s/crashes", REST_API]];
 
 	[OakCommitWindowServer sharedInstance]; // Setup server
@@ -711,10 +638,13 @@ BOOL HasDocumentWindow (NSArray* windows)
 	[NSApp sendAction:@selector(selectAndCenter:) to:nil from:[goToLineTextField stringValue]];
 }
 
+#if 0
+// App updates are disabled for this fork until we decide on a new update mechanism.
 - (IBAction)performSoftwareUpdateCheck:(id)sender
 {
 	[SoftwareUpdate.sharedInstance checkForUpdate:self];
 }
+#endif
 
 - (IBAction)showPreferences:(id)sender
 {

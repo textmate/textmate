@@ -1,8 +1,8 @@
 #import "SelectGrammarViewController.h"
-#import <OakTextView/OakDocumentView.h>
-#import <OakAppKit/OakUIConstructionFunctions.h>
-#import <BundlesManager/BundlesManager.h>
-#import <ns/ns.h>
+#import <OakTextView/src/OakDocumentView.h>
+#import <OakAppKit/src/OakUIConstructionFunctions.h>
+#import <BundlesManager/src/BundlesManager.h>
+#import <ns/src/ns.h>
 
 @interface SelectGrammarViewController ()
 {

@@ -1,4 +1,4 @@
-#import <regexp/find.h>
+#import <regexp/src/find.h>
 
 extern NSNotificationName const FFDocumentSearchDidReceiveResultsNotification;
 extern NSNotificationName const FFDocumentSearchDidFinishNotification;

@@ -1,7 +1,7 @@
 #import "OakAppKit.h"
 #import <oak/algorithm.h>
-#import <crash/info.h>
-#import <ns/ns.h>
+#import <crash/src/info.h>
+#import <ns/src/ns.h>
 #import <oak/debug.h>
 
 NSNotificationName const OakCursorDidHideNotification = @"OakCursorDidHideNotification";

@@ -1,7 +1,7 @@
 #import "HOBrowserView.h"
 #import "HOWebViewDelegateHelper.h"
 #import "HOStatusBar.h"
-#import <OakAppKit/OakUIConstructionFunctions.h>
+#import <OakAppKit/src/OakUIConstructionFunctions.h>
 
 static NSString* EscapeHTML (NSString* str)
 {
@@ -13,6 +13,15 @@ static void ShowLoadErrorForURL (WebFrame* frame, NSURL* url, NSError* error)
 	NSString* options  = [[url scheme] isEqualToString:@"file"] ? @" -R" : @"";
 	NSString* errorMsg = [NSString stringWithFormat:@"<title>Load Error</title><h1>Load Error</h1><p>WebKit reported <em>%@</em> while loading <tt><a href=\"#\" onClick=\"javascript:TextMate.system('/usr/bin/open%@ &quot;%@&quot;', null)\">%@</a></tt>.</p>", EscapeHTML([error localizedDescription]), options, EscapeHTML([url absoluteString]), EscapeHTML([url absoluteString])];
 	[frame loadHTMLString:errorMsg baseURL:[NSURL fileURLWithPath:NSTemporaryDirectory()]];
+}
+
+static void SetWebPreferenceIfSupported (WebPreferences* preferences, NSString* key, id value)
+{
+	@try {
+		[preferences setValue:value forKey:key];
+	}
+	@catch(NSException* exception) {
+	}
 }
 
 @interface HOBrowserView () <WebPolicyDelegate, WebUIDelegate, WebResourceLoadDelegate>
@@ -29,9 +38,13 @@ static void ShowLoadErrorForURL (WebFrame* frame, NSURL* url, NSError* error)
 		_webView = [[WebView alloc] initWithFrame:NSZeroRect];
 
 		NSString* const kHTMLOutputPreferencesIdentifier = @"HTML Output Preferences Identifier";
-		WebPreferences* webViewPrefs = [[WebPreferences alloc] initWithIdentifier:kHTMLOutputPreferencesIdentifier];
-		webViewPrefs.plugInsEnabled = NO;
 		self.webView.preferencesIdentifier = kHTMLOutputPreferencesIdentifier;
+		WebPreferences* webViewPrefs = self.webView.preferences ?: [[WebPreferences alloc] initWithIdentifier:kHTMLOutputPreferencesIdentifier];
+		webViewPrefs.plugInsEnabled = NO;
+		SetWebPreferenceIfSupported(webViewPrefs, @"allowFileAccessFromFileURLs", @YES);
+		SetWebPreferenceIfSupported(webViewPrefs, @"allowUniversalAccessFromFileURLs", @YES);
+		SetWebPreferenceIfSupported(webViewPrefs, @"webSecurityEnabled", @NO);
+		self.webView.preferences = webViewPrefs;
 
 		_statusBar = [[HOStatusBar alloc] initWithFrame:NSZeroRect];
 		_statusBar.delegate = _webView;

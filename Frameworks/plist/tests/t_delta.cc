@@ -1,5 +1,5 @@
-#include <plist/ascii.h>
-#include <plist/delta.h>
+#include <plist/src/ascii.h>
+#include <plist/src/delta.h>
 
 void test_delta ()
 {

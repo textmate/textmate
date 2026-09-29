@@ -1,4 +1,4 @@
-#import <ns/spellcheck.h>
+#import <ns/src/spellcheck.h>
 #import <AppKit/NSApplication.h>
 
 void setup ()

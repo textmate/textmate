@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>beforeRunningCommand</key>
+	<string>nop</string>
+	<key>command</key>
+	<string>#!/bin/bash
+
+# Toggles the global on/off switch for Python diagnostics. The menu item
+# shows a checkmark while checking is enabled (see the userDefaultsState
+# key in this file, handled by BundleMenuDelegate).
+
+if [[ "$(defaults read com.macromates.TextMate pythonDiagnosticsDisabled 2&gt;/dev/null)" == "1" ]]; then
+	defaults delete com.macromates.TextMate pythonDiagnosticsDisabled 2&gt;/dev/null
+	echo "Python checking enabled — diagnostics refresh on next save."
+else
+	defaults write com.macromates.TextMate pythonDiagnosticsDisabled -bool YES
+
+	# remove all existing diagnostic marks (no file argument = all documents)
+	MATE="$TM_MATE"
+	[[ -f "$MATE" ]] || MATE="$(command -v mate)"
+	[[ -f "$MATE" ]] || MATE="/Applications/TextMate.app/Contents/MacOS/mate"
+	if [[ -f "$MATE" ]]; then
+		"$MATE" --clear-mark error
+		"$MATE" --clear-mark warning
+		"$MATE" --clear-mark note
+	fi
+	echo "Python checking disabled."
+fi
+</string>
+	<key>input</key>
+	<string>none</string>
+	<key>name</key>
+	<string>Enable Checking on Save</string>
+	<key>outputLocation</key>
+	<string>toolTip</string>
+	<key>scope</key>
+	<string></string>
+	<key>userDefaultsState</key>
+	<string>!pythonDiagnosticsDisabled</string>
+	<key>uuid</key>
+	<string>3C1B58A2-71E4-4B0D-9E42-A18C2A7E6F01</string>
+	<key>version</key>
+	<integer>2</integer>
+</dict>
+</plist>

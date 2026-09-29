@@ -1,5 +1,5 @@
 #import "OakChooser.h"
-#import <document/OakDocument.h>
+#import <document/src/OakDocument.h>
 
 @interface SymbolChooser : OakChooser
 @property (class, readonly) SymbolChooser* sharedInstance;

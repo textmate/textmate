@@ -1,18 +1,18 @@
 #import "AppController.h"
-#import <DocumentWindow/DocumentWindowController.h>
-#import <bundles/bundles.h>
-#import <command/parser.h>
-#import <command/runner.h>
-#import <document/OakDocument.h>
-#import <document/OakDocumentController.h>
-#import <ns/ns.h>
-#import <settings/settings.h>
-#import <OakAppKit/NSAlert Additions.h>
-#import <OakAppKit/OakToolTip.h>
-#import <OakFoundation/NSString Additions.h>
-#import <OakCommand/OakCommand.h>
-#import <plist/uuid.h>
-#import <HTMLOutputWindow/HTMLOutputWindow.h>
+#import <DocumentWindow/src/DocumentWindowController.h>
+#import <bundles/src/bundles.h>
+#import <command/src/parser.h>
+#import <command/src/runner.h>
+#import <document/src/OakDocument.h>
+#import <document/src/OakDocumentController.h>
+#import <ns/src/ns.h>
+#import <settings/src/settings.h>
+#import <OakAppKit/src/NSAlert Additions.h>
+#import <OakAppKit/src/OakToolTip.h>
+#import <OakFoundation/src/NSString Additions.h>
+#import <OakCommand/src/OakCommand.h>
+#import <plist/src/uuid.h>
+#import <HTMLOutputWindow/src/HTMLOutputWindow.h>
 
 @implementation AppController (Commands)
 - (void)performBundleItemWithUUIDStringFrom:(id)anArgument

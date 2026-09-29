@@ -1,7 +1,7 @@
 #include "api.h"
 #include <oak/oak.h>
-#include <text/parse.h>
-#include <io/io.h>
+#include <text/src/parse.h>
+#include <io/src/io.h>
 #include <oak/debug.h>
 
 static scm::status::type parse_status_flag (char flag)

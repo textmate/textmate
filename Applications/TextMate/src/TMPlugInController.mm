@@ -1,9 +1,9 @@
 #import "TMPlugInController.h"
-#import <OakAppKit/NSAlert Additions.h>
-#import <OakSystem/application.h>
-#import <crash/info.h>
-#import <io/path.h>
-#import <ns/ns.h>
+#import <OakAppKit/src/NSAlert Additions.h>
+#import <OakSystem/src/application.h>
+#import <crash/src/info.h>
+#import <io/src/path.h>
+#import <ns/src/ns.h>
 #import <oak/debug.h>
 
 static NSInteger const kPlugInAPIVersion = 2;

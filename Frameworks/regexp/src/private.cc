@@ -1,6 +1,6 @@
 #include "private.h"
 #include <oak/oak.h>
-#include <text/format.h>
+#include <text/src/format.h>
 
 struct udata_t
 {

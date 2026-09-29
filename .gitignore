@@ -1,3 +1,9 @@
-build.ninja
-local.rave
 Frameworks/license/src/revoked_serials.cc
+xcuserdata
+vendor/prebuilt/build/
+vendor/prebuilt/src/
+vendor/prebuilt/arm64/
+vendor/prebuilt/x86_64/
+vendor/prebuilt/sparsehash-native/
+vendor/prebuilt/include/
+.DS_Store

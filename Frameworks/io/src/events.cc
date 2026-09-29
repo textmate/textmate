@@ -1,6 +1,6 @@
 #include "events.h"
 #include "path.h"
-#include <cf/cf.h>
+#include <cf/src/cf.h>
 #include <oak/debug.h>
 
 namespace

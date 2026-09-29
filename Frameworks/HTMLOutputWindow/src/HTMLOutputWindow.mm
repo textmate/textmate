@@ -1,8 +1,8 @@
 #import "HTMLOutputWindow.h"
-#import <OakAppKit/OakAppKit.h>
-#import <OakFoundation/NSString Additions.h>
-#import <command/runner.h>
-#import <ns/ns.h>
+#import <OakAppKit/src/OakAppKit.h>
+#import <OakFoundation/src/NSString Additions.h>
+#import <command/src/runner.h>
+#import <ns/src/ns.h>
 #import <oak/debug.h>
 
 @interface HTMLOutputWindowController () <NSWindowDelegate>

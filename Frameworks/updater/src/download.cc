@@ -1,7 +1,7 @@
 #include "download.h"
-#include <network/network.h>
-#include <network/download_tbz.h>
-#include <text/decode.h>
+#include <network/src/network.h>
+#include <network/src/download_tbz.h>
+#include <text/src/decode.h>
 
 namespace bundles_db
 {

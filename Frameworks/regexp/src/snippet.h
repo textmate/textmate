@@ -3,7 +3,7 @@
 
 #include "format_string.h"
 #include "regexp.h"
-#include <text/indent.h>
+#include <text/src/indent.h>
 #include <oak/debug.h>
 
 namespace snippet

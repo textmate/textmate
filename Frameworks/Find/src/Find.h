@@ -1,5 +1,5 @@
-#import <OakFoundation/OakFindProtocol.h>
-#import <text/types.h>
+#import <OakFoundation/src/OakFindProtocol.h>
+#import <text/src/types.h>
 
 @class OakDocument;
 

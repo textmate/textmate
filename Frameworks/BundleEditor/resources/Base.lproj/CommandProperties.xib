@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="22505" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+    <dependencies>
+        <deployment identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="22505"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <customObject id="-2" userLabel="File's Owner" customClass="PropertiesViewController">
+            <connections>
+                <outlet property="alignmentView" destination="44" id="128"/>
+                <outlet property="objectController" destination="99" id="100"/>
+                <outlet property="view" destination="1" id="98"/>
+            </connections>
+        </customObject>
+        <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
+        <customObject id="-3" userLabel="Application" customClass="NSObject"/>
+        <customView id="1" userLabel="Command Properties">
+            <rect key="frame" x="0.0" y="0.0" width="337" height="237"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+            <subviews>
+                <textField focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="136" userLabel="Content Match Text Field">
+                    <rect key="frame" x="133" y="216" width="184" height="21"/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="137">
+                        <font key="font" metaFont="system"/>
+                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                    <connections>
+                        <binding destination="99" name="value" keyPath="selection.contentMatch" id="138"/>
+                    </connections>
+                </textField>
+                <popUpButton verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="38" userLabel="Pre-Exec Pop Up">
+                    <rect key="frame" x="130" y="184" width="165" height="25"/>
+                    <popUpButtonCell key="cell" type="push" title="Nothing" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="41" id="39">
+                        <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                        <font key="font" metaFont="menu"/>
+                        <menu key="menu" title="OtherViews" id="40">
+                            <items>
+                                <menuItem title="Nothing" state="on" id="41"/>
+                                <menuItem title="Current Document" tag="1" id="43"/>
+                                <menuItem title="Modified Documents" tag="2" id="42"/>
+                            </items>
+                        </menu>
+                    </popUpButtonCell>
+                    <connections>
+                        <binding destination="99" name="selectedTag" keyPath="selection.beforeRunningCommand" id="129">
+                            <dictionary key="options">
+                                <string key="NSValueTransformerName">OakSaveStringListTransformer</string>
+                            </dictionary>
+                        </binding>
+                    </connections>
+                </popUpButton>
+                <popUpButton verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="2" userLabel="Input Pop Up">
+                    <rect key="frame" x="130" y="156" width="102" height="25"/>
+                    <popUpButtonCell key="cell" type="push" title="Selection" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="5" id="3">
+                        <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                        <font key="font" metaFont="menu"/>
+                        <menu key="menu" title="OtherViews" id="4">
+                            <items>
+                                <menuItem title="Selection" state="on" id="5"/>
+                                <menuItem title="Document" tag="1" id="6"/>
+                                <menuItem title="Scope" tag="2" id="7"/>
+                                <menuItem title="Line" tag="3" id="48"/>
+                                <menuItem title="Word" tag="4" id="49"/>
+                                <menuItem title="Character" tag="5" id="50"/>
+                                <menuItem title="Nothing" tag="6" id="51"/>
+                            </items>
+                        </menu>
+                    </popUpButtonCell>
+                    <connections>
+                        <binding destination="99" name="selectedTag" keyPath="selection.input" id="122">
+                            <dictionary key="options">
+                                <string key="NSValueTransformerName">OakInputStringListTransformer</string>
+                            </dictionary>
+                        </binding>
+                    </connections>
+                </popUpButton>
+                <popUpButton verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="8" userLabel="Input Format Pop Up">
+                    <rect key="frame" x="185" y="128" width="67" height="25"/>
+                    <popUpButtonCell key="cell" type="push" title="XML" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" tag="1" imageScaling="proportionallyDown" inset="2" selectedItem="12" id="9">
+                        <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                        <font key="font" metaFont="menu"/>
+                        <menu key="menu" title="OtherViews" id="10">
+                            <items>
+                                <menuItem title="Text" id="13"/>
+                                <menuItem title="XML" state="on" tag="1" id="12"/>
+                            </items>
+                        </menu>
+                    </popUpButtonCell>
+                    <connections>
+                        <binding destination="99" name="selectedTag" keyPath="selection.inputFormat" id="123">
+                            <dictionary key="options">
+                                <string key="NSValueTransformerName">OakInputFormatStringListTransformer</string>
+                            </dictionary>
+                        </binding>
+                    </connections>
+                </popUpButton>
+                <popUpButton verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="54" userLabel="Output Location Pop Up">
+                    <rect key="frame" x="130" y="100" width="169" height="25"/>
+                    <popUpButtonCell key="cell" type="push" title="Replace Input" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="72" id="64">
+                        <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                        <font key="font" metaFont="menu"/>
+                        <menu key="menu" title="OtherViews" id="65">
+                            <items>
+                                <menuItem title="Replace Input" state="on" id="72"/>
+                                <menuItem title="Replace Document" tag="1" id="71"/>
+                                <menuItem title="Insert at Caret" tag="2" id="70"/>
+                                <menuItem title="Insert After Input" tag="3" id="69"/>
+                                <menuItem title="Show in New Window" tag="4" id="68"/>
+                                <menuItem title="Show in Tool Tip" tag="5" id="67"/>
+                                <menuItem title="Discard" tag="6" id="66"/>
+                                <menuItem title="Replace Selection" tag="7" id="73"/>
+                            </items>
+                        </menu>
+                    </popUpButtonCell>
+                    <connections>
+                        <binding destination="99" name="selectedTag" keyPath="selection.outputLocation" id="133">
+                            <dictionary key="options">
+                                <string key="NSValueTransformerName">OakOutputLocationStringListTransformer</string>
+                            </dictionary>
+                        </binding>
+                    </connections>
+                </popUpButton>
+                <popUpButton verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="55" userLabel="Output Format Pop Up">
+                    <rect key="frame" x="185" y="70" width="136" height="25"/>
+                    <popUpButtonCell key="cell" type="push" title="Text" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="62" id="60">
+                        <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                        <font key="font" metaFont="menu"/>
+                        <menu key="menu" title="OtherViews" id="61">
+                            <items>
+                                <menuItem title="Text" state="on" id="62"/>
+                                <menuItem title="Snippet" tag="1" id="63"/>
+                                <menuItem title="HTML" tag="2" id="74"/>
+                                <menuItem title="Completion List" tag="3" id="75"/>
+                            </items>
+                        </menu>
+                    </popUpButtonCell>
+                    <connections>
+                        <binding destination="99" name="selectedTag" keyPath="selection.outputFormat" id="125">
+                            <dictionary key="options">
+                                <string key="NSValueTransformerName">OakOutputFormatStringListTransformer</string>
+                            </dictionary>
+                        </binding>
+                    </connections>
+                </popUpButton>
+                <popUpButton horizontalHuggingPriority="249" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="14" userLabel="Output Caret Placement Pop Up">
+                    <rect key="frame" x="130" y="40" width="191" height="25"/>
+                    <popUpButtonCell key="cell" type="push" title="After Output" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="17" id="15">
+                        <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                        <font key="font" metaFont="menu"/>
+                        <menu key="menu" title="OtherViews" id="16">
+                            <items>
+                                <menuItem title="After Output" state="on" id="17"/>
+                                <menuItem title="Select Output" tag="1" id="18"/>
+                                <menuItem title="Character Interpolation" tag="2" id="19"/>
+                                <menuItem title="Line Interpolation" tag="3" id="78"/>
+                                <menuItem title="Heuristic" tag="4" id="79"/>
+                            </items>
+                        </menu>
+                    </popUpButtonCell>
+                    <connections>
+                        <binding destination="99" name="selectedTag" keyPath="selection.outputCaret" id="131">
+                            <dictionary key="options">
+                                <string key="NSValueTransformerName">OakOutputCaretStringListTransformer</string>
+                            </dictionary>
+                        </binding>
+                    </connections>
+                </popUpButton>
+                <button verticalHuggingPriority="1000" translatesAutoresizingMaskIntoConstraints="NO" id="96">
+                    <rect key="frame" x="131" y="19" width="186" height="18"/>
+                    <buttonCell key="cell" type="check" title="Scroll for new output" bezelStyle="regularSquare" imagePosition="left" alignment="left" state="on" inset="2" id="97">
+                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                        <font key="font" metaFont="system"/>
+                    </buttonCell>
+                    <connections>
+                        <binding destination="99" name="value" keyPath="selection.autoScrollOutput" id="114"/>
+                    </connections>
+                </button>
+                <textField focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="134">
+                    <rect key="frame" x="18" y="219" width="109" height="16"/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Content Match:" id="135">
+                        <font key="font" metaFont="system"/>
+                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+                <textField focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="44">
+                    <rect key="frame" x="18" y="191" width="109" height="16"/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Save:" id="45">
+                        <font key="font" metaFont="system"/>
+                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+                <textField focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="46">
+                    <rect key="frame" x="18" y="163" width="109" height="16"/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Input:" id="47">
+                        <font key="font" metaFont="system"/>
+                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+                <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="52">
+                    <rect key="frame" x="131" y="135" width="51" height="16"/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Format:" id="53">
+                        <font key="font" metaFont="system"/>
+                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+                <textField focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="139">
+                    <rect key="frame" x="234" y="163" width="18" height="14"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="14" id="9Xs-Rg-Kdx"/>
+                        <constraint firstAttribute="width" constant="14" id="QHA-h5-c7n"/>
+                    </constraints>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="⤵" id="140">
+                        <font key="font" size="13" name="AquaKana"/>
+                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+                <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="143">
+                    <rect key="frame" x="301" y="107" width="18" height="14"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="14" id="5BV-Ye-3rP"/>
+                        <constraint firstAttribute="width" constant="14" id="RF9-fU-ejR"/>
+                    </constraints>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="⤵" id="144">
+                        <font key="font" size="13" name="AquaKana"/>
+                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+                <textField focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="56">
+                    <rect key="frame" x="18" y="107" width="109" height="16"/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Output:" id="59">
+                        <font key="font" metaFont="system"/>
+                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+                <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="57">
+                    <rect key="frame" x="131" y="77" width="51" height="16"/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Format:" id="58">
+                        <font key="font" metaFont="system"/>
+                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+                <textField focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="76">
+                    <rect key="frame" x="18" y="47" width="109" height="16"/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Caret Placement:" id="77">
+                        <font key="font" metaFont="system"/>
+                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+            </subviews>
+            <constraints>
+                <constraint firstItem="96" firstAttribute="top" secondItem="14" secondAttribute="bottom" constant="8" symbolic="YES" id="1wc-TB-Gel"/>
+                <constraint firstItem="55" firstAttribute="top" secondItem="54" secondAttribute="bottom" constant="10" symbolic="YES" id="2q9-EC-xbx"/>
+                <constraint firstItem="52" firstAttribute="leading" secondItem="136" secondAttribute="leading" id="3Ir-2v-A1X"/>
+                <constraint firstItem="38" firstAttribute="top" secondItem="136" secondAttribute="bottom" constant="8" id="3X4-DN-4LZ"/>
+                <constraint firstItem="54" firstAttribute="leading" secondItem="136" secondAttribute="leading" id="52Y-vf-Z7B"/>
+                <constraint firstItem="2" firstAttribute="firstBaseline" secondItem="46" secondAttribute="firstBaseline" id="5Z1-0b-0kK"/>
+                <constraint firstItem="44" firstAttribute="trailing" secondItem="134" secondAttribute="trailing" id="7Ea-Al-sJo"/>
+                <constraint firstItem="55" firstAttribute="leading" secondItem="57" secondAttribute="trailing" constant="8" symbolic="YES" id="A0i-NQ-l1g"/>
+                <constraint firstItem="2" firstAttribute="top" secondItem="38" secondAttribute="bottom" constant="8" id="B9A-EF-XJg"/>
+                <constraint firstItem="76" firstAttribute="trailing" secondItem="134" secondAttribute="trailing" id="EA9-lB-ksT"/>
+                <constraint firstAttribute="trailing" secondItem="14" secondAttribute="trailing" constant="20" symbolic="YES" id="Eip-c3-BxT"/>
+                <constraint firstItem="2" firstAttribute="leading" secondItem="136" secondAttribute="leading" id="FBC-s8-E3i"/>
+                <constraint firstItem="14" firstAttribute="firstBaseline" secondItem="76" secondAttribute="firstBaseline" id="Htt-n1-LOK"/>
+                <constraint firstItem="54" firstAttribute="top" secondItem="8" secondAttribute="bottom" constant="8" id="KiB-ix-a3X"/>
+                <constraint firstItem="139" firstAttribute="leading" secondItem="2" secondAttribute="trailing" constant="8" symbolic="YES" id="MNu-Od-rzj"/>
+                <constraint firstItem="57" firstAttribute="leading" secondItem="136" secondAttribute="leading" id="PAz-gm-1mi"/>
+                <constraint firstItem="38" firstAttribute="leading" secondItem="136" secondAttribute="leading" id="UTI-3c-IoV"/>
+                <constraint firstItem="8" firstAttribute="top" secondItem="2" secondAttribute="bottom" constant="8" id="V4x-pI-Aqz"/>
+                <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="139" secondAttribute="trailing" constant="20" symbolic="YES" id="V74-Ni-9Yc"/>
+                <constraint firstAttribute="trailing" secondItem="136" secondAttribute="trailing" constant="20" symbolic="YES" id="YLb-NQ-kLu"/>
+                <constraint firstItem="56" firstAttribute="trailing" secondItem="134" secondAttribute="trailing" id="adk-VD-HtY"/>
+                <constraint firstAttribute="bottom" secondItem="96" secondAttribute="bottom" constant="20" symbolic="YES" id="cE1-mc-4dC"/>
+                <constraint firstItem="134" firstAttribute="leading" secondItem="1" secondAttribute="leading" constant="20" symbolic="YES" id="cM6-hd-X3v"/>
+                <constraint firstAttribute="trailing" secondItem="143" secondAttribute="trailing" constant="20" symbolic="YES" id="dvD-IB-lVp"/>
+                <constraint firstItem="38" firstAttribute="firstBaseline" secondItem="44" secondAttribute="firstBaseline" id="egP-E6-i24"/>
+                <constraint firstItem="143" firstAttribute="leading" secondItem="54" secondAttribute="trailing" constant="8" symbolic="YES" id="ejU-FV-6Jr"/>
+                <constraint firstItem="143" firstAttribute="centerY" secondItem="54" secondAttribute="centerY" id="fx9-q1-cMl"/>
+                <constraint firstAttribute="trailing" secondItem="55" secondAttribute="trailing" constant="20" symbolic="YES" id="g6b-UA-kxT"/>
+                <constraint firstItem="136" firstAttribute="firstBaseline" secondItem="134" secondAttribute="firstBaseline" id="gn8-DT-XKs"/>
+                <constraint firstItem="96" firstAttribute="leading" secondItem="136" secondAttribute="leading" id="hBD-oF-YUi"/>
+                <constraint firstItem="46" firstAttribute="trailing" secondItem="134" secondAttribute="trailing" id="hSN-83-rpI"/>
+                <constraint firstItem="76" firstAttribute="leading" secondItem="134" secondAttribute="leading" id="iN3-Gi-ukB"/>
+                <constraint firstItem="8" firstAttribute="firstBaseline" secondItem="52" secondAttribute="firstBaseline" id="ibq-VS-5FU"/>
+                <constraint firstItem="44" firstAttribute="leading" secondItem="134" secondAttribute="leading" id="laz-7q-8Pt"/>
+                <constraint firstItem="46" firstAttribute="leading" secondItem="134" secondAttribute="leading" id="mQZ-g8-QBw"/>
+                <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="8" secondAttribute="trailing" constant="20" symbolic="YES" id="nvk-s5-vT5"/>
+                <constraint firstItem="136" firstAttribute="top" secondItem="1" secondAttribute="top" id="o4S-ks-y7d"/>
+                <constraint firstItem="56" firstAttribute="leading" secondItem="134" secondAttribute="leading" id="smK-il-wnN"/>
+                <constraint firstItem="14" firstAttribute="top" secondItem="55" secondAttribute="bottom" constant="10" symbolic="YES" id="t3a-KC-idX"/>
+                <constraint firstAttribute="trailing" secondItem="96" secondAttribute="trailing" constant="20" symbolic="YES" id="tNC-oB-YIq"/>
+                <constraint firstItem="54" firstAttribute="firstBaseline" secondItem="56" secondAttribute="firstBaseline" id="tP6-mc-3PY"/>
+                <constraint firstItem="55" firstAttribute="firstBaseline" secondItem="57" secondAttribute="firstBaseline" id="vfp-D4-TRY"/>
+                <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="38" secondAttribute="trailing" constant="20" symbolic="YES" id="whs-lu-g35"/>
+                <constraint firstItem="136" firstAttribute="leading" secondItem="134" secondAttribute="trailing" constant="8" symbolic="YES" id="xuD-6K-pit"/>
+                <constraint firstItem="139" firstAttribute="centerY" secondItem="2" secondAttribute="centerY" id="yeO-bF-Dzl"/>
+                <constraint firstItem="8" firstAttribute="leading" secondItem="52" secondAttribute="trailing" constant="8" symbolic="YES" id="ypy-PJ-HoL"/>
+                <constraint firstItem="14" firstAttribute="leading" secondItem="136" secondAttribute="leading" id="zoY-h0-UF7"/>
+            </constraints>
+            <point key="canvasLocation" x="-192" y="129"/>
+        </customView>
+        <objectController id="99">
+            <declaredKeys>
+                <string>autoScrollOutput</string>
+                <string>beforeRunningCommand</string>
+                <string>input</string>
+                <string>inputFormat</string>
+                <string>output</string>
+                <string>outputFormat</string>
+                <string>outputPlacement</string>
+                <string>outputCaret</string>
+                <string>outputLocation</string>
+                <string>contentMatch</string>
+            </declaredKeys>
+            <connections>
+                <binding destination="-2" name="contentObject" keyPath="properties" id="109"/>
+            </connections>
+        </objectController>
+    </objects>
+</document>

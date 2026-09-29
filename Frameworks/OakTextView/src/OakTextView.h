@@ -1,7 +1,7 @@
 #import "GutterView.h"
-#import <OakAppKit/OakView.h>
-#import <theme/theme.h>
-#import <command/parser.h>
+#import <OakAppKit/src/OakView.h>
+#import <theme/src/theme.h>
+#import <command/src/parser.h>
 #import <oak/debug.h>
 
 extern int32_t const NSWrapColumnWindowWidth;
@@ -20,6 +20,12 @@ enum OTVFontSmoothing : NSUInteger
 	OTVFontSmoothingEnabled              = 1,
 	OTVFontSmoothingDisabledForDark      = 2,
 	OTVFontSmoothingDisabledForDarkHiDPI = 3,
+};
+
+typedef NS_ENUM(NSUInteger, OTVDecorationLayer)
+{
+	OTVDecorationLayerBackground,
+	OTVDecorationLayerForeground,
 };
 
 @protocol OakTextViewDelegate <NSObject>
@@ -44,6 +50,7 @@ enum OTVFontSmoothing : NSUInteger
 @property (nonatomic) BOOL                                  softWrap;
 @property (nonatomic) BOOL                                  scrollPastEnd;
 @property (nonatomic) BOOL                                  softTabs;
+@property (nonatomic, copy) void                            (^decorationDrawingBlock)(NSRect dirtyRect, OTVDecorationLayer layer);
 
 @property (nonatomic, readonly) BOOL                        hasMultiLineSelection;
 @property (nonatomic, readonly) BOOL                        hasSelection;
@@ -54,6 +61,10 @@ enum OTVFontSmoothing : NSUInteger
 
 - (GVLineRecord)lineRecordForPosition:(CGFloat)yPos;
 - (GVLineRecord)lineFragmentForLine:(NSUInteger)aLine column:(NSUInteger)aColumn;
+- (NSRect)rectForLine:(NSUInteger)lineNumber byteColumnRange:(NSRange)byteColumnRange;
+- (NSRect)caretRectForLine:(NSUInteger)lineNumber byteColumn:(NSUInteger)byteColumn;
+- (NSColor*)backgroundColorForLine:(NSUInteger)lineNumber;
+- (void)drawDiagnosticBackgroundInGutterRect:(NSRect)dirtyRect bounds:(NSRect)bounds;
 
 - (BOOL)filterDocumentThroughCommand:(NSString*)commandString input:(input::type)inputUnit output:(output::type)outputUnit;
 
@@ -68,8 +79,15 @@ enum OTVFontSmoothing : NSUInteger
 - (IBAction)toggleFoldingAtLine:(NSUInteger)lineNumber recursive:(BOOL)flag;
 - (IBAction)toggleShowInvisibles:(id)sender;
 - (IBAction)toggleScrollPastEnd:(id)sender;
+- (IBAction)toggleSoftWrap:(id)sender;
+- (IBAction)toggleShowWrapColumn:(id)sender;
+- (IBAction)takeWrapColumnFrom:(id)sender;
+- (IBAction)goToNextBookmark:(id)sender;
+- (IBAction)goToPreviousBookmark:(id)sender;
 
 - (IBAction)saveScratchMacro:(id)sender;
+- (IBAction)undo:(id)sender;
+- (IBAction)redo:(id)sender;
 
 - (void)performBundleItem:(bundles::item_ptr)anItem;
 - (void)updateEnvironment:(std::map<std::string, std::string>&)res;

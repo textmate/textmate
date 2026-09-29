@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="24765" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+    <dependencies>
+        <deployment identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="24765"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <customObject id="-2" userLabel="File's Owner" customClass="NewComparisonWindowController">
+            <connections>
+                <outlet property="compareButton" destination="compare-button" id="owner-compare"/>
+                <outlet property="leftDropImageView" destination="left-drop" id="owner-left-drop"/>
+                <outlet property="leftPathField" destination="left-path" id="owner-left-path"/>
+                <outlet property="rightDropImageView" destination="right-drop" id="owner-right-drop"/>
+                <outlet property="rightPathField" destination="right-path" id="owner-right-path"/>
+                <outlet property="window" destination="comparison-window" id="owner-window"/>
+            </connections>
+        </customObject>
+        <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
+        <customObject id="-3" userLabel="Application" customClass="NSObject"/>
+        <window title="New Comparison" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" restorable="NO" releasedWhenClosed="NO" animationBehavior="default" id="comparison-window">
+            <windowStyleMask key="styleMask" titled="YES" closable="YES"/>
+            <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
+            <rect key="contentRect" x="100" y="100" width="920" height="218"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1410"/>
+            <view key="contentView" id="content-view">
+                <rect key="frame" x="0.0" y="0.0" width="920" height="161"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="left-button">
+                        <rect key="frame" x="20" y="101" width="67" height="24"/>
+                        <buttonCell key="cell" type="push" title="Left…" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="left-button-cell">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                        <connections>
+                            <action selector="chooseLeftFile:" target="-2" id="choose-left-action"/>
+                            <outlet property="nextKeyView" destination="right-button" id="V87-vu-08t"/>
+                        </connections>
+                    </button>
+                    <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="right-button">
+                        <rect key="frame" x="20" y="65" width="67" height="24"/>
+                        <buttonCell key="cell" type="push" title="Right…" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="right-button-cell">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                        <connections>
+                            <action selector="chooseRightFile:" target="-2" id="choose-right-action"/>
+                            <outlet property="nextKeyView" destination="left-path" id="BRZ-vc-4EB"/>
+                        </connections>
+                    </button>
+                    <comboBox focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="left-path">
+                        <rect key="frame" x="95" y="101" width="659" height="24"/>
+                        <comboBoxCell key="cell" lineBreakMode="truncatingMiddle" selectable="YES" editable="YES" borderStyle="bezel" placeholderString="Choose the left file or folder" drawsBackground="YES" numberOfVisibleItems="10" id="left-path-cell">
+                            <font key="font" metaFont="system"/>
+                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                        </comboBoxCell>
+                        <connections>
+                            <outlet property="delegate" destination="-2" id="left-path-delegate"/>
+                            <outlet property="nextKeyView" destination="right-path" id="44e-hV-KMm"/>
+                        </connections>
+                    </comboBox>
+                    <comboBox focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="right-path">
+                        <rect key="frame" x="95" y="65" width="659" height="24"/>
+                        <comboBoxCell key="cell" lineBreakMode="truncatingMiddle" selectable="YES" editable="YES" borderStyle="bezel" placeholderString="Choose the right file or folder" drawsBackground="YES" numberOfVisibleItems="10" id="right-path-cell">
+                            <font key="font" metaFont="system"/>
+                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                        </comboBoxCell>
+                        <connections>
+                            <outlet property="delegate" destination="-2" id="right-path-delegate"/>
+                            <outlet property="nextKeyView" destination="compare-button" id="puI-yn-7He"/>
+                        </connections>
+                    </comboBox>
+                    <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="left-label">
+                        <rect key="frame" x="779" y="137" width="32" height="16"/>
+                        <textFieldCell key="cell" lineBreakMode="clipping" alignment="center" title="Left" id="left-label-cell">
+                            <font key="font" metaFont="system"/>
+                            <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                        </textFieldCell>
+                    </textField>
+                    <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="right-label">
+                        <rect key="frame" x="848" y="137" width="40" height="16"/>
+                        <textFieldCell key="cell" lineBreakMode="clipping" alignment="center" title="Right" id="right-label-cell">
+                            <font key="font" metaFont="system"/>
+                            <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                        </textFieldCell>
+                    </textField>
+                    <imageView translatesAutoresizingMaskIntoConstraints="NO" id="left-drop" customClass="FileDropImageView">
+                        <rect key="frame" x="759" y="61" width="71" height="71"/>
+                        <constraints>
+                            <constraint firstAttribute="width" constant="65" id="urY-0t-7ay"/>
+                        </constraints>
+                        <imageCell key="cell" refusesFirstResponder="YES" alignment="center" imageScaling="proportionallyUpOrDown" imageFrameStyle="grayBezel" id="left-image-cell"/>
+                    </imageView>
+                    <imageView translatesAutoresizingMaskIntoConstraints="NO" id="right-drop" customClass="FileDropImageView">
+                        <rect key="frame" x="832" y="61" width="71" height="71"/>
+                        <constraints>
+                            <constraint firstAttribute="width" constant="65" id="63A-T7-xWh"/>
+                            <constraint firstAttribute="height" constant="65" id="fdG-cZ-5ty"/>
+                        </constraints>
+                        <imageCell key="cell" refusesFirstResponder="YES" alignment="center" imageScaling="proportionallyUpOrDown" imageFrameStyle="grayBezel" id="right-image-cell"/>
+                    </imageView>
+                    <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="cancel-button">
+                        <rect key="frame" x="729" y="20" width="80" height="24"/>
+                        <buttonCell key="cell" type="push" title="Cancel" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="cancel-button-cell">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                        <connections>
+                            <action selector="cancel:" target="-2" id="cancel-action"/>
+                            <outlet property="nextKeyView" destination="left-button" id="gyX-cp-Ojh"/>
+                        </connections>
+                    </button>
+                    <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="compare-button">
+                        <rect key="frame" x="821" y="20" width="79" height="24"/>
+                        <buttonCell key="cell" type="push" title="Compare" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="compare-button-cell">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                            <string key="keyEquivalent" base64-UTF8="YES">
+DQ
+</string>
+                        </buttonCell>
+                        <connections>
+                            <action selector="compare:" target="-2" id="compare-action"/>
+                            <outlet property="nextKeyView" destination="cancel-button" id="sS2-JZ-9Pp"/>
+                        </connections>
+                    </button>
+                </subviews>
+                <constraints>
+                    <constraint firstItem="compare-button" firstAttribute="top" secondItem="right-drop" secondAttribute="bottom" constant="20" symbolic="YES" id="4jb-Jv-l0d"/>
+                    <constraint firstItem="compare-button" firstAttribute="width" secondItem="cancel-button" secondAttribute="width" id="7bI-wF-T3D"/>
+                    <constraint firstItem="right-path" firstAttribute="leading" secondItem="left-path" secondAttribute="leading" id="BMR-nG-0Qd"/>
+                    <constraint firstItem="right-path" firstAttribute="trailing" secondItem="left-path" secondAttribute="trailing" id="HmR-e0-50z"/>
+                    <constraint firstItem="compare-button" firstAttribute="centerY" secondItem="cancel-button" secondAttribute="centerY" id="NRN-UT-ooL"/>
+                    <constraint firstItem="compare-button" firstAttribute="leading" secondItem="cancel-button" secondAttribute="trailing" constant="12" symbolic="YES" id="Slt-Pq-57G"/>
+                    <constraint firstAttribute="bottom" secondItem="compare-button" secondAttribute="bottom" constant="20" symbolic="YES" id="WXp-lV-YTs"/>
+                    <constraint firstItem="cancel-button" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="content-view" secondAttribute="leading" constant="20" symbolic="YES" id="iFm-GA-8HI"/>
+                    <constraint firstItem="right-button" firstAttribute="trailing" secondItem="left-button" secondAttribute="trailing" id="jhg-N3-AvK"/>
+                    <constraint firstItem="left-drop" firstAttribute="leading" secondItem="left-path" secondAttribute="trailing" constant="8" symbolic="YES" id="k2T-Yu-vBv"/>
+                    <constraint firstAttribute="trailing" secondItem="compare-button" secondAttribute="trailing" constant="20" symbolic="YES" id="lax-hn-ttn"/>
+                    <constraint firstItem="left-button" firstAttribute="leading" secondItem="content-view" secondAttribute="leading" constant="20" symbolic="YES" id="left-button-leading"/>
+                    <constraint firstItem="left-button" firstAttribute="top" secondItem="content-view" secondAttribute="top" constant="36" id="left-button-top"/>
+                    <constraint firstItem="left-drop" firstAttribute="height" constant="65" id="left-drop-height"/>
+                    <constraint firstItem="left-drop" firstAttribute="top" secondItem="left-label" secondAttribute="bottom" constant="8" symbolic="YES" id="left-drop-top"/>
+                    <constraint firstItem="left-label" firstAttribute="centerX" secondItem="left-drop" secondAttribute="centerX" id="left-label-center-x"/>
+                    <constraint firstItem="left-label" firstAttribute="top" secondItem="content-view" secondAttribute="top" constant="8" id="left-label-top"/>
+                    <constraint firstItem="left-path" firstAttribute="centerY" secondItem="left-button" secondAttribute="centerY" id="left-path-center-y"/>
+                    <constraint firstItem="left-path" firstAttribute="leading" secondItem="left-button" secondAttribute="trailing" constant="8" symbolic="YES" id="left-path-leading"/>
+                    <constraint firstItem="right-button" firstAttribute="leading" secondItem="left-button" secondAttribute="leading" id="right-button-leading"/>
+                    <constraint firstItem="right-button" firstAttribute="top" secondItem="left-button" secondAttribute="bottom" constant="12" symbolic="YES" id="right-button-top"/>
+                    <constraint firstItem="right-drop" firstAttribute="leading" secondItem="left-drop" secondAttribute="trailing" constant="8" symbolic="YES" id="right-drop-leading"/>
+                    <constraint firstItem="right-drop" firstAttribute="top" secondItem="left-drop" secondAttribute="top" id="right-drop-top"/>
+                    <constraint firstItem="right-label" firstAttribute="centerX" secondItem="right-drop" secondAttribute="centerX" id="right-label-center-x"/>
+                    <constraint firstItem="right-label" firstAttribute="top" secondItem="left-label" secondAttribute="top" id="right-label-top"/>
+                    <constraint firstItem="right-path" firstAttribute="centerY" secondItem="right-button" secondAttribute="centerY" id="right-path-center-y"/>
+                    <constraint firstAttribute="trailing" secondItem="right-drop" secondAttribute="trailing" constant="20" symbolic="YES" id="scD-ou-ESQ"/>
+                </constraints>
+            </view>
+            <connections>
+                <outlet property="initialFirstResponder" destination="left-path" id="initial-first-responder"/>
+            </connections>
+            <point key="canvasLocation" x="139" y="171"/>
+        </window>
+    </objects>
+</document>

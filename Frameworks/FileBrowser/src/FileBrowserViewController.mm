@@ -1,4 +1,5 @@
 #import "FileBrowserViewController.h"
+#import <oak/TextMateResponderActions.h>
 #import "FileBrowserView.h"
 #import "FileBrowserOutlineView.h"
 #import "FileBrowserNotifications.h"
@@ -9,23 +10,23 @@
 #import "OFB/OFBHeaderView.h"
 #import "OFB/OFBActionsView.h"
 #import "OFB/OFBFinderTagsChooser.h"
-#import <MenuBuilder/MenuBuilder.h>
-#import <OakAppKit/NSMenuItem Additions.h>
-#import <OakAppKit/NSImage Additions.h>
-#import <OakAppKit/OakAppKit.h>
-#import <OakAppKit/OakOpenWithMenu.h>
-#import <OakAppKit/OakFinderTag.h>
-#import <OakAppKit/OakZoomingIcon.h>
-#import <OakFoundation/OakFoundation.h>
-#import <OakCommand/OakCommand.h>
-#import <TMFileReference/TMFileReference.h>
-#import <Preferences/Keys.h>
-#import <bundles/bundles.h>
-#import <ns/ns.h>
-#import <regexp/glob.h>
-#import <settings/settings.h>
-#import <text/ctype.h>
-#import <text/utf8.h>
+#import <MenuBuilder/src/MenuBuilder.h>
+#import <OakAppKit/src/NSMenuItem Additions.h>
+#import <OakAppKit/src/NSImage Additions.h>
+#import <OakAppKit/src/OakAppKit.h>
+#import <OakAppKit/src/OakOpenWithMenu.h>
+#import <OakAppKit/src/OakFinderTag.h>
+#import <OakAppKit/src/OakZoomingIcon.h>
+#import <OakFoundation/src/OakFoundation.h>
+#import <OakCommand/src/OakCommand.h>
+#import <TMFileReference/src/TMFileReference.h>
+#import <Preferences/src/Keys.h>
+#import <bundles/src/bundles.h>
+#import <ns/src/ns.h>
+#import <regexp/src/glob.h>
+#import <settings/src/settings.h>
+#import <text/src/my_ctype.h>
+#import <text/src/utf8.h>
 
 static bool is_binary (std::string const& path)
 {
@@ -83,7 +84,7 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 	return res;
 }
 
-@interface FileBrowserViewController () <NSMenuDelegate, NSOutlineViewDataSource, NSOutlineViewDelegate, NSTextFieldDelegate, QLPreviewPanelDataSource, OakUserDefaultsObserver>
+@interface FileBrowserViewController () <NSMenuDelegate, NSMenuItemValidation, NSOutlineViewDataSource, NSOutlineViewDelegate, NSTextFieldDelegate, QLPreviewPanelDataSource, OakUserDefaultsObserver>
 {
 	NSUndoManager* _fileBrowserUndoManager;
 	NSArray<FileItem*>* _previewItems;
@@ -99,7 +100,6 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 	NSInteger _nestedCollapsingChildrenCounter;
 }
 @property (nonatomic) BOOL canExpandSymbolicLinks;
-@property (nonatomic) BOOL canExpandPackages;
 @property (nonatomic) BOOL sortDirectoriesBeforeFiles;
 
 @property (nonatomic) BOOL showExcludedItems;
@@ -132,7 +132,7 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 
 + (void)initialize
 {
-	[NSApplication.sharedApplication registerServicesMenuSendTypes:@[ NSFilenamesPboardType, NSURLPboardType ] returnTypes:@[ ]];
+	[NSApplication.sharedApplication registerServicesMenuSendTypes:@[ NSPasteboardTypeFileURL, NSPasteboardTypeURL ] returnTypes:@[ ]];
 
 	[NSUserDefaults.standardUserDefaults registerDefaults:@{
 		kUserDefaultsFoldersOnTopKey: [[[NSUserDefaults alloc] initWithSuiteName:@"com.apple.finder"] objectForKey:@"_FXSortFoldersFirst"] ?: @NO,
@@ -147,7 +147,6 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 		_loadingURLs       = [NSMutableSet set];
 
 		_canExpandSymbolicLinks     = [NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsAllowExpandingLinksKey];
-		_canExpandPackages          = [NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsAllowExpandingPackagesKey];
 		_sortDirectoriesBeforeFiles = [NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsFoldersOnTopKey];
 
 		_expandedURLs = [NSMutableSet set];
@@ -182,7 +181,6 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 - (void)userDefaultsDidChange:(id)sender
 {
 	self.canExpandSymbolicLinks     = [NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsAllowExpandingLinksKey];
-	self.canExpandPackages          = [NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsAllowExpandingPackagesKey];
 	self.sortDirectoriesBeforeFiles = [NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsFoldersOnTopKey];
 }
 
@@ -211,7 +209,7 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 
 		outlineView.menu = [[NSMenu alloc] init];
 		outlineView.menu.delegate = self;
-
+		outlineView.style = NSTableViewStyleSourceList;
 		OFBHeaderView* headerView = _fileBrowserView.headerView;
 		headerView.goBackButton.target  = self;
 		headerView.goBackButton.action  = @selector(goBack:);
@@ -375,7 +373,7 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 		[menu removeItemAtIndex:menu.numberOfItems-1];
 
 	FileItem* fileItem = self.fileItem;
-	while(fileItem = [FileItem fileItemWithURL:fileItem.parentURL])
+	while((fileItem = [FileItem fileItemWithURL:fileItem.parentURL]))
 	{
 		NSMenuItem* menuItem = [menu addItemWithTitle:fileItem.localizedName action:@selector(takeURLFrom:) keyEquivalent:@""];
 		menuItem.representedObject = fileItem.resolvedURL;
@@ -405,16 +403,14 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 	NSEventModifierFlags eventFlags = NSApp.currentEvent.modifierFlags & (NSEventModifierFlagControl|NSEventModifierFlagOption|NSEventModifierFlagShift|NSEventModifierFlagCommand);
 	BOOL isMouseEvent               = eventType == NSEventTypeLeftMouseUp || eventType == NSEventTypeOtherMouseUp || eventType == NSEventTypeOtherMouseUp;
 	BOOL commandKeyDown             = isMouseEvent && eventFlags == NSEventModifierFlagCommand;
-	BOOL optionKeyDown              = isMouseEvent && eventFlags == NSEventModifierFlagOption;
-	BOOL treatPackageAsDirectory    = [NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsAllowExpandingPackagesKey];
 
 	for(FileItem* item in items)
 	{
 		if(commandKeyDown)
 			[itemsToShowInFinder addObject:item];
-		else if(item.isDirectory && (treatPackageAsDirectory || !item.isPackage) || item.isLinkToDirectory && (treatPackageAsDirectory || !item.isLinkToPackage) || optionKeyDown && (item.isPackage || item.isLinkToDirectory))
+		else if(item.isDirectory || item.isLinkToDirectory)
 			[itemsToShowInFileBrowser addObject:item];
-		else if(item.isPackage || item.isLinkToPackage || item.URL.isFileURL && is_binary(item.URL.fileSystemRepresentation))
+		else if(item.URL.isFileURL && is_binary(item.URL.fileSystemRepresentation))
 			[itemsToOpen addObject:item];
 		else
 			[itemsToOpenInTextMate addObject:item];
@@ -436,7 +432,7 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 		[NSWorkspace.sharedWorkspace activateFileViewerSelectingURLs:[itemsToShowInFinder valueForKeyPath:@"URL"]];
 
 	for(FileItem* item in itemsToOpen)
-		[NSWorkspace.sharedWorkspace openFile:item.resolvedURL.path];
+		[NSWorkspace.sharedWorkspace openURL:item.resolvedURL];
 
 	if(itemsToOpenInTextMate.count > 0)
 		[self.delegate fileBrowser:self openURLs:[itemsToOpenInTextMate valueForKeyPath:@"URL"]];
@@ -490,11 +486,10 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 
 	MBMenu const items = {
 		{ @"Open",                    @selector(openSelectedItems:)           },
-		{ openWithTitle,              @selector(openWithMenuAction:), .delegate = _openWithMenuDelegate, .representedObject = openWithAppURL },
+		MBMenuItem{ openWithTitle,              @selector(openWithMenuAction:) }.withDelegate(_openWithMenuDelegate).withRepresentedObject(openWithAppURL),
 		{ /* -------- */ },
 		{ @"Show Original",           @selector(showOriginal:)                },
 		{ @"Show Enclosing Folder",   @selector(showEnclosingFolder:)         },
-		{ @"Show Package Contents",   @selector(showPackageContents:)         },
 		{ @"Show in Finder",          @selector(showSelectedEntriesInFinder:) },
 		{ /* -------- */ },
 		{ @"New File",                @selector(newDocumentInDirectory:), @"n", NSEventModifierFlagCommand|NSEventModifierFlagControl },
@@ -510,12 +505,12 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 		{ /* -------- */ .ref = &insertBundleItemsMenuItem },
 		{ /* -------- */ },
 		{ @"Copy",                    @selector(copy:)                                                                            },
-		{ @"Copy as Pathname",        @selector(copyAsPathname:),      @"",  NSEventModifierFlagOption, .tag = kRequiresSelectionTag, .alternate = YES },
+		MBMenuItem{ @"Copy as Pathname",        @selector(copyAsPathname:),      @"",  NSEventModifierFlagOption }.withTag(kRequiresSelectionTag).withAlternate(YES),
 		{ @"Paste",                   @selector(paste:),                      },
 		{ @"Move Items Here",         @selector(pasteNext:),                  },
 		{ @"Create Link to Items",    @selector(createLinkToPasteboardItems:) },
 		{ /* -------- */ },
-		{ @"Finder Tag", .tag = kRequiresSelectionTag, .ref = &finderTagsMenuItem },
+		MBMenuItem{ @"Finder Tag" }.withTag(kRequiresSelectionTag).withRef(&finderTagsMenuItem),
 		{ /* -------- */ },
 		{ @"Undo",                    @selector(undo:) },
 		{ @"Redo",                    @selector(redo:) },
@@ -636,11 +631,6 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 		[self goToURL:enclosingFolder];
 		[self expandURLs:nil selectURLs:@[ url ]];
 	}
-}
-
-- (void)showPackageContents:(id)sender
-{
-	[self goToURL:self.previewableItems.firstObject.resolvedURL];
 }
 
 - (void)showSelectedEntriesInFinder:(id)sender
@@ -941,7 +931,7 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 
 - (NSArray<NSURL*>*)URLsFromPasteboard:(NSPasteboard*)pboard
 {
-	return [pboard readObjectsForClasses:@[ [NSURL class] ] options:nil];
+	return [pboard readObjectsForClasses:@[ [NSURL class] ] options:@{ NSPasteboardURLReadingFileURLsOnlyKey: @YES }];
 }
 
 - (void)didChangeFinderTag:(OFBFinderTagsChooser*)finderTagsChooser
@@ -1014,15 +1004,13 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 	else if(menuItem.action == @selector(openSelectedItems:))
 		hideAndDisable = previewableItems.count == 0;
 	else if(menuItem.action == @selector(openWithMenuAction:))
-		hideAndDisable = previewableItems.count == 0 || selectedItems.count == 1 && selectedItems.firstObject.isApplication;
+		hideAndDisable = previewableItems.count == 0 || (selectedItems.count == 1 && selectedItems.firstObject.isApplication);
 	else if(menuItem.action == @selector(showSelectedEntriesInFinder:))
 		hideAndDisable = previewableItems.count == 0;
 	else if(menuItem.action == @selector(showOriginal:))
 		hideAndDisable = selectedItems.count != 1 || [selectedItems.firstObject.URL isEqual:selectedItems.firstObject.resolvedURL];
 	else if(menuItem.action == @selector(showEnclosingFolder:))
 		hideAndDisable = selectedItems.count != 1 || [selectedItems.firstObject.parentURL isEqual:((FileItem*)[self.outlineView parentForItem:selectedItems.firstObject]).URL ?: selectedItems.firstObject.parentURL];
-	else if(menuItem.action == @selector(showPackageContents:))
-		hideAndDisable = previewableItems.count != 1 || previewableItems.firstObject.isPackage == NO;
 	else if(menuItem.action == @selector(editSelectedEntries:))
 		hideAndDisable = previewableItems.count != 1 || previewableItems.firstObject.canRename == NO;
 	else if(menuItem.action == @selector(addSelectedEntriesToFavorites:))
@@ -1047,7 +1035,7 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 		hideAndDisable = previewableItems.count == 0;
 
 	menuItem.hidden = hideAndDisable && menuItem.target == self;
-	if(res = res && !hideAndDisable)
+	if((res = res && !hideAndDisable))
 	{
 		NSString* copyAsPathnameTitle = previewableItems.count > 1 ? @"Copy%@ as Pathnames" : @"Copy%@ as Pathname";
 
@@ -1169,7 +1157,7 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 
 - (id)sessionState
 {
-	if(NSKeyedArchiver* coder = [[NSKeyedArchiver alloc] init])
+	if(NSKeyedArchiver* coder = [[NSKeyedArchiver alloc] initRequiringSecureCoding:NO])
 	{
 		[self encodeRestorableStateWithCoder:coder];
 		[coder finishEncoding];
@@ -1182,7 +1170,7 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 {
 	if([state isKindOfClass:[NSData class]])
 	{
-		if(NSCoder* coder = [[NSKeyedUnarchiver alloc] initForReadingWithData:state])
+		if(NSCoder* coder = [[NSKeyedUnarchiver alloc] initForReadingFromData:state error:nil])
 			[self restoreStateWithCoder:coder];
 	}
 	else if([state isKindOfClass:[NSDictionary class]])
@@ -1364,27 +1352,7 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 	while(FileItem* item = stack.firstObject)
 	{
 		[stack removeObjectAtIndex:0];
-		if(item.isLinkToDirectory && (_canExpandPackages || !item.isLinkToPackage))
-			[self.outlineView reloadItem:item reloadChildren:YES];
-		if([self.outlineView isExpandable:item] && item.arrangedChildren)
-			[stack addObjectsFromArray:item.arrangedChildren];
-	}
-}
-
-- (void)setCanExpandPackages:(BOOL)flag
-{
-	if(_canExpandPackages == flag)
-		return;
-	_canExpandPackages = flag;
-
-	if(!self.fileItem)
-		return;
-
-	NSMutableArray<FileItem*>* stack = [self.fileItem.arrangedChildren mutableCopy];
-	while(FileItem* item = stack.firstObject)
-	{
-		[stack removeObjectAtIndex:0];
-		if(item.isDirectory && item.isPackage)
+		if(item.isLinkToDirectory)
 			[self.outlineView reloadItem:item reloadChildren:YES];
 		if([self.outlineView isExpandable:item] && item.arrangedChildren)
 			[stack addObjectsFromArray:item.arrangedChildren];
@@ -1835,7 +1803,7 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 
 		for(FileItem* child in item.arrangedChildren)
 		{
-			if((flag && !child.isSymbolicLink || [_expandedURLs containsObject:child.URL] || [child.URL.scheme isEqualToString:@"scm"]) && [self.outlineView isExpandable:child])
+			if(((flag && !child.isSymbolicLink) || [_expandedURLs containsObject:child.URL] || [child.URL.scheme isEqualToString:@"scm"]) && [self.outlineView isExpandable:child])
 				[self.outlineView expandItem:child expandChildren:flag && !child.isSymbolicLink];
 
 			if([_selectedURLs containsObject:child.URL])
@@ -2053,7 +2021,7 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 
 - (BOOL)outlineView:(NSOutlineView*)outlineView isItemExpandable:(FileItem*)item
 {
-	return item.isDirectory && (_canExpandPackages || !item.isPackage) || (_canExpandSymbolicLinks && item.isLinkToDirectory && (_canExpandPackages || !item.isLinkToPackage));
+	return item.isDirectory || (_canExpandSymbolicLinks && item.isLinkToDirectory);
 }
 
 - (BOOL)outlineView:(NSOutlineView*)outlineView isGroupItem:(FileItem*)item
@@ -2218,7 +2186,7 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 
 - (id)validRequestorForSendType:(NSString*)sendType returnType:(NSString*)returnType
 {
-	return returnType == nil && sendType != nil && [@[ NSFilenamesPboardType, NSURLPboardType ] containsObject:sendType] ? self : nil;
+	return returnType == nil && sendType != nil && [@[ NSPasteboardTypeFileURL, NSPasteboardTypeURL ] containsObject:sendType] ? self : nil;
 }
 
 - (BOOL)writeSelectionToPasteboard:(NSPasteboard*)pboard types:(NSArray*)types
@@ -2242,15 +2210,16 @@ static NSMutableIndexSet* MutableLongestCommonSubsequence (NSArray* lhs, NSArray
 		return NSDragOperationNone;
 
 	NSPasteboard* pboard  = info.draggingPasteboard;
-	NSArray* draggedPaths = [pboard propertyListForType:NSFilenamesPboardType];
+	NSArray<NSURL*>* draggedURLs = [self URLsFromPasteboard:pboard];
 
 	dev_t targetDevice   = path::device(dropURL.fileSystemRepresentation);
 	BOOL linkOperation   = (NSApp.currentEvent.modifierFlags & NSEventModifierFlagControl) == NSEventModifierFlagControl;
 	BOOL toggleOperation = (NSApp.currentEvent.modifierFlags & NSEventModifierFlagOption) == NSEventModifierFlagOption;
 
 	// We accept the drop as long as it is valid for at least one of the items
-	for(NSString* draggedPath in draggedPaths)
+	for(NSURL* draggedURL in draggedURLs)
 	{
+		NSString* draggedPath = draggedURL.path;
 		BOOL sameSource = (path::device(draggedPath.fileSystemRepresentation) == targetDevice);
 		NSDragOperation operation = linkOperation ? NSDragOperationLink : ((sameSource != toggleOperation) ? NSDragOperationMove : NSDragOperationCopy);
 

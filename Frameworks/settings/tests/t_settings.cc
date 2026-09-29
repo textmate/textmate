@@ -1,5 +1,5 @@
 #include <test/jail.h>
-#include <settings/settings.h>
+#include <settings/src/settings.h>
 
 void test_settings ()
 {

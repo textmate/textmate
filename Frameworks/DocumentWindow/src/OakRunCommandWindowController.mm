@@ -1,8 +1,8 @@
 #import "OakRunCommandWindowController.h"
-#import <OakFoundation/OakHistoryList.h>
-#import <OakFoundation/OakFoundation.h>
-#import <OakAppKit/OakUIConstructionFunctions.h>
-#import <OakTextView/OakTextView.h>
+#import <OakFoundation/src/OakHistoryList.h>
+#import <OakFoundation/src/OakFoundation.h>
+#import <OakAppKit/src/OakUIConstructionFunctions.h>
+#import <OakTextView/src/OakTextView.h>
 
 static NSString* const kUserDefaultsFilterOutputType = @"filterOutputType";
 

@@ -59,7 +59,7 @@ namespace ng
 
 		_buffer.remove_callback(&_buffer_callback);
 		ranges_t res;
-		size_t rev;
+		size_t rev = _buffer.revision();
 		while(res.empty())
 		{
 			ASSERT(_index != 0);
@@ -83,7 +83,7 @@ namespace ng
 
 		_buffer.remove_callback(&_buffer_callback);
 		ranges_t res;
-		size_t rev;
+		size_t rev = _buffer.revision();
 		while(res.empty())
 		{
 			ASSERT(_index != _records.size());

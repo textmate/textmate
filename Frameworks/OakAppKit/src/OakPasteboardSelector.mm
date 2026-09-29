@@ -6,7 +6,7 @@
 
 #import "OakPasteboardSelector.h"
 #import "OakAppKit.h"
-#import <ns/ns.h>
+#import <ns/src/ns.h>
 #import <oak/oak.h>
 #import <oak/debug.h>
 
@@ -56,38 +56,14 @@ static size_t line_count (std::string const& text)
 	}
 }
 
-- (NSSet*)myAccessibilityAttributeNames
+- (NSAccessibilityRole)accessibilityRole
 {
-	static NSSet* set = [NSSet setWithArray:@[
-		NSAccessibilityRoleAttribute,
-		NSAccessibilityValueAttribute,
-	]];
-	return set;
+	return NSAccessibilityStaticTextRole;
 }
 
-- (NSArray*)accessibilityAttributeNames
+- (NSString*)accessibilityValue
 {
-	static NSArray* attributes = [[[self myAccessibilityAttributeNames] setByAddingObjectsFromArray:[super accessibilityAttributeNames]] allObjects];
-	return attributes;
-}
-
-- (BOOL)accessibilityIsAttributeSettable:(NSString*)attribute
-{
-	if([[self myAccessibilityAttributeNames] containsObject:attribute])
-		return NO;
-	return [super accessibilityIsAttributeSettable:attribute];
-}
-
-- (id)accessibilityAttributeValue:(NSString*)attribute
-{
-	id value = nil;
-	if([attribute isEqualToString:NSAccessibilityRoleAttribute])
-		value = NSAccessibilityStaticTextRole;
-	else if([attribute isEqualToString:NSAccessibilityValueAttribute])
-		value = [self objectValue];
-	else
-		value = [super accessibilityAttributeValue:attribute];
-	return value;
+	return [self objectValue];
 }
 
 - (size_t)lineCountForText:(NSString*)text
@@ -183,7 +159,7 @@ static size_t line_count (std::string const& text)
 		[tableView setNextResponder:[self nextResponder]];
 	}
 
-	if(tableView = aTableView)
+	if((tableView = aTableView))
 	{
 		[tableView setDataSource:self];
 		[tableView setDelegate:self];

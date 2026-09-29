@@ -1,4 +1,4 @@
-#include <editor/editor.h>
+#include <editor/src/editor.h>
 
 void test_insert ()
 {

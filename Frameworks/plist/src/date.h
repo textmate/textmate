@@ -1,6 +1,8 @@
 #ifndef OAK_DATE_H_AIWA64W2
 #define OAK_DATE_H_AIWA64W2
 
+#import <CoreFoundation/CoreFoundation.h>
+
 namespace oak
 {
 	// the ‘at’ value is seconds relative to Jan 1 2001 00:00:00 GMT

@@ -1,0 +1,262 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PREFIX="${PREFIX:-$ROOT/vendor/prebuilt}"
+BUILD_ROOT="${BUILD_ROOT:-$PREFIX/build}"
+SOURCE_ROOT="${SOURCE_ROOT:-$PREFIX/src}"
+DEPLOYMENT_TARGET="${MACOSX_DEPLOYMENT_TARGET:-10.13}"
+ARCHS="${ARCHS:-arm64 x86_64}"
+JOBS="${JOBS:-$(sysctl -n hw.ncpu)}"
+
+BOOST_VERSION="${BOOST_VERSION:-1.88.0}"
+CAPNP_VERSION="${CAPNP_VERSION:-1.2.0}"
+SPARSEHASH_VERSION="${SPARSEHASH_VERSION:-2.0.4}"
+
+BOOST_ARCHIVE="boost_${BOOST_VERSION//./_}.tar.bz2"
+BOOST_URL="${BOOST_URL:-https://archives.boost.io/release/$BOOST_VERSION/source/$BOOST_ARCHIVE}"
+CAPNP_ARCHIVE="capnproto-c++-$CAPNP_VERSION.tar.gz"
+CAPNP_URL="${CAPNP_URL:-https://github.com/capnproto/capnproto/archive/refs/tags/v$CAPNP_VERSION.tar.gz}"
+SPARSEHASH_ARCHIVE="sparsehash-$SPARSEHASH_VERSION.tar.gz"
+SPARSEHASH_URL="${SPARSEHASH_URL:-https://github.com/sparsehash/sparsehash/archive/refs/tags/sparsehash-$SPARSEHASH_VERSION.tar.gz}"
+ONIGMO_SRC="${ONIGMO_SRC:-$ROOT/vendor/Onigmo/vendor}"
+
+log()
+{
+	printf '\033[1m==>\033[0m %s\n' "$*"
+}
+
+fail()
+{
+	printf 'error: %s\n' "$*" >&2
+	exit 1
+}
+
+require_tool()
+{
+	command -v "$1" >/dev/null 2>&1 || fail "missing required tool: $1"
+}
+
+download()
+{
+	local url="$1"
+	local output="$2"
+
+	if [[ -f "$output" ]]; then
+		return
+	fi
+
+	log "Downloading $(basename "$output")"
+	curl --fail --location --output "$output" "$url"
+}
+
+extract_once()
+{
+	local archive="$1"
+	local marker="$2"
+
+	if [[ -f "$marker" ]]; then
+		return
+	fi
+
+	log "Extracting $(basename "$archive")"
+	mkdir -p "$(dirname "$marker")"
+	tar -xf "$archive" -C "$(dirname "$marker")"
+	touch "$marker"
+}
+
+find_dir()
+{
+	local base="$1"
+	local name="$2"
+	find "$base" -mindepth 1 -maxdepth 1 -type d -name "$name" -print -quit
+}
+
+merge_library()
+{
+	local name="$1"
+	shift
+
+	local inputs=()
+	for arch in $ARCHS; do
+		inputs+=("$PREFIX/$arch/lib/$name")
+	done
+
+	log "Creating universal $name"
+	lipo -create "${inputs[@]}" -output "$PREFIX/lib/$name"
+	ranlib "$PREFIX/lib/$name"
+	lipo -info "$PREFIX/lib/$name"
+}
+
+copy_headers_from_arch()
+{
+	local arch="$1"
+
+	log "Installing headers from $arch build"
+	mkdir -p "$PREFIX/include"
+	rsync -a "$PREFIX/$arch/include/" "$PREFIX/include/"
+}
+
+build_boost_for_arch()
+{
+	local arch="$1"
+	local src="$2"
+	local install="$PREFIX/$arch"
+	local build_dir="$BUILD_ROOT/boost-$arch"
+	local boost_architecture
+
+	case "$arch" in
+		arm64) boost_architecture=arm ;;
+		x86_64) boost_architecture=x86 ;;
+		*) fail "unsupported architecture for Boost: $arch" ;;
+	esac
+
+	log "Building Boost $BOOST_VERSION for $arch"
+	mkdir -p "$build_dir"
+	(
+		cd "$src"
+		./bootstrap.sh --with-libraries=filesystem,regex --prefix="$install"
+		./b2 \
+			--build-dir="$build_dir" \
+			--prefix="$install" \
+			-j"$JOBS" \
+			toolset=clang \
+			variant=release \
+			link=static \
+			runtime-link=shared \
+			threading=multi \
+			address-model=64 \
+			architecture="$boost_architecture" \
+			cxxflags="-arch $arch -mmacosx-version-min=$DEPLOYMENT_TARGET" \
+			linkflags="-arch $arch -mmacosx-version-min=$DEPLOYMENT_TARGET" \
+			--with-filesystem \
+			--with-regex \
+			install
+	)
+}
+
+build_capnp_for_arch()
+{
+	local arch="$1"
+	local src="$2"
+	local install="$PREFIX/$arch"
+	local cmake_src="$src"
+
+	if [[ -f "$src/c++/CMakeLists.txt" ]]; then
+		cmake_src="$src/c++"
+	fi
+
+	log "Building Cap'n Proto $CAPNP_VERSION for $arch"
+	cmake -S "$cmake_src" -B "$BUILD_ROOT/capnp-$arch" \
+		-DCMAKE_BUILD_TYPE=Release \
+		-DCMAKE_INSTALL_PREFIX="$install" \
+		-DCMAKE_OSX_ARCHITECTURES="$arch" \
+		-DCMAKE_OSX_DEPLOYMENT_TARGET="$DEPLOYMENT_TARGET" \
+		-DBUILD_SHARED_LIBS=OFF \
+		-DBUILD_TESTING=OFF \
+		-DCAPNP_BUILD_TESTS=OFF
+	cmake --build "$BUILD_ROOT/capnp-$arch" --target install --parallel "$JOBS"
+}
+
+build_onigmo_for_arch()
+{
+	local arch="$1"
+	local install="$PREFIX/$arch"
+	local build_dir="$BUILD_ROOT/onigmo-$arch"
+	local sdkroot
+
+	case "$arch" in
+		arm64|x86_64) ;;
+		*) fail "unsupported architecture for Onigmo: $arch" ;;
+	esac
+
+	[[ -f "$ONIGMO_SRC/configure" ]] || fail "could not find Onigmo configure script at $ONIGMO_SRC"
+	sdkroot="$(xcrun --sdk macosx --show-sdk-path)"
+
+	log "Building Onigmo for $arch"
+	rm -rf "$build_dir"
+	mkdir -p "$build_dir"
+	rsync -a --exclude .git "$ONIGMO_SRC/" "$build_dir/"
+	(
+		cd "$build_dir"
+		CC="$(xcrun -find clang)" \
+		CFLAGS="-arch $arch -isysroot $sdkroot -mmacosx-version-min=$DEPLOYMENT_TARGET" \
+		LDFLAGS="-arch $arch -isysroot $sdkroot -mmacosx-version-min=$DEPLOYMENT_TARGET" \
+		./configure \
+			--prefix="$install" \
+			--disable-shared \
+			--enable-static
+		make -j"$JOBS" install
+	)
+}
+
+install_sparsehash()
+{
+	local src="$1"
+	local install="$PREFIX/sparsehash-native"
+
+	log "Installing google-sparsehash $SPARSEHASH_VERSION headers"
+	(
+		cd "$src"
+		./configure --prefix="$install"
+		make -j"$JOBS" install
+	)
+	rsync -a "$install/include/" "$PREFIX/include/"
+}
+
+main()
+{
+	require_tool curl
+	require_tool tar
+	require_tool cmake
+	require_tool lipo
+	require_tool ranlib
+	require_tool rsync
+	require_tool make
+	require_tool xcrun
+
+	mkdir -p "$PREFIX/lib" "$PREFIX/include" "$BUILD_ROOT" "$SOURCE_ROOT"
+
+	local archive_dir="$SOURCE_ROOT/archives"
+	mkdir -p "$archive_dir"
+
+	download "$BOOST_URL" "$archive_dir/$BOOST_ARCHIVE"
+	download "$CAPNP_URL" "$archive_dir/$CAPNP_ARCHIVE"
+	download "$SPARSEHASH_URL" "$archive_dir/$SPARSEHASH_ARCHIVE"
+
+	extract_once "$archive_dir/$BOOST_ARCHIVE" "$SOURCE_ROOT/.boost-extracted"
+	extract_once "$archive_dir/$CAPNP_ARCHIVE" "$SOURCE_ROOT/.capnp-extracted"
+	extract_once "$archive_dir/$SPARSEHASH_ARCHIVE" "$SOURCE_ROOT/.sparsehash-extracted"
+
+	local boost_src
+	local capnp_src
+	local sparsehash_src
+	boost_src="$(find_dir "$SOURCE_ROOT" "boost_${BOOST_VERSION//./_}")"
+	capnp_src="$(find_dir "$SOURCE_ROOT" "capnproto-$CAPNP_VERSION")"
+	sparsehash_src="$(find_dir "$SOURCE_ROOT" "sparsehash-sparsehash-$SPARSEHASH_VERSION")"
+
+	[[ -n "$boost_src" ]] || fail "could not find extracted Boost sources"
+	[[ -n "$capnp_src" ]] || fail "could not find extracted Cap'n Proto sources"
+	[[ -n "$sparsehash_src" ]] || fail "could not find extracted google-sparsehash sources"
+
+	for arch in $ARCHS; do
+		build_boost_for_arch "$arch" "$boost_src"
+		build_capnp_for_arch "$arch" "$capnp_src"
+		build_onigmo_for_arch "$arch"
+	done
+
+	copy_headers_from_arch "$(printf '%s\n' $ARCHS | sed -n '1p')"
+	install_sparsehash "$sparsehash_src"
+
+	merge_library libboost_filesystem.a
+	merge_library libboost_regex.a
+	merge_library libcapnp.a
+	merge_library libkj.a
+	merge_library libonig.a
+
+	log "Done"
+	printf 'Headers:   %s\n' "$PREFIX/include"
+	printf 'Libraries: %s\n' "$PREFIX/lib"
+}
+
+main "$@"

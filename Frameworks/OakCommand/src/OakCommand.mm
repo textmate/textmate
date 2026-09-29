@@ -1,24 +1,24 @@
 #import "OakCommand.h"
-#import <document/OakDocument.h>
-#import <document/OakDocumentController.h>
+#import <document/src/OakDocument.h>
+#import <document/src/OakDocumentController.h>
 #import <oak/datatypes.h>
-#import <cf/cf.h>
-#import <ns/ns.h>
-#import <io/environment.h>
-#import <io/pipe.h>
-#import <text/tokenize.h>
-#import <text/trim.h>
-#import <text/encode.h>
-#import <text/parse.h>
-#import <command/runner.h> // bundle_command_t, fix_shebang, create_script_path
-#import <bundles/wrappers.h>
-#import <regexp/format_string.h>
-#import <OakAppKit/OakToolTip.h>
-#import <HTMLOutput/HTMLOutput.h>
-#import <HTMLOutputWindow/HTMLOutputWindow.h>
-#import <OakSystem/process.h>
-#import <settings/settings.h>
-#import <BundleEditor/BundleEditor.h>
+#import <cf/src/cf.h>
+#import <ns/src/ns.h>
+#import <io/src/environment.h>
+#import <io/src/pipe.h>
+#import <text/src/tokenize.h>
+#import <text/src/trim.h>
+#import <text/src/encode.h>
+#import <text/src/parse.h>
+#import <command/src/runner.h> // bundle_command_t, fix_shebang, create_script_path
+#import <bundles/src/wrappers.h>
+#import <regexp/src/format_string.h>
+#import <OakAppKit/src/OakToolTip.h>
+#import <HTMLOutput/src/HTMLOutput.h>
+#import <HTMLOutputWindow/src/HTMLOutputWindow.h>
+#import <OakSystem/src/process.h>
+#import <settings/src/settings.h>
+#import <BundleEditor/src/BundleEditor.h>
 
 NSNotificationName const OakCommandDidTerminateNotification = @"OakCommandDidTerminateNotification";
 NSString* const OakCommandErrorDomain                       = @"com.macromates.TextMate.ErrorDomain";
@@ -68,7 +68,7 @@ static std::tuple<pid_t, int, int> my_fork (char const* cmd, int inputRead, std:
 
 	oak::c_array env(environment);
 
-	pid_t pid = vfork();
+	pid_t pid = fork();
 	if(pid == 0)
 	{
 		int const signals[] = { SIGINT, SIGTERM, SIGPIPE, SIGUSR1 };
@@ -703,7 +703,7 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 	[self.client URLProtocol:self didReceiveResponse:response cacheStoragePolicy:NSURLCacheStorageNotAllowed];
 
 	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-		int len;
+		ssize_t len = 0;
 		char buf[8192];
 		__block BOOL keepRunning = YES;
 		@try {
@@ -711,7 +711,7 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 			{
 				NSData* data = [NSData dataWithBytes:buf length:len];
 				dispatch_sync(dispatch_get_main_queue(), ^{
-					if(keepRunning = !_stop)
+					if((keepRunning = !_stop))
 						[self.client URLProtocol:self didLoadData:data];
 				});
 			}

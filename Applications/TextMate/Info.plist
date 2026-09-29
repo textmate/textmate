@@ -2,67 +2,13 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>CFBundleName</key>
-	<string>${TARGET_NAME}</string>
-	<key>CFBundleShortVersionString</key>
-	<string>${APP_VERSION}</string>
-	<key>CFBundleVersion</key>
-	<string>9800</string>
-	<key>CFBundleIdentifier</key>
-	<string>com.macromates.${TARGET_NAME}</string>
 	<key>CFBundleDevelopmentRegion</key>
-	<string>English</string>
-	<key>CFBundleExecutable</key>
-	<string>${TARGET_NAME}</string>
-	<key>CFBundleHelpBookFolder</key>
-	<string>${TARGET_NAME} Help</string>
-	<key>CFBundleHelpBookName</key>
-	<string>${TARGET_NAME} 2 Help</string>
-	<key>CFBundleIconFile</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
 	<string>TextMate</string>
-	<key>CFBundleInfoDictionaryVersion</key>
-	<string>6.0</string>
-	<key>CFBundlePackageType</key>
-	<string>APPL</string>
-	<key>CFBundleSignature</key>
-	<string>avin</string>
-	<key>LSApplicationCategoryType</key>
-	<string>public.app-category.developer-tools</string>
-	<key>LSMinimumSystemVersion</key>
-	<string>${APP_MIN_OS}</string>
-	<key>NSAppleScriptEnabled</key>
-	<true/>
-	<key>NSAppTransportSecurity</key>
-	<dict>
-		<key>NSAllowsArbitraryLoads</key>
-		<true/>
-	</dict>
-	<key>NSAppleEventsUsageDescription</key>
-	<string>TextMate needs to send back a response to the application from which “Edit in TextMate” was invoked. This is done using AppleEvents.</string>
-	<key>NSContactsUsageDescription</key>
-	<string>Your email address is used as a default contact address when you create a new bundle. This can be changed in the bundle editor after the bundle has been created.</string>
-	<key>NSMainNibFile</key>
-	<string>MainMenu</string>
-	<key>NSPrincipalClass</key>
-	<string>NSApplication</string>
-	<key>NSSupportsAutomaticGraphicsSwitching</key>
-	<true/>
-	<key>CFBundleURLTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleURLName</key>
-			<string>TextMate URL</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>txmt</string>
-			</array>
-		</dict>
-	</array>
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>ADA</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -73,8 +19,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>AppleScript</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -85,8 +29,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>AppleScript</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -97,8 +39,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>ActionScript</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -109,8 +49,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>ASP</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -121,8 +59,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>ASPNET</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -133,8 +69,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>BibTeX</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -145,8 +79,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>C</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -157,8 +89,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>C++</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -169,8 +99,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>C#</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -181,8 +109,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>CoffeeScript</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -193,8 +119,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>CFDG</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -205,8 +129,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>Text</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -217,8 +139,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>Text</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -229,8 +149,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>CGI</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -241,8 +159,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>Config</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -253,8 +169,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>CSS</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -265,8 +179,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>Blank</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -277,8 +189,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>Diff</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -289,8 +199,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>DTD</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -301,8 +209,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>Dylan</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -313,8 +219,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>Erlang</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -325,8 +229,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>F-Script</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -337,8 +239,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>Fortran</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -349,8 +249,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>Fortran</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -361,8 +259,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>Fortran</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -373,8 +269,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>Fortran</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -385,8 +279,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>H</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -397,8 +289,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>H++</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -409,8 +299,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>GTD</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -421,8 +309,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>Haskell</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -433,8 +319,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>HTML</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -445,8 +329,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>Inc</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -457,8 +339,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>iCal</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -469,8 +349,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>INI</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -481,8 +359,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>Io</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -493,8 +369,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>Java</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -505,8 +379,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>Java</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -517,8 +389,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>Java</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -529,8 +399,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>JavaScript</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -541,8 +409,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>JSP</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -553,8 +419,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>JSON</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -565,8 +429,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>Blank</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -577,8 +439,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>Lisp</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -589,8 +449,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>Blank</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -601,8 +459,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>Logo</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -613,8 +469,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>Lua</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -625,8 +479,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>Markdown</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -637,8 +489,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>Wiki</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -649,8 +499,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>ASM</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -661,8 +509,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>Modula</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -673,8 +519,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>Wiki</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -685,8 +529,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>Obj-C</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -697,8 +539,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>Obj-C++</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -709,8 +549,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>OCaml</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -721,8 +559,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>Pascal</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -733,8 +569,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>Perl</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -745,8 +579,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>PHP</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -757,8 +589,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>PostScript</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -769,8 +599,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>PostScript</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -781,8 +609,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>Plist</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -793,8 +619,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>Python</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -805,8 +629,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>R</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -817,8 +639,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>Ragel</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -829,8 +649,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>Blank</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -841,8 +659,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>reST</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -853,8 +669,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>RHTML</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -865,8 +679,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>SQL</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -877,8 +689,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>Ruby</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -889,8 +699,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>Scheme</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -901,8 +709,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>Blank</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -913,8 +719,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>Shell</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -925,8 +729,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>Slate</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -937,8 +739,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>SQL</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -949,8 +749,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>SML</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -961,8 +759,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>Strings</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -973,8 +769,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>SVG</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -985,8 +779,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>SWIG</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -997,8 +789,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>Tcl</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -1009,8 +799,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>TeX</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -1021,8 +809,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>Text</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -1033,8 +819,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>Textile</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -1045,8 +829,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>XHTML</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -1057,8 +839,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>XML</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -1069,8 +849,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>XSL</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -1081,8 +859,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>Blank</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -1093,8 +869,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>VisualBasic</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -1105,8 +879,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>YAML</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -1117,8 +889,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>TextMate Snippet</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -1129,8 +899,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>TextMate Macro</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -1141,8 +909,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>TextMate Grammar</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -1153,8 +919,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>TextMate Settings</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -1165,8 +929,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>TextMate Command</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -1177,8 +939,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>TextMate Bundle Item</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -1189,8 +949,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>TextMate Theme</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -1201,8 +959,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>Text</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -1213,8 +969,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>TextMate Bundle</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -1225,8 +979,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>TextMate PlugIn</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -1241,8 +993,6 @@
 			<array>
 				<string>nfo</string>
 			</array>
-			<key>CFBundleTypeIconFile</key>
-			<string>Text</string>
 			<key>CFBundleTypeName</key>
 			<string>Text document</string>
 			<key>CFBundleTypeRole</key>
@@ -1264,8 +1014,6 @@
 				<string>fxscript</string>
 				<string>lgt</string>
 			</array>
-			<key>CFBundleTypeIconFile</key>
-			<string>Blank</string>
 			<key>CFBundleTypeName</key>
 			<string>Source</string>
 			<key>CFBundleTypeRole</key>
@@ -1301,16 +1049,12 @@
 				<string>yy</string>
 				<string>*</string>
 			</array>
-			<key>CFBundleTypeIconFile</key>
-			<string>Blank</string>
 			<key>CFBundleTypeName</key>
 			<string>Document</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>GenericDocumentIcon</string>
 			<key>CFBundleTypeName</key>
 			<string>Document</string>
 			<key>CFBundleTypeOSTypes</key>
@@ -1335,6 +1079,340 @@
 			</array>
 		</dict>
 	</array>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleHelpBookFolder</key>
+	<string>${TARGET_NAME} Help</string>
+	<key>CFBundleHelpBookName</key>
+	<string>${TARGET_NAME} 2 Help</string>
+	<key>CFBundleIconFile</key>
+	<string>TextMate</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundlePackageType</key>
+	<string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>TextMate URL</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>txmt</string>
+			</array>
+		</dict>
+	</array>
+	<key>CFBundleVersion</key>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.developer-tools</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
+	<key>NSAppleEventsUsageDescription</key>
+	<string>TextMate needs to send back a response to the application from which “Edit in TextMate” was invoked. This is done using AppleEvents.</string>
+	<key>NSAppleScriptEnabled</key>
+	<true/>
+	<key>NSContactsUsageDescription</key>
+	<string>Your email address is used as a default contact address when you create a new bundle. This can be changed in the bundle editor after the bundle has been created.</string>
+	<key>NSMainNibFile</key>
+	<string>MainMenu</string>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
+	<key>NSSupportsAutomaticGraphicsSwitching</key>
+	<true/>
+	<key>TMSigningKeys</key>
+	<dict>
+		<key>org.textmate.duff</key>
+		<string>-----BEGIN PUBLIC KEY-----
+MIIBtjCCASsGByqGSM44BAEwggEeAoGBAPIE9PpXPK3y2eBDJ0dnR/D8xR1TiT9m
+8DnPXYqkxwlqmjSShmJEmxYycnbliv2JpojYF4ikBUPJPuerlZfOvUBC99ERAgz7
+N1HYHfzFIxVo1oTKWurFJ1OOOsfg8AQDBDHnKpS1VnwVoDuvO05gK8jjQs9E5LcH
+e/opThzSrI7/AhUAy02E9H7EOwRyRNLofdtPxpa10o0CgYBKDfcBscidAoH4pkHR
+IOEGTCYl3G2Pd1yrblCp0nCCUEBCnvmrWVSXUTVa2/AyOZUTN9uZSC/Kq9XYgqwj
+hgzqa8h/a8yD+ao4q8WovwGeb6Iso3WlPl8waz6EAPR/nlUTnJ4jzr9t6iSH9owS
+vAmWrgeboia0CI2AH++liCDvigOBhAACgYAFWO66xFvmF2tVIB+4E7CwhrSi2uIk
+deBrpmNcZZ+AVFy1RXJelNe/cZ1aXBYskn/57xigklpkfHR6DGqpEbm6KC/47Jfy
+y5GEx+F/eBWEePi90XnLinytjmXRmS2FNqX6D15XNG1xJfjociA8bzC7s4gfeTUd
+lpQkBq2z71yitA==
+-----END PUBLIC KEY-----
+</string>
+	</dict>
+	<key>UTExportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>com.apple.property-list</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>TextMate Snippet</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBackgroundName</key>
+				<string>TextMateDocumentFill</string>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Snippet</string>
+			</dict>
+			<key>UTTypeIdentifier</key>
+			<string>com.macromates.textmate.snippet</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>tmSnippet</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>com.apple.property-list</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>TextMate Macro</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBackgroundName</key>
+				<string>TextMateDocumentFill</string>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Macro</string>
+			</dict>
+			<key>UTTypeIdentifier</key>
+			<string>com.macromates.textmate.macro</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>tmMacro</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>com.apple.property-list</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>TextMate Language Grammar</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBackgroundName</key>
+				<string>TextMateDocumentFill</string>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Grammar</string>
+			</dict>
+			<key>UTTypeIdentifier</key>
+			<string>com.macromates.textmate.language</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>tmLanguage</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>com.apple.property-list</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>TextMate Preferences</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBackgroundName</key>
+				<string>TextMateDocumentFill</string>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Settings</string>
+			</dict>
+			<key>UTTypeIdentifier</key>
+			<string>com.macromates.textmate.preferences</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>tmPreferences</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>com.apple.property-list</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>TextMate Command</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBackgroundName</key>
+				<string>TextMateDocumentFill</string>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Command</string>
+			</dict>
+			<key>UTTypeIdentifier</key>
+			<string>com.macromates.textmate.command</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>tmCommand</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>com.apple.property-list</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>TextMate Drag Command</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBackgroundName</key>
+				<string>TextMateDocumentFill</string>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Drag</string>
+			</dict>
+			<key>UTTypeIdentifier</key>
+			<string>com.macromates.textmate.drag-command</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>tmDragCommand</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>com.apple.property-list</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>TextMate Theme</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBackgroundName</key>
+				<string>TextMateDocumentFill</string>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Theme</string>
+			</dict>
+			<key>UTTypeIdentifier</key>
+			<string>com.macromates.textmate.theme</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>tmTheme</string>
+					<string>tmtheme</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.text</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>TextMate release notes</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Notes</string>
+			</dict>
+			<key>UTTypeIdentifier</key>
+			<string>com.macromates.textmate.release-notes</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>tmReleaseNotes</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>com.apple.package</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>TextMate Bundle</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBackgroundName</key>
+				<string>TextMateDocumentFill</string>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Bundle</string>
+			</dict>
+			<key>UTTypeIdentifier</key>
+			<string>com.macromates.textmate.bundle</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>tmBundle</string>
+					<string>tmbundle</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>com.apple.package</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>TextMate PlugIn</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBackgroundName</key>
+				<string>TextMateDocumentFill</string>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>PlugIn</string>
+			</dict>
+			<key>UTTypeIdentifier</key>
+			<string>com.macromates.textmate.plugin</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>tmPlugIn</string>
+					<string>tmPlugin</string>
+					<string>tmplugin</string>
+				</array>
+			</dict>
+		</dict>
+	</array>
 	<key>UTImportedTypeDeclarations</key>
 	<array>
 		<dict>
@@ -1344,8 +1422,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Ada source</string>
-			<key>UTTypeIconFile</key>
-			<string>ADA</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>ADA</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>public.ada-source</string>
 			<key>UTTypeReferenceURL</key>
@@ -1369,8 +1452,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>AppleScript source</string>
-			<key>UTTypeIconFile</key>
-			<string>AppleScript</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Script</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>com.apple.applescript.text</string>
 			<key>UTTypeTagSpecification</key>
@@ -1388,8 +1476,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Compiled AppleScript</string>
-			<key>UTTypeIconFile</key>
-			<string>AppleScript</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Script</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>com.apple.applescript.script</string>
 			<key>UTTypeTagSpecification</key>
@@ -1409,8 +1502,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>ActionScript source</string>
-			<key>UTTypeIconFile</key>
-			<string>ActionScript</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>AS</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>com.adobe.actionscript</string>
 			<key>UTTypeReferenceURL</key>
@@ -1432,8 +1530,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>ASP document</string>
-			<key>UTTypeIconFile</key>
-			<string>ASP</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>ASP</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>com.microsoft.asp</string>
 			<key>UTTypeReferenceURL</key>
@@ -1454,8 +1557,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>ASP.NET document</string>
-			<key>UTTypeIconFile</key>
-			<string>ASPNET</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>ASPNET</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>com.microsoft.asp.net</string>
 			<key>UTTypeReferenceURL</key>
@@ -1478,8 +1586,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>BibTeX Database</string>
-			<key>UTTypeIconFile</key>
-			<string>BibTeX</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>BibTeX</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>org.tug.tex.bibtex</string>
 			<key>UTTypeTagSpecification</key>
@@ -1497,8 +1610,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>C source</string>
-			<key>UTTypeIconFile</key>
-			<string>C</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>C</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>public.c-source</string>
 			<key>UTTypeTagSpecification</key>
@@ -1516,8 +1634,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>C++ source</string>
-			<key>UTTypeIconFile</key>
-			<string>C++</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>C++</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>public.c-plus-plus-source</string>
 			<key>UTTypeTagSpecification</key>
@@ -1539,8 +1662,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>C# source</string>
-			<key>UTTypeIconFile</key>
-			<string>C#</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>C#</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>com.microsoft.c-sharp</string>
 			<key>UTTypeReferenceURL</key>
@@ -1560,8 +1688,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>CoffeeScript source</string>
-			<key>UTTypeIconFile</key>
-			<string>CoffeeScript</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Coffee</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>org.coffeescript.coffeescript</string>
 			<key>UTTypeReferenceURL</key>
@@ -1581,8 +1714,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>ContextFree Design Document</string>
-			<key>UTTypeIconFile</key>
-			<string>CFDG</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>CFDG</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>org.contextfreeart.contextfree</string>
 			<key>UTTypeReferenceURL</key>
@@ -1602,6 +1740,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>delimited text values</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Data</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>public.delimited-values-text</string>
 		</dict>
@@ -1612,8 +1757,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Comma Separated Values</string>
-			<key>UTTypeIconFile</key>
-			<string>Text</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>CSV</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>public.comma-separated-values-text</string>
 			<key>UTTypeReferenceURL</key>
@@ -1638,8 +1788,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Tab Separated Values</string>
-			<key>UTTypeIconFile</key>
-			<string>Text</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>TSV</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>public.tab-separated-values-text</string>
 			<key>UTTypeTagSpecification</key>
@@ -1659,8 +1814,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>CGI script</string>
-			<key>UTTypeIconFile</key>
-			<string>CGI</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>CGI</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>com.macromates.textmate.cgi-script</string>
 			<key>UTTypeTagSpecification</key>
@@ -1679,8 +1839,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Configuration file</string>
-			<key>UTTypeIconFile</key>
-			<string>Config</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Config</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>com.macromates.textmate.config-file</string>
 			<key>UTTypeTagSpecification</key>
@@ -1701,8 +1866,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Cascading Style Sheet</string>
-			<key>UTTypeIconFile</key>
-			<string>CSS</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>CSS</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>org.w3.css</string>
 			<key>UTTypeReferenceURL</key>
@@ -1724,8 +1894,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>D source</string>
-			<key>UTTypeIconFile</key>
-			<string>D</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>D</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>org.dlang.d</string>
 			<key>UTTypeReferenceURL</key>
@@ -1746,8 +1921,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Differences File</string>
-			<key>UTTypeIconFile</key>
-			<string>Diff</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Patch</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>public.patch-file</string>
 			<key>UTTypeReferenceURL</key>
@@ -1767,8 +1947,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Document Type Definition</string>
-			<key>UTTypeIconFile</key>
-			<string>DTD</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>DTD</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>org.w3.xml-dtd</string>
 			<key>UTTypeReferenceURL</key>
@@ -1790,8 +1975,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Dylan source</string>
-			<key>UTTypeIconFile</key>
-			<string>Dylan</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Dylan</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>public.dylan-source</string>
 			<key>UTTypeReferenceURL</key>
@@ -1811,8 +2001,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Erlang source</string>
-			<key>UTTypeIconFile</key>
-			<string>Erlang</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Erlang</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>org.erlang.erlang</string>
 			<key>UTTypeReferenceURL</key>
@@ -1833,8 +2028,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>F-Script source</string>
-			<key>UTTypeIconFile</key>
-			<string>F-Script</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>F-Script</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>org.fscript.fscript</string>
 			<key>UTTypeReferenceURL</key>
@@ -1854,8 +2054,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Fortran source</string>
-			<key>UTTypeIconFile</key>
-			<string>Fortran</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Fortran</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>public.fortran-source</string>
 			<key>UTTypeTagSpecification</key>
@@ -1875,8 +2080,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Fortran source</string>
-			<key>UTTypeIconFile</key>
-			<string>Fortran</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Fortran</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>public.fortran-77-source</string>
 			<key>UTTypeTagSpecification</key>
@@ -1894,8 +2104,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Fortran source</string>
-			<key>UTTypeIconFile</key>
-			<string>Fortran</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Fortran</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>public.fortran-90-source</string>
 			<key>UTTypeTagSpecification</key>
@@ -1913,8 +2128,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Fortran source</string>
-			<key>UTTypeIconFile</key>
-			<string>Fortran</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Fortran</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>public.fortran-95-source</string>
 			<key>UTTypeTagSpecification</key>
@@ -1932,8 +2152,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Header</string>
-			<key>UTTypeIconFile</key>
-			<string>H</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>H</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>public.c-header</string>
 			<key>UTTypeTagSpecification</key>
@@ -1952,8 +2177,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>C++ Header</string>
-			<key>UTTypeIconFile</key>
-			<string>H++</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>H++</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>public.c-plus-plus-header</string>
 			<key>UTTypeTagSpecification</key>
@@ -1974,8 +2204,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>GTD document</string>
-			<key>UTTypeIconFile</key>
-			<string>GTD</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>GTD</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>com.macromates.textmate.gtd</string>
 			<key>UTTypeReferenceURL</key>
@@ -1996,8 +2231,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Haskell source</string>
-			<key>UTTypeIconFile</key>
-			<string>Haskell</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Haskell</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>org.haskell.haskell</string>
 			<key>UTTypeReferenceURL</key>
@@ -2018,8 +2258,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>HTML document</string>
-			<key>UTTypeIconFile</key>
-			<string>HTML</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>HTML</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>public.html</string>
 			<key>UTTypeReferenceURL</key>
@@ -2046,8 +2291,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Include file</string>
-			<key>UTTypeIconFile</key>
-			<string>Inc</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Inc</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>com.macromates.textmate.include-file</string>
 			<key>UTTypeTagSpecification</key>
@@ -2067,8 +2317,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>iCalendar schedule</string>
-			<key>UTTypeIconFile</key>
-			<string>iCal</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>iCal</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>com.apple.ical.ics</string>
 			<key>UTTypeReferenceURL</key>
@@ -2091,8 +2346,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>MS Windows initialization file</string>
-			<key>UTTypeIconFile</key>
-			<string>INI</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>INI</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>com.microsoft.ini</string>
 			<key>UTTypeTagSpecification</key>
@@ -2110,8 +2370,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Io source</string>
-			<key>UTTypeIconFile</key>
-			<string>Io</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Io</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>org.iolanguage.io</string>
 			<key>UTTypeReferenceURL</key>
@@ -2131,8 +2396,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Java source</string>
-			<key>UTTypeIconFile</key>
-			<string>Java</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Java</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>com.sun.java-source</string>
 			<key>UTTypeReferenceURL</key>
@@ -2153,8 +2423,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>BeanShell script</string>
-			<key>UTTypeIconFile</key>
-			<string>Java</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Java</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>org.beanshell.beanshell</string>
 			<key>UTTypeReferenceURL</key>
@@ -2174,8 +2449,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Java Properties File</string>
-			<key>UTTypeIconFile</key>
-			<string>Java</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Java</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>com.sun.java-properties</string>
 			<key>UTTypeReferenceURL</key>
@@ -2196,8 +2476,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>JavaScript source</string>
-			<key>UTTypeIconFile</key>
-			<string>JavaScript</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>JS</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>com.netscape.javascript-source</string>
 			<key>UTTypeReferenceURL</key>
@@ -2222,8 +2507,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Java Server Page</string>
-			<key>UTTypeIconFile</key>
-			<string>JSP</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>JSP</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>com.sun.java-server-pages</string>
 			<key>UTTypeReferenceURL</key>
@@ -2243,8 +2533,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>JSON file</string>
-			<key>UTTypeIconFile</key>
-			<string>JSON</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>JSON</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>public.json</string>
 			<key>UTTypeReferenceURL</key>
@@ -2266,8 +2561,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>LDAP Data Interchange Format</string>
-			<key>UTTypeIconFile</key>
-			<string>Blank</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>LDIF</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>org.ietf.ldap-data-interchange-format</string>
 			<key>UTTypeReferenceURL</key>
@@ -2287,8 +2587,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Lisp source</string>
-			<key>UTTypeIconFile</key>
-			<string>Lisp</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Lisp</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>com.macromates.textmate.lisp</string>
 			<key>UTTypeTagSpecification</key>
@@ -2311,8 +2616,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Log File</string>
-			<key>UTTypeIconFile</key>
-			<string>Blank</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>LOG</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>com.apple.log</string>
 			<key>UTTypeTagSpecification</key>
@@ -2330,8 +2640,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Logo source</string>
-			<key>UTTypeIconFile</key>
-			<string>Logo</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Logo</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>com.macromates.textmate.logo</string>
 			<key>UTTypeTagSpecification</key>
@@ -2349,8 +2664,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Lua source</string>
-			<key>UTTypeIconFile</key>
-			<string>Lua</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Lua</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>org.lua.lua</string>
 			<key>UTTypeReferenceURL</key>
@@ -2370,8 +2690,15 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Markdown document</string>
-			<key>UTTypeIconFile</key>
-			<string>Markdown</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>md</string>
+				<key>UTTypeSymbolName</key>
+				<string>arrow.down</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>net.daringfireball.markdown</string>
 			<key>UTTypeReferenceURL</key>
@@ -2394,8 +2721,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Mediawiki document</string>
-			<key>UTTypeIconFile</key>
-			<string>Wiki</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Wiki</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>org.mediawiki.wiki-source</string>
 			<key>UTTypeReferenceURL</key>
@@ -2417,8 +2749,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>MIPS assembler source</string>
-			<key>UTTypeIconFile</key>
-			<string>ASM</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>ASM</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>com.mips.mips-assembler</string>
 			<key>UTTypeTagSpecification</key>
@@ -2439,8 +2776,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Modula-3 source</string>
-			<key>UTTypeIconFile</key>
-			<string>Modula</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Modula</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>com.dec.modula-3</string>
 			<key>UTTypeTagSpecification</key>
@@ -2459,8 +2801,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>MoinMoin document</string>
-			<key>UTTypeIconFile</key>
-			<string>Wiki</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Wiki</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>in.moinmo.wiki-source</string>
 			<key>UTTypeReferenceURL</key>
@@ -2480,8 +2827,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Objective-C source</string>
-			<key>UTTypeIconFile</key>
-			<string>Obj-C</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Obj-C</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>public.objective-c-source</string>
 			<key>UTTypeReferenceURL</key>
@@ -2501,8 +2853,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Objective-C++ source</string>
-			<key>UTTypeIconFile</key>
-			<string>Obj-C++</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Obj-C++</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>public.objective-c-plus-plus-source</string>
 			<key>UTTypeReferenceURL</key>
@@ -2522,8 +2879,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>OCaml source</string>
-			<key>UTTypeIconFile</key>
-			<string>OCaml</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>OCaml</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>org.ocaml.ocaml</string>
 			<key>UTTypeReferenceURL</key>
@@ -2546,8 +2908,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Pascal source</string>
-			<key>UTTypeIconFile</key>
-			<string>Pascal</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Pascal</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>public.pascal-source</string>
 			<key>UTTypeTagSpecification</key>
@@ -2566,8 +2933,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Patch file</string>
-			<key>UTTypeIconFile</key>
-			<string>Patch</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Patch</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>public.patch-file</string>
 			<key>UTTypeTagSpecification</key>
@@ -2585,8 +2957,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Perl source</string>
-			<key>UTTypeIconFile</key>
-			<string>Perl</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Perl</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>public.perl-script</string>
 			<key>UTTypeReferenceURL</key>
@@ -2611,8 +2988,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>PHP source</string>
-			<key>UTTypeIconFile</key>
-			<string>PHP</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>PHP</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>public.php-script</string>
 			<key>UTTypeReferenceURL</key>
@@ -2643,8 +3025,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>PostScript</string>
-			<key>UTTypeIconFile</key>
-			<string>PostScript</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>PS</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>com.adobe.postscript</string>
 			<key>UTTypeReferenceURL</key>
@@ -2666,8 +3053,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Encapsulated PostScript</string>
-			<key>UTTypeIconFile</key>
-			<string>PostScript</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>EPS</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>com.adobe.encapsulated-postscript</string>
 			<key>UTTypeReferenceURL</key>
@@ -2694,8 +3086,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Property List</string>
-			<key>UTTypeIconFile</key>
-			<string>Plist</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Plist</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>com.apple.property-list</string>
 			<key>UTTypeReferenceURL</key>
@@ -2718,8 +3115,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Python source</string>
-			<key>UTTypeIconFile</key>
-			<string>Python</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Python</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>public.python-script</string>
 			<key>UTTypeReferenceURL</key>
@@ -2744,8 +3146,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>R source</string>
-			<key>UTTypeIconFile</key>
-			<string>R</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>R</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>org.r-project.r</string>
 			<key>UTTypeReferenceURL</key>
@@ -2766,8 +3173,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Ragel source</string>
-			<key>UTTypeIconFile</key>
-			<string>Ragel</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Ragel</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>org.complang.ragel</string>
 			<key>UTTypeReferenceURL</key>
@@ -2788,8 +3200,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Remind document</string>
-			<key>UTTypeIconFile</key>
-			<string>Blank</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>REM</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>com.roaringpenguin.remind</string>
 			<key>UTTypeReferenceURL</key>
@@ -2810,8 +3227,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>reStructuredText document</string>
-			<key>UTTypeIconFile</key>
-			<string>reST</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>reST</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>org.python.restructuredtext</string>
 			<key>UTTypeReferenceURL</key>
@@ -2832,8 +3254,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>HTML with embedded Ruby</string>
-			<key>UTTypeIconFile</key>
-			<string>RHTML</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>RHTML</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>org.ruby-lang.eruby</string>
 			<key>UTTypeReferenceURL</key>
@@ -2853,8 +3280,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>SQL with embedded Ruby</string>
-			<key>UTTypeIconFile</key>
-			<string>SQL</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>SQL</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>org.rubyonrails.erb-sql</string>
 			<key>UTTypeTagSpecification</key>
@@ -2872,8 +3304,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Ruby source</string>
-			<key>UTTypeIconFile</key>
-			<string>Ruby</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Ruby</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>public.ruby-script</string>
 			<key>UTTypeReferenceURL</key>
@@ -2898,8 +3335,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Scheme source</string>
-			<key>UTTypeIconFile</key>
-			<string>Scheme</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Scheme</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>com.macromates.textmate.scheme</string>
 			<key>UTTypeReferenceURL</key>
@@ -2920,8 +3362,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Setext document</string>
-			<key>UTTypeIconFile</key>
-			<string>Blank</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>EXT</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>com.macromates.textmate.setext</string>
 			<key>UTTypeReferenceURL</key>
@@ -2941,8 +3388,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Shell script</string>
-			<key>UTTypeIconFile</key>
-			<string>Shell</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Shell</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>public.shell-script</string>
 			<key>UTTypeTagSpecification</key>
@@ -2966,8 +3418,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Slate source</string>
-			<key>UTTypeIconFile</key>
-			<string>Slate</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Slate</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>org.slatelanguage.slate</string>
 			<key>UTTypeReferenceURL</key>
@@ -2987,8 +3444,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>SQL source</string>
-			<key>UTTypeIconFile</key>
-			<string>SQL</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>SQL</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>org.iso.sql</string>
 			<key>UTTypeTagSpecification</key>
@@ -3008,8 +3470,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Standard ML source</string>
-			<key>UTTypeIconFile</key>
-			<string>SML</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>SML</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>com.macromates.textmate.standard-ml</string>
 			<key>UTTypeTagSpecification</key>
@@ -3027,8 +3494,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Strings document</string>
-			<key>UTTypeIconFile</key>
-			<string>Strings</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Strings</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>com.apple.xcode.strings-text</string>
 			<key>UTTypeTagSpecification</key>
@@ -3046,8 +3518,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Scalable vector graphics (SVG)</string>
-			<key>UTTypeIconFile</key>
-			<string>SVG</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>SVG</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>public.svg-image</string>
 			<key>UTTypeReferenceURL</key>
@@ -3075,8 +3552,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>SWIG source</string>
-			<key>UTTypeIconFile</key>
-			<string>SWIG</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>SWIG</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>org.swig.swig</string>
 			<key>UTTypeReferenceURL</key>
@@ -3097,8 +3579,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Tcl source</string>
-			<key>UTTypeIconFile</key>
-			<string>Tcl</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Tcl</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>tk.tcl.tcl</string>
 			<key>UTTypeReferenceURL</key>
@@ -3120,8 +3607,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>TeX document</string>
-			<key>UTTypeIconFile</key>
-			<string>TeX</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>TeX</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>org.tug.tex</string>
 			<key>UTTypeReferenceURL</key>
@@ -3143,8 +3635,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Plain text document</string>
-			<key>UTTypeIconFile</key>
-			<string>Text</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Text</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>public.plain-text</string>
 			<key>UTTypeTagSpecification</key>
@@ -3172,8 +3669,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Textile document</string>
-			<key>UTTypeIconFile</key>
-			<string>Textile</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>Textile</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>com.textpattern.textile</string>
 			<key>UTTypeTagSpecification</key>
@@ -3191,8 +3693,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>XHTML document</string>
-			<key>UTTypeIconFile</key>
-			<string>XHTML</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>XHTML</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>public.xhtml</string>
 			<key>UTTypeReferenceURL</key>
@@ -3216,8 +3723,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>XML document</string>
-			<key>UTTypeIconFile</key>
-			<string>XML</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>XML</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>public.xml</string>
 			<key>UTTypeReferenceURL</key>
@@ -3249,8 +3761,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>XSL stylesheet</string>
-			<key>UTTypeIconFile</key>
-			<string>XSL</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>XSL</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>org.w3.xsl</string>
 			<key>UTTypeReferenceURL</key>
@@ -3274,8 +3791,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Electronic business card</string>
-			<key>UTTypeIconFile</key>
-			<string>Blank</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>VCF</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>public.vcard</string>
 			<key>UTTypeTagSpecification</key>
@@ -3304,8 +3826,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>VisualBasic</string>
-			<key>UTTypeIconFile</key>
-			<string>Visual Basic source</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>VB</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>com.microsoft.visual-basic</string>
 			<key>UTTypeReferenceURL</key>
@@ -3325,8 +3852,13 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>YAML document</string>
-			<key>UTTypeIconFile</key>
-			<string>YAML</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>TextMateDocumentBadge</string>
+				<key>UTTypeIconText</key>
+				<string>YAML</string>
+			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>org.yaml.yaml</string>
 			<key>UTTypeReferenceURL</key>
@@ -3341,219 +3873,5 @@
 			</dict>
 		</dict>
 	</array>
-	<key>UTExportedTypeDeclarations</key>
-	<array>
-		<dict>
-			<key>UTTypeConformsTo</key>
-			<array>
-				<string>com.apple.property-list</string>
-			</array>
-			<key>UTTypeDescription</key>
-			<string>TextMate Snippet</string>
-			<key>UTTypeIconFile</key>
-			<string>TextMate Snippet</string>
-			<key>UTTypeIdentifier</key>
-			<string>com.macromates.textmate.snippet</string>
-			<key>UTTypeTagSpecification</key>
-			<dict>
-				<key>public.filename-extension</key>
-				<array>
-					<string>tmSnippet</string>
-				</array>
-			</dict>
-		</dict>
-		<dict>
-			<key>UTTypeConformsTo</key>
-			<array>
-				<string>com.apple.property-list</string>
-			</array>
-			<key>UTTypeDescription</key>
-			<string>TextMate Macro</string>
-			<key>UTTypeIconFile</key>
-			<string>TextMate Macro</string>
-			<key>UTTypeIdentifier</key>
-			<string>com.macromates.textmate.macro</string>
-			<key>UTTypeTagSpecification</key>
-			<dict>
-				<key>public.filename-extension</key>
-				<array>
-					<string>tmMacro</string>
-				</array>
-			</dict>
-		</dict>
-		<dict>
-			<key>UTTypeConformsTo</key>
-			<array>
-				<string>com.apple.property-list</string>
-			</array>
-			<key>UTTypeDescription</key>
-			<string>TextMate Language Grammar</string>
-			<key>UTTypeIconFile</key>
-			<string>TextMate Grammar</string>
-			<key>UTTypeIdentifier</key>
-			<string>com.macromates.textmate.language</string>
-			<key>UTTypeTagSpecification</key>
-			<dict>
-				<key>public.filename-extension</key>
-				<array>
-					<string>tmLanguage</string>
-				</array>
-			</dict>
-		</dict>
-		<dict>
-			<key>UTTypeConformsTo</key>
-			<array>
-				<string>com.apple.property-list</string>
-			</array>
-			<key>UTTypeDescription</key>
-			<string>TextMate Preferences</string>
-			<key>UTTypeIconFile</key>
-			<string>TextMate Settings</string>
-			<key>UTTypeIdentifier</key>
-			<string>com.macromates.textmate.preferences</string>
-			<key>UTTypeTagSpecification</key>
-			<dict>
-				<key>public.filename-extension</key>
-				<array>
-					<string>tmPreferences</string>
-				</array>
-			</dict>
-		</dict>
-		<dict>
-			<key>UTTypeConformsTo</key>
-			<array>
-				<string>com.apple.property-list</string>
-			</array>
-			<key>UTTypeDescription</key>
-			<string>TextMate Command</string>
-			<key>UTTypeIconFile</key>
-			<string>TextMate Command</string>
-			<key>UTTypeIdentifier</key>
-			<string>com.macromates.textmate.command</string>
-			<key>UTTypeTagSpecification</key>
-			<dict>
-				<key>public.filename-extension</key>
-				<array>
-					<string>tmCommand</string>
-				</array>
-			</dict>
-		</dict>
-		<dict>
-			<key>UTTypeConformsTo</key>
-			<array>
-				<string>com.apple.property-list</string>
-			</array>
-			<key>UTTypeDescription</key>
-			<string>TextMate Drag Command</string>
-			<key>UTTypeIconFile</key>
-			<string>TextMate Bundle Item</string>
-			<key>UTTypeIdentifier</key>
-			<string>com.macromates.textmate.drag-command</string>
-			<key>UTTypeTagSpecification</key>
-			<dict>
-				<key>public.filename-extension</key>
-				<array>
-					<string>tmDragCommand</string>
-				</array>
-			</dict>
-		</dict>
-		<dict>
-			<key>UTTypeConformsTo</key>
-			<array>
-				<string>com.apple.property-list</string>
-			</array>
-			<key>UTTypeDescription</key>
-			<string>TextMate Theme</string>
-			<key>UTTypeIconFile</key>
-			<string>TextMate Theme</string>
-			<key>UTTypeIdentifier</key>
-			<string>com.macromates.textmate.theme</string>
-			<key>UTTypeTagSpecification</key>
-			<dict>
-				<key>public.filename-extension</key>
-				<array>
-					<string>tmTheme</string>
-					<string>tmtheme</string>
-				</array>
-			</dict>
-		</dict>
-		<dict>
-			<key>UTTypeConformsTo</key>
-			<array>
-				<string>public.text</string>
-			</array>
-			<key>UTTypeDescription</key>
-			<string>TextMate release notes</string>
-			<key>UTTypeIconFile</key>
-			<string>Text</string>
-			<key>UTTypeIdentifier</key>
-			<string>com.macromates.textmate.release-notes</string>
-			<key>UTTypeTagSpecification</key>
-			<dict>
-				<key>public.filename-extension</key>
-				<array>
-					<string>tmReleaseNotes</string>
-				</array>
-			</dict>
-		</dict>
-		<dict>
-			<key>UTTypeConformsTo</key>
-			<array>
-				<string>com.apple.package</string>
-			</array>
-			<key>UTTypeDescription</key>
-			<string>TextMate Bundle</string>
-			<key>UTTypeIconFile</key>
-			<string>TextMate Bundle</string>
-			<key>UTTypeIdentifier</key>
-			<string>com.macromates.textmate.bundle</string>
-			<key>UTTypeTagSpecification</key>
-			<dict>
-				<key>public.filename-extension</key>
-				<array>
-					<string>tmBundle</string>
-					<string>tmbundle</string>
-				</array>
-			</dict>
-		</dict>
-		<dict>
-			<key>UTTypeConformsTo</key>
-			<array>
-				<string>com.apple.package</string>
-			</array>
-			<key>UTTypeDescription</key>
-			<string>TextMate PlugIn</string>
-			<key>UTTypeIconFile</key>
-			<string>TextMate PlugIn</string>
-			<key>UTTypeIdentifier</key>
-			<string>com.macromates.textmate.plugin</string>
-			<key>UTTypeTagSpecification</key>
-			<dict>
-				<key>public.filename-extension</key>
-				<array>
-					<string>tmPlugIn</string>
-					<string>tmPlugin</string>
-					<string>tmplugin</string>
-				</array>
-			</dict>
-		</dict>
-	</array>
-	<key>TMSigningKeys</key>
-	<dict>
-		<key>org.textmate.duff</key>
-		<string>-----BEGIN PUBLIC KEY-----
-MIIBtjCCASsGByqGSM44BAEwggEeAoGBAPIE9PpXPK3y2eBDJ0dnR/D8xR1TiT9m
-8DnPXYqkxwlqmjSShmJEmxYycnbliv2JpojYF4ikBUPJPuerlZfOvUBC99ERAgz7
-N1HYHfzFIxVo1oTKWurFJ1OOOsfg8AQDBDHnKpS1VnwVoDuvO05gK8jjQs9E5LcH
-e/opThzSrI7/AhUAy02E9H7EOwRyRNLofdtPxpa10o0CgYBKDfcBscidAoH4pkHR
-IOEGTCYl3G2Pd1yrblCp0nCCUEBCnvmrWVSXUTVa2/AyOZUTN9uZSC/Kq9XYgqwj
-hgzqa8h/a8yD+ao4q8WovwGeb6Iso3WlPl8waz6EAPR/nlUTnJ4jzr9t6iSH9owS
-vAmWrgeboia0CI2AH++liCDvigOBhAACgYAFWO66xFvmF2tVIB+4E7CwhrSi2uIk
-deBrpmNcZZ+AVFy1RXJelNe/cZ1aXBYskn/57xigklpkfHR6DGqpEbm6KC/47Jfy
-y5GEx+F/eBWEePi90XnLinytjmXRmS2FNqX6D15XNG1xJfjociA8bzC7s4gfeTUd
-lpQkBq2z71yitA==
------END PUBLIC KEY-----
-</string>
-	</dict>
 </dict>
 </plist>

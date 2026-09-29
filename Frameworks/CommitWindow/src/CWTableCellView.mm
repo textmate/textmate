@@ -1,6 +1,6 @@
 #import "CWTableCellView.h"
 #import "CWStatusStringTransformer.h"
-#import <OakAppKit/OakUIConstructionFunctions.h>
+#import <OakAppKit/src/OakUIConstructionFunctions.h>
 
 @implementation CWTableCellView
 - (id)init

@@ -1,10 +1,10 @@
 #include "encoding.h"
 #include "constants.h"
-#include <plist/plist.h>
-#include <io/path.h>
-#include <text/utf8.h>
-#include <text/transcode.h>
-#include <cf/cf.h>
+#include <plist/src/plist.h>
+#include <io/src/path.h>
+#include <text/src/utf8.h>
+#include <text/src/transcode.h>
+#include <cf/src/cf.h>
 #include <oak/oak.h>
 #include <oak/debug.h>
 

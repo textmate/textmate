@@ -1,11 +1,11 @@
 #import "OakDocumentEditor.h"
 #import "OakDocument Private.h"
 #import "clipboard.h"
-#import <OakAppKit/OakPasteboard.h>
-#import <settings/settings.h>
-#import <ns/ns.h>
-#import <editor/editor.h>
-#import <layout/layout.h>
+#import <OakAppKit/src/OakPasteboard.h>
+#import <settings/src/settings.h>
+#import <ns/src/ns.h>
+#import <editor/src/editor.h>
+#import <layout/src/layout.h>
 
 // Defined in OakTextView.h
 static int32_t const NSWrapColumnWindowWidth = 0;

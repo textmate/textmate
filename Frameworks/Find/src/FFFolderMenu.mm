@@ -1,10 +1,10 @@
 #import "FFFolderMenu.h"
-#import <OakAppKit/NSMenuItem Additions.h>
-#import <OakFoundation/OakFoundation.h>
-#import <OakFoundation/NSString Additions.h>
-#import <io/io.h>
-#import <io/entries.h>
-#import <ns/ns.h>
+#import <OakAppKit/src/NSMenuItem Additions.h>
+#import <OakFoundation/src/OakFoundation.h>
+#import <OakFoundation/src/NSString Additions.h>
+#import <io/src/io.h>
+#import <io/src/entries.h>
+#import <ns/src/ns.h>
 #import <oak/oak.h>
 #import <oak/debug.h>
 

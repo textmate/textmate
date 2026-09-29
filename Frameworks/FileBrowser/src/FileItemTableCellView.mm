@@ -1,8 +1,8 @@
 #import "FileItemTableCellView.h"
 #import "FileItem.h"
-#import <OakAppKit/OakUIConstructionFunctions.h>
-#import <OakAppKit/OakFinderTag.h>
-#import <TMFileReference/TMFileReference.h>
+#import <OakAppKit/src/OakUIConstructionFunctions.h>
+#import <OakAppKit/src/OakFinderTag.h>
+#import <TMFileReference/src/TMFileReference.h>
 
 @interface FileItemSelectBasenameCell : NSTextFieldCell
 @end
@@ -112,8 +112,8 @@ static void* kObjectValueURLObserverContext = &kObjectValueURLObserverContext;
 
 		[textField setContentHuggingPriority:NSLayoutPriorityDefaultLow-1 forOrientation:NSLayoutConstraintOrientationHorizontal];
 
-		[stackView.leadingAnchor  constraintEqualToAnchor:self.leadingAnchor  constant: 4].active = YES;
-		[stackView.trailingAnchor constraintEqualToAnchor:self.trailingAnchor constant:-8].active = YES;
+		[stackView.leadingAnchor  constraintEqualToAnchor:self.leadingAnchor  constant: 0].active = YES;
+		[stackView.trailingAnchor constraintEqualToAnchor:self.trailingAnchor constant: 0].active = YES;
 		[stackView.topAnchor      constraintEqualToAnchor:self.topAnchor      constant: 0].active = YES;
 		[stackView.bottomAnchor   constraintEqualToAnchor:self.bottomAnchor   constant: 0].active = YES;
 

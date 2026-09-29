@@ -1,7 +1,7 @@
 #ifndef FS_CACHE_H_3ILT90EK
 #define FS_CACHE_H_3ILT90EK
 
-#include <io/path.h>
+#include <io/src/path.h>
 #include "plist.h"
 
 namespace plist

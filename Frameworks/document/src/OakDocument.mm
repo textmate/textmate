@@ -4,30 +4,31 @@
 #import "EncodingView.h"
 #import "Printing.h"
 #import "merge.h"
-#import <FileBrowser/FileItemImage.h>
-#import <FileBrowser/KEventManager.h>
-#import <OakFoundation/OakFoundation.h>
-#import <OakFoundation/NSString Additions.h>
-#import <OakAppKit/OakEncodingPopUpButton.h>
-#import <OakAppKit/OakSavePanel.h>
-#import <OakAppKit/NSAlert Additions.h>
-#import <TMFileReference/TMFileReference.h>
-#import <BundlesManager/BundlesManager.h>
-#import <authorization/constants.h>
-#import <cf/run_loop.h>
-#import <ns/ns.h>
-#import <settings/settings.h>
-#import <buffer/buffer.h>
-#import <undo/undo.h>
-#import <selection/types.h>
-#import <text/newlines.h>
-#import <text/utf8.h>
-#import <io/entries.h>
-#import <file/type.h>
-#import <file/open.h>
-#import <file/save.h>
-#import <file/reader.h>
-#import <encoding/encoding.h>
+#import <FileBrowser/src/FileItemImage.h>
+#import <FileBrowser/src/KEventManager.h>
+#import <OakFoundation/src/OakFoundation.h>
+#import <OakFoundation/src/NSString Additions.h>
+#import <OakAppKit/src/OakEncodingPopUpButton.h>
+#import <OakAppKit/src/OakSavePanel.h>
+#import <OakAppKit/src/NSAlert Additions.h>
+#import <TMFileReference/src/TMFileReference.h>
+#import <BundlesManager/src/BundlesManager.h>
+#import <authorization/src/constants.h>
+#import <cf/src/run_loop.h>
+#import <ns/src/ns.h>
+#import <settings/src/settings.h>
+#import <buffer/src/buffer.h>
+#import <undo/src/undo.h>
+#import <selection/src/types.h>
+#import <text/src/newlines.h>
+#import <text/src/indent.h>
+#import <text/src/utf8.h>
+#import <io/src/entries.h>
+#import <file/src/type.h>
+#import <file/src/open.h>
+#import <file/src/save.h>
+#import <file/src/reader.h>
+#import <encoding/src/encoding.h>
 
 namespace document
 {
@@ -249,11 +250,9 @@ static void* kDocumentEditedObserverContext = &kDocumentEditedObserverContext;
 	if(!_fileType || !_buffer)
 		return;
 
-	for(auto const& item : bundles::query(bundles::kFieldGrammarScope, to_s(_fileType), scope::wildcard, bundles::kItemTypeGrammar))
-	{
-		_buffer->set_grammar(item);
-		break;
-	}
+	auto grammars = bundles::query(bundles::kFieldGrammarScope, to_s(_fileType), scope::wildcard, bundles::kItemTypeGrammar);
+	if(!grammars.empty())
+		_buffer->set_grammar(grammars.front());
 }
 
 - (void)snapshot
@@ -294,8 +293,23 @@ static void* kDocumentEditedObserverContext = &kDocumentEditedObserverContext;
 	if(updateIndent)
 	{
 		self.tabSize = std::max(1, settings.get(kSettingsTabSizeKey, 4));
-		self.softTabs = settings.get(kSettingsSoftTabsKey, false);
+		std::string const indentStyle = settings.get(kSettingsSoftTabsKey, "false");
+		self.automaticallyDetectsIndentation = indentStyle == "auto";
+		if(self.automaticallyDetectsIndentation)
+		{
+			if(auto softTabs = text::detect_soft_tabs(_buffer->substr(0, _buffer->size())))
+				self.softTabs = *softTabs;
+		}
+		else
+		{
+			self.softTabs = indentStyle != "0" && indentStyle != "false";
+		}
 	}
+}
+
+- (void)reloadIndentationSettings
+{
+	[self updateSpellingSettings:NO andIndentSettings:YES];
 }
 
 // ==================
@@ -631,14 +645,18 @@ static void* kDocumentEditedObserverContext = &kDocumentEditedObserverContext;
 		}
 
 		bool error = _buffer->visit_data([fd](char const* bytes, size_t offset, size_t len, bool* stop){
-			if(*stop = write(fd, bytes, len) != len)
+			if((*stop = write(fd, bytes, len) != len)) {
 				perrorf("saveBackup: write");
+			}
 		});
 
 		close(fd);
 
 		if(error)
-			return unlink(temp.c_str()), NO;
+		{
+			unlink(temp.c_str());
+			return NO;
+		}
 
 		auto attr = [self extendedAttributeds];
 
@@ -704,7 +722,7 @@ static void* kDocumentEditedObserverContext = &kDocumentEditedObserverContext;
 		[_fileReference decreaseModifiedCount];
 	[_fileReference decreaseOpenCount];
 
-	if(_fileReference = newFileReference)
+	if((_fileReference = newFileReference))
 	{
 		[_fileReference increaseOpenCount];
 		if(self.isDocumentEdited)
@@ -1281,6 +1299,35 @@ static void* kDocumentEditedObserverContext = &kDocumentEditedObserverContext;
 	}
 }
 
+- (void)enumerateCachedSymbolsUsingBlock:(void(^)(text::pos_t const& pos, NSString* symbol, NSUInteger lineIndent, BOOL* stop))block
+{
+	if(!(self.isLoaded && _buffer))
+		return;
+
+	NSUInteger tabSize = self.tabSize ?: 4;
+	BOOL stop = NO;
+	for(auto const& pair : _buffer->symbols())
+	{
+		text::pos_t const pos = _buffer->convert(pair.first);
+		std::string const line = _buffer->substr(_buffer->begin(pos.line), _buffer->eol(pos.line));
+
+		NSUInteger lineIndent = 0;
+		for(char ch : line)
+		{
+			if(ch == ' ')
+				++lineIndent;
+			else if(ch == '\t')
+				lineIndent += tabSize;
+			else
+				break;
+		}
+
+		block(pos, to_ns(pair.second), lineIndent, &stop);
+		if(stop)
+			break;
+	}
+}
+
 - (void)enumerateBookmarksUsingBlock:(void(^)(text::pos_t const& pos, NSString* excerpt))block
 {
 	if(self.isLoaded && _buffer)
@@ -1584,7 +1631,7 @@ static void* kDocumentEditedObserverContext = &kDocumentEditedObserverContext;
 
 	if(flag)
 	{
-		if(_scmInfo = scm::info(path::parent(to_s(self.path))))
+		if((_scmInfo = scm::info(path::parent(to_s(self.path)))))
 		{
 			_scmStatus    = _scmInfo->status(to_s(self.path));
 			_scmVariables = _scmInfo->scm_variables();
@@ -1673,7 +1720,7 @@ static void* kDocumentEditedObserverContext = &kDocumentEditedObserverContext;
 	if(_needsImportDocumentChanges == flag)
 		return;
 
-	if(_needsImportDocumentChanges = flag)
+	if((_needsImportDocumentChanges = flag))
 	{
 		if(_undoManager->in_undo_group())
 			return;

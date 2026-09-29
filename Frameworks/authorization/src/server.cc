@@ -1,9 +1,9 @@
 #include "server.h"
 #include "constants.h"
-#include <io/path.h>
-#include <io/exec.h>
-#include <regexp/regexp.h>
-#include <OakSystem/application.h>
+#include <io/src/path.h>
+#include <io/src/exec.h>
+#include <regexp/src/regexp.h>
+#include <OakSystem/src/application.h>
 #include <oak/debug.h>
 #include <oak/compat.h>
 

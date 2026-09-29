@@ -13,8 +13,6 @@ Some non-visible stuff.
 
 Holding ⌥ to “close other” also works in the file browser or when using ⌘T (and ⌘T now does multi-select).
 
-One exception to “⌥ closes other” is when single-clicking the icon of a bundle (e.g. `.app`) in the file browser. In this case the single-click works as “Show Package Contents”.
-
 ## Completion (⎋)
 
 The current word suffix is taken into consideration when hitting escape.

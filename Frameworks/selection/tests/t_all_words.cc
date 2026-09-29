@@ -1,6 +1,6 @@
-#include <buffer/buffer.h>
-#include <selection/selection.h>
-#include <text/format.h>
+#include <buffer/src/buffer.h>
+#include <selection/src/selection.h>
+#include <text/src/format.h>
 
 static std::string all_words (ng::buffer_t const& buf)
 {

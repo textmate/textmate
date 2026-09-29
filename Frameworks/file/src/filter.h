@@ -2,8 +2,8 @@
 #define FILE_FILTER_H_7W5OVO3A
 
 #include "bytes.h"
-#include <plist/uuid.h>
-#include <bundles/bundles.h>
+#include <plist/src/uuid.h>
+#include <bundles/src/bundles.h>
 
 struct bundle_command_t;
 

@@ -1,7 +1,7 @@
 #ifndef CONNECTION_H_B2QX4NXP
 #define CONNECTION_H_B2QX4NXP
 
-#include <io/socket.h>
+#include <io/src/socket.h>
 #include <oak/oak.h>
 
 template <typename T> struct container_traits { typedef typename T::value_type insert_type; };

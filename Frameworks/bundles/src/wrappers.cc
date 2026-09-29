@@ -1,10 +1,10 @@
 #include "wrappers.h"
 #include "query.h"
-#include <text/case.h>
-#include <io/path.h>
-#include <regexp/regexp.h>
-#include <regexp/format_string.h>
-#include <text/tokenize.h>
+#include <text/src/case.h>
+#include <io/src/path.h>
+#include <regexp/src/regexp.h>
+#include <regexp/src/format_string.h>
+#include <text/src/tokenize.h>
 
 namespace bundles
 {

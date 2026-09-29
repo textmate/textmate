@@ -1,12 +1,28 @@
-#include <authorization/constants.h>
-#include <authorization/authorization.h>
+#include <authorization/src/constants.h>
+#include <authorization/src/authorization.h>
 #include <oak/oak.h>
-#include <text/format.h>
-#include <text/parse.h>
-#include <io/path.h>
-#include <plist/uuid.h>
+#include <text/src/format.h>
+#include <text/src/parse.h>
+#include <io/src/path.h>
+#include <plist/src/uuid.h>
 
 static char const* const AppVersion = "2.13.3";
+
+static long target_pid ()
+{
+	static long const pid = []() {
+		if(char const* value = getenv("TM_PID"))
+		{
+			char* last = nullptr;
+			long res = strtol(value, &last, 10);
+			if(value != last && *last == '\0' && 0 < res)
+				return res;
+		}
+
+		return 0L;
+	}();
+	return pid;
+}
 
 static char const* socket_path ()
 {
@@ -14,7 +30,12 @@ static char const* socket_path ()
 	if(getenv("SUDO_UID"))
 		uid = atoi(getenv("SUDO_UID"));
 
-	static std::string const str = text::format("/tmp/textmate-%d.sock", uid);
+	static std::string const str = [uid]() {
+		if(long pid = target_pid())
+			return text::format("/tmp/textmate-%d-%ld.sock", uid, pid);
+
+		return text::format("/tmp/textmate-%d.sock", uid);
+	}();
 	return str.c_str();
 }
 
@@ -88,7 +109,7 @@ static void install_auth_tool ()
 			exit(EX_UNAVAILABLE);
 		}
 
-		pid_t pid = vfork();
+		pid_t pid = fork();
 		if(pid == 0)
 		{
 			execl(arg0, arg0, "--install", nullptr);
@@ -389,20 +410,20 @@ int main (int argc, char const* argv[])
 	strcpy(addr.sun_path, socket_path());
 	addr.sun_len = SUN_LEN(&addr);
 
-	int rc;
+	int rc = -1;
 	for(size_t i = 0; i < 10; ++i)
 	{
 		rc = connect(fd, (sockaddr*)&addr, sizeof(addr));
 		if(rc == 0)
 			break;
-		if(i == 0)
+		if(i == 0 && !target_pid())
 			launch_app(!files.empty());
 		usleep(500000);
 	}
 
 	if(rc == -1)
 	{
-		perror("unable to bind to socket");
+		perror("unable to connect to socket");
 		exit(EX_IOERR);
 	}
 

@@ -1,10 +1,10 @@
 #include "ct.h"
 #include "render.h"
-#include <cf/cf.h>
-#include <text/utf8.h>
-#include <text/utf16.h>
-#include <text/hexdump.h>
-#include <crash/info.h>
+#include <cf/src/cf.h>
+#include <text/src/utf8.h>
+#include <text/src/utf16.h>
+#include <text/src/hexdump.h>
+#include <crash/src/info.h>
 
 namespace ng
 {
@@ -50,6 +50,7 @@ namespace ng
 			{
 				switch(state)
 				{
+					case kWaiting: break;
 					case kExclude:
 					{
 						switch(ch)

@@ -1,15 +1,15 @@
 #import "TerminalPreferences.h"
 #import "Keys.h"
-#import <OakAppKit/NSAlert Additions.h>
-#import <OakAppKit/NSImage Additions.h>
-#import <OakFoundation/NSString Additions.h>
-#import <OakFoundation/OakStringListTransformer.h>
-#import <SoftwareUpdate/SoftwareUpdate.h> // OakCompareVersionStrings()
-#import <io/path.h>
-#import <io/exec.h>
-#import <ns/ns.h>
-#import <regexp/format_string.h>
-#import <bundles/bundles.h>
+#import <OakAppKit/src/NSAlert Additions.h>
+#import <OakAppKit/src/NSImage Additions.h>
+#import <OakFoundation/src/NSString Additions.h>
+#import <OakFoundation/src/OakStringListTransformer.h>
+#import <SoftwareUpdate/src/SoftwareUpdate.h> // OakCompareVersionStrings()
+#import <io/src/path.h>
+#import <io/src/exec.h>
+#import <ns/src/ns.h>
+#import <regexp/src/format_string.h>
+#import <bundles/src/bundles.h>
 #import <oak/compat.h>
 
 static void CreateHyperLink (NSTextField* textField, NSString* text, NSString* url)

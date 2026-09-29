@@ -82,7 +82,7 @@ namespace scope
 
 		bool operator== (context_t const& rhs) const { return left == rhs.left && right == rhs.right; }
 		bool operator!= (context_t const& rhs) const { return !(*this == rhs); }
-		bool operator< (context_t const& rhs) const  { return left < rhs.left || left == rhs.left && right < rhs.right; }
+		bool operator< (context_t const& rhs) const  { return left < rhs.left || (left == rhs.left && right < rhs.right); }
 
 		scope_t left, right;
 	};

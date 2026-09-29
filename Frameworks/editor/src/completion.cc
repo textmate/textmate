@@ -1,12 +1,12 @@
 #include "editor.h"
 #include "write.h"
-#include <text/utf8.h>
-#include <text/classification.h>
-#include <text/ctype.h>
-#include <text/tokenize.h>
-#include <bundles/bundles.h>
-#include <command/runner.h>
-#include <settings/settings.h>
+#include <text/src/utf8.h>
+#include <text/src/classification.h>
+#include <text/src/my_ctype.h>
+#include <text/src/tokenize.h>
+#include <bundles/src/bundles.h>
+#include <command/src/runner.h>
+#include <settings/src/settings.h>
 
 template <typename _OutputIter>
 _OutputIter words_with_prefix_and_suffix (ng::buffer_t const& buffer, std::string const& prefix, std::string const& suffix, std::string const& excludeWord, _OutputIter out)
@@ -32,7 +32,7 @@ namespace ng
 			return ng::write_unit_to_fd(buffer, ranges, buffer.indent().tab_size(), fd, unit, fallbackUnit, format, scopeSelector, variables, inputWasSelection);
 		}
 
-		bool accept_html_data (command::runner_ptr runner, char const* data, size_t len) { return fprintf(stderr, "html: %.*s", (int)len, data), false; }
+		bool accept_html_data (command::runner_ptr runner, char const* data, size_t len) { fprintf(stderr, "html: %.*s", (int)len, data); return false; }
 
 		void show_document (std::string const& str) { fprintf(stderr, "document: %s\n", str.c_str()); }
 		void show_tool_tip (std::string const& str) { fprintf(stderr, "tool tip: %s\n", str.c_str()); }

@@ -1,0 +1,4 @@
+{	name = "Python Diagnostics";
+	uuid = "80807D47-5DE7-420A-9AB8-00CC71A4BBF7";
+	description = "Runs Ruff and Pyright on save, shows issues in the editor, and formats Python documents with Ruff.";
+}

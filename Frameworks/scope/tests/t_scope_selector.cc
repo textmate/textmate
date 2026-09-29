@@ -1,4 +1,4 @@
-#include <scope/scope.h>
+#include <scope/src/scope.h>
 
 void test_child_selector ()
 {

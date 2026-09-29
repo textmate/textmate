@@ -2,6 +2,7 @@
 typedef NS_ENUM(NSUInteger, OakBackgroundFillViewStyle) {
 	OakBackgroundFillViewStyleNone = 0,
 	OakBackgroundFillViewStyleHeader,
+	OakBackgroundFillViewStyleTitlebar,
 };
 
 @interface OakBackgroundFillView : NSView

@@ -1,14 +1,178 @@
 #import "OakTabBarView.h"
-#import <OakAppKit/NSImage Additions.h>
-#import <OakAppKit/OakUIConstructionFunctions.h>
-#import <OakAppKit/OakAppKit.h>
-#import <OakAppKit/NSMenuItem Additions.h>
-#import <OakFoundation/OakFoundation.h>
-#import <TMFileReference/TMFileReference.h>
+#import <oak/TextMateResponderActions.h>
+#import <OakAppKit/src/NSImage Additions.h>
+#import <OakAppKit/src/OakUIConstructionFunctions.h>
+#import <OakAppKit/src/OakAppKit.h>
+#import <OakAppKit/src/NSMenuItem Additions.h>
+#import <OakFoundation/src/OakFoundation.h>
+#import <TMFileReference/src/TMFileReference.h>
 #import <oak/misc.h>
 
 static NSString* kUserDefaultsTabItemMinWidthKey = @"tabItemMinWidth";
 static NSString* kUserDefaultsTabItemMaxWidthKey = @"tabItemMaxWidth";
+
+@interface OakTabBarStyle : NSObject
+@property (nonatomic, readonly) BOOL usesModernLayout;
+@property (nonatomic, readonly) CGFloat preferredHeight;
+@property (nonatomic, readonly) CGFloat contentHeight;
+@property (nonatomic, readonly) CGFloat leadingInset;
+@property (nonatomic, readonly) CGFloat trailingInset;
+@property (nonatomic, readonly) CGFloat newTabButtonGap;
+- (CGFloat)titleAlphaForSelected:(BOOL)selected;
+- (void)drawTabBarInRect:(NSRect)rect;
+- (void)drawTabInRect:(NSRect)rect hasTabItem:(BOOL)hasTabItem selected:(BOOL)selected hovered:(BOOL)hovered leadingSeparator:(BOOL)leadingSeparator dragging:(BOOL)dragging;
+- (NSArray<NSLayoutConstraint*>*)installConstraintsInTabView:(NSView*)tabView closeButton:(NSButton*)closeButton titleField:(NSTextField*)titleField overflowButton:(NSButton*)overflowButton;
+- (NSRect)initialFrameForNewTabButton;
+- (void)configureNewTabButton:(NSButton*)button;
+- (CGFloat)visibleWidthForBounds:(NSRect)bounds newTabButton:(NSButton*)button;
+@end
+
+@interface OakLegacyTabBarStyle : OakTabBarStyle
+@end
+
+@interface OakModernTabBarStyle : OakTabBarStyle
+@end
+
+@implementation OakTabBarStyle
+- (BOOL)usesModernLayout { return NO; }
+- (CGFloat)preferredHeight { return 26; }
+- (CGFloat)contentHeight { return self.preferredHeight; }
+- (CGFloat)leadingInset { return -1; }
+- (CGFloat)trailingInset { return 0; }
+- (CGFloat)newTabButtonGap { return 0; }
+- (CGFloat)titleAlphaForSelected:(BOOL)selected { return selected ? 1 : 0.5; }
+- (void)drawTabBarInRect:(NSRect)rect { }
+- (void)drawTabInRect:(NSRect)rect hasTabItem:(BOOL)hasTabItem selected:(BOOL)selected hovered:(BOOL)hovered leadingSeparator:(BOOL)leadingSeparator dragging:(BOOL)dragging { }
+- (NSArray<NSLayoutConstraint*>*)installConstraintsInTabView:(NSView*)tabView closeButton:(NSButton*)closeButton titleField:(NSTextField*)titleField overflowButton:(NSButton*)overflowButton { return @[]; }
+- (NSRect)initialFrameForNewTabButton { return NSMakeRect(0, 2, 26, 20); }
+- (void)configureNewTabButton:(NSButton*)button { }
+- (CGFloat)visibleWidthForBounds:(NSRect)bounds newTabButton:(NSButton*)button { return NSWidth(bounds) - NSWidth(button.frame); }
+@end
+
+@implementation OakLegacyTabBarStyle
+- (void)drawTabInRect:(NSRect)rect hasTabItem:(BOOL)hasTabItem selected:(BOOL)selected hovered:(BOOL)hovered leadingSeparator:(BOOL)leadingSeparator dragging:(BOOL)dragging
+{
+	CGFloat backgroundAlpha = dragging ? 0.1 : (selected ? 0 : (hovered && hasTabItem ? 0.2 : 0.1));
+	if(backgroundAlpha > 0)
+	{
+		[[NSColor.textColor colorWithAlphaComponent:backgroundAlpha] setFill];
+		NSRectFill(NSMakeRect(NSMinX(rect), NSMinY(rect), NSWidth(rect), std::max<CGFloat>(0, NSHeight(rect) - 1)));
+	}
+
+	[[NSColor colorWithCalibratedWhite:NSBlack alpha:0.25] setFill];
+	if(dragging || !selected)
+		NSRectFill(NSMakeRect(NSMinX(rect), NSMaxY(rect) - 1, NSWidth(rect), 1));
+	NSRectFill(NSMakeRect(NSMinX(rect), NSMinY(rect), 1, NSHeight(rect)));
+}
+
+- (NSArray<NSLayoutConstraint*>*)installConstraintsInTabView:(NSView*)tabView closeButton:(NSButton*)closeButton titleField:(NSTextField*)titleField overflowButton:(NSButton*)overflowButton
+{
+	NSDictionary* views = @{ @"close": closeButton, @"title": titleField, @"overflow": overflowButton };
+	[tabView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(3@53)-[close]-(>=3@53)-[title]-(>=6@53)-|" options:0 metrics:nil views:views]];
+	[tabView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[close]-(4)-|" options:0 metrics:nil views:views]];
+	[tabView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[title]-(3)-|" options:0 metrics:nil views:views]];
+	[tabView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[overflow]|" options:0 metrics:nil views:views]];
+	[tabView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[overflow]|" options:0 metrics:nil views:views]];
+
+	NSArray<NSLayoutConstraint*>* overflowConstraints = [NSLayoutConstraint constraintsWithVisualFormat:@"H:[title]-(>=3@53)-[overflow]" options:0 metrics:nil views:views];
+	[tabView addConstraints:overflowConstraints];
+	return overflowConstraints;
+}
+@end
+
+@implementation OakModernTabBarStyle
+- (BOOL)usesModernLayout { return YES; }
+- (CGFloat)preferredHeight { return 32; }
+- (CGFloat)contentHeight { return 28; }
+- (CGFloat)leadingInset { return 12; }
+- (CGFloat)trailingInset { return 8; }
+- (CGFloat)newTabButtonGap { return 4; }
+- (CGFloat)titleAlphaForSelected:(BOOL)selected { return selected ? 1 : 0.72; }
+
+- (void)drawTabBarInRect:(NSRect)rect
+{
+	[[NSColor colorWithCalibratedWhite:0 alpha:0.07] setFill];
+	[[NSBezierPath bezierPathWithRoundedRect:rect xRadius:NSHeight(rect) / 2 yRadius:NSHeight(rect) / 2] fill];
+}
+
+- (void)drawTabInRect:(NSRect)rect hasTabItem:(BOOL)hasTabItem selected:(BOOL)selected hovered:(BOOL)hovered leadingSeparator:(BOOL)leadingSeparator dragging:(BOOL)dragging
+{
+	if(!hasTabItem)
+		return;
+
+	CGFloat backgroundAlpha = dragging ? 1 : (selected ? 1 : (hovered ? 0.12 : 0));
+	if(backgroundAlpha > 0)
+	{
+		NSRect backgroundRect = NSInsetRect(rect, 2.5, 2.5);
+		NSBezierPath* path = [NSBezierPath bezierPathWithRoundedRect:backgroundRect xRadius:12 yRadius:12];
+
+		[NSGraphicsContext saveGraphicsState];
+		CGContextSetAlpha(NSGraphicsContext.currentContext.CGContext, backgroundAlpha);
+		[[NSColor.windowBackgroundColor colorWithAlphaComponent:0.72] setFill];
+		[path fill];
+		path.lineWidth = 1;
+		[[NSColor colorWithCalibratedWhite:1 alpha:0.75] setStroke];
+		[path stroke];
+		[NSGraphicsContext restoreGraphicsState];
+	}
+
+	if(leadingSeparator && !dragging)
+	{
+		[[NSColor.separatorColor colorWithAlphaComponent:0.18] setFill];
+		NSRectFill(NSMakeRect(NSMinX(rect), NSMidY(rect) - 7, 1, 14));
+	}
+}
+
+- (NSArray<NSLayoutConstraint*>*)installConstraintsInTabView:(NSView*)tabView closeButton:(NSButton*)closeButton titleField:(NSTextField*)titleField overflowButton:(NSButton*)overflowButton
+{
+	NSDictionary* views = @{ @"close": closeButton, @"title": titleField, @"overflow": overflowButton };
+	[tabView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(9@53)-[close]-(>=4@53)-[title]-(>=10@53)-|" options:0 metrics:nil views:views]];
+	[tabView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[overflow]-(10)-|" options:0 metrics:nil views:views]];
+
+	for(NSView* view in @[ closeButton, titleField, overflowButton ])
+	{
+		[tabView addConstraint:[NSLayoutConstraint constraintWithItem:view attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:tabView attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
+	}
+
+	NSArray<NSLayoutConstraint*>* overflowConstraints = [NSLayoutConstraint constraintsWithVisualFormat:@"H:[title]-(>=3@53)-[overflow]" options:0 metrics:nil views:views];
+	[tabView addConstraints:overflowConstraints];
+	return overflowConstraints;
+}
+
+- (NSRect)initialFrameForNewTabButton
+{
+	return NSMakeRect(0, 0, 28, 28);
+}
+
+- (void)configureNewTabButton:(NSButton*)button
+{
+	button.wantsLayer = YES;
+	button.layer.cornerRadius = 14;
+	button.layer.backgroundColor = [NSColor.windowBackgroundColor colorWithAlphaComponent:0.72].CGColor;
+	button.layer.borderColor = [NSColor colorWithCalibratedWhite:1 alpha:0.65].CGColor;
+	button.layer.borderWidth = 1;
+}
+
+- (CGFloat)visibleWidthForBounds:(NSRect)bounds newTabButton:(NSButton*)button
+{
+	return std::max<CGFloat>(0, NSWidth(bounds) - NSWidth(button.frame) - self.leadingInset - self.trailingInset - self.newTabButtonGap);
+}
+@end
+
+static OakTabBarStyle* OakCurrentTabBarStyle ()
+{
+	static OakTabBarStyle* style;
+	static dispatch_once_t onceToken;
+	dispatch_once(&onceToken, ^{
+		style = NSProcessInfo.processInfo.operatingSystemVersion.majorVersion >= 26 ? [OakModernTabBarStyle new] : [OakLegacyTabBarStyle new];
+	});
+	return style;
+}
+
+static CGFloat OakTabBarVisibleWidth (NSRect bounds, NSButton* createNewTabButton)
+{
+	return [OakCurrentTabBarStyle() visibleWidthForBounds:bounds newTabButton:createNewTabButton];
+}
 
 static void DisableImplicitAnimationForBlock (void(^handler)())
 {
@@ -78,7 +242,7 @@ static NSString* const OakTabItemPasteboardType = @"com.macromates.TextMate.tabI
 
 - (NSArray*)writableTypesForPasteboard:(NSPasteboard*)aPasteboard
 {
-	return OakIsEmptyString(_path) ? @[ OakTabItemPasteboardType ] : @[ OakTabItemPasteboardType, (NSString*)kUTTypeFileURL ];
+	return OakIsEmptyString(_path) ? @[ OakTabItemPasteboardType ] : @[ OakTabItemPasteboardType, NSPasteboardTypeFileURL ];
 }
 
 - (NSPasteboardWritingOptions)writingOptionsForType:(NSString*)aType pasteboard:(NSPasteboard*)aPasteboard
@@ -88,7 +252,7 @@ static NSString* const OakTabItemPasteboardType = @"com.macromates.TextMate.tabI
 
 - (id)pasteboardPropertyListForType:(NSString*)aType
 {
-	if([aType isEqualToString:(NSString*)kUTTypeFileURL])
+	if([aType isEqualToString:NSPasteboardTypeFileURL])
 		return [NSURL fileURLWithPath:_path].absoluteString;
 
 	NSMutableDictionary* dict = [NSMutableDictionary dictionary];
@@ -131,38 +295,6 @@ static NSString* const OakTabItemPasteboardType = @"com.macromates.TextMate.tabI
 }
 @end
 
-// ==========
-// = OakBox =
-// ==========
-
-@interface OakBox : NSView
-@property (nonatomic) NSColor* fillColor;
-@end
-
-@implementation OakBox
-- (BOOL)wantsUpdateLayer
-{
-	return YES;
-}
-
-- (void)updateLayer
-{
-	self.layer.backgroundColor = _fillColor.CGColor;
-}
-
-- (void)drawRect:(NSRect)aRect
-{
-	[_fillColor set];
-	[NSBezierPath fillRect:aRect];
-}
-
-- (void)setFillColor:(NSColor*)color
-{
-	_fillColor = color;
-	self.needsDisplay = YES;
-}
-@end
-
 // ==============
 // = OakTabView =
 // ==============
@@ -185,13 +317,13 @@ static NSString* const OakTabItemPasteboardType = @"com.macromates.TextMate.tabI
 
 @property (nonatomic, getter = isMouseInside) BOOL mouseInside;
 @property (nonatomic, getter = isVoiceOverEnabled) BOOL voiceOverEnabled;
+@property (nonatomic) BOOL showsLeadingSeparator;
+@property (nonatomic) BOOL drawingDragImage;
 
 @property (nonatomic, readonly) BOOL shouldShowCloseButton;
 @property (nonatomic) NSArray<NSLayoutConstraint*>* overflowButtonConstraints;
 
-@property (nonatomic) OakBox* backgroundView;
-@property (nonatomic) OakBox* topBorderView;
-@property (nonatomic) OakBox* leftBorderView;
+@property (nonatomic) OakTabBarStyle* style;
 @property (nonatomic) OakRolloverButton* closeButton;
 @property (nonatomic) OakRolloverButton* overflowButton;
 @property (nonatomic) NSTextField* textField;
@@ -212,12 +344,14 @@ static NSString* const OakTabItemPasteboardType = @"com.macromates.TextMate.tabI
 @property (nonatomic) NSInteger dropTabAtIndex;
 @property (nonatomic) NSInteger freezeTabFramesLeftOfIndex;
 @property (nonatomic, readonly) OakTabView* backgroundView;
+@property (nonatomic) OakTabBarStyle* style;
 @property (nonatomic) NSButton* createNewTabButton;
 @property (nonatomic) NSTrackingArea* trackingArea;
 @property (nonatomic, getter = isDragging) BOOL dragging;
 - (void)didClickCloseButtonForTabView:(OakTabView*)tabView;
 - (void)didClickOverflorButtonForTabView:(OakTabView*)tabView;
 - (NSMenu*)menuForTabView:(OakTabView*)tabView withEvent:(NSEvent*)anEvent;
+- (void)updateTabSeparators;
 
 @property (nonatomic) NSArray<OakTabFrame*>* fromLayout;
 @property (nonatomic) NSArray<OakTabFrame*>* toLayout;
@@ -238,6 +372,29 @@ static void* kOakTabViewSelectedContext  = &kOakTabViewSelectedContext;
 	return [NSSet setWithObjects:@"tabItem", @"mouseInside", @"modified", @"voiceOverEnabled", nil];
 }
 
+- (CGFloat)titleAlphaValue
+{
+	return [_style titleAlphaForSelected:_selected];
+}
+
+- (void)updateTabStyle
+{
+	self.textField.alphaValue = self.titleAlphaValue;
+	self.needsDisplay = YES;
+}
+
+- (void)drawRect:(NSRect)dirtyRect
+{
+	[super drawRect:dirtyRect];
+	[_style drawTabInRect:self.bounds hasTabItem:_tabItem != nil selected:_selected hovered:_mouseInside leadingSeparator:_showsLeadingSeparator dragging:_drawingDragImage];
+}
+
+- (void)viewDidChangeEffectiveAppearance
+{
+	[super viewDidChangeEffectiveAppearance];
+	self.needsDisplay = YES;
+}
+
 - (instancetype)animator
 {
 	return (OakTabView*)[[OakAnimatorProxy alloc] initWithRealObject:super.animator];
@@ -251,24 +408,16 @@ static void* kOakTabViewSelectedContext  = &kOakTabViewSelectedContext;
 		self.accessibilityRoleDescription = @"Tab";
 
 		_tabBarView = tabBarView;
-
-		_backgroundView = [[OakBox alloc] initWithFrame:NSZeroRect];
-		_topBorderView  = [[OakBox alloc] initWithFrame:NSZeroRect];
-		_leftBorderView = [[OakBox alloc] initWithFrame:NSZeroRect];
+		_style      = OakCurrentTabBarStyle();
 
 		_textField = OakCreateLabel();
 
 		DisableImplicitAnimationForBlock(^{
-			_backgroundView.fillColor  = NSColor.textColor;
-			_backgroundView.alphaValue = _selected ? 0 : (_mouseInside ? 0.2 : 0.1);
-			_topBorderView.fillColor   = [NSColor colorWithCalibratedWhite:NSBlack alpha:0.25];
-			_leftBorderView.fillColor  = [NSColor colorWithCalibratedWhite:NSBlack alpha:0.25];
-
 			_textField.textColor  = NSColor.secondaryLabelColor;
-			_textField.alphaValue = _selected ? 1 : 0.5;
+			_textField.alphaValue = self.titleAlphaValue;
 		});
 
-		NSArray<NSView*>* subviews = @[ _backgroundView, _topBorderView, _leftBorderView, _textField, self.closeButton, self.overflowButton ];
+		NSArray<NSView*>* subviews = @[ _textField, self.closeButton, self.overflowButton ];
 		for(NSView* view in subviews)
 		{
 			view.translatesAutoresizingMaskIntoConstraints = NO;
@@ -277,33 +426,10 @@ static void* kOakTabViewSelectedContext  = &kOakTabViewSelectedContext;
 
 		self.overflowButton.hidden = YES;
 
-		if(@available(macos 10.13, *))
+		if(@available(macOS 10.13, *))
 			[NSWorkspace.sharedWorkspace addObserver:self forKeyPath:@"voiceOverEnabled" options:NSKeyValueObservingOptionInitial context:kOakTabViewVoiceOverContext];
 
-		NSDictionary* views = @{
-			@"background": _backgroundView,
-			@"topBorder":  _topBorderView,
-			@"leftBorder": _leftBorderView,
-
-			@"close":      self.closeButton,
-			@"title":      self.textField,
-			@"overflow":   self.overflowButton,
-		};
-
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[leftBorder(==1@75)][topBorder]|" options:NSLayoutFormatAlignAllTop metrics:nil views:views]];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[topBorder(==1@75)][background]|" options:NSLayoutFormatAlignAllLeft|NSLayoutFormatAlignAllRight metrics:nil views:views]];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[leftBorder]|" options:0 metrics:nil views:views]];
-
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(3@53)-[close]-(>=3@53)-[title]-(>=6@53)-|" options:0 metrics:nil views:views]];
-
-		_overflowButtonConstraints = [NSLayoutConstraint constraintsWithVisualFormat:@"H:[title]-(>=3@53)-[overflow]" options:0 metrics:nil views:views];
-		[NSLayoutConstraint deactivateConstraints:_overflowButtonConstraints];
-		[self addConstraints:_overflowButtonConstraints];
-
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[overflow]|" options:0 metrics:nil views:views]];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[close]-(4)-|" options:0 metrics:nil views:views]];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[title]-(3)-|" options:0 metrics:nil views:views]];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[overflow]|" options:0 metrics:nil views:views]];
+		_overflowButtonConstraints = [_style installConstraintsInTabView:self closeButton:self.closeButton titleField:self.textField overflowButton:self.overflowButton];
 
 		[_textField setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
 		[_textField setContentCompressionResistancePriority:NSLayoutPriorityFittingSizeCompression+2 forOrientation:NSLayoutConstraintOrientationHorizontal];
@@ -320,7 +446,7 @@ static void* kOakTabViewSelectedContext  = &kOakTabViewSelectedContext;
 - (void)dealloc
 {
 	self.tabItem = nil;
-	if(@available(macos 10.13, *))
+	if(@available(macOS 10.13, *))
 		[NSWorkspace.sharedWorkspace removeObserver:self forKeyPath:@"voiceOverEnabled" context:kOakTabViewVoiceOverContext];
 }
 
@@ -344,8 +470,16 @@ static void* kOakTabViewSelectedContext  = &kOakTabViewSelectedContext;
 		return;
 
 	_mouseInside = flag;
-	if(!self.isSelected && _tabItem)
-		self.backgroundView.alphaValue = _mouseInside ? 0.2 : 0.1;
+	self.needsDisplay = YES;
+}
+
+- (void)setShowsLeadingSeparator:(BOOL)flag
+{
+	if(_showsLeadingSeparator == flag)
+		return;
+
+	_showsLeadingSeparator = flag;
+	self.needsDisplay = YES;
 }
 
 - (void)setModified:(BOOL)flag
@@ -360,10 +494,8 @@ static void* kOakTabViewSelectedContext  = &kOakTabViewSelectedContext;
 		return;
 
 	_selected = flag;
-
-	self.textField.alphaValue      = _selected ? 1 : 0.5;
-	self.backgroundView.alphaValue = _selected ? 0 : (_mouseInside ? 0.2 : 0.1);
-	self.topBorderView.alphaValue  = _selected ? 0 : 1;
+	[self updateTabStyle];
+	[self.tabBarView updateTabSeparators];
 }
 
 - (void)setTabItem:(OakTabItem*)tabItem
@@ -392,11 +524,10 @@ static void* kOakTabViewSelectedContext  = &kOakTabViewSelectedContext;
 		self.closeButton.cell.accessibilityElement    = NO;
 		self.overflowButton.cell.accessibilityElement = NO;
 
-		self.textField.alphaValue      = 0.0;
-		self.backgroundView.alphaValue = 0.1;
-		self.topBorderView.alphaValue  = 1;
+		self.textField.alphaValue = 0.0;
 		self.overflowButtonVisible     = NO;
 	}
+	self.needsDisplay = YES;
 }
 
 - (void)updateCloseButtonImage
@@ -478,7 +609,7 @@ static void* kOakTabViewSelectedContext  = &kOakTabViewSelectedContext;
 {
 	if(context == kOakTabViewVoiceOverContext)
 	{
-		if(@available(macos 10.13, *))
+		if(@available(macOS 10.13, *))
 			self.voiceOverEnabled = NSWorkspace.sharedWorkspace.isVoiceOverEnabled;
 	}
 	else if(context == kOakTabViewTitleContext)
@@ -614,26 +745,24 @@ static void* kOakTabViewSelectedContext  = &kOakTabViewSelectedContext;
 
 - (NSImage*)dragImage
 {
-	NSRect bounds = self.backgroundView.frame;
+	NSRect bounds = self.bounds;
 	if(NSIsEmptyRect(bounds))
 		return nil;
 
+	_overflowButton.hidden = YES;
+	_textField.alphaValue  = 1.0;
+	_drawingDragImage      = YES;
+	self.needsDisplay      = YES;
+
+	NSBitmapImageRep* bitmap = [self bitmapImageRepForCachingDisplayInRect:bounds];
+	[self cacheDisplayInRect:bounds toBitmapImageRep:bitmap];
 	NSImage* image = [[NSImage alloc] initWithSize:bounds.size];
-	[image lockFocusFlipped:self.isFlipped];
+	[image addRepresentation:bitmap];
 
-	_overflowButton.hidden     = YES;
-	_textField.alphaValue      = 1.0;
-	_backgroundView.alphaValue = 0.1;
-	_topBorderView.alphaValue  = 1;
+	_drawingDragImage      = NO;
+	_overflowButton.hidden = !_overflowButtonVisible;
+	[self updateTabStyle];
 
-	[self displayRectIgnoringOpacity:bounds inContext:NSGraphicsContext.currentContext];
-
-	_overflowButton.hidden     = !_overflowButtonVisible;
-	_textField.alphaValue      = _selected ? 1 : 0.5;
-	_backgroundView.alphaValue = _selected ? 0 : (_mouseInside ? 0.2 : 0.1);
-	_topBorderView.alphaValue  = _selected ? 0 : 1;
-
-	[image unlockFocus];
 	return image;
 }
 @end
@@ -670,6 +799,11 @@ static void* kOakTabViewSelectedContext  = &kOakTabViewSelectedContext;
 // =================
 
 @implementation OakTabBarView
++ (CGFloat)preferredHeight
+{
+	return OakCurrentTabBarStyle().preferredHeight;
+}
+
 + (id)defaultAnimationForKey:(NSString*)key
 {
 	if([key isEqualToString:@"tabLayoutAnimationProgress"])
@@ -702,6 +836,7 @@ static void* kOakTabViewSelectedContext  = &kOakTabViewSelectedContext;
 
 		_draggedTabIndex = -1;
 		_dropTabAtIndex  = -1;
+		_style           = OakCurrentTabBarStyle();
 
 		_backgroundView = [[OakTabView alloc] initWithFrame:NSZeroRect tabItem:nil parent:nil];
 		_backgroundView.target       = self;
@@ -717,7 +852,20 @@ static void* kOakTabViewSelectedContext  = &kOakTabViewSelectedContext;
 
 - (NSSize)intrinsicContentSize
 {
-	return NSMakeSize(NSViewNoIntrinsicMetric, 23);
+	return NSMakeSize(NSViewNoIntrinsicMetric, self.class.preferredHeight);
+}
+
+- (void)drawRect:(NSRect)dirtyRect
+{
+	[super drawRect:dirtyRect];
+	[_style drawTabBarInRect:_backgroundView.frame];
+}
+
+- (void)viewDidChangeEffectiveAppearance
+{
+	[super viewDidChangeEffectiveAppearance];
+	[_style configureNewTabButton:_createNewTabButton];
+	self.needsDisplay = YES;
 }
 
 - (BOOL)mouseDownCanMoveWindow
@@ -729,7 +877,7 @@ static void* kOakTabViewSelectedContext  = &kOakTabViewSelectedContext;
 {
 	if(!_createNewTabButton)
 	{
-		_createNewTabButton = [[NSButton alloc] initWithFrame:NSMakeRect(0, 2, 26, 20)];
+		_createNewTabButton = [[NSButton alloc] initWithFrame:_style.initialFrameForNewTabButton];
 		_createNewTabButton.accessibilityLabel = @"Create new tab";
 		_createNewTabButton.image      = [NSImage imageNamed:NSImageNameAddTemplate];
 		_createNewTabButton.bordered   = NO;
@@ -737,8 +885,15 @@ static void* kOakTabViewSelectedContext  = &kOakTabViewSelectedContext;
 		_createNewTabButton.toolTip    = @"Create new tab";
 		_createNewTabButton.action     = @selector(newTab:);
 		_createNewTabButton.target     = self;
+		[_style configureNewTabButton:_createNewTabButton];
 	}
 	return _createNewTabButton;
+}
+
+- (NSInteger)countOfVisibleTabs
+{
+	CGFloat const visibleWidth = OakTabBarVisibleWidth(self.bounds, self.createNewTabButton);
+	return std::min<NSUInteger>(std::max<CGFloat>(0, floor(visibleWidth / _minimumTabSize)), _tabItems.count);
 }
 
 - (NSUInteger)selectedTabIndex
@@ -968,7 +1123,7 @@ static void* kOakTabViewSelectedContext  = &kOakTabViewSelectedContext;
 {
 	NSDraggingItem* dragItem = [[NSDraggingItem alloc] initWithPasteboardWriter:tabView.tabItem];
 	if(NSImage* dragImage = tabView.dragImage)
-		[dragItem setDraggingFrame:[self convertRect:tabView.backgroundView.frame fromView:tabView] contents:dragImage];
+		[dragItem setDraggingFrame:[self convertRect:tabView.bounds fromView:tabView] contents:dragImage];
 
 	self.draggedTabIndex = [_tabItems indexOfObject:tabView.tabItem] == NSNotFound ? -1 : [_tabItems indexOfObject:tabView.tabItem];
 	self.dropTabAtIndex  = _draggedTabIndex+1;
@@ -1096,13 +1251,13 @@ static void* kOakTabViewSelectedContext  = &kOakTabViewSelectedContext;
 	std::vector<tab_t> tabs;
 	for(NSUInteger i = 0, j = 0; i < oldLayout.count || j < newLayout.count; )
 	{
-		if(j == newLayout.count || i < oldLayout.count && ![newTabIdentifiers containsObject:oldLayout[i].tabItem.identifier])
+		if(j == newLayout.count || (i < oldLayout.count && ![newTabIdentifiers containsObject:oldLayout[i].tabItem.identifier]))
 		{
 			if(oldLayout[i].width > 0)
 				tabs.emplace_back(oldLayout[i].tabItem, oldLayout[i].width, 0);
 			++i;
 		}
-		else if(i == oldLayout.count || j < newLayout.count && ![oldTabIdentifiers containsObject:newLayout[j].tabItem.identifier])
+		else if(i == oldLayout.count || (j < newLayout.count && ![oldTabIdentifiers containsObject:newLayout[j].tabItem.identifier]))
 		{
 			if(newLayout[j].width > 0)
 				tabs.emplace_back(newLayout[j].tabItem, 0, newLayout[j].width);
@@ -1144,6 +1299,18 @@ static void* kOakTabViewSelectedContext  = &kOakTabViewSelectedContext;
 
 - (NSArray<OakTabFrame*>*)makeLayoutForTabItems:(NSArray<OakTabItem*>*)tabItems inRectOfWidth:(CGFloat)totalWidth
 {
+	if(_style.usesModernLayout)
+	{
+		NSMutableArray<OakTabFrame*>* array = [NSMutableArray array];
+		for(NSUInteger i = 0; i < tabItems.count; ++i)
+		{
+			CGFloat x0 = round(totalWidth * (i+0) / tabItems.count);
+			CGFloat x1 = round(totalWidth * (i+1) / tabItems.count);
+			[array addObject:[[OakTabFrame alloc] initWithTabItem:tabItems[i] width:x1 - x0]];
+		}
+		return array;
+	}
+
 	totalWidth += 1; // We place leftmost tab at position -1
 
 	NSMutableArray<OakTabFrame*>* array = [NSMutableArray array];
@@ -1212,8 +1379,8 @@ static void* kOakTabViewSelectedContext  = &kOakTabViewSelectedContext;
 - (NSArray<OakTabFrame*>*)makeLayout
 {
 	static NSString* const firstTabIdentifier = [NSUUID UUID].UUIDString;
-	CGFloat const visibleWidth = NSWidth(self.bounds) - NSWidth(self.createNewTabButton.frame);
-	NSUInteger const countOfVisibleTabs = MIN(MAX(0, floor(visibleWidth / _minimumTabSize)), _tabItems.count);
+	CGFloat const visibleWidth = OakTabBarVisibleWidth(self.bounds, self.createNewTabButton);
+	NSUInteger const countOfVisibleTabs = self.countOfVisibleTabs;
 
 	NSMutableArray<OakTabItem*>* tabItems = [NSMutableArray array];
 	BOOL didIncludeSelected = [_tabItems filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"selected == YES"]].count == 0;
@@ -1346,8 +1513,12 @@ static void* kOakTabViewSelectedContext  = &kOakTabViewSelectedContext;
 		[tabView removeFromSuperview];
 	}
 
+	BOOL const modernStyle = _style.usesModernLayout;
 	NSRect createNewTabButtonFrame = _createNewTabButton.frame;
-	CGFloat x = -1, y = NSMinY(self.bounds)+1, height = NSHeight(self.bounds)-1;
+	CGFloat visibleWidth = OakTabBarVisibleWidth(self.bounds, self.createNewTabButton);
+	CGFloat x = _style.leadingInset;
+	CGFloat height = modernStyle ? _style.contentHeight : NSHeight(self.bounds) - 1;
+	CGFloat y = modernStyle ? NSMaxY(self.bounds) - height : NSMinY(self.bounds) + 1;
 
 	for(OakTabFrame* tabFrame in _currentLayout)
 	{
@@ -1356,8 +1527,23 @@ static void* kOakTabViewSelectedContext  = &kOakTabViewSelectedContext;
 		x += tabFrame.width;
 	}
 
-	_backgroundView.frame = NSMakeRect(x, y, NSWidth(self.bounds)+2 - x, height);
-	_createNewTabButton.frame  = { { x, round((height - NSHeight(createNewTabButtonFrame)) / 2) }, createNewTabButtonFrame.size };
+	CGFloat createNewTabButtonX = modernStyle ? _style.leadingInset + visibleWidth + _style.newTabButtonGap : x;
+	_backgroundView.frame = modernStyle ? NSMakeRect(_style.leadingInset, y, visibleWidth, height) : NSMakeRect(x, y, NSWidth(self.bounds)+2 - x, height);
+	CGFloat createNewTabButtonY = modernStyle ? y : round((NSHeight(self.bounds) - NSHeight(createNewTabButtonFrame)) / 2);
+	_createNewTabButton.frame  = { { createNewTabButtonX, createNewTabButtonY }, createNewTabButtonFrame.size };
+	self.needsDisplay = YES;
+	[self updateTabSeparators];
+}
+
+- (void)updateTabSeparators
+{
+	OakTabView* previousTabView = nil;
+	for(OakTabFrame* tabFrame in _currentLayout)
+	{
+		OakTabView* tabView = tabFrame.tabItem.tabView;
+		tabView.showsLeadingSeparator = _style.usesModernLayout && previousTabView && !previousTabView.isSelected && !tabView.isSelected;
+		previousTabView = tabView;
+	}
 }
 
 - (void)resizeSubviewsWithOldSize:(NSSize)aSize

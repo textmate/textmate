@@ -1,11 +1,11 @@
 #include "filter.h"
 #include "path_info.h"
-#include <command/parser.h>
-#include <command/runner.h>
-#include <text/utf8.h>
-#include <regexp/regexp.h>
-#include <settings/settings.h>
-#include <io/path.h>
+#include <command/src/parser.h>
+#include <command/src/runner.h>
+#include <text/src/utf8.h>
+#include <regexp/src/regexp.h>
+#include <settings/src/settings.h>
+#include <io/src/path.h>
 #include <oak/debug.h>
 
 static std::vector<bundles::item_ptr> binary_filters (std::string const& event, std::string const& pathAttributes, io::bytes_ptr content)
@@ -46,7 +46,7 @@ namespace
 	{
 		event_delegate_t (io::bytes_ptr input, filter::callback_ptr context) : _input(input), _context(context) { }
 
-		bool accept_html_data (command::runner_ptr runner, char const* data, size_t len)   { return fprintf(stderr, "html: %.*s", (int)len, data), false; }
+		bool accept_html_data (command::runner_ptr runner, char const* data, size_t len)   { fprintf(stderr, "html: %.*s", (int)len, data); return false; }
 		void show_document (std::string const& str)                                        { fprintf(stderr, "document: %s\n", str.c_str()); }
 		void show_tool_tip (std::string const& str)                                        { fprintf(stderr, "tool tip: %s\n", str.c_str()); }
 		void show_error (bundle_command_t const& command, int rc, std::string const& out, std::string const& err) { _context->filter_error(command, rc, out, err); }
@@ -80,7 +80,10 @@ namespace
 	bool event_delegate_t::accept_result (std::string const& out, output::type placement, output_format::type format, output_caret::type outputCaret, ng::ranges_t const& inputRanges, std::map<std::string, std::string> const& environment)
 	{
 		if(placement != output::replace_document || format != output_format::text)
-			return fprintf(stderr, "*** unhandled placement/format (%d/%d): %s\n", placement, format, out.c_str()), false;
+		{
+			fprintf(stderr, "*** unhandled placement/format (%d/%d): %s\n", placement, format, out.c_str());
+			return false;
+		}
 
 		_context->set_content(std::make_shared<io::bytes_t>(out));
 		return true;

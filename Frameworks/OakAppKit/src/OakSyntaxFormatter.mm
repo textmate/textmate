@@ -1,11 +1,11 @@
 #import "OakSyntaxFormatter.h"
-#import <OakFoundation/OakFoundation.h>
-#import <bundles/query.h>
-#import <theme/OakTheme.h>
-#import <parse/parse.h>
-#import <parse/grammar.h>
-#import <text/utf16.h>
-#import <ns/ns.h>
+#import <OakFoundation/src/OakFoundation.h>
+#import <bundles/src/query.h>
+#import <theme/src/OakTheme.h>
+#import <parse/src/parse.h>
+#import <parse/src/grammar.h>
+#import <text/src/utf16.h>
+#import <ns/src/ns.h>
 
 static size_t kParseSizeLimit = 1024;
 
@@ -54,7 +54,7 @@ static size_t kParseSizeLimit = 1024;
 	{
 		for(auto const& bundleItem : bundles::query(bundles::kFieldGrammarScope, to_s(_grammarName), scope::wildcard, bundles::kItemTypeGrammar))
 		{
-			if(_grammar = parse::parse_grammar(bundleItem))
+			if((_grammar = parse::parse_grammar(bundleItem)))
 				break;
 		}
 

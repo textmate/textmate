@@ -1,7 +1,7 @@
 #ifndef UPDATER_DOWNLOAD_H_842XT36M
 #define UPDATER_DOWNLOAD_H_842XT36M
 
-#include <network/key_chain.h>
+#include <network/src/key_chain.h>
 #include <oak/oak.h>
 
 namespace bundles_db

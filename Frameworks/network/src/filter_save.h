@@ -2,8 +2,8 @@
 #define ARCHIVE_H_XHCVW91K
 
 #include "download.h" // filter_t
-#include <io/io.h>
-#include <text/format.h>
+#include <io/src/io.h>
+#include <text/src/format.h>
 
 namespace network
 {

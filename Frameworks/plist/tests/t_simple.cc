@@ -1,5 +1,5 @@
-#include <plist/ascii.h>
-#include <plist/stl.h>
+#include <plist/src/ascii.h>
+#include <plist/src/stl.h>
 
 static int32_t parse_int (std::string const& src)
 {

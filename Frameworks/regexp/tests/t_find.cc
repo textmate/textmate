@@ -1,4 +1,4 @@
-#include <regexp/find.h>
+#include <regexp/src/find.h>
 
 typedef std::pair<size_t, size_t> range_t;
 

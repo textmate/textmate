@@ -1,14 +1,14 @@
 #include "tbz.h"
-#include <text/format.h>
-#include <text/trim.h>
+#include <text/src/format.h>
+#include <text/src/trim.h>
 
 namespace network
 {
 	tbz_t::tbz_t (std::string const& dest)
 	{
-		if(_group = dispatch_group_create())
+		if((_group = dispatch_group_create()))
 		{
-			if(_process = io::spawn(std::vector<std::string>{ "/usr/bin/tar", "-jxmkC", dest, "--strip-components", "1", "--disable-copyfile", "--exclude", "._*" }))
+			if((_process = io::spawn(std::vector<std::string>{ "/usr/bin/tar", "-jxmkC", dest, "--strip-components", "1", "--disable-copyfile", "--exclude", "._*" })))
 			{
 				dispatch_group_async(_group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 					io::exhaust_fd(_process.out, &_output);

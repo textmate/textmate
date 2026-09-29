@@ -3,7 +3,7 @@
 
 #include "bytes.h"
 #include <oak/oak.h>
-#include <text/case.h>
+#include <text/src/case.h>
 
 extern std::string const kCharsetNoEncoding;
 extern std::string const kCharsetASCII;

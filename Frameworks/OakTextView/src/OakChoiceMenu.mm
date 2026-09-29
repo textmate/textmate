@@ -1,5 +1,5 @@
 #import "OakChoiceMenu.h"
-#import <OakAppKit/OakUIConstructionFunctions.h>
+#import <OakAppKit/src/OakUIConstructionFunctions.h>
 #import <oak/algorithm.h>
 
 NSUInteger const OakChoiceMenuKeyUnused   = 0;
@@ -33,7 +33,7 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 
 		_tableView = [[NSTableView alloc] initWithFrame:NSZeroRect];
 		[_tableView addTableColumn:[[NSTableColumn alloc] initWithIdentifier:@"mainColumn"]];
-		if(@available(macos 11.0, *))
+		if(@available(macOS 11.0, *))
 			_tableView.style = NSTableViewStylePlain;
 		_tableView.headerView              = nil;
 		_tableView.focusRingType           = NSFocusRingTypeNone;
@@ -57,7 +57,7 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 		effectView.autoresizingMask = NSViewWidthSizable|NSViewHeightSizable;
 		effectView.material         = NSVisualEffectMaterialMenu;
 
-		if(@available(macos 10.14, *))
+		if(@available(macOS 10.14, *))
 			effectView.blendingMode = NSVisualEffectBlendingModeBehindWindow; // MAC_OS_X_VERSION_10_14
 
 		[effectView addSubview:scrollView positioned:NSWindowBelow relativeTo:nil];

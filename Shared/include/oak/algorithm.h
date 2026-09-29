@@ -1,6 +1,9 @@
 #ifndef OAK_ALGORITHM_H_E3HYH9S3
 #define OAK_ALGORITHM_H_E3HYH9S3
 
+#include <math.h>
+#include <random>
+
 namespace oak
 {
 	template <typename _InputIter, typename _ValueT>

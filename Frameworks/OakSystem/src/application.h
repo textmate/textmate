@@ -1,6 +1,8 @@
 #ifndef APPLICATION_H_J6YAXEQE
 #define APPLICATION_H_J6YAXEQE
 
+#include <string>
+
 namespace oak
 {
 	struct application_t

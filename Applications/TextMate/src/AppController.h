@@ -24,7 +24,10 @@
 
 - (IBAction)showBundleItemChooser:(id)sender;
 
+#if 0
+// App updates are disabled for this fork until we decide on a new update mechanism.
 - (IBAction)performSoftwareUpdateCheck:(id)sender;
+#endif
 - (IBAction)showPreferences:(id)sender;
 - (IBAction)showBundleEditor:(id)sender;
 
@@ -37,6 +40,7 @@
 
 @interface AppController (Documents)
 - (void)newDocument:(id)sender;
+- (void)newFileBrowser:(id)sender;
 - (void)openDocument:(id)sender;
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication*)sender;
 @end

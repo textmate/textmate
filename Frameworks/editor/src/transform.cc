@@ -1,13 +1,13 @@
 #include "transform.h"
 #include "indent.h"
-#include <regexp/regexp.h>
-#include <regexp/format_string.h>
+#include <regexp/src/regexp.h>
+#include <regexp/src/format_string.h>
 #include <oak/oak.h>
-#include <text/case.h>
-#include <text/ctype.h>
-#include <text/parse.h>
-#include <text/utf8.h>
-#include <cf/cf.h>
+#include <text/src/case.h>
+#include <text/src/my_ctype.h>
+#include <text/src/parse.h>
+#include <text/src/utf8.h>
+#include <cf/src/cf.h>
 
 static size_t count_columns (std::string const& str, size_t tabSize)
 {

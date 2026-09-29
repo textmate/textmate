@@ -67,7 +67,7 @@ static NSString* GetHardwareInfo (int field, BOOL isInteger = NO)
 		_extractorDispatchGroup = dispatch_group_create();
 
 		_progress.kind = NSProgressKindFile;
-		if(@available(macos 10.13, *))
+		if(@available(macOS 10.13, *))
 				_progress.fileOperationKind = NSProgressFileOperationKindDownloading;
 		else	[_progress setUserInfoObject:NSProgressFileOperationKindDownloading forKey:NSProgressFileOperationKindKey];
 		_progress.localizedDescription = [NSString stringWithFormat:@"Downloading %@…", url.lastPathComponent];
@@ -129,7 +129,7 @@ static NSString* GetHardwareInfo (int field, BOOL isInteger = NO)
 			dispatch_group_leave(group);
 		};
 
-		if(@available(macos 10.13, *))
+		if(@available(macOS 10.13, *))
 		{
 			if(![_extractorTask launchAndReturnError:&error])
 			{

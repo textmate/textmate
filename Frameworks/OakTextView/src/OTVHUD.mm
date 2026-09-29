@@ -1,5 +1,5 @@
 #import "OTVHUD.h"
-#import <OakAppKit/OakUIConstructionFunctions.h>
+#import <OakAppKit/src/OakUIConstructionFunctions.h>
 
 @interface OTVHUDView : NSView
 @end

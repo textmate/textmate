@@ -1,10 +1,10 @@
 #include "ODBEditorSuite.h"
-#include <cf/cf.h>
-#include <document/OakDocument.h>
-#include <document/OakDocumentController.h>
-#include <ns/ns.h>
+#include <cf/src/cf.h>
+#include <document/src/OakDocument.h>
+#include <document/src/OakDocumentController.h>
+#include <ns/src/ns.h>
 #include <oak/debug.h>
-#include <text/hexdump.h>
+#include <text/src/hexdump.h>
 #include <oak/oak.h>
 
 struct ae_record_t;

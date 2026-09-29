@@ -1,20 +1,23 @@
 #import "GutterView.h"
-#import <OakAppKit/OakAppKit.h>
-#import <OakAppKit/NSImage Additions.h>
-#import <OakFoundation/OakFoundation.h>
-#import <OakFoundation/NSString Additions.h>
-#import <Preferences/Keys.h>
-#import <text/types.h>
-#import <cf/cf.h>
-#import <cf/cgrect.h>
-#import <crash/info.h>
+#import <OakAppKit/src/OakAppKit.h>
+#import <OakAppKit/src/NSImage Additions.h>
+#import <OakFoundation/src/OakFoundation.h>
+#import <OakFoundation/src/NSString Additions.h>
+#import <Preferences/src/Keys.h>
+#import <text/src/types.h>
+#import <cf/src/cf.h>
+#import <cf/src/cgrect.h>
+#import <crash/src/info.h>
 #import <oak/debug.h>
 #import <oak/oak.h>
 
 NSString* GVColumnDataSourceDidChange   = @"GVColumnDataSourceDidChange";
 NSString* GVLineNumbersColumnIdentifier = @"lineNumbers";
 
+static CGFloat const kCurrentLineHighlightHorizontalInset = 6;
+
 static CGFloat WidthOfLineNumbers (NSUInteger lineNumber, NSFont* font);
+static NSBezierPath* CurrentLineHighlightPath (CGRect const& rect);
 
 struct data_source_t
 {
@@ -42,6 +45,7 @@ struct data_source_t
 - (CGFloat)widthForColumnWithIdentifier:(std::string const&)identifier;
 - (data_source_t*)columnWithIdentifier:(std::string const&)identifier;
 
+- (void)commonInit;
 - (void)clearTrackingRects;
 - (void)setupTrackingRects;
 @end
@@ -55,27 +59,43 @@ struct data_source_t
 {
 	if(self = [super initWithFrame:frame])
 	{
-		id fontName = [NSUserDefaults.standardUserDefaults objectForKey:@"NSFixedPitchFont"];
-		id fontSize = [NSUserDefaults.standardUserDefaults objectForKey:@"NSFixedPitchFontSize"];
-		crash_reporter_info_t info("User has font name override %s, size %s", BSTR(fontName), BSTR(fontSize));
-		if(fontName) info << "font name: " << [[fontName description] UTF8String];
-		if(fontSize) info << "font size: " << [[fontSize description] UTF8String];
-
-		hiddenColumns       = [NSMutableSet new];
-		self.lineNumberFont = [NSFont userFixedPitchFontOfSize:12];
-		[self insertColumnWithIdentifier:GVLineNumbersColumnIdentifier atPosition:0 dataSource:nil delegate:nil];
-
-		mouseDownAtPoint     = NSMakePoint(-1, -1);
-		mouseHoveringAtPoint = NSMakePoint(-1, -1);
-
-		[self userDefaultsDidChange:nil];
-
-		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(cursorDidHide:) name:OakCursorDidHideNotification object:nil];
-		OakObserveUserDefaults(self);
+		[self commonInit];
 	}
 	return self;
 }
 
+- (id)initWithScrollView:(NSScrollView*)scrollView orientation:(NSRulerOrientation)orientation
+{
+	if(self = [super initWithScrollView:scrollView orientation:orientation])
+	{
+		[self commonInit];
+	}
+	return self;
+}
+
+- (void)commonInit
+{
+	id fontName = [NSUserDefaults.standardUserDefaults objectForKey:@"NSFixedPitchFont"];
+	id fontSize = [NSUserDefaults.standardUserDefaults objectForKey:@"NSFixedPitchFontSize"];
+	crash_reporter_info_t info("User has font name override %s, size %s", BSTR(fontName), BSTR(fontSize));
+	if(fontName) info << "font name: " << [[fontName description] UTF8String];
+	if(fontSize) info << "font size: " << [[fontSize description] UTF8String];
+
+	hiddenColumns       = [NSMutableSet new];
+	self.lineNumberFont = [NSFont userFixedPitchFontOfSize:12];
+	[self insertColumnWithIdentifier:GVLineNumbersColumnIdentifier atPosition:0 dataSource:nil delegate:nil];
+
+	mouseDownAtPoint     = NSMakePoint(-1, -1);
+	mouseHoveringAtPoint = NSMakePoint(-1, -1);
+
+	[self userDefaultsDidChange:nil];
+
+	[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(cursorDidHide:) name:OakCursorDidHideNotification object:nil];
+	OakObserveUserDefaults(self);
+}
+- (BOOL)clipsToBounds {
+	return YES;
+}
 - (void)userDefaultsDidChange:(id)sender
 {
 	self.antiAlias = ![NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsDisableAntiAliasKey];
@@ -114,16 +134,24 @@ struct data_source_t
 	backgroundRects.clear();
 	borderRects.clear();
 
-	for(auto const& range : text::selection_t(highlightedRange))
+	text::selection_t selection(highlightedRange);
+	if(selection.size() != 1 || !selection.last().empty() || selection.last().columnar)
+		return;
+
+	for(auto const& range : selection)
 	{
 		auto from = range.min(), to = range.max();
 		CGFloat firstY = [self.delegate lineFragmentForLine:from.line column:from.column].firstY;
 		auto fragment = [self.delegate lineFragmentForLine:to.line column:to.column];
 		CGFloat lastY = to.column == 0 && from.line != to.line ? fragment.firstY : fragment.lastY;
 
-		backgroundRects.push_back(CGRectMake(0, firstY+1, self.frame.size.width, lastY - firstY - 2));
+		backgroundRects.push_back(CGRectMake(kCurrentLineHighlightHorizontalInset, firstY, std::max<CGFloat>(0, self.frame.size.width - kCurrentLineHighlightHorizontalInset), lastY - firstY));
+#if 0
+		// Disabled: keep the old current-line top/bottom gutter strokes here in
+		// case we want to restore the bordered gutter highlight later.
 		borderRects.push_back(CGRectMake(0, firstY, self.frame.size.width, 1));
 		borderRects.push_back(CGRectMake(0, lastY-1, self.frame.size.width, 1));
+#endif
 	}
 }
 
@@ -150,7 +178,7 @@ struct data_source_t
 {
 	if(_partnerView)
 		[NSNotificationCenter.defaultCenter removeObserver:self];
-	if(_partnerView = aView)
+	if((_partnerView = aView))
 	{
 		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(boundsDidChange:) name:NSViewBoundsDidChangeNotification object:[[_partnerView enclosingScrollView] contentView]];
 		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(boundsDidChange:) name:NSViewFrameDidChangeNotification object:_partnerView];
@@ -243,7 +271,14 @@ struct data_source_t
 - (void)boundsDidChange:(NSNotification*)aNotification
 {
 	[self updateSize];
-	[self.enclosingScrollView.contentView scrollToPoint:NSMakePoint(0, NSMinY(_partnerView.enclosingScrollView.contentView.bounds))];
+
+	NSClipView* clipView = _partnerView.enclosingScrollView.contentView;
+	NSRect bounds = self.bounds;
+	bounds.origin.y    = NSMinY(clipView.bounds);
+	bounds.size.width  = self.size.width;
+	bounds.size.height = NSHeight(clipView.bounds);
+	self.bounds = bounds;
+	[self setNeedsDisplay:YES];
 }
 
 - (void)setSize:(NSSize)newSize
@@ -291,6 +326,26 @@ static CGFloat WidthOfLineNumbers (NSUInteger lineNumber, NSFont* font)
 	return ceil(width);
 }
 
+static NSBezierPath* CurrentLineHighlightPath (CGRect const& rect)
+{
+	if(CGRectIsEmpty(rect))
+		return [NSBezierPath bezierPath];
+
+	CGFloat radius = CGRectGetHeight(rect) * 0.25;
+	CGFloat minX = CGRectGetMinX(rect), maxX = CGRectGetMaxX(rect);
+	CGFloat minY = CGRectGetMinY(rect), maxY = CGRectGetMaxY(rect);
+
+	NSBezierPath* path = [NSBezierPath bezierPath];
+	[path moveToPoint:NSMakePoint(maxX, minY)];
+	[path lineToPoint:NSMakePoint(minX + radius, minY)];
+	[path appendBezierPathWithArcFromPoint:NSMakePoint(minX, minY) toPoint:NSMakePoint(minX, minY + radius) radius:radius];
+	[path lineToPoint:NSMakePoint(minX, maxY - radius)];
+	[path appendBezierPathWithArcFromPoint:NSMakePoint(minX, maxY) toPoint:NSMakePoint(minX + radius, maxY) radius:radius];
+	[path lineToPoint:NSMakePoint(maxX, maxY)];
+	[path closePath];
+	return path;
+}
+
 static void DrawText (std::string const& text, CGRect const& rect, CGFloat baseline, NSFont* font, NSColor* color)
 {
 	CGContextRef context = NSGraphicsContext.currentContext.CGContext;
@@ -309,17 +364,47 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 - (void)drawRect:(NSRect)aRect
 {
 	[self.backgroundColor set];
-	NSRectFill(NSIntersectionRect(aRect, self.frame));
+	NSRectFill(NSIntersectionRect(aRect, self.bounds));
 
 	[self setupSelectionRects];
 
+	std::pair<NSUInteger, NSUInteger> prevBackgroundLine(NSNotFound, 0);
+	for(CGFloat y = NSMinY(aRect); y < NSMaxY(aRect); )
+	{
+		GVLineRecord record = [self.delegate lineRecordForPosition:y];
+		if(record.lastY <= y || prevBackgroundLine == std::make_pair(record.lineNumber, record.softlineOffset))
+			break;
+		prevBackgroundLine = std::make_pair(record.lineNumber, record.softlineOffset);
+
+		if(NSColor* backgroundColor = [self.delegate backgroundColorForLineRecord:record])
+		{
+			[backgroundColor set];
+			NSRectFill(NSIntersectionRect(aRect, NSMakeRect(0, record.firstY, NSWidth(self.frame), record.lastY - record.firstY)));
+		}
+
+		y = record.lastY;
+	}
+
+	if([(id)self.delegate respondsToSelector:@selector(gutterView:drawBackgroundDecorationsInRect:)])
+		[self.delegate gutterView:self drawBackgroundDecorationsInRect:aRect];
+
+	if(self.backgroundDecorationDrawingBlock)
+		self.backgroundDecorationDrawingBlock(aRect);
+
 	[self.selectionBackgroundColor set];
 	for(auto const& rect : backgroundRects)
-		NSRectFillUsingOperation(NSIntersectionRect(rect, NSIntersectionRect(aRect, self.frame)), NSCompositingOperationSourceOver);
+	{
+		if(NSIntersectsRect(rect, aRect))
+			[CurrentLineHighlightPath(rect) fill];
+	}
 
+#if 0
+	// Disabled: current-line gutter fill no longer draws top/bottom border
+	// strokes, but leave the drawing code close by for easy restoration.
 	[self.selectionBorderColor set];
 	for(auto const& rect : borderRects)
 		NSRectFillUsingOperation(NSIntersectionRect(rect, NSIntersectionRect(aRect, self.frame)), NSCompositingOperationSourceOver);
+#endif
 
 	if(!self.antiAlias)
 		CGContextSetShouldAntialias(NSGraphicsContext.currentContext.CGContext, false);
@@ -414,8 +499,16 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 	}
 
 	NSPoint origin = NSMakePoint(0, NSMinY(_partnerView.enclosingScrollView.contentView.bounds));
-	CGFloat height = std::max(NSHeight(_partnerView.frame), origin.y + NSHeight([self visibleRect]));
+	CGFloat height = std::max(NSHeight(_partnerView.frame), origin.y + NSHeight(_partnerView.enclosingScrollView.contentView.bounds));
 	[self setSize:NSMakeSize(totalWidth, height)];
+
+	self.ruleThickness = totalWidth;
+	[self.scrollView tile];
+}
+
+- (CGFloat)requiredThickness
+{
+	return self.size.width;
 }
 
 - (NSSize)intrinsicContentSize

@@ -1,8 +1,8 @@
 #ifndef UPDATER_H_D2910JR4
 #define UPDATER_H_D2910JR4
 
-#include <plist/plist.h>
-#include <network/key_chain.h>
+#include <plist/src/plist.h>
+#include <network/src/key_chain.h>
 
 namespace bundles_db
 {

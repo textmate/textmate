@@ -4,15 +4,15 @@
 #include "indexed_map.h"
 #include "storage.h"
 #include <oak/callbacks.h>
-#include <text/types.h>
-#include <text/indent.h>
-#include <scope/scope.h>
-#include <parse/parse.h>
-#include <parse/grammar.h>
-#include <bundles/bundles.h>
-#include <regexp/regexp.h>
+#include <text/src/types.h>
+#include <text/src/indent.h>
+#include <scope/src/scope.h>
+#include <parse/src/parse.h>
+#include <parse/src/grammar.h>
+#include <bundles/src/bundles.h>
+#include <regexp/src/regexp.h>
 #include <oak/debug.h>
-#include <ns/spellcheck.h>
+#include <ns/src/spellcheck.h>
 
 namespace ng
 {

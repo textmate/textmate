@@ -4,6 +4,7 @@
 #include "parser_fwd.h"
 #include "regexp.h"
 #include <oak/misc.h>
+#include <Onigmo/oniguruma.h>
 
 namespace parser
 {

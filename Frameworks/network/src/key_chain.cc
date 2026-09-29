@@ -1,7 +1,7 @@
 #include "key_chain.h"
-#include <cf/cf.h>
+#include <cf/src/cf.h>
 #include <oak/oak.h>
-#include <plist/plist.h>
+#include <plist/src/plist.h>
 
 key_chain_t::key_t::key_t (std::string const& identity, std::string const& key_data) : _identity(identity), _key_data(key_data)
 {

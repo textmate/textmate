@@ -4,9 +4,9 @@
 #include "clipboard.h"
 #include "snippets.h"
 #include <oak/callbacks.h>
-#include <regexp/find.h>
-#include <command/parser.h>
-#include <selection/selection.h>
+#include <regexp/src/find.h>
+#include <command/src/parser.h>
+#include <selection/src/selection.h>
 
 namespace ng
 {

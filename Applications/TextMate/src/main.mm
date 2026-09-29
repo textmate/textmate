@@ -1,9 +1,9 @@
 #import <oak/debug.h>
-#import <OakSystem/application.h>
-#import <DocumentWindow/DocumentWindowController.h>
-#import <io/path.h>
-#import <text/format.h>
-#import <crash/info.h>
+#import <OakSystem/src/application.h>
+#import <DocumentWindow/src/DocumentWindowController.h>
+#import <io/src/path.h>
+#import <text/src/format.h>
+#import <crash/src/info.h>
 
 static void sig_int_handler (void* unused)
 {

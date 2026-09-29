@@ -1,9 +1,9 @@
 #import "SymbolChooser.h"
-#import <OakAppKit/OakUIConstructionFunctions.h>
-#import <OakFoundation/NSString Additions.h>
-#import <OakFoundation/OakFoundation.h>
-#import <text/ranker.h>
-#import <ns/ns.h>
+#import <OakAppKit/src/OakUIConstructionFunctions.h>
+#import <OakFoundation/src/NSString Additions.h>
+#import <OakFoundation/src/OakFoundation.h>
+#import <text/src/ranker.h>
+#import <ns/src/ns.h>
 
 @interface SymbolChooserItem : NSObject
 @property (nonatomic) NSString* path;
@@ -79,7 +79,7 @@ static SymbolChooserItem* CreateItem (OakDocument* document, text::pos_t const& 
 
 - (void)setTMDocument:(OakDocument*)aDocument
 {
-	if(_TMDocument = aDocument)
+	if((_TMDocument = aDocument))
 		[self updateItems:self];
 	NSString* title = @"Jump to Symbol";
 	self.window.title = _TMDocument ? [title stringByAppendingFormat:@" — %@", _TMDocument.displayName] : title;

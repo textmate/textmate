@@ -6,27 +6,27 @@
 #import "CommonAncestor.h"
 #import "FFFolderMenu.h"
 #import "FFStatusBarViewController.h"
-#import <OakFoundation/OakFindProtocol.h>
-#import <OakFoundation/NSString Additions.h>
-#import <OakFoundation/OakFoundation.h>
-#import <OakFoundation/OakHistoryList.h>
-#import <OakAppKit/NSAlert Additions.h>
-#import <OakAppKit/NSMenuItem Additions.h>
-#import <OakAppKit/OakAppKit.h>
-#import <OakAppKit/OakPasteboard.h>
-#import <OakAppKit/OakTransitionViewController.h>
-#import <OakAppKit/OakUIConstructionFunctions.h>
-#import <MenuBuilder/MenuBuilder.h>
-#import <Preferences/Keys.h>
-#import <ns/ns.h>
-#import <text/types.h>
-#import <text/utf8.h>
-#import <regexp/format_string.h>
-#import <regexp/regexp.h>
-#import <document/OakDocument.h>
-#import <document/OakDocumentController.h>
-#import <io/path.h>
-#import <settings/settings.h>
+#import <OakFoundation/src/OakFindProtocol.h>
+#import <OakFoundation/src/NSString Additions.h>
+#import <OakFoundation/src/OakFoundation.h>
+#import <OakFoundation/src/OakHistoryList.h>
+#import <OakAppKit/src/NSAlert Additions.h>
+#import <OakAppKit/src/NSMenuItem Additions.h>
+#import <OakAppKit/src/OakAppKit.h>
+#import <OakAppKit/src/OakPasteboard.h>
+#import <OakAppKit/src/OakTransitionViewController.h>
+#import <OakAppKit/src/OakUIConstructionFunctions.h>
+#import <MenuBuilder/src/MenuBuilder.h>
+#import <Preferences/src/Keys.h>
+#import <ns/src/ns.h>
+#import <text/src/types.h>
+#import <text/src/utf8.h>
+#import <regexp/src/format_string.h>
+#import <regexp/src/regexp.h>
+#import <document/src/OakDocument.h>
+#import <document/src/OakDocumentController.h>
+#import <io/src/path.h>
+#import <settings/src/settings.h>
 
 static NSString* const kUserDefaultsFolderOptionsKey               = @"Folder Search Options";
 static NSString* const kUserDefaultsFindResultsHeightKey           = @"findResultsHeight";
@@ -76,7 +76,7 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 	return res;
 }
 
-@interface Find () <OakFindServerProtocol, OakUserDefaultsObserver, NSWindowDelegate, NSMenuDelegate>
+@interface Find () <OakFindServerProtocol, OakUserDefaultsObserver, NSWindowDelegate, NSMenuDelegate, NSMenuItemValidation, NSEditor>
 {
 	NSObjectController*        _objectController;
 
@@ -335,13 +335,13 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 		MBMenu const items = {
 			{ /* Placeholder */ },
 			{ @"Search",                               @selector(nop:)                                    },
-			{ @"Binary Files",                         @selector(toggleSearchBinaryFiles:),   .indent = 1 },
-			{ @"Hidden Folders",                       @selector(toggleSearchHiddenFolders:), .indent = 1 },
-			{ @"Symbolic Links to Folders",            @selector(toggleSearchFolderLinks:),   .indent = 1 },
-			{ @"Symbolic Links to Files",              @selector(toggleSearchFileLinks:),     .indent = 1 },
+			MBMenuItem{ @"Binary Files",                         @selector(toggleSearchBinaryFiles:) }.withIndent(1),
+			MBMenuItem{ @"Hidden Folders",                       @selector(toggleSearchHiddenFolders:) }.withIndent(1),
+			MBMenuItem{ @"Symbolic Links to Folders",            @selector(toggleSearchFolderLinks:) }.withIndent(1),
+			MBMenuItem{ @"Symbolic Links to Files",              @selector(toggleSearchFileLinks:) }.withIndent(1),
 			{ /* -------- */ },
-			{ @"Collapse Results",                     @selector(toggleCollapsedState:),      @"1", .modifierFlags = NSEventModifierFlagCommand|NSEventModifierFlagOption, .target = _resultsViewController },
-			{ @"Select Result",                        .delegate = self                                   },
+			MBMenuItem{ @"Collapse Results",                     @selector(toggleCollapsedState:),      @"1" }.withModifierFlags(NSEventModifierFlagCommand|NSEventModifierFlagOption).withTarget(_resultsViewController),
+			MBMenuItem{ @"Select Result" }.withDelegate(self),
 			{ /* -------- */ },
 			{ @"Copy Matching Parts",                  @selector(copyMatchingParts:)                      },
 			{ @"Copy Matching Parts With Filenames",   @selector(copyMatchingPartsWithFilename:)          },
@@ -560,15 +560,15 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 	NSMenuItem* folderItem;
 
 	MBMenu const items = {
-		{ @"Document",            @selector(orderFrontFindPanel:),  @"f", .tag = FFSearchTargetDocument          },
-		{ @"Selection",           @selector(orderFrontFindPanel:),        .tag = FFSearchTargetSelection         },
+		MBMenuItem{ @"Document",            @selector(orderFrontFindPanel:),  @"f" }.withTag(FFSearchTargetDocument),
+		MBMenuItem{ @"Selection",           @selector(orderFrontFindPanel:) }.withTag(FFSearchTargetSelection),
 		{ /* -------- */ },
-		{ @"Open Files",          @selector(orderFrontFindPanel:),        .tag = FFSearchTargetOpenFiles         },
-		{ @"Project Folder",      @selector(orderFrontFindPanel:),  @"F", .tag = FFSearchTargetProject           },
-		{ @"File Browser Items",  @selector(orderFrontFindPanel:),        .tag = FFSearchTargetFileBrowserItems  },
-		{ @"Other Folder…",       @selector(showFolderSelectionPanel:),   .tag = FFSearchTargetOther             },
+		MBMenuItem{ @"Open Files",          @selector(orderFrontFindPanel:) }.withTag(FFSearchTargetOpenFiles),
+		MBMenuItem{ @"Project Folder",      @selector(orderFrontFindPanel:),  @"F" }.withTag(FFSearchTargetProject),
+		MBMenuItem{ @"File Browser Items",  @selector(orderFrontFindPanel:) }.withTag(FFSearchTargetFileBrowserItems),
+		MBMenuItem{ @"Other Folder…",       @selector(showFolderSelectionPanel:) }.withTag(FFSearchTargetOther),
 		{ /* -------- */ },
-		{ @"«Last Folder»",       @selector(orderFrontFindPanel:),        .ref = &folderItem                     },
+		MBMenuItem{ @"«Last Folder»",       @selector(orderFrontFindPanel:) }.withRef(&folderItem),
 		{ /* -------- */ },
 		{ @"Recent Places",       @selector(nop:),                                                               },
 	};
@@ -670,7 +670,7 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 	if(_showsResultsOutlineView == flag)
 		return;
 
-	if(_showsResultsOutlineView = flag)
+	if((_showsResultsOutlineView = flag))
 	{
 		_resultsViewController.view.frame = { .size = NSMakeSize(NSWidth(_transitionViewController.view.frame), MAX(50, self.findResultsHeight)) };
 		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(resultsFrameDidChange:) name:NSViewFrameDidChangeNotification object:_resultsViewController.view];
@@ -845,7 +845,7 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 + (NSSet*)keyPathsForValuesAffectingReplaceAllButtonTitle { return [NSSet setWithArray:@[ @"countOfMatches", @"countOfExcludedMatches", @"countOfReadOnlyMatches", @"countOfExcludedReadOnlyMatches", @"showsResultsOutlineView" ]]; }
 
 - (BOOL)canReplaceAll                { return _showsResultsOutlineView ? (_countOfExcludedMatches - _countOfExcludedReadOnlyMatches < _countOfMatches - _countOfReadOnlyMatches) : YES; }
-- (NSString*)replaceAllButtonTitle   { return _showsResultsOutlineView && (_countOfExcludedMatches || _countOfReadOnlyMatches && _countOfReadOnlyMatches != _countOfMatches) ? @"Replace Selected" : @"Replace All"; }
+- (NSString*)replaceAllButtonTitle   { return _showsResultsOutlineView && (_countOfExcludedMatches || (_countOfReadOnlyMatches && _countOfReadOnlyMatches != _countOfMatches)) ? @"Replace Selected" : @"Replace All"; }
 
 - (IBAction)countOccurrences:(id)sender   { [self performFindAction:FindActionCountMatches];   }
 - (IBAction)findAll:(id)sender            { [self performFindAction:FindActionFindAll];        }
@@ -885,7 +885,7 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 		_findOptions |= find::all_matches;
 
 	FFSearchTarget searchTarget = self.searchTarget;
-	if(searchTarget != FFSearchTargetSelection && (searchTarget != FFSearchTargetDocument || action == FindActionFindAll && self.documentIdentifier))
+	if(searchTarget != FFSearchTargetSelection && (searchTarget != FFSearchTargetDocument || (action == FindActionFindAll && self.documentIdentifier)))
 	{
 		switch(action)
 		{
@@ -1108,7 +1108,7 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 		[_documentSearch stop];
 	}
 
-	if(_documentSearch = newSearcher)
+	if((_documentSearch = newSearcher))
 	{
 		_statusBarViewController.progressIndicatorVisible = YES;
 		self.statusString            = @"Searching…";
@@ -1392,11 +1392,11 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 	else if(aMenuItem.action == @selector(toggleSearchBinaryFiles:))
 		aMenuItem.state = self.searchBinaryFiles ? NSControlStateValueOn : NSControlStateValueOff;
 	else if(aMenuItem.action == @selector(goToParentFolder:))
-		res = self.searchFolder != nil || _searchTarget == FFSearchTargetFileBrowserItems && CommonAncestor(_fileBrowserItems);
+		res = self.searchFolder != nil || (_searchTarget == FFSearchTargetFileBrowserItems && CommonAncestor(_fileBrowserItems));
 	else if(aMenuItem.action == @selector(goBack:))
 		res = [_wherePopUpButton.menu indexOfItemWithTarget:self andAction:aMenuItem.action] != -1;
 	else if(aMenuItem.action == @selector(goForward:))
-		res = [_wherePopUpButton.menu indexOfItemWithTarget:self andAction:aMenuItem.action] != -1 || _searchTarget == FFSearchTargetOther && _otherFolder;
+		res = [_wherePopUpButton.menu indexOfItemWithTarget:self andAction:aMenuItem.action] != -1 || (_searchTarget == FFSearchTargetOther && _otherFolder);
 	return res;
 }
 @end

@@ -1,4 +1,4 @@
-#include <ns/event.h>
+#include <ns/src/event.h>
 
 void test_normalize_event_string ()
 {

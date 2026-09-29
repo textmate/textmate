@@ -1,6 +1,6 @@
 #include "../src/track_paths.h"
-#include <io/path.h>
-#include <text/format.h>
+#include <io/src/path.h>
+#include <text/src/format.h>
 #include <test/jail.h>
 
 static bool test_range (track_paths_t& tracker, std::vector<std::string> const& paths, size_t first, size_t last)

@@ -1,13 +1,13 @@
 #include "license.h"
-#include <cf/cf.h>
-#include <text/decode.h>
-#include <text/hexdump.h>
-#include <text/tokenize.h>
-#include <text/case.h>
-#include <text/format.h>
-#include <crash/info.h>
+#include <cf/src/cf.h>
+#include <text/src/decode.h>
+#include <text/src/hexdump.h>
+#include <text/src/tokenize.h>
+#include <text/src/case.h>
+#include <text/src/format.h>
+#include <crash/src/info.h>
 
-extern std::vector<size_t> const& revoked_serials () WEAK_IMPORT_ATTRIBUTE;
+// extern std::vector<size_t> const& revoked_serials () WEAK_IMPORT_ATTRIBUTE;
 
 namespace
 {
@@ -124,7 +124,7 @@ namespace
 		static std::string const key = "-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDLFL3xBKeG19N7/6uCnpPLESJ+\n2VDL3LWH0KxIRse/sdkbWw1bYNPMeXtdVNfZRiF03umdxaPgzpNCN/JY7P91m8Lv\ndizRDO8I411Wcf+G7W5CA3GuJbQfNvBBOn+3KwHrG4v+RR+XtdEbw5uPHyIvYWOI\nmwvjE6oSRSBkWMIATQIDAQAB\n-----END PUBLIC KEY-----\n";
 		return key;
 	}
-
+#if 0
 	static bool is_serial_revoked (size_t serial)
 	{
 		if(revoked_serials)
@@ -135,6 +135,7 @@ namespace
 		}
 		return false;
 	}
+#endif
 }
 
 namespace license

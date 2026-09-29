@@ -1,10 +1,10 @@
 #import "OakKeyEquivalentView.h"
 #import "OakUIConstructionFunctions.h"
 #import "NSImage Additions.h"
-#import <OakFoundation/OakFoundation.h>
-#import <OakFoundation/NSString Additions.h>
-#import <ns/ns.h>
-#import <text/utf8.h>
+#import <OakFoundation/src/OakFoundation.h>
+#import <OakFoundation/src/NSString Additions.h>
+#import <ns/src/ns.h>
+#import <text/src/utf8.h>
 
 static NSString* const kRecordingPlaceholderString = @"…";
 
@@ -76,7 +76,7 @@ static NSString* const kRecordingPlaceholderString = @"…";
 	if(_showClearButton == flag)
 		return;
 
-	if(_showClearButton = flag)
+	if((_showClearButton = flag))
 	{
 		if(!_clearButton)
 		{
@@ -205,7 +205,7 @@ static NSString* const kRecordingPlaceholderString = @"…";
 	NSColor* frameColor      = NSColor.lightGrayColor;
 	NSColor* backgroundColor = NSColor.whiteColor;
 
-	if(@available(macos 10.14, *))
+	if(@available(macOS 10.14, *))
 	{
 		if([[NSApp.effectiveAppearance bestMatchFromAppearancesWithNames:@[ NSAppearanceNameAqua, NSAppearanceNameDarkAqua ]] isEqualToString:NSAppearanceNameDarkAqua])
 			frameColor = NSColor.tertiaryLabelColor;

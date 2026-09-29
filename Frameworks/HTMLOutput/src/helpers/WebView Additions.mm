@@ -1,10 +1,10 @@
-#import <OakAppKit/OakPasteboard.h>
-#import <OakFoundation/OakFoundation.h>
-#import <OakFoundation/OakFindProtocol.h>
-#import <OakFoundation/NSString Additions.h>
-#import <document/OakDocument.h>
-#import <document/OakDocumentController.h>
-#import <ns/ns.h>
+#import <OakAppKit/src/OakPasteboard.h>
+#import <OakFoundation/src/OakFoundation.h>
+#import <OakFoundation/src/OakFindProtocol.h>
+#import <OakFoundation/src/NSString Additions.h>
+#import <document/src/OakDocument.h>
+#import <document/src/OakDocumentController.h>
+#import <ns/src/ns.h>
 
 @interface WebView (OakFindNextPrevious)
 - (void)performFindOperation:(id <OakFindServerProtocol>)aFindServer;

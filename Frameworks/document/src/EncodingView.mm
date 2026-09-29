@@ -1,13 +1,13 @@
 #import "EncodingView.h"
-#import <OakFoundation/NSString Additions.h>
-#import <OakAppKit/OakEncodingPopUpButton.h>
-#import <OakAppKit/OakUIConstructionFunctions.h>
-#import <text/hexdump.h>
-#import <text/utf8.h>
-#import <text/transcode.h>
+#import <OakFoundation/src/NSString Additions.h>
+#import <OakAppKit/src/OakEncodingPopUpButton.h>
+#import <OakAppKit/src/OakUIConstructionFunctions.h>
+#import <text/src/hexdump.h>
+#import <text/src/utf8.h>
+#import <text/src/transcode.h>
 #import <oak/oak.h>
 #import <oak/debug.h>
-#import <ns/ns.h>
+#import <ns/src/ns.h>
 
 template <typename _InputIter>
 size_t newline_size (_InputIter first, _InputIter const& last)

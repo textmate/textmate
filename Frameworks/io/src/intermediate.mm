@@ -1,7 +1,7 @@
 #include "intermediate.h"
 #include "path.h"
-#include <ns/ns.h>
-#include <text/format.h>
+#include <ns/src/ns.h>
+#include <text/src/format.h>
 #include <oak/debug.h>
 
 __attribute__ ((format (printf, 1, 2))) static std::string format_error (char const* format, ...)
@@ -88,7 +88,10 @@ static bool swap_and_unlink (std::string const& src, std::string const& dst, std
 static std::string create_path (std::string const& path)
 {
 	if(!path::exists(path))
-		return path::make_dir(path::parent(path)), path;
+	{
+		path::make_dir(path::parent(path));
+		return path;
+	}
 	else if(path::device(path) != path::device(path::temp()) && access(path::parent(path).c_str(), W_OK) == 0)
 		return path + "~";
 	return path::temp("atomic_save");
@@ -113,7 +116,7 @@ namespace path
 		char const* setup (std::string* errorMsg)
 		{
 			NSError* error;
-			if(_tempDirectoryURL = [NSFileManager.defaultManager URLForDirectory:NSItemReplacementDirectory inDomain:NSUserDomainMask appropriateForURL:_destURL create:YES error:&error])
+			if((_tempDirectoryURL = [NSFileManager.defaultManager URLForDirectory:NSItemReplacementDirectory inDomain:NSUserDomainMask appropriateForURL:_destURL create:YES error:&error]))
 			{
 				_tempURL = [_tempDirectoryURL URLByAppendingPathComponent:_destURL.lastPathComponent];
 				return _tempURL.fileSystemRepresentation;
@@ -219,7 +222,7 @@ namespace path
 			BOOL isInternalVolume = [destURL getResourceValue:&boolean forKey:NSURLVolumeIsInternalKey error:&error] && boolean.boolValue;
 			BOOL isLocalVolume    = [destURL getResourceValue:&boolean forKey:NSURLVolumeIsLocalKey error:&error] && boolean.boolValue;
 
-			if(atomicSave == atomic_t::always || atomicSave == atomic_t::external_volumes && !isInternalVolume || atomicSave == atomic_t::remote_volumes && !isLocalVolume)
+	if(atomicSave == atomic_t::always || (atomicSave == atomic_t::external_volumes && !isInternalVolume) || (atomicSave == atomic_t::remote_volumes && !isLocalVolume))
 					_strategy.reset(new filemanager_strategy_t(destURL));
 			else	_strategy.reset(new non_atomic_strategy_t(dest));
 		}

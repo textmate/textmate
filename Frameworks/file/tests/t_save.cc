@@ -1,6 +1,6 @@
-#include <file/save.h>
-#include <io/path.h>
-#include <text/hexdump.h>
+#include <file/src/save.h>
+#include <io/src/path.h>
+#include <text/src/hexdump.h>
 #include <test/jail.h>
 
 struct stall_t : file::save_callback_t

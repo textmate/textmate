@@ -1,8 +1,8 @@
 #include "user_agent.h"
-#include <OakSystem/application.h>
-#include <text/format.h>
-#include <io/path.h>
-#include <cf/cf.h>
+#include <OakSystem/src/application.h>
+#include <text/src/format.h>
+#include <io/src/path.h>
+#include <cf/src/cf.h>
 #include <oak/compat.h>
 
 static std::string hardware_info (int field, bool integer = false)

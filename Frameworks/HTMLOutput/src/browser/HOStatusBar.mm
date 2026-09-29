@@ -1,6 +1,6 @@
 #import "HOStatusBar.h"
-#import <OakAppKit/NSImage Additions.h>
-#import <OakAppKit/OakUIConstructionFunctions.h>
+#import <OakAppKit/src/NSImage Additions.h>
+#import <OakAppKit/src/OakUIConstructionFunctions.h>
 
 static NSButton* OakCreateImageButton (NSImage* image)
 {
@@ -131,7 +131,7 @@ static NSTextField* OakCreateTextField ()
 	if(_indeterminateProgress == newIndeterminateProgress)
 		return;
 
-	if(_indeterminateProgress = newIndeterminateProgress)
+	if((_indeterminateProgress = newIndeterminateProgress))
 	{
 		[_progressIndicator removeFromSuperview];
 		[self addSubview:_spinner];

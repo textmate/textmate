@@ -1,9 +1,9 @@
-#import <text/types.h>
-#import <authorization/authorization.h>
-#import <selection/types.h>
-#import <command/parser.h>
-#import <regexp/find.h> // find::options_t
-#import <scm/scm.h>
+#import <text/src/types.h>
+#import <authorization/src/authorization.h>
+#import <selection/src/types.h>
+#import <command/src/parser.h>
+#import <regexp/src/find.h> // find::options_t
+#import <scm/src/scm.h>
 
 extern NSNotificationName const OakDocumentContentDidChangeNotification;
 extern NSNotificationName const OakDocumentMarksDidChangeNotification;
@@ -96,6 +96,7 @@ typedef NS_ENUM(NSInteger, OakDocumentIOResult) {
 + (void)removeAllMarksOfType:(NSString*)aMark;
 
 - (void)enumerateSymbolsUsingBlock:(void(^)(text::pos_t const& pos, NSString* symbol))block;
+- (void)enumerateCachedSymbolsUsingBlock:(void(^)(text::pos_t const& pos, NSString* symbol, NSUInteger lineIndent, BOOL* stop))block;
 - (void)enumerateBookmarksUsingBlock:(void(^)(text::pos_t const& pos, NSString* excerpt))block;
 - (void)enumerateBookmarksAtLine:(NSUInteger)line block:(void(^)(text::pos_t const& pos, NSString* type, NSString* payload))block;
 - (void)enumerateByteRangesUsingBlock:(void(^)(char const* bytes, NSRange byteRange, BOOL* stop))block;
@@ -121,6 +122,8 @@ typedef NS_ENUM(NSInteger, OakDocumentIOResult) {
 // Read from .tm_properties so will update if we change fileType
 @property (nonatomic) NSUInteger tabSize;
 @property (nonatomic) BOOL softTabs;
+@property (nonatomic) BOOL automaticallyDetectsIndentation;
+- (void)reloadIndentationSettings;
 
 - (void)runPrintOperationModalForWindow:(NSWindow*)aWindow fontName:(NSString*)aFontName;
 

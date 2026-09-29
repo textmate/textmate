@@ -1,5 +1,5 @@
-#include <io/path.h>
-#include <text/format.h>
+#include <io/src/path.h>
+#include <text/src/format.h>
 #include <test/jail.h>
 
 template <size_t N> void run_test (std::string const (&path_list)[N], size_t expected_parents)

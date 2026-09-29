@@ -1,4 +1,4 @@
-#include <CommitWindow/CommitWindow.h>
+#include <CommitWindow/src/CommitWindow.h>
 #include <oak/oak.h>
 
 static double const AppVersion = 1.1;

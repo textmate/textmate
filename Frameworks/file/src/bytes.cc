@@ -1,5 +1,7 @@
 #include "bytes.h"
 
+#include <boost/crc.hpp>
+
 namespace io
 {
 	bytes_t::bytes_t (size_t size) : _dispose(true)

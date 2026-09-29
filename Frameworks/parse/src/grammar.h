@@ -1,7 +1,7 @@
 #ifndef LOAD_GRAMMAR_H_FPR2TQML
 #define LOAD_GRAMMAR_H_FPR2TQML
 
-#include <bundles/bundles.h>
+#include <bundles/src/bundles.h>
 #include <oak/callbacks.h>
 
 namespace parse

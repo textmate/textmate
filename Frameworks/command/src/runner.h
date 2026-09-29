@@ -2,9 +2,9 @@
 #define COMMAND_RUNNER_H_MW7OSOTP
 
 #include "parser.h"
-#include <buffer/buffer.h>
-#include <selection/selection.h>
-#include <text/types.h>
+#include <buffer/src/buffer.h>
+#include <selection/src/selection.h>
+#include <text/src/types.h>
 #include <oak/debug.h>
 #include <oak/callbacks.h>
 

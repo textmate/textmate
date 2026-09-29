@@ -1,6 +1,6 @@
 #import "OakDebug.h"
 #import <oak/oak.h>
-#import <text/format.h>
+#import <text/src/format.h>
 
 @interface OakExceptionHandlerDelegate : NSObject { }
 @end
@@ -28,7 +28,7 @@ std::string OakStackDump (int linesToSkip)
 	int output[2];
 	pipe(&output[0]);
 
-	pid_t pid = vfork();
+	pid_t pid = fork();
 	if(pid == 0)
 	{
 		close(STDOUT_FILENO); close(STDERR_FILENO);
@@ -40,7 +40,9 @@ std::string OakStackDump (int linesToSkip)
 		int mib[2] = { CTL_USER, USER_CS_PATH };
 		size_t len = 0;
 		sysctl(mib, 2, NULL, &len, NULL, 0);
-		char buf[len + 5];
+		if(len > PATH_MAX)
+			_exit(EXIT_FAILURE);
+		char buf[PATH_MAX + 5];
 		strcpy(buf, "PATH=");
 		sysctl(mib, 2, buf + 5, &len, NULL, 0);
 
@@ -120,6 +122,8 @@ void OakPrintBadAssertion (char const* lhs, char const* op, char const* rhs, std
 	if([[exception name] isEqualToString:@"FSExecutionErrorException"])
 		return NO;
 	os_log_error(OS_LOG_DEFAULT, "%{public}@: %{public}@\n", exception.name, exception.reason);
+	if(mask & NSLogOtherExceptionMask)
+		return YES;
 	abort();
 	return YES;
 }

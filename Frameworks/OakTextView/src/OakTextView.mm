@@ -1,50 +1,51 @@
 #import "OakTextView.h"
+#import <oak/TextMateResponderActions.h>
 #import "OakChoiceMenu.h"
 #import "OakDocumentView.h" // addAuxiliaryView:atEdge: signature
 #import "OakCommandRefresh.h"
 #import "LiveSearchView.h"
 #import "OTVHUD.h"
-#import <OakCommand/OakCommand.h>
-#import <OakAppKit/OakAppKit.h>
-#import <OakAppKit/NSAlert Additions.h>
-#import <OakAppKit/NSEvent Additions.h>
-#import <OakAppKit/NSImage Additions.h>
-#import <OakAppKit/NSMenuItem Additions.h>
-#import <OakAppKit/OakPasteboard.h>
-#import <OakAppKit/OakPopOutAnimation.h>
-#import <OakAppKit/OakToolTip.h>
-#import <OakAppKit/OakSound.h>
-#import <OakFoundation/NSString Additions.h>
-#import <OakFoundation/OakFoundation.h>
-#import <OakFoundation/OakFindProtocol.h>
-#import <OakSystem/application.h>
-#import <crash/info.h>
-#import <buffer/indexed_map.h>
-#import <BundleMenu/BundleMenu.h>
-#import <BundlesManager/BundlesManager.h>
-#import <Preferences/Keys.h>
-#import <bundles/bundles.h>
-#import <cf/cf.h>
-#import <command/runner.h>
-#import <document/OakDocumentEditor.h>
-#import <document/OakDocumentController.h>
-#import <file/type.h>
-#import <layout/layout.h>
-#import <ns/ns.h>
-#import <ns/spellcheck.h>
-#import <text/case.h>
-#import <text/classification.h>
-#import <text/format.h>
-#import <text/newlines.h>
-#import <text/trim.h>
-#import <text/utf16.h>
-#import <text/utf8.h>
-#import <settings/settings.h>
+#import <OakCommand/src/OakCommand.h>
+#import <OakAppKit/src/OakAppKit.h>
+#import <OakAppKit/src/NSAlert Additions.h>
+#import <OakAppKit/src/NSEvent Additions.h>
+#import <OakAppKit/src/NSImage Additions.h>
+#import <OakAppKit/src/NSMenuItem Additions.h>
+#import <OakAppKit/src/OakPasteboard.h>
+#import <OakAppKit/src/OakPopOutAnimation.h>
+#import <OakAppKit/src/OakToolTip.h>
+#import <OakAppKit/src/OakSound.h>
+#import <OakFoundation/src/NSString Additions.h>
+#import <OakFoundation/src/OakFoundation.h>
+#import <OakFoundation/src/OakFindProtocol.h>
+#import <OakSystem/src/application.h>
+#import <crash/src/info.h>
+#import <buffer/src/indexed_map.h>
+#import <BundleMenu/src/BundleMenu.h>
+#import <BundlesManager/src/BundlesManager.h>
+#import <Preferences/src/Keys.h>
+#import <bundles/src/bundles.h>
+#import <cf/src/cf.h>
+#import <command/src/runner.h>
+#import <document/src/OakDocumentEditor.h>
+#import <document/src/OakDocumentController.h>
+#import <file/src/type.h>
+#import <layout/src/layout.h>
+#import <ns/src/ns.h>
+#import <ns/src/spellcheck.h>
+#import <text/src/case.h>
+#import <text/src/classification.h>
+#import <text/src/format.h>
+#import <text/src/newlines.h>
+#import <text/src/trim.h>
+#import <text/src/utf16.h>
+#import <text/src/utf8.h>
+#import <settings/src/settings.h>
 #import <oak/debug.h>
-#import <editor/editor.h>
-#import <editor/write.h>
-#import <io/exec.h>
-#import <Find/Find.h>
+#import <editor/src/editor.h>
+#import <editor/src/write.h>
+#import <io/src/exec.h>
+#import <Find/src/Find.h>
 
 int32_t const NSWrapColumnWindowWidth =  0;
 int32_t const NSWrapColumnAskUser     = -1;
@@ -284,6 +285,12 @@ struct document_view_t : ng::buffer_api_t
 		return [_document_editor buffer].prev_mark(SIZE_T_MAX, type).second != NULL_STR;
 	}
 
+	std::multimap<size_t, std::pair<std::string, std::string>> all_marks () const
+	{
+		ng::buffer_t const& buf = [_document_editor buffer];
+		return buf.get_marks(0, buf.size());
+	}
+
 	bool current_line_has_marks (std::string const& type) const
 	{
 		ng::buffer_t const& buf = [_document_editor buffer];
@@ -427,7 +434,7 @@ struct document_view_t : ng::buffer_api_t
 	bool draw_wrap_column () const { return _layout->draw_wrap_column(); }
 	bool draw_indent_guides () const { return _layout->draw_indent_guides(); }
 	void update_metrics (CGRect visibleRect) { _layout->update_metrics(visibleRect); }
-	void draw (ng::context_t const& context, CGRect rectangle, bool isFlipped, ng::ranges_t const& selection, ng::ranges_t const& highlightRanges = ng::ranges_t(), bool drawBackground = true) { _layout->draw(context, rectangle, isFlipped, selection, highlightRanges, drawBackground); }
+	void draw (ng::context_t const& context, CGRect rectangle, bool isFlipped, ng::ranges_t const& selection, ng::ranges_t const& highlightRanges = ng::ranges_t(), bool drawBackground = true, std::function<void()> const& drawBackgroundDecorations = {}) { _layout->draw(context, rectangle, isFlipped, selection, highlightRanges, drawBackground, drawBackgroundDecorations); }
 	ng::index_t index_at_point (CGPoint point) const { return _layout->index_at_point(point); }
 	CGRect rect_at_index (ng::index_t const& index, bool bol_as_eol = false, bool wantsBaseline = false) const { return _layout->rect_at_index(index, bol_as_eol, wantsBaseline); }
 	CGRect rect_for_range (size_t first, size_t last, bool bol_as_eol = false) const { return _layout->rect_for_range(first, last, bol_as_eol); }
@@ -460,7 +467,7 @@ private:
 	ng::layout_t* _layout;
 };
 
-@interface OakTextView () <NSTextInputClient, NSDraggingSource, NSIgnoreMisspelledWords, NSChangeSpelling, NSTextFieldDelegate, NSTouchBarDelegate, NSAccessibilityCustomRotorItemSearchDelegate, OakUserDefaultsObserver>
+@interface OakTextView () <NSTextInputClient, NSDraggingSource, NSIgnoreMisspelledWords, NSChangeSpelling, NSTextFieldDelegate, NSTouchBarDelegate, NSAccessibilityCustomRotorItemSearchDelegate, OakUserDefaultsObserver, NSMenuItemValidation>
 {
 	std::shared_ptr<document_view_t> documentView;
 	ng::callback_t* callback;
@@ -470,6 +477,26 @@ private:
 
 	NSImage* spellingDotImage;
 	NSImage* foldingDotsImage;
+
+	// ======================
+	// = Diagnostic Overlay =
+	// ======================
+
+	struct diagnostic_info_t
+	{
+		std::string type;    // error / warning / note
+		std::string message; // message with length prefix and fix payload stripped
+		std::string fixJSON; // empty when the mark carries no fix
+		size_t index;        // buffer index of the mark
+	};
+	std::map<size_t, std::vector<diagnostic_info_t>> diagnosticsByLine;
+	std::map<size_t, std::string> diagnosticLineTint;
+	std::vector<std::pair<ng::range_t, std::string>> diagnosticSquiggles;
+	std::map<size_t, NSRect> diagnosticPillRects;   // line → clickable icon capsule
+	std::map<size_t, NSRect> diagnosticBannerRects; // line → full banner; padding clicks are swallowed
+	std::map<size_t, NSTextField*> diagnosticBannerTextFields;
+	NSPopover* diagnosticsPopover;
+	NSMutableArray<NSDictionary*>* diagnosticFixQueue;
 
 	// =================
 	// = Mouse Support =
@@ -580,6 +607,21 @@ static ng::ranges_t merge (ng::ranges_t lhs, ng::ranges_t const& rhs)
 	return lhs;
 }
 
+static NSRect TextViewportRect (OakTextView* textView)
+{
+	if(NSScrollView* scrollView = [textView enclosingScrollView])
+	{
+		NSRect res = scrollView.contentView.bounds;
+		res.size = scrollView.contentView.frame.size;
+		// With a vertical ruler, AppKit reports a content-view frame that still
+		// includes the ruler. Soft wrapping must use the remaining text width.
+		if(scrollView.rulersVisible && scrollView.hasVerticalRuler)
+			res.size.width = std::max<CGFloat>(0, NSWidth(res) - scrollView.verticalRulerView.requiredThickness);
+		return res;
+	}
+	return textView.visibleRect;
+}
+
 struct refresh_helper_t
 {
 	refresh_helper_t (OakTextView* self, std::shared_ptr<document_view_t> const& documentView) : _self(self), _document_view(documentView)
@@ -616,9 +658,10 @@ struct refresh_helper_t
 					[_self updateSymbol];
 				}
 
+				NSRect r = TextViewportRect(_self);
+				documentView->set_viewport(r);
 				auto damagedRects = documentView->end_refresh_cycle(merge(documentView->ranges(), [_self markedRanges]), [_self visibleRect], [_self liveSearchRanges]);
 
-				NSRect r = [[_self enclosingScrollView] documentVisibleRect];
 				NSSize newSize = NSMakeSize(std::max(NSWidth(r), documentView->width()), std::max(NSHeight(r), documentView->height()));
 				if(!NSEqualSizes([_self frame].size, newSize))
 					[_self setFrameSize:newSize];
@@ -823,7 +866,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 	NSString* appearance = [NSUserDefaults.standardUserDefaults stringForKey:@"themeAppearance"];
 	BOOL darkMode = [appearance isEqualToString:@"dark"];
-	if(@available(macos 10.14, *))
+	if(@available(macOS 10.14, *))
 	{
 		if(!darkMode && ![appearance isEqualToString:@"light"]) // If it is not ‘light’ then assume ‘auto’
 			darkMode = [[self.effectiveAppearance bestMatchFromAppearancesWithNames:@[ NSAppearanceNameAqua, NSAppearanceNameDarkAqua ]] isEqualToString:NSAppearanceNameDarkAqua];
@@ -870,6 +913,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 		[NSNotificationCenter.defaultCenter removeObserver:self name:OakDocumentDidSaveNotification object:_document];
 		[NSNotificationCenter.defaultCenter removeObserver:self name:OakDocumentWillReloadNotification object:_document];
 		[NSNotificationCenter.defaultCenter removeObserver:self name:OakDocumentDidReloadNotification object:_document];
+		[NSNotificationCenter.defaultCenter removeObserver:self name:OakDocumentMarksDidChangeNotification object:_document];
 
 		[self updateDocumentMetadata];
 
@@ -886,7 +930,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 		documentView.reset();
 	}
 
-	if(_document = aDocument)
+	if((_document = aDocument))
 	{
 		_scmStatus = scm::status::unknown;
 
@@ -905,7 +949,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 		struct buffer_refresh_callback_t : ng::callback_t
 		{
 			buffer_refresh_callback_t (OakTextView* textView) : textView(textView) { }
-			void did_parse (size_t from, size_t to)                                { [textView redisplayFrom:from to:to]; }
+			void did_parse (size_t from, size_t to)                                { [textView redisplayFrom:from to:to]; [textView updateSymbol]; }
 			void did_replace (size_t from, size_t to, char const* buf, size_t len) { NSAccessibilityPostNotification(textView, NSAccessibilityValueChangedNotification); }
 
 		private:
@@ -952,6 +996,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(documentDidSave:) name:OakDocumentDidSaveNotification object:_document];
 		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(documentWillReload:) name:OakDocumentWillReloadNotification object:_document];
 		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(documentDidReload:) name:OakDocumentDidReloadNotification object:_document];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(documentMarksDidChange:) name:OakDocumentMarksDidChangeNotification object:_document];
 
 		[self resetBlinkCaretTimer];
 		[self setNeedsDisplay:YES];
@@ -1042,11 +1087,45 @@ static std::string shell_quote (std::vector<std::string> paths)
 		[self performBundleItem:item];
 }
 
+- (void)documentMarksDidChange:(NSNotification*)aNotification
+{
+	[self setNeedsDisplay:YES];
+}
+
+- (void)viewDidMoveToSuperview
+{
+	[super viewDidMoveToSuperview];
+	[NSNotificationCenter.defaultCenter removeObserver:self name:NSViewBoundsDidChangeNotification object:nil];
+	if(NSClipView* clipView = [[self enclosingScrollView] contentView])
+	{
+		clipView.postsBoundsChangedNotifications = YES;
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(diagnosticScrollBoundsDidChange:) name:NSViewBoundsDidChangeNotification object:clipView];
+	}
+}
+
+- (void)diagnosticScrollBoundsDidChange:(NSNotification*)aNotification
+{
+	if(diagnosticPillRects.empty())
+		return;
+
+	// The message pills anchor to the visible rect’s right edge, so scrolling
+	// must redraw the horizontal band of every marked line — both to erase the
+	// pill at its old position and to draw it at the new one.
+	NSRect const visible = self.visibleRect;
+	for(auto const& pair : diagnosticPillRects)
+	{
+		NSRect band = pair.second;
+		band.origin.x   = NSMinX(visible);
+		band.size.width = NSWidth(visible);
+		[self setNeedsDisplayInRect:band];
+	}
+}
+
 - (void)reflectDocumentSize
 {
 	if(documentView && [self enclosingScrollView])
 	{
-		NSRect r = [[self enclosingScrollView] documentVisibleRect];
+		NSRect r = TextViewportRect(self);
 		documentView->set_viewport(r);
 		NSSize newSize = NSMakeSize(std::max(NSWidth(r), documentView->width()), std::max(NSHeight(r), documentView->height()));
 		if(!NSEqualSizes([self frame].size, newSize))
@@ -1177,11 +1256,526 @@ doScroll:
 	_links.reset();
 }
 
+- (BOOL)clipsToBounds {
+	return YES;
+}
+
+// ====================
+// = Diagnostic Marks =
+// ====================
+
+static NSColor* OTVColorForDiagnosticMark (std::string const& markType, CGFloat alpha)
+{
+	if(markType == "error")
+		return [NSColor colorWithSRGBRed:0.90 green:0.23 blue:0.20 alpha:alpha];
+	else if(markType == "warning")
+		return [NSColor colorWithSRGBRed:0.95 green:0.68 blue:0.09 alpha:alpha];
+	else if(markType == "note")
+		return [NSColor colorWithSRGBRed:0.33 green:0.60 blue:0.90 alpha:alpha];
+	return nil;
+}
+
+static size_t OTVDiagnosticSeverity (std::string const& markType)
+{
+	if(markType == "error")   return 3;
+	if(markType == "warning") return 2;
+	if(markType == "note")    return 1;
+	return 0;
+}
+
+// Mark content format: “<length>|<message>” optionally followed by U+001F and
+// a JSON fix payload. A legacy payload is one { "message": …, "edits": … }
+// object; newer payloads use { "fixes": [ … ] } to offer multiple actions.
+// Edit rows/columns are 1-based.
+// The length (in UTF-8 bytes) sizes the squiggle; without it we underline to
+// the end of the word at the mark’s position.
+static size_t OTVParseDiagnosticContent (std::string const& content, std::string& message, std::string& fixJSON)
+{
+	size_t len = 0, i = 0;
+	while(i < content.size() && isdigit(content[i]))
+		len = len * 10 + (content[i++] - '0');
+	if(!(i && i < content.size() && content[i] == '|'))
+		i = len = 0;
+	else
+		++i;
+
+	std::string::size_type sep = content.find('\x1F', i);
+	message = content.substr(i, sep == std::string::npos ? std::string::npos : sep - i);
+	fixJSON = sep == std::string::npos ? std::string() : content.substr(sep + 1);
+	return len;
+}
+
+static NSArray<NSDictionary*>* OTVDiagnosticFixes (std::string const& fixJSON, BOOL includeOptionFixes)
+{
+	if(fixJSON.empty())
+		return @[];
+
+	NSData* data = [NSData dataWithBytes:fixJSON.data() length:fixJSON.size()];
+	id object = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+	if(![object isKindOfClass:NSDictionary.class])
+		return @[];
+
+	NSDictionary* payload = object;
+	NSArray* fixes = [payload[@"fixes"] isKindOfClass:NSArray.class] ? payload[@"fixes"] : ([payload[@"edits"] isKindOfClass:NSArray.class] ? @[ payload ] : @[]);
+	NSMutableArray<NSDictionary*>* result = [NSMutableArray array];
+	for(id fix in fixes)
+	{
+		if([fix isKindOfClass:NSDictionary.class] && (includeOptionFixes || ![fix[@"requiresOption"] boolValue]))
+			[result addObject:fix];
+	}
+	return result;
+}
+
+static NSString* OTVPyrightConfigByDisablingRule (NSString* contents, NSString* rule)
+{
+	if(!contents || ![rule hasPrefix:@"report"] || [rule rangeOfCharacterFromSet:NSCharacterSet.alphanumericCharacterSet.invertedSet].location != NSNotFound)
+		return nil;
+
+	NSString* escapedRule = [NSRegularExpression escapedPatternForString:rule];
+	NSString* keyPattern = [NSString stringWithFormat:@"\\\"%@\\\"\\s*:", escapedRule];
+	NSRegularExpression* keyExpression = [NSRegularExpression regularExpressionWithPattern:keyPattern options:0 error:nil];
+	if([keyExpression firstMatchInString:contents options:0 range:NSMakeRange(0, contents.length)])
+	{
+		NSString* valuePattern = [NSString stringWithFormat:@"(\\\"%@\\\"\\s*:\\s*)(?:\\\"(?:none|information|warning|error)\\\"|true|false)", escapedRule];
+		NSRegularExpression* valueExpression = [NSRegularExpression regularExpressionWithPattern:valuePattern options:0 error:nil];
+		NSTextCheckingResult* match = [valueExpression firstMatchInString:contents options:0 range:NSMakeRange(0, contents.length)];
+		if(!match)
+			return nil;
+		NSMutableString* result = [contents mutableCopy];
+		[result replaceCharactersInRange:[match rangeAtIndex:0] withString:[NSString stringWithFormat:@"%@\"none\"", [contents substringWithRange:[match rangeAtIndex:1]]]];
+		return result;
+	}
+
+	NSRange openingBrace = [contents rangeOfString:@"{"];
+	NSRange closingBrace = [contents rangeOfString:@"}" options:NSBackwardsSearch];
+	if(openingBrace.location == NSNotFound || closingBrace.location == NSNotFound || openingBrace.location > closingBrace.location)
+		return nil;
+
+	NSString* propertyPattern = @"(?m)^([ \\t]+)\\\"[^\\\"]+\\\"[ \\t]*:";
+	NSRegularExpression* propertyExpression = [NSRegularExpression regularExpressionWithPattern:propertyPattern options:0 error:nil];
+	NSRange const objectRange = NSMakeRange(openingBrace.location + 1, closingBrace.location - openingBrace.location - 1);
+	NSTextCheckingResult* property = [propertyExpression firstMatchInString:contents options:0 range:objectRange];
+	NSRegularExpression* anyPropertyExpression = [NSRegularExpression regularExpressionWithPattern:@"\\\"[^\\\"]+\\\"\\s*:" options:0 error:nil];
+	BOOL const hasProperties = [anyPropertyExpression firstMatchInString:contents options:0 range:objectRange] != nil;
+	NSString* indent = property ? [contents substringWithRange:[property rangeAtIndex:1]] : @"    ";
+	NSString* newline = [contents containsString:@"\r\n"] ? @"\r\n" : @"\n";
+	NSString* insertion = [NSString stringWithFormat:@"%@%@\"%@\": \"none\"%@", newline, indent, rule, hasProperties ? @"," : @""];
+	return [contents stringByReplacingCharactersInRange:NSMakeRange(openingBrace.location + 1, 0) withString:insertion];
+}
+
+- (void)updateDiagnosticMarks
+{
+	diagnosticsByLine.clear();
+	diagnosticLineTint.clear();
+	diagnosticSquiggles.clear();
+
+	for(auto const& pair : documentView->all_marks())
+	{
+		size_t const index         = documentView->sanitize_index(pair.first);
+		std::string const& type    = pair.second.first;
+		std::string const& content = pair.second.second;
+
+		size_t const severity = OTVDiagnosticSeverity(type);
+		if(severity == 0)
+			continue;
+
+		size_t const line = documentView->convert(index).line;
+		auto tint = diagnosticLineTint.find(line);
+		if(tint == diagnosticLineTint.end() || OTVDiagnosticSeverity(tint->second) < severity)
+			diagnosticLineTint[line] = type;
+
+		diagnostic_info_t info;
+		info.type  = type;
+		info.index = index;
+		size_t markLen = OTVParseDiagnosticContent(content, info.message, info.fixJSON);
+		auto& lineInfos = diagnosticsByLine[line];
+		auto insertAt = std::find_if(lineInfos.begin(), lineInfos.end(), [&type](diagnostic_info_t const& rhs){ return OTVDiagnosticSeverity(rhs.type) < OTVDiagnosticSeverity(type); });
+		lineInfos.insert(insertAt, info);
+
+		size_t const eol = documentView->eol(line);
+		size_t to = index + std::min(markLen, eol - index);
+		if(to == index) // no length given: extend to end of word
+		{
+			std::string const rest = documentView->substr(index, eol);
+			while(to - index < rest.size() && (isalnum((unsigned char)rest[to - index]) || rest[to - index] == '_'))
+				++to;
+		}
+		to = documentView->sanitize_index(std::clamp(to, index, eol));
+		if(to <= index && index < eol)
+			to = std::min(index + (*documentView)[index].size(), eol);
+		if(index < to)
+			diagnosticSquiggles.emplace_back(ng::range_t(ng::index_t(index), ng::index_t(to)), type);
+	}
+}
+
+- (void)drawDiagnosticBackgroundInGutterRect:(NSRect)dirtyRect bounds:(NSRect)bounds
+{
+	[self updateDiagnosticMarks];
+
+	for(auto const& pair : diagnosticLineTint)
+	{
+		CGRect r = documentView->rect_for_range(documentView->begin(pair.first), documentView->eol(pair.first));
+		r.origin.x   = NSMinX(bounds);
+		r.size.width = NSWidth(bounds);
+		if(!NSIntersectsRect(r, dirtyRect))
+			continue;
+		[OTVColorForDiagnosticMark(pair.second, 0.12) set];
+		NSRectFillUsingOperation(NSIntersectionRect(r, dirtyRect), NSCompositingOperationSourceOver);
+	}
+}
+
+- (void)drawDiagnosticBackgroundInRect:(NSRect)aRect
+{
+	for(auto const& pair : diagnosticLineTint)
+	{
+		CGRect r = documentView->rect_for_range(documentView->begin(pair.first), documentView->eol(pair.first));
+		r.origin.x   = NSMinX(self.bounds);
+		r.size.width = NSWidth(self.bounds);
+		if(!NSIntersectsRect(r, aRect))
+			continue;
+		[OTVColorForDiagnosticMark(pair.second, 0.12) set];
+		NSRectFillUsingOperation(NSIntersectionRect(r, aRect), NSCompositingOperationSourceOver);
+	}
+}
+
+- (void)drawDiagnosticForegroundInRect:(NSRect)aRect
+{
+	diagnosticPillRects.clear();
+	diagnosticBannerRects.clear();
+	std::set<size_t> visibleBannerTextFields;
+
+	for(auto const& pair : diagnosticSquiggles)
+	{
+		NSColor* color = OTVColorForDiagnosticMark(pair.second, 0.85);
+		for(CGRect rect : documentView->rects_for_ranges(pair.first))
+		{
+			if(!NSIntersectsRect(NSInsetRect(rect, -2, -2), aRect))
+				continue;
+
+			CGFloat const amplitude  = 0.7;
+			CGFloat const wavelength = 6;
+			CGFloat const y = NSMaxY(rect) - amplitude * 3;
+
+			NSBezierPath* path = [NSBezierPath bezierPath];
+			[path moveToPoint:NSMakePoint(NSMinX(rect), y)];
+			CGFloat x = NSMinX(rect);
+			BOOL up = YES;
+			while(x < NSMaxX(rect))
+			{
+				CGFloat nextX = std::min(x + wavelength/2, NSMaxX(rect));
+				[path curveToPoint:NSMakePoint(nextX, y)
+					 controlPoint1:NSMakePoint(x + (nextX-x)/2, y + (up ? -amplitude*2 : amplitude*2))
+					 controlPoint2:NSMakePoint(x + (nextX-x)/2, y + (up ? -amplitude*2 : amplitude*2))];
+				up = !up;
+				x = nextX;
+			}
+			path.lineWidth = 1;
+			[color set];
+			[path stroke];
+		}
+	}
+
+	// Xcode-style issue banner per marked line, right-aligned and never
+	// overlapping the code: a solid icon capsule (with issue count when a line
+	// has several) plus a tinted message section that truncates — or vanishes,
+	// leaving only the icon — when the code runs long. The message is selectable,
+	// while clicking the icon opens the diagnostics popover (see mouseDown:).
+	// Rects are stored for hit-testing even when outside the dirty rect.
+	NSRect const visible = self.visibleRect;
+	NSFont* pillFont = [NSFont systemFontOfSize:documentView->font().pointSize * documentView->font_scale_factor()]; // match the editor’s effective text size
+	BOOL const isDark = self.theme->is_dark();
+	NSColor* messageColor = [NSColor colorWithCGColor:self.theme->foreground()] ?: (isDark ? NSColor.whiteColor : NSColor.blackColor);
+
+	for(auto const& pair : diagnosticsByLine)
+	{
+		size_t const line = pair.first;
+		auto const& infos = pair.second;
+		std::string const& type = infos.front().type;
+
+		CGRect const lineRect = documentView->rect_for_range(documentView->begin(line), documentView->eol(line));
+
+		CGFloat const pillH     = NSHeight(lineRect); // banner and icon share the full height of the line bar
+		CGFloat const iconW     = std::max<CGFloat>(round(pillH), 20);
+		CGFloat const padX      = 7;
+		CGFloat const rightEdge = NSMaxX(visible) - 8;
+		CGFloat const codeGap   = 16; // minimum distance kept between end of code and banner
+
+		// Space available to the right of the code on this line
+		CGFloat const available = rightEdge - (NSMaxX(lineRect) + codeGap);
+
+		NSMutableParagraphStyle* pStyle = [NSMutableParagraphStyle new];
+		pStyle.lineBreakMode = NSLineBreakByTruncatingTail;
+		NSDictionary* attrs = @{
+			NSFontAttributeName: pillFont,
+			NSForegroundColorAttributeName: messageColor,
+			NSParagraphStyleAttributeName: pStyle
+		};
+		NSAttributedString* str = [[NSAttributedString alloc] initWithString:[NSString stringWithUTF8String:infos.front().message.c_str()] ?: @"" attributes:attrs];
+
+		CGFloat textWidth = ceil(str.size.width) + 2 * padX;
+
+		// Shrink the message into the free space; drop it entirely when tight.
+		if(available < iconW + 40)
+			textWidth = 0; // icon-only capsule
+		else if(iconW + textWidth > available)
+			textWidth = available - iconW;
+
+		NSRect pill;
+		pill.size.width  = iconW + textWidth;
+		pill.size.height = pillH;
+		pill.origin.x    = rightEdge - pill.size.width;
+		pill.origin.y    = NSMinY(lineRect);
+
+		NSRect const iconRect = NSMakeRect(NSMinX(pill), NSMinY(pill), iconW, pillH);
+		diagnosticPillRects[line]   = iconRect; // only the icon capsule opens the popover
+		diagnosticBannerRects[line] = pill;     // padding outside the selectable text swallows clicks
+
+		if(textWidth > 0 && NSIntersectsRect(pill, visible))
+		{
+			NSTextField* textField = diagnosticBannerTextFields[line];
+			if(!textField)
+			{
+				textField = [NSTextField labelWithAttributedString:str];
+				textField.selectable = YES;
+				textField.focusRingType = NSFocusRingTypeNone;
+				textField.lineBreakMode = NSLineBreakByTruncatingTail;
+				textField.usesSingleLineMode = YES;
+				[self addSubview:textField];
+				diagnosticBannerTextFields[line] = textField;
+			}
+			if(![textField.attributedStringValue isEqualToAttributedString:str])
+				textField.attributedStringValue = str;
+			textField.frame = NSMakeRect(NSMinX(pill) + iconW + padX, round(NSMidY(pill) - str.size.height/2) - 1, textWidth - 2*padX, str.size.height);
+			visibleBannerTextFields.insert(line);
+		}
+
+		if(!NSIntersectsRect(pill, aRect))
+			continue;
+
+		CGFloat const radius = std::min<CGFloat>(5, pillH / 2);
+		NSBezierPath* capsule = [NSBezierPath bezierPathWithRoundedRect:pill xRadius:radius yRadius:radius];
+
+		[NSGraphicsContext saveGraphicsState];
+		[capsule addClip];
+
+		// opaque base so the banner stays readable over anything beneath it
+		//[(isDark ? [NSColor colorWithWhite:0.12 alpha:1] : [NSColor colorWithWhite:1 alpha:1]) set];
+		//NSRectFill(pill);
+		[OTVColorForDiagnosticMark(type, 0.16) set];
+		NSRectFillUsingOperation(pill, NSCompositingOperationSourceOver);
+
+		// solid icon section
+		[OTVColorForDiagnosticMark(type, 0.7) set];
+		//NSRectFill(iconRect);
+		NSRectFillUsingOperation(iconRect, NSCompositingOperationSourceOver);
+
+		[NSGraphicsContext restoreGraphicsState];
+
+		// icon glyph — issue count when the line has more than one diagnostic
+		std::string glyph = infos.size() > 1 ? std::to_string(infos.size()) : (type == "error" ? "✕" : (type == "warning" ? "!" : "i"));
+		NSAttributedString* glyphStr = [[NSAttributedString alloc] initWithString:[NSString stringWithUTF8String:glyph.c_str()] ?: @"" attributes:@{ NSFontAttributeName: [NSFont boldSystemFontOfSize:pillFont.pointSize], NSForegroundColorAttributeName: NSColor.whiteColor }];
+		NSSize const glyphSize = glyphStr.size;
+		[glyphStr drawAtPoint:NSMakePoint(round(NSMidX(iconRect) - glyphSize.width/2), round(NSMidY(iconRect) - glyphSize.height/2) - 1)];
+
+	}
+
+	for(auto it = diagnosticBannerTextFields.begin(); it != diagnosticBannerTextFields.end();)
+	{
+		if(visibleBannerTextFields.count(it->first))
+			++it;
+		else
+		{
+			[it->second removeFromSuperview];
+			it = diagnosticBannerTextFields.erase(it);
+		}
+	}
+}
+
+- (void)showDiagnosticsPopoverForLine:(size_t)line fromRect:(NSRect)aRect includeOptionFixes:(BOOL)includeOptionFixes
+{
+	auto it = diagnosticsByLine.find(line);
+	if(it == diagnosticsByLine.end())
+		return;
+
+	[diagnosticsPopover close];
+	diagnosticFixQueue = [NSMutableArray array];
+
+	NSStackView* stack = [NSStackView new];
+	stack.orientation = NSUserInterfaceLayoutOrientationVertical;
+	stack.alignment   = NSLayoutAttributeWidth; // rows stretch so Apply buttons right-align
+	stack.spacing     = 8;
+	stack.edgeInsets  = NSEdgeInsetsMake(12, 12, 12, 12);
+
+	// Wrapping labels report no intrinsic width, so the popover would collapse
+	// unless we measure the content and pin the stack to an explicit width.
+	NSFont* messageFont = [NSFont systemFontOfSize:documentView->font().pointSize * documentView->font_scale_factor()]; // match the editor’s effective text size
+	CGFloat maxMessageWidth = 0;
+	CGFloat maxFixWidth = 0;
+	BOOL anyFix = NO;
+	for(auto const& info : it->second)
+	{
+		NSString* message = [NSString stringWithUTF8String:info.message.c_str()] ?: @"";
+		NSSize const size = [[[NSAttributedString alloc] initWithString:[@"● " stringByAppendingString:message] attributes:@{ NSFontAttributeName: messageFont }] size];
+		maxMessageWidth = std::max(maxMessageWidth, std::ceil(size.width));
+		for(NSDictionary* fix in OTVDiagnosticFixes(info.fixJSON, includeOptionFixes))
+		{
+			NSString* description = [fix[@"message"] isKindOfClass:NSString.class] ? fix[@"message"] : ([fix[@"title"] isKindOfClass:NSString.class] ? fix[@"title"] : @"Apply fix");
+			NSSize const fixSize = [description sizeWithAttributes:@{ NSFontAttributeName: [NSFont systemFontOfSize:NSFont.smallSystemFontSize] }];
+			maxFixWidth = std::max(maxFixWidth, std::ceil(fixSize.width));
+			anyFix = YES;
+		}
+	}
+	CGFloat const buttonWidth = anyFix ? 64 : 0;
+	CGFloat const fixIndent = anyFix ? 18 : 0;
+	CGFloat const contentWidth = std::max(maxMessageWidth, maxFixWidth + fixIndent + buttonWidth + 12);
+	CGFloat const stackWidth  = std::clamp<CGFloat>(contentWidth + 24, 280, 760);
+	CGFloat const labelWidth  = stackWidth - 24;
+	CGFloat const fixLabelWidth = labelWidth - fixIndent - buttonWidth - 12;
+
+	for(auto const& info : it->second)
+	{
+		NSString* message = [NSString stringWithUTF8String:info.message.c_str()] ?: @"";
+		NSMutableAttributedString* str = [[NSMutableAttributedString alloc] initWithString:@"● " attributes:@{ NSForegroundColorAttributeName: OTVColorForDiagnosticMark(info.type, 1), NSFontAttributeName: messageFont }];
+		[str appendAttributedString:[[NSAttributedString alloc] initWithString:message attributes:@{ NSForegroundColorAttributeName: NSColor.labelColor, NSFontAttributeName: messageFont }]];
+
+		NSTextField* label = [NSTextField labelWithAttributedString:str];
+		label.selectable = YES;
+		label.lineBreakMode = NSLineBreakByWordWrapping;
+		label.preferredMaxLayoutWidth = labelWidth;
+		[label setContentHuggingPriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
+		[label setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
+		[label.widthAnchor constraintLessThanOrEqualToConstant:labelWidth].active = YES;
+
+		NSStackView* diagnostic = [NSStackView new];
+		diagnostic.orientation = NSUserInterfaceLayoutOrientationVertical;
+		diagnostic.alignment = NSLayoutAttributeWidth;
+		diagnostic.spacing = 4;
+		[diagnostic addArrangedSubview:label];
+
+		NSArray<NSDictionary*>* fixes = OTVDiagnosticFixes(info.fixJSON, includeOptionFixes);
+		for(NSDictionary* fix in fixes)
+		{
+			BOOL const hasEdits = [fix[@"edits"] isKindOfClass:NSArray.class];
+			BOOL const disablesPyrightRule = [fix[@"action"] isEqualToString:@"disablePyrightRule"];
+			if(!hasEdits && !disablesPyrightRule)
+				continue;
+
+			NSString* description = [fix[@"message"] isKindOfClass:NSString.class] ? fix[@"message"] : ([fix[@"title"] isKindOfClass:NSString.class] ? fix[@"title"] : @"Apply fix");
+			NSTextField* fixLabel = [NSTextField labelWithString:description];
+			fixLabel.textColor = NSColor.secondaryLabelColor;
+			fixLabel.font = [NSFont systemFontOfSize:NSFont.smallSystemFontSize];
+			fixLabel.lineBreakMode = NSLineBreakByTruncatingTail;
+			fixLabel.toolTip = description;
+			[fixLabel.widthAnchor constraintLessThanOrEqualToConstant:fixLabelWidth].active = YES;
+
+			NSButton* button = [NSButton buttonWithTitle:@"Apply" target:self action:@selector(applyDiagnosticFix:)];
+			button.controlSize = NSControlSizeSmall;
+			button.toolTip = description;
+			button.tag = diagnosticFixQueue.count;
+			[button.widthAnchor constraintEqualToConstant:buttonWidth].active = YES;
+			[button setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
+
+			NSMutableDictionary* queuedFix = [fix mutableCopy];
+			queuedFix[@"type"] = [NSString stringWithUTF8String:info.type.c_str()] ?: @"";
+			queuedFix[@"index"] = @(info.index);
+			[diagnosticFixQueue addObject:queuedFix];
+
+			NSStackView* fixRow = [NSStackView new];
+			fixRow.orientation = NSUserInterfaceLayoutOrientationHorizontal;
+			fixRow.alignment = NSLayoutAttributeCenterY;
+			fixRow.spacing = 12;
+			fixRow.edgeInsets = NSEdgeInsetsMake(0, fixIndent, 0, 0);
+			[fixRow addView:fixLabel inGravity:NSStackViewGravityLeading];
+			[fixRow addView:button inGravity:NSStackViewGravityTrailing];
+			[diagnostic addArrangedSubview:fixRow];
+		}
+
+		[stack addArrangedSubview:diagnostic];
+	}
+
+	[stack.widthAnchor constraintEqualToConstant:stackWidth].active = YES;
+
+	NSViewController* vc = [NSViewController new];
+	vc.view = stack;
+
+	diagnosticsPopover = [NSPopover new];
+	diagnosticsPopover.behavior = NSPopoverBehaviorTransient;
+	diagnosticsPopover.contentViewController = vc;
+	[diagnosticsPopover showRelativeToRect:aRect ofView:self preferredEdge:NSRectEdgeMaxY];
+}
+
+- (void)applyDiagnosticFix:(NSButton*)sender
+{
+	if(!documentView || sender.tag < 0 || (NSUInteger)sender.tag >= diagnosticFixQueue.count)
+		return;
+
+	NSDictionary* info = diagnosticFixQueue[sender.tag];
+	if([info[@"action"] isEqualToString:@"disablePyrightRule"])
+	{
+		NSString* path = [info[@"path"] isKindOfClass:NSString.class] ? info[@"path"] : nil;
+		NSString* rule = [info[@"rule"] isKindOfClass:NSString.class] ? info[@"rule"] : nil;
+		if(!path.isAbsolutePath || !rule)
+			return NSBeep();
+
+		[diagnosticsPopover close];
+		OakDocument* configDocument = [OakDocumentController.sharedInstance documentWithPath:path.stringByStandardizingPath];
+		[configDocument loadModalForWindow:self.window completionHandler:^(OakDocumentIOResult result, NSString* errorMessage, oak::uuid_t const& filterUUID){
+			if(result != OakDocumentIOResultSuccess)
+			{
+				NSError* error = [NSError errorWithDomain:@"OakDiagnosticFix" code:1 userInfo:@{ NSLocalizedDescriptionKey: errorMessage ?: @"Could not open the Pyright configuration." }];
+				[self presentError:error];
+				return;
+			}
+
+			NSString* updated = OTVPyrightConfigByDisablingRule(configDocument.content, rule);
+			if(!updated)
+			{
+				NSError* error = [NSError errorWithDomain:@"OakDiagnosticFix" code:2 userInfo:@{ NSLocalizedDescriptionKey: [NSString stringWithFormat:@"Could not disable %@ in %@.", rule, path.lastPathComponent] }];
+				[self presentError:error];
+				[configDocument close];
+				return;
+			}
+
+			configDocument.content = updated;
+			size_t markIndex = [info[@"index"] unsignedLongValue];
+			[self.document removeMarkOfType:info[@"type"] atPosition:documentView->convert(markIndex)];
+			[OakDocumentController.sharedInstance showDocument:configDocument andSelect:text::range_t::undefined inProject:nil bringToFront:YES];
+			[configDocument close];
+			[self setNeedsDisplay:YES];
+		}];
+		return;
+	}
+
+	NSArray* edits = [info[@"edits"] sortedArrayUsingComparator:^NSComparisonResult(NSDictionary* lhs, NSDictionary* rhs){
+		NSComparisonResult res = [rhs[@"location"][@"row"] compare:lhs[@"location"][@"row"]];
+		return res != NSOrderedSame ? res : [rhs[@"location"][@"column"] compare:lhs[@"location"][@"column"]];
+	}];
+
+	// Remove the mark before edits shift positions around.
+	size_t markIndex = [info[@"index"] unsignedLongValue];
+	[self.document removeMarkOfType:info[@"type"] atPosition:documentView->convert(markIndex)];
+
+	AUTO_REFRESH;
+	documentView->begin_change_grouping();
+	for(NSDictionary* edit in edits) // bottom-up so earlier positions stay valid
+	{
+		size_t from = documentView->convert(text::pos_t([edit[@"location"][@"row"] unsignedLongValue] - 1, [edit[@"location"][@"column"] unsignedLongValue] - 1));
+		size_t to   = documentView->convert(text::pos_t([edit[@"end_location"][@"row"] unsignedLongValue] - 1, [edit[@"end_location"][@"column"] unsignedLongValue] - 1));
+		documentView->set_ranges(ng::range_t(ng::index_t(std::min(from, to)), ng::index_t(std::max(from, to))));
+		documentView->insert(to_s((NSString*)edit[@"content"] ?: @""));
+	}
+	documentView->end_change_grouping();
+
+	[diagnosticsPopover close];
+	[self setNeedsDisplay:YES];
+}
+
 - (void)drawRect:(NSRect)aRect
 {
 	if(!documentView || !self.theme)
 	{
 		NSEraseRect(aRect);
+		//NSEraseRect(NSIntersectionRect(aRect, self.bounds));
 		return;
 	}
 
@@ -1189,6 +1783,7 @@ doScroll:
 	{
 		[NSColor.clearColor set];
 		NSRectFill(aRect);
+		//NSRectFill(NSIntersectionRect(aRect, self.bounds));
 	}
 
 	CGContextRef context = NSGraphicsContext.currentContext.CGContext;
@@ -1196,11 +1791,18 @@ doScroll:
 		CGContextSetShouldAntialias(context, false);
 
 	BOOL disableFontSmoothing = NO;
-	switch(self.fontSmoothing)
-	{
-		case OTVFontSmoothingDisabled:             disableFontSmoothing = YES;                                                         break;
-		case OTVFontSmoothingDisabledForDark:      disableFontSmoothing = self.theme->is_dark();                                            break;
-		case OTVFontSmoothingDisabledForDarkHiDPI: disableFontSmoothing = self.theme->is_dark() && [[self window] backingScaleFactor] == 2; break;
+	switch(self.fontSmoothing) {
+		case OTVFontSmoothingDisabled:
+			disableFontSmoothing = YES;
+			break;
+		case OTVFontSmoothingDisabledForDark:
+			disableFontSmoothing = self.theme->is_dark();
+			break;
+		case OTVFontSmoothingDisabledForDarkHiDPI:
+			disableFontSmoothing = self.theme->is_dark() && [[self window] backingScaleFactor] == 2;
+			break;
+		case OTVFontSmoothingEnabled:
+			break;
 	}
 
 	if(disableFontSmoothing)
@@ -1217,7 +1819,17 @@ doScroll:
 		return NULL;
 	};
 
-	documentView->draw(ng::context_t(context, _showInvisibles ? documentView->invisibles_map : NULL_STR, [spellingDotImage CGImageForProposedRect:NULL context:[NSGraphicsContext currentContext] hints:nil], foldingDotsFactory), aRect, [self isFlipped], merge(documentView->ranges(), [self markedRanges]), _liveSearchRanges);
+	[self updateDiagnosticMarks];
+	void (^decorationDrawingBlock)(NSRect, OTVDecorationLayer) = self.decorationDrawingBlock;
+	documentView->draw(ng::context_t(context, _showInvisibles ? documentView->invisibles_map : NULL_STR, [spellingDotImage CGImageForProposedRect:NULL context:[NSGraphicsContext currentContext] hints:nil], foldingDotsFactory), aRect, [self isFlipped], merge(documentView->ranges(), [self markedRanges]), _liveSearchRanges, true, [self, decorationDrawingBlock, aRect] {
+		[self drawDiagnosticBackgroundInRect:aRect];
+		if(decorationDrawingBlock)
+			decorationDrawingBlock(aRect, OTVDecorationLayerBackground);
+	});
+
+	if(decorationDrawingBlock)
+		decorationDrawingBlock(aRect, OTVDecorationLayerForeground);
+	[self drawDiagnosticForegroundInRect:aRect];
 }
 
 // =====================
@@ -1941,7 +2553,8 @@ doScroll:
 
 		case bundles::kItemTypeCommand:
 		{
-			[self recordSelector:@selector(executeCommandWithOptions:) withArgument:ns::to_dictionary(item->plist())];
+			// Macro command names are dispatched by the editor, not Objective-C methods.
+			[self recordSelector:NSSelectorFromString(@"executeCommandWithOptions:") withArgument:ns::to_dictionary(item->plist())];
 
 			auto command = parse_command(item);
 			command.name = name_with_selection(item, self.hasSelection);
@@ -1951,7 +2564,7 @@ doScroll:
 
 		case bundles::kItemTypeMacro:
 		{
-			[self recordSelector:@selector(playMacroWithOptions:) withArgument:ns::to_dictionary(item->plist())];
+			[self recordSelector:NSSelectorFromString(@"playMacroWithOptions:") withArgument:ns::to_dictionary(item->plist())];
 			AUTO_REFRESH;
 			documentView->macro_dispatch(item->plist(), [self variablesForBundleItem:item]);
 		}
@@ -2171,7 +2784,10 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 	{
 		plist::dictionary_t::const_iterator pair = KeyBindings.find(eventString);
 		if(pair != KeyBindings.end())
-			return [self handleKeyBindingAction:pair->second], YES;
+		{
+			[self handleKeyBindingAction:pair->second];
+			return YES;
+		}
 	}
 
 	return NO;
@@ -2466,6 +3082,17 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 	};
 
 	NSMenu* menu = [self checkSpellingMenuForRanges:someRanges];
+	std::vector<bundles::item_ptr> const& bundleItems = bundles::query(bundles::kFieldSemanticClass, "callback.context-menu", [self scopeContext], bundles::kItemTypeCommand, oak::uuid_t(), false);
+	if(!bundleItems.empty())
+	{
+		for(auto const& item : bundleItems)
+		{
+			NSMenuItem* menuItem = [menu addItemWithTitle:[NSString stringWithCxxString:item->name()] action:@selector(performBundleItemWithUUIDStringFrom:) keyEquivalent:@""];
+			[menuItem setRepresentedObject:[NSString stringWithCxxString:item->uuid()]];
+		}
+		[menu addItem:[NSMenuItem separatorItem]];
+	}
+
 	for(auto const& item : items)
 	{
 		if(item.title)
@@ -2481,8 +3108,13 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 	ng::index_t index = documentView->index_at_point(point);
 	bool clickInSelection = false;
 	for(auto const& range : documentView->ranges())
-		clickInSelection = clickInSelection || range.min() <= index && index <= range.max();
-	return [self contextMenuForRanges:(clickInSelection ? documentView->ranges() : index)];
+		clickInSelection = clickInSelection || (range.min() <= index && index <= range.max());
+	if(!clickInSelection)
+	{
+		AUTO_REFRESH;
+		documentView->set_ranges(ng::range_t(index.index));
+	}
+	return [self contextMenuForRanges:documentView->ranges()];
 }
 
 - (void)showMenu:(NSMenu*)aMenu
@@ -2615,7 +3247,7 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 		}
 
 		if(dict[@"action"])
-			[self recordSelector:@selector(findWithOptions:) withArgument:dict];
+			[self recordSelector:NSSelectorFromString(@"findWithOptions:") withArgument:dict];
 	}
 
 	AUTO_REFRESH;
@@ -2823,11 +3455,20 @@ static void update_menu_key_equivalents (NSMenu* menu, std::multimap<std::string
 - (BOOL)control:(NSControl*)aControl textView:(NSTextView*)aTextView doCommandBySelector:(SEL)aCommand
 {
 	if(aCommand == @selector(insertNewline:) || aCommand == @selector(cancelOperation:))
-		return [self setShowLiveSearch:NO], YES;
+	{
+		[self setShowLiveSearch:NO];
+		return YES;
+	}
 	if(aCommand == @selector(insertTab:))
-		return [self findNext:self], YES;
+	{
+		[self findNext:self];
+		return YES;
+	}
 	if(aCommand == @selector(insertBacktab:))
-		return [self findPrevious:self], YES;
+	{
+		[self findPrevious:self];
+		return YES;
+	}
 	return NO;
 }
 
@@ -3059,7 +3700,7 @@ static NSTouchBarItemIdentifier kOTVTouchBarItemIdentifierAddRemoveBookmark  = @
 	std::vector<bundles::item_ptr> const& items = items_for_tab_expansion(documentView, documentView->ranges(), to_s([self scopeAttributes]), &range);
 	if(bundles::item_ptr item = [self showMenuForBundleItems:items])
 	{
-		[self recordSelector:@selector(deleteTabTrigger:) withArgument:[NSString stringWithCxxString:documentView->substr(range.first.index, range.last.index)]];
+		[self recordSelector:NSSelectorFromString(@"deleteTabTrigger:") withArgument:[NSString stringWithCxxString:documentView->substr(range.first.index, range.last.index)]];
 		documentView->delete_tab_trigger(documentView->substr(range.first.index, range.last.index));
 		[self performBundleItem:item];
 	}
@@ -3297,7 +3938,6 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	ng::index_t visibleIndex = documentView->index_at_point([self visibleRect].origin);
 	documentView->set_wrapping(flag, documentView->wrap_column());
 	[self scrollIndexToFirstVisible:documentView->begin(documentView->convert(visibleIndex.index).line)];
-	settings_t::set(kSettingsSoftWrapKey, (bool)flag, documentView->file_type());
 }
 
 - (void)setSoftTabs:(BOOL)flag
@@ -3377,7 +4017,9 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 - (IBAction)toggleSoftWrap:(id)sender
 {
-	self.softWrap = !self.softWrap;
+	BOOL const softWrap = !self.softWrap;
+	self.softWrap = softWrap;
+	settings_t::set(kSettingsSoftWrapKey, (bool)softWrap, documentView->file_type());
 }
 
 - (IBAction)toggleShowWrapColumn:(id)sender
@@ -3575,6 +4217,35 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	return GVLineRecord(record.line, record.softline, record.top, record.bottom, record.baseline);
 }
 
+- (NSRect)rectForLine:(NSUInteger)lineNumber byteColumnRange:(NSRange)byteColumnRange
+{
+	if(!documentView || lineNumber >= documentView->lines())
+		return NSZeroRect;
+
+	size_t const first = documentView->convert(text::pos_t(lineNumber, byteColumnRange.location));
+	size_t const last = documentView->convert(text::pos_t(lineNumber, NSMaxRange(byteColumnRange)));
+	return documentView->rect_for_range(first, last);
+}
+
+- (NSRect)caretRectForLine:(NSUInteger)lineNumber byteColumn:(NSUInteger)byteColumn
+{
+	if(!documentView || lineNumber >= documentView->lines())
+		return NSZeroRect;
+
+	size_t const index = documentView->convert(text::pos_t(lineNumber, byteColumn));
+	return documentView->rect_at_index(index);
+}
+
+- (NSColor*)backgroundColorForLine:(NSUInteger)lineNumber
+{
+	if(!documentView || !self.theme || lineNumber == NSNotFound || lineNumber >= documentView->lines())
+		return nil;
+
+	CGColorRef editorBackground = self.theme->background(documentView->file_type());
+	CGColorRef lineBackground   = self.theme->styles_for_scope(documentView->scope(documentView->begin(lineNumber)).right).background();
+	return lineBackground && !CFEqual(editorBackground, lineBackground) ? [NSColor colorWithCGColor:lineBackground] : nil;
+}
+
 - (BOOL)filterDocumentThroughCommand:(NSString*)commandString input:(input::type)inputUnit output:(output::type)outputUnit
 {
 	bundle_command_t command = {
@@ -3663,8 +4334,8 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 + (NSArray*)dropTypes
 {
-	return @[ NSColorPboardType, NSFilenamesPboardType,
-		@"WebURLsWithTitlesPboardType", (NSString*)kUTTypeURL, @"public.url-name", NSURLPboardType,
+	return @[ NSPasteboardTypeColor, NSPasteboardTypeFileURL,
+		@"WebURLsWithTitlesPboardType", NSPasteboardTypeURL, @"public.url-name",
 		NSPasteboardTypeString ];
 }
 
@@ -3797,7 +4468,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 		BOOL hoveringSelection = [self isPointInSelection:[self convertPoint:[info draggingLocation] fromView:nil]];
 		res = hoveringSelection ? NSDragOperationNone : ((mask & NSDragOperationMove) ?: (mask & NSDragOperationCopy));
 	}
-	else if([[info draggingPasteboard] availableTypeFromArray:@[ NSFilenamesPboardType ]])
+	else if([[info draggingPasteboard] canReadObjectForClasses:@[ [NSURL class] ] options:@{ NSPasteboardURLReadingFileURLsOnlyKey: @YES }])
 	{
 		res = (mask & NSDragOperationCopy) ?: (mask & NSDragOperationLink);
 	}
@@ -3844,7 +4515,10 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	ng::index_t pos = dropPosition;
 	documentView->set_drop_marker(dropPosition = ng::index_t());
 
-	NSArray* files = [pboard availableTypeFromArray:@[ NSFilenamesPboardType ]] ? [pboard propertyListForType:NSFilenamesPboardType] : nil;
+	NSArray<NSURL*>* fileURLs = [pboard readObjectsForClasses:@[ [NSURL class] ] options:@{ NSPasteboardURLReadingFileURLsOnlyKey: @YES }];
+	NSMutableArray<NSString*>* files = fileURLs ? [NSMutableArray arrayWithCapacity:fileURLs.count] : nil;
+	for(NSURL* url in fileURLs)
+		[files addObject:url.path];
 	if(shouldLink && files)
 	{
 		std::vector<std::string> paths;
@@ -4137,6 +4811,18 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 	if([self.inputContext handleEvent:anEvent] || !documentView || [anEvent type] != NSEventTypeLeftMouseDown || ignoreMouseDown)
 		return (void)(ignoreMouseDown = NO);
 
+	NSPoint const clickPos = [self convertPoint:[anEvent locationInWindow] fromView:nil];
+	for(auto const& pair : diagnosticPillRects)
+	{
+		if(NSMouseInRect(clickPos, pair.second, [self isFlipped]))
+			return [self showDiagnosticsPopoverForLine:pair.first fromRect:pair.second includeOptionFixes:([anEvent modifierFlags] & NSEventModifierFlagOption) != 0];
+	}
+	for(auto const& pair : diagnosticBannerRects)
+	{
+		if(NSMouseInRect(clickPos, pair.second, [self isFlipped]))
+			return; // don’t let clicks on the banner text reach the code beneath
+	}
+
 	if(ng::range_t r = documentView->folded_range_at_point([self convertPoint:[anEvent locationInWindow] fromView:nil]))
 	{
 		AUTO_REFRESH;
@@ -4309,7 +4995,7 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 }
 
 #define ACTION(NAME)      (void)NAME:(id)sender { [self handleAction:ng::to_action(#NAME ":") forSelector:@selector(NAME:)]; }
-#define ALIAS(NAME, REAL) (void)NAME:(id)sender { [self handleAction:ng::to_action(#REAL ":") forSelector:@selector(REAL:)]; }
+#define ALIAS(NAME, REAL) (void)NAME:(id)sender { [self handleAction:ng::to_action(#REAL ":") forSelector:sel_registerName(#REAL ":")]; }
 
 // =========================
 // = Scroll Action Methods =

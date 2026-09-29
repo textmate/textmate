@@ -1,6 +1,11 @@
 #ifndef BYTES_H_ZGQQH1SH
 #define BYTES_H_ZGQQH1SH
 
+#include <cstddef>
+#include <string>
+#include <cstdint>    // for uint32_t
+#include <memory>     // for std::shared_ptr
+
 namespace io
 {
 	struct bytes_t

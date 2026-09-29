@@ -8,7 +8,10 @@ parser_base_t::parser_base_t (std::string const& str)
 
 bool parser_base_t::parse_char (char const* ch)
 {
-	return it != last && strchr(ch, *it) ? (++it, true) : false;
+	if(it == last || !strchr(ch, *it))
+		return false;
+	++it;
+	return true;
 }
 
 bool parser_base_t::parse_chars (char const* chars, std::string& res)
@@ -39,5 +42,8 @@ bool parser_base_t::parse_until (char const* stopChars, std::string& res)
 			++it;
 		res += *it;
 	}
-	return parse_char(stopChars) ? true : (it = backtrack, false);
+	if(parse_char(stopChars))
+		return true;
+	it = backtrack;
+	return false;
 }

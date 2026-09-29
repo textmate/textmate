@@ -1,8 +1,8 @@
 #ifndef BE_ENTRY_H_HB65VO7S
 #define BE_ENTRY_H_HB65VO7S
 
-#include <bundles/bundles.h>
-#include <io/path.h>
+#include <bundles/src/bundles.h>
+#include <io/src/path.h>
 
 namespace be
 {

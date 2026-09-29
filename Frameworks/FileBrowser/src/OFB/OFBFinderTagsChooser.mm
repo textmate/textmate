@@ -1,7 +1,7 @@
 #import "OFBFinderTagsChooser.h"
-#import <OakAppKit/OakFinderTag.h>
-#import <OakAppKit/OakRolloverButton.h>
-#import <OakAppKit/OakUIConstructionFunctions.h>
+#import <OakAppKit/src/OakFinderTag.h>
+#import <OakAppKit/src/OakRolloverButton.h>
+#import <OakAppKit/src/OakUIConstructionFunctions.h>
 
 static constexpr CGFloat SwatchButtonWidth  = 24;
 

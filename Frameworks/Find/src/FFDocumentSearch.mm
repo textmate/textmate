@@ -1,10 +1,10 @@
 #import "FFDocumentSearch.h"
 #import "CommonAncestor.h"
-#import <OakFoundation/NSString Additions.h>
-#import <document/OakDocumentController.h>
-#import <document/OakDocument.h>
-#import <settings/settings.h>
-#import <ns/ns.h>
+#import <OakFoundation/src/NSString Additions.h>
+#import <document/src/OakDocumentController.h>
+#import <document/src/OakDocument.h>
+#import <settings/src/settings.h>
+#import <ns/src/ns.h>
 #import <oak/oak.h>
 
 NSNotificationName const FFDocumentSearchDidReceiveResultsNotification = @"FFDocumentSearchDidReceiveResultsNotification";
@@ -87,7 +87,7 @@ static NSDictionary* GlobOptionsForPath (std::string const& path, NSString* glob
 
 	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 		[OakDocumentController.sharedInstance enumerateDocumentsAtPaths:_paths options:options usingBlock:^(OakDocument* document, BOOL* stop){
-			if(*stop = searchToken != _lastSearchToken)
+			if((*stop = searchToken != _lastSearchToken))
 				return;
 
 			self.lastDocumentPath = document.path;

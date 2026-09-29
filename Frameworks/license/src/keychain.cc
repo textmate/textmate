@@ -1,7 +1,7 @@
 #include "keychain.h"
-#include <text/ctype.h>
-#include <text/format.h>
-#include <cf/cf.h>
+#include <text/src/my_ctype.h>
+#include <text/src/format.h>
+#include <cf/src/cf.h>
 #include <oak/debug.h>
 
 static std::string error_keychain (char const* prefix, OSStatus status)

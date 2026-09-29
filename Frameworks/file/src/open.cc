@@ -5,15 +5,15 @@
 #include "filter.h"
 #include "type.h"
 #include "server.h"
-#include <authorization/constants.h>
-#include <authorization/server.h>
-#include <cf/cf.h>
-#include <command/parser.h>
-#include <command/runner.h>
-#include <settings/settings.h>
-#include <text/trim.h>
-#include <text/utf8.h>
-#include <text/newlines.h>
+#include <authorization/src/constants.h>
+#include <authorization/src/server.h>
+#include <cf/src/cf.h>
+#include <command/src/parser.h>
+#include <command/src/runner.h>
+#include <settings/src/settings.h>
+#include <text/src/trim.h>
+#include <text/src/utf8.h>
+#include <text/src/newlines.h>
 #include <oak/debug.h>
 
 /*
@@ -74,7 +74,6 @@ namespace
 			kStateEstimateLineFeeds,
 			kStateHarmonizeLineFeeds,
 			kStateExecuteTextImportFilter,
-			kStateEstimateFileType,
 			kStateEstimateTabSettings,
 			kStateShowContent,
 			kStateDone
@@ -213,7 +212,7 @@ namespace file
 
 static bool not_ascii (char ch)
 {
-	return !(0x20 <= ch && ch < 0x80 || ch && strchr("\t\n\f\r\e", ch));
+	return !((0x20 <= ch && ch < 0x80) || (ch && strchr("\t\n\f\r\e", ch)));
 }
 
 static io::bytes_ptr convert (io::bytes_ptr content, std::string const& from, std::string const& to)
@@ -255,6 +254,10 @@ namespace
 		{
 			switch(_state)
 			{
+				case kStateIdle:
+				case kStateDone:
+					return;
+
 				case kStateStart:
 				{
 					_state      = kStateIdle;

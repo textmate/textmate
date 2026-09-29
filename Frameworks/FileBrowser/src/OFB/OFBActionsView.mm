@@ -1,7 +1,7 @@
 #import "OFBActionsView.h"
-#import <OakAppKit/OakAppKit.h>
-#import <OakAppKit/OakUIConstructionFunctions.h>
-#import <OakAppKit/NSImage Additions.h>
+#import <OakAppKit/src/OakAppKit.h>
+#import <OakAppKit/src/OakUIConstructionFunctions.h>
+#import <OakAppKit/src/NSImage Additions.h>
 
 static NSButton* OakCreateImageButton (NSImage* image)
 {
@@ -18,11 +18,6 @@ static NSButton* OakCreateImageButton (NSImage* image)
 {
 	if(self = [super initWithFrame:aRect])
 	{
-		self.wantsLayer   = YES;
-		self.material     = NSVisualEffectMaterialTitlebar;
-		self.blendingMode = NSVisualEffectBlendingModeWithinWindow;
-		self.state        = NSVisualEffectStateFollowsWindowActiveState;
-
 		self.createButton       = OakCreateImageButton([NSImage imageNamed:NSImageNameAddTemplate]);
 		self.actionsPopUpButton = OakCreateActionPopUpButton();
 		self.reloadButton       = OakCreateImageButton([NSImage imageNamed:NSImageNameRefreshTemplate]);

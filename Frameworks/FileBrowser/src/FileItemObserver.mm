@@ -1,8 +1,8 @@
 #import "FileItem.h"
 #import "FSEventsManager.h"
 #import "SCMManager.h"
-#import <io/path.h>
-#import <ns/ns.h>
+#import <io/src/path.h>
+#import <ns/src/ns.h>
 
 // =======================================
 // = File system and SCM status observer =

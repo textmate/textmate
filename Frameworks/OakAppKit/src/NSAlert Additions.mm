@@ -5,7 +5,7 @@
 {
 	do {
 		[self addButtonWithTitle:firstTitle];
-	} while(firstTitle = va_arg(list, NSString*));
+	} while((firstTitle = va_arg(list, NSString*)));
 	va_end(list);
 }
 

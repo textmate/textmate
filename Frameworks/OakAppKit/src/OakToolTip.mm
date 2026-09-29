@@ -49,7 +49,7 @@ static __weak OakToolTip* LastToolTip;
 		[field setFont:defaultFont];
 		[field setStringValue:@"This is a nice little code block"];
 
-		if(@available(macos 10.14, *))
+		if(@available(macOS 10.14, *))
 		{
 			NSVisualEffectView* effectView = [[NSVisualEffectView alloc] initWithFrame:self.contentView.frame];
 			effectView.material = NSVisualEffectMaterialToolTip;

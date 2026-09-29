@@ -1,9 +1,9 @@
 #import "SCMManager.h"
 #import "FSEventsManager.h"
 #import "drivers/api.h"
-#import <scm/scm.h>
-#import <ns/ns.h>
-#import <TMFileReference/TMFileReference.h>
+#import <scm/src/scm.h>
+#import <ns/src/ns.h>
+#import <TMFileReference/src/TMFileReference.h>
 
 namespace scm
 {

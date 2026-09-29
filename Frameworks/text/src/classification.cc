@@ -1,5 +1,5 @@
 #include "classification.h"
-#include "ctype.h"
+#include "my_ctype.h"
 #include "utf8.h"
 
 namespace text

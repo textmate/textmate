@@ -1,7 +1,7 @@
 #ifndef CT_H_IWVOT7CS
 #define CT_H_IWVOT7CS
 
-#include <theme/theme.h>
+#include <theme/src/theme.h>
 
 namespace ng
 {

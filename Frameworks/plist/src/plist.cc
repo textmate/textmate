@@ -1,7 +1,7 @@
 #include "plist.h"
-#include <io/path.h>
+#include <io/src/path.h>
 #include <oak/oak.h>
-#include <cf/cf.h>
+#include <cf/src/cf.h>
 
 namespace plist
 {
@@ -62,9 +62,9 @@ namespace plist
 		std::map<std::string, any_t>& ref = boost::get< std::map<std::string, any_t> >(res = std::map<std::string, any_t>());
 
 		CFIndex len = CFDictionaryGetCount(dict);
-		CFPropertyListRef keys[len];
-		CFPropertyListRef values[len];
-		CFDictionaryGetKeysAndValues(dict, keys, values);
+		std::vector<CFPropertyListRef> keys(len);
+		std::vector<CFPropertyListRef> values(len);
+		CFDictionaryGetKeysAndValues(dict, keys.data(), values.data());
 		for(CFIndex i = 0; i < len; ++i)
 		{
 			std::map<std::string, any_t>::iterator it = ref.emplace(cf::to_s((CFStringRef)keys[i]), any_t()).first;
@@ -285,13 +285,13 @@ namespace plist
 	static bool convert_to (int32_t from, std::string& to)                   { to = std::to_string(from);       return true; }
 
 	static bool convert_to (uint64_t from, bool& to)                         { to = from ? true : false;        return true; }
-	static bool convert_to (uint64_t from, int32_t& to)                      { to = from;                       return from <= INT32_MAX; }
+	static bool convert_to (uint64_t from, int32_t& to)                      { if(from > INT32_MAX) return false; to = static_cast<int32_t>(from); return true; }
 	static bool convert_to (uint64_t from, std::string& to)                  { to = std::to_string(from);       return true; }
 
 	static bool convert_to (std::string const& from, bool& to)               { to = from != "0" ? true : false;         return true; }
-	static bool convert_to (std::string const& from, int32_t& to)            { to = strtol(from.c_str(), nullptr, 0);   return true; }
+	static bool convert_to (std::string const& from, int32_t& to)            { long value = strtol(from.c_str(), nullptr, 0); if(value < INT32_MIN || value > INT32_MAX) return false; to = static_cast<int32_t>(value); return true; }
 	static bool convert_to (std::string const& from, uint64_t& to)           { to = strtoull(from.c_str(), nullptr, 0); return true; }
-	static bool convert_to (std::string const& from, oak::uuid_t& to)        { return oak::uuid_t::is_valid(from) ? (to = from), true : false; }
+	static bool convert_to (std::string const& from, oak::uuid_t& to)        { if(!oak::uuid_t::is_valid(from)) return false; to = from; return true; }
 
 	static bool convert_to (bool from, plist::any_t& to)                       { to = from; return true; }
 	static bool convert_to (int32_t from, plist::any_t& to)                    { to = from; return true; }

@@ -296,7 +296,7 @@ namespace decode
 		for(auto const& it : src)
 		{
 			static char const Table[65] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-			uint32_t i = std::find(Table, Table + 64, it) - Table;
+	uint32_t i = static_cast<uint32_t>(std::find(Table, Table + 64, it) - Table);
 			if(i == 64)
 				continue;
 			value = (value << 6) | i;

@@ -19,3 +19,99 @@
 [submodule "Applications/SyntaxMate/resources/SyntaxMate.tmBundle"]
 	path = Applications/SyntaxMate/resources/SyntaxMate.tmBundle
 	url = https://github.com/shpakovski/syntaxmate.tmbundle.git
+[submodule "Bundles/Core/mail.tmbundle"]
+	path = Bundles/Core/mail.tmbundle
+	url = https://github.com/textmate/mail.tmbundle
+[submodule "Bundles/Core/scm.tmbundle"]
+	path = Bundles/Core/scm.tmbundle
+	url = https://github.com/textmate/scm.tmbundle
+[submodule "Bundles/Core/todo.tmbundle"]
+	path = Bundles/Core/todo.tmbundle
+	url = https://github.com/textmate/todo.tmbundle
+[submodule "Bundles/Core/sql.tmbundle"]
+	path = Bundles/Core/sql.tmbundle
+	url = https://github.com/textmate/sql.tmbundle
+[submodule "Bundles/Core/apache.tmbundle"]
+	path = Bundles/Core/apache.tmbundle
+	url = https://github.com/textmate/apache.tmbundle
+[submodule "Bundles/Core/json.tmbundle"]
+	path = Bundles/Core/json.tmbundle
+	url = https://github.com/textmate/json.tmbundle
+[submodule "Bundles/Core/subversion.tmbundle"]
+	path = Bundles/Core/subversion.tmbundle
+	url = https://github.com/textmate/subversion.tmbundle
+[submodule "Bundles/Core/textmate.tmbundle"]
+	path = Bundles/Core/textmate.tmbundle
+	url = https://github.com/textmate/textmate.tmbundle
+[submodule "Bundles/Core/diff.tmbundle"]
+	path = Bundles/Core/diff.tmbundle
+	url = https://github.com/textmate/diff.tmbundle
+[submodule "Bundles/Core/css.tmbundle"]
+	path = Bundles/Core/css.tmbundle
+	url = https://github.com/textmate/css.tmbundle
+[submodule "Bundles/Core/bundle-development.tmbundle"]
+	path = Bundles/Core/bundle-development.tmbundle
+	url = https://github.com/textmate/bundle-development.tmbundle
+[submodule "Bundles/Core/mercurial.tmbundle"]
+	path = Bundles/Core/mercurial.tmbundle
+	url = https://github.com/textmate/mercurial.tmbundle
+[submodule "Bundles/Core/hyperlink-helper.tmbundle"]
+	path = Bundles/Core/hyperlink-helper.tmbundle
+	url = https://github.com/textmate/hyperlink-helper.tmbundle
+[submodule "Bundles/Core/xml.tmbundle"]
+	path = Bundles/Core/xml.tmbundle
+	url = https://github.com/textmate/xml.tmbundle
+[submodule "Bundles/Core/math.tmbundle"]
+	path = Bundles/Core/math.tmbundle
+	url = https://github.com/textmate/math.tmbundle
+[submodule "Bundles/Core/php.tmbundle"]
+	path = Bundles/Core/php.tmbundle
+	url = https://github.com/textmate/php.tmbundle
+[submodule "Bundles/Core/scm-diff-gutter.tmbundle"]
+	path = Bundles/Core/scm-diff-gutter.tmbundle
+	url = https://github.com/textmate/scm-diff-gutter.tmbundle
+[submodule "Bundles/Core/themes.tmbundle"]
+	path = Bundles/Core/themes.tmbundle
+	url = https://github.com/textmate/themes.tmbundle
+[submodule "Bundles/Core/git.tmbundle"]
+	path = Bundles/Core/git.tmbundle
+	url = https://github.com/textmate/git.tmbundle
+[submodule "Bundles/Core/html.tmbundle"]
+	path = Bundles/Core/html.tmbundle
+	url = https://github.com/textmate/html.tmbundle
+[submodule "Bundles/Core/source.tmbundle"]
+	path = Bundles/Core/source.tmbundle
+	url = https://github.com/textmate/source.tmbundle
+[submodule "Bundles/Core/make.tmbundle"]
+	path = Bundles/Core/make.tmbundle
+	url = https://github.com/textmate/make.tmbundle
+[submodule "Bundles/Core/ruby.tmbundle"]
+	path = Bundles/Core/ruby.tmbundle
+	url = https://github.com/textmate/ruby.tmbundle
+[submodule "Bundles/Core/text.tmbundle"]
+	path = Bundles/Core/text.tmbundle
+	url = https://github.com/textmate/text.tmbundle
+[submodule "Bundles/Core/objective-c.tmbundle"]
+	path = Bundles/Core/objective-c.tmbundle
+	url = https://github.com/textmate/objective-c.tmbundle
+[submodule "Bundles/Core/markdown.tmbundle"]
+	path = Bundles/Core/markdown.tmbundle
+	url = https://github.com/textmate/markdown.tmbundle
+[submodule "Bundles/Core/property-list.tmbundle"]
+	path = Bundles/Core/property-list.tmbundle
+	url = https://github.com/textmate/property-list.tmbundle
+[submodule "Bundles/Core/c.tmbundle"]
+	path = Bundles/Core/c.tmbundle
+	url = https://github.com/textmate/c.tmbundle
+[submodule "Bundles/Core/python.tmbundle"]
+	path = Bundles/Core/python.tmbundle
+	url = https://github.com/textmate/python.tmbundle
+[submodule "Bundles/Core/bundle-support.tmbundle"]
+	path = Bundles/Core/bundle-support.tmbundle
+	url = https://github.com/textmate/bundle-support.tmbundle
+[submodule "Bundles/Core/shellscript.tmbundle"]
+	path = Bundles/Core/shellscript.tmbundle
+	url = https://github.com/textmate/shellscript.tmbundle
+[submodule "Bundles/Core/javascript.tmbundle"]
+	path = Bundles/Core/javascript.tmbundle
+	url = https://github.com/textmate/javascript.tmbundle

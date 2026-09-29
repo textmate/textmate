@@ -1,8 +1,8 @@
 #ifndef THEME_H_T0VVCP8F
 #define THEME_H_T0VVCP8F
 
-#include <bundles/bundles.h>
-#include <scope/scope.h>
+#include <bundles/src/bundles.h>
+#include <scope/src/scope.h>
 
 extern char const* kMacClassicThemeUUID;
 extern char const* kTwilightThemeUUID;

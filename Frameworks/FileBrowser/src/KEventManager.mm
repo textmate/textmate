@@ -160,7 +160,7 @@ static bool paths_share_inode (NSString* lhs, NSString* rhs)
 	if(_accessible == isAccessible)
 		return;
 
-	if(_accessible = isAccessible)
+	if((_accessible = isAccessible))
 	{
 		[self setUpEventSource];
 
@@ -192,14 +192,14 @@ static bool paths_share_inode (NSString* lhs, NSString* rhs)
 	{
 		if(_fileDescriptor != -1)
 		{
-			os_log_error(kLogEventManager, "[%{public}@ setUpEventSource] Event source already exists for %{public}@", [self class], path);
+			//os_log_error(kLogEventManager, "[%{public}@ setUpEventSource] Event source already exists for %{public}@", [self class], path);
 			return;
 		}
 
 		_fileDescriptor = open(self.path.fileSystemRepresentation, O_EVTONLY|O_CLOEXEC, 0);
 		if(_fileDescriptor != -1)
 		{
-			os_log_debug(kLogEventManager, "[%{public}@ setUpEventSource] %{public}@", [self class], path);
+			//os_log_debug(kLogEventManager, "[%{public}@ setUpEventSource] %{public}@", [self class], path);
 
 			if(dispatch_source_t dispatchSource = dispatch_source_create(DISPATCH_SOURCE_TYPE_VNODE, _fileDescriptor, DISPATCH_VNODE_DELETE|DISPATCH_VNODE_WRITE|DISPATCH_VNODE_EXTEND|DISPATCH_VNODE_RENAME|DISPATCH_VNODE_REVOKE, dispatch_get_main_queue()))
 			{
@@ -214,7 +214,7 @@ static bool paths_share_inode (NSString* lhs, NSString* rhs)
 		}
 		else
 		{
-			os_log_error(kLogEventManager, "[%{public}@ setUpEventSource] Unable to access %{public}@", [self class], path);
+			//os_log_error(kLogEventManager, "[%{public}@ setUpEventSource] Unable to access %{public}@", [self class], path);
 		}
 	}
 }

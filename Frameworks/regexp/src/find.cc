@@ -1,8 +1,8 @@
 #include "find.h"
 #include "private.h"
 #include <Onigmo/oniguruma.h>
-#include <text/utf8.h>
-#include <cf/cf.h>
+#include <text/src/utf8.h>
+#include <cf/src/cf.h>
 
 namespace find
 {
@@ -391,7 +391,7 @@ namespace find
 					options = options ^ find::not_eol;
 				}
 
-				int r;
+				OnigPosition r;
 				OnigRegion* region = onig_region_new();
 				if(ONIG_MISMATCH != (r = onig_search(compiled_pattern, first, last, range_start, range_stop, region, flags)))
 				{
@@ -425,7 +425,7 @@ namespace find
 		options_t options;
 		std::vector<char> buffer;
 		ssize_t buffer_size = 0;
-		int last_beg, last_end;
+		OnigPosition last_beg, last_end;
 		bool did_start_searching;
 	};
 

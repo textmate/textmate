@@ -1,8 +1,8 @@
 #ifndef BUNDLES_ITEM_H_H2GEVOXK
 #define BUNDLES_ITEM_H_H2GEVOXK
 
-#include <plist/plist.h>
-#include <scope/scope.h>
+#include <plist/src/plist.h>
+#include <scope/src/scope.h>
 
 namespace fs { struct node_t; }
 
@@ -25,6 +25,8 @@ namespace bundles
 
 	extern std::string const kFieldSemanticClass;
 	extern std::string const kFieldContentMatch;
+	extern std::string const kFieldUserDefaultsState;         // menu item shows a checkmark bound to this NSUserDefaults bool key (“!key” inverts)
+	extern std::string const kFieldShowIfExecutableMissing;   // menu item only shown while any of these (space-separated) executables is missing
 	extern std::string const kFieldDropExtension;
 	extern std::string const kFieldGrammarExtension;
 	extern std::string const kFieldGrammarFirstLineMatch;

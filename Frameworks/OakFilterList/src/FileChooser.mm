@@ -1,21 +1,21 @@
 #import "FileChooser.h"
 #import "OakAbbreviations.h"
-#import <OakAppKit/OakAppKit.h>
-#import <OakAppKit/OakUIConstructionFunctions.h>
-#import <OakAppKit/OakScopeBarView.h>
-#import <OakAppKit/NSImage Additions.h>
-#import <OakFoundation/NSString Additions.h>
-#import <OakFoundation/OakFoundation.h>
-#import <document/OakDocument.h>
-#import <document/OakDocumentController.h>
-#import <scm/scm.h>
-#import <ns/ns.h>
-#import <regexp/glob.h>
-#import <text/format.h>
-#import <text/parse.h>
-#import <text/ctype.h>
-#import <text/ranker.h>
-#import <settings/settings.h>
+#import <OakAppKit/src/OakAppKit.h>
+#import <OakAppKit/src/OakUIConstructionFunctions.h>
+#import <OakAppKit/src/OakScopeBarView.h>
+#import <OakAppKit/src/NSImage Additions.h>
+#import <OakFoundation/src/NSString Additions.h>
+#import <OakFoundation/src/OakFoundation.h>
+#import <document/src/OakDocument.h>
+#import <document/src/OakDocumentController.h>
+#import <scm/src/scm.h>
+#import <ns/src/ns.h>
+#import <regexp/src/glob.h>
+#import <text/src/format.h>
+#import <text/src/parse.h>
+#import <text/src/my_ctype.h>
+#import <text/src/ranker.h>
+#import <settings/src/settings.h>
 #import <oak/algorithm.h>
 #import <oak/duration.h>
 
@@ -111,7 +111,7 @@ NSUInteger const kFileChooserUncommittedChangesSourceIndex = 2;
 	if(!filter.empty() && filter != NULL_STR)
 	{
 		std::vector<std::pair<size_t, size_t>> cover;
-		if(rank = oak::rank(filter, _file, &_coverFile))
+		if((rank = oak::rank(filter, _file, &_coverFile)))
 		{
 			rank += 1;
 
@@ -119,7 +119,7 @@ NSUInteger const kFileChooserUncommittedChangesSourceIndex = 2;
 			if(it != bindings.end())
 				rank = 2 + (bindings.end() - it) / (double)bindings.size();
 		}
-		else if(rank = oak::rank(filter, _directory + "/" + _file, &cover))
+		else if((rank = oak::rank(filter, _directory + "/" + _file, &cover)))
 		{
 			for(auto pair : cover)
 			{
@@ -220,7 +220,7 @@ static NSDictionary* globs_for_path (std::string const& path)
 	return res;
 }
 
-@interface FileChooser ()
+@interface FileChooser () <NSMenuItemValidation>
 {
 	scm::info_ptr                     _scmInfo;
 	NSMutableArray<FileChooserItem*>* _records;

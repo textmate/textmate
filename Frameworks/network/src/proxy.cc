@@ -1,8 +1,8 @@
 #include "proxy.h"
-#include <regexp/regexp.h>
-#include <text/encode.h>
+#include <regexp/src/regexp.h>
+#include <text/src/encode.h>
 #include <oak/debug.h>
-#include <cf/cf.h>
+#include <cf/src/cf.h>
 
 static proxy_settings_t user_pw_settings (CFStringRef server, CFNumberRef portNumber)
 {

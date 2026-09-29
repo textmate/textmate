@@ -1,17 +1,17 @@
 #import "Favorites.h"
-#import <OakFilterList/OakAbbreviations.h>
-#import <OakAppKit/OakAppKit.h>
-#import <OakAppKit/OakUIConstructionFunctions.h>
-#import <OakAppKit/OakScopeBarView.h>
-#import <OakAppKit/OakSound.h>
-#import <OakFoundation/NSString Additions.h>
-#import <OakSystem/application.h>
-#import <text/ranker.h>
-#import <io/entries.h>
-#import <text/case.h>
-#import <text/ctype.h>
-#import <io/path.h>
-#import <ns/ns.h>
+#import <OakFilterList/src/OakAbbreviations.h>
+#import <OakAppKit/src/OakAppKit.h>
+#import <OakAppKit/src/OakUIConstructionFunctions.h>
+#import <OakAppKit/src/OakScopeBarView.h>
+#import <OakAppKit/src/OakSound.h>
+#import <OakFoundation/src/NSString Additions.h>
+#import <OakSystem/src/application.h>
+#import <text/src/ranker.h>
+#import <io/src/entries.h>
+#import <text/src/case.h>
+#import <text/src/my_ctype.h>
+#import <io/src/path.h>
+#import <ns/src/ns.h>
 #import <kvdb/kvdb.h>
 
 static NSString* const kUserDefaultsOpenProjectSourceIndex = @"openProjectSourceIndex";
@@ -20,7 +20,7 @@ static NSUInteger const kOakSourceIndexRecentProjects = 0;
 static NSUInteger const kOakSourceIndexFavorites      = 1;
 
 @interface FavoritesItem : NSObject
-@property (nonatomic, readonly) NSImage* icon;
+@property (nonatomic) NSImage* icon;
 @property (nonatomic) NSAttributedString* name;
 @property (nonatomic) NSAttributedString* folder;
 @property (nonatomic, getter = isRemovable) BOOL removable;
@@ -49,8 +49,24 @@ static NSUInteger const kOakSourceIndexFavorites      = 1;
 				_displayName = path.lastPathComponent;
 		else	_displayName = [NSFileManager.defaultManager displayNameAtPath:_path];
 
-		_icon = [NSWorkspace.sharedWorkspace iconForFile:_path];
-		_icon.size = NSMakeSize(32, 32);
+		_icon = [[NSImage alloc] initWithSize:NSMakeSize(32, 32)];
+		NSString* iconPath = [_path copy];
+		__weak FavoritesItem* weakSelf = self;
+		dispatch_async(dispatch_get_global_queue(QOS_CLASS_UTILITY, 0), ^{
+			if(!weakSelf)
+				return;
+
+			NSImage* icon = [NSWorkspace.sharedWorkspace iconForFile:iconPath];
+			dispatch_async(dispatch_get_main_queue(), ^{
+				FavoritesItem* strongSelf = weakSelf;
+				if(!strongSelf)
+					return;
+
+				NSImage* resizedIcon = [icon copy];
+				resizedIcon.size = NSMakeSize(32, 32);
+				strongSelf.icon = resizedIcon;
+			});
+		});
 
 		_removable = isRemovable;
 	}

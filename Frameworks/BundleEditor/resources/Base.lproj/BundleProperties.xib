@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="22505" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+    <dependencies>
+        <deployment identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="22505"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <customObject id="-2" userLabel="File's Owner" customClass="PropertiesViewController">
+            <connections>
+                <outlet property="alignmentView" destination="128" id="139"/>
+                <outlet property="objectController" destination="99" id="100"/>
+                <outlet property="view" destination="1" id="98"/>
+            </connections>
+        </customObject>
+        <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
+        <customObject id="-3" userLabel="Application" customClass="NSObject"/>
+        <customView id="1" userLabel="Bundle Properties">
+            <rect key="frame" x="0.0" y="0.0" width="323" height="147"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+            <subviews>
+                <button translatesAutoresizingMaskIntoConstraints="NO" id="132">
+                    <rect key="frame" x="117" y="110" width="186" height="18"/>
+                    <buttonCell key="cell" type="check" title="Enable this item" bezelStyle="regularSquare" imagePosition="left" alignment="left" state="on" inset="2" id="133">
+                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                        <font key="font" metaFont="system"/>
+                    </buttonCell>
+                    <connections>
+                        <binding destination="99" name="value" keyPath="selection.isDisabled" id="141">
+                            <dictionary key="options">
+                                <string key="NSValueTransformerName">NSNegateBoolean</string>
+                            </dictionary>
+                        </binding>
+                    </connections>
+                </button>
+                <textField focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="127" userLabel="Name Text Field">
+                    <rect key="frame" x="119" y="82" width="184" height="21"/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="130">
+                        <font key="font" metaFont="system"/>
+                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                    <connections>
+                        <binding destination="99" name="value" keyPath="selection.name" id="137"/>
+                    </connections>
+                </textField>
+                <textField focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="93" userLabel="Contact Name Text Field">
+                    <rect key="frame" x="119" y="51" width="184" height="21"/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="94">
+                        <font key="font" metaFont="system"/>
+                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                    <connections>
+                        <binding destination="99" name="value" keyPath="selection.contactName" id="149"/>
+                    </connections>
+                </textField>
+                <textField focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="90" userLabel="Contact Email Text Field">
+                    <rect key="frame" x="119" y="20" width="184" height="21"/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="91">
+                        <font key="font" metaFont="system"/>
+                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                    <connections>
+                        <binding destination="99" name="value" keyPath="selection.contactEmailRot13" id="151">
+                            <dictionary key="options">
+                                <string key="NSValueTransformerName">OakRot13Transformer</string>
+                            </dictionary>
+                        </binding>
+                    </connections>
+                </textField>
+                <textField focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="128">
+                    <rect key="frame" x="18" y="85" width="95" height="16"/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Name:" id="129">
+                        <font key="font" metaFont="system"/>
+                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+                <textField focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="92">
+                    <rect key="frame" x="18" y="54" width="95" height="16"/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Contact Name:" id="95">
+                        <font key="font" metaFont="system"/>
+                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+                <textField focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="80">
+                    <rect key="frame" x="18" y="23" width="95" height="16"/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Contact Email:" id="81">
+                        <font key="font" metaFont="system"/>
+                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+            </subviews>
+            <constraints>
+                <constraint firstItem="80" firstAttribute="leading" secondItem="92" secondAttribute="leading" id="0Tn-H4-lsJ"/>
+                <constraint firstItem="128" firstAttribute="leading" secondItem="1" secondAttribute="leading" constant="20" symbolic="YES" id="18L-LU-UnM"/>
+                <constraint firstItem="90" firstAttribute="firstBaseline" secondItem="80" secondAttribute="firstBaseline" id="3K6-Kh-CxK"/>
+                <constraint firstItem="128" firstAttribute="trailing" secondItem="92" secondAttribute="trailing" id="6m1-Hl-M8n"/>
+                <constraint firstItem="128" firstAttribute="leading" secondItem="92" secondAttribute="leading" id="8JX-Lr-MFb"/>
+                <constraint firstItem="80" firstAttribute="trailing" secondItem="92" secondAttribute="trailing" id="9dl-BS-MYx"/>
+                <constraint firstItem="93" firstAttribute="trailing" secondItem="132" secondAttribute="trailing" id="EwE-3U-Ql1"/>
+                <constraint firstItem="127" firstAttribute="firstBaseline" secondItem="128" secondAttribute="firstBaseline" id="F1H-Co-j1N"/>
+                <constraint firstItem="127" firstAttribute="leading" secondItem="132" secondAttribute="leading" id="IzK-mH-gV3"/>
+                <constraint firstItem="93" firstAttribute="firstBaseline" secondItem="92" secondAttribute="firstBaseline" id="Jqh-dv-13T"/>
+                <constraint firstAttribute="bottom" secondItem="90" secondAttribute="bottom" constant="20" symbolic="YES" id="Sya-kO-EIN"/>
+                <constraint firstItem="93" firstAttribute="leading" secondItem="132" secondAttribute="leading" id="b0d-ks-yDv"/>
+                <constraint firstItem="93" firstAttribute="top" secondItem="127" secondAttribute="bottom" constant="10" symbolic="YES" id="bJw-Ye-piw"/>
+                <constraint firstItem="127" firstAttribute="leading" secondItem="128" secondAttribute="trailing" constant="8" symbolic="YES" id="eV9-Kf-TKu"/>
+                <constraint firstItem="127" firstAttribute="trailing" secondItem="132" secondAttribute="trailing" id="gnH-Ms-MGU"/>
+                <constraint firstAttribute="trailing" secondItem="132" secondAttribute="trailing" constant="20" symbolic="YES" id="kPU-DO-Egi"/>
+                <constraint firstItem="132" firstAttribute="top" secondItem="1" secondAttribute="top" constant="20" symbolic="YES" id="ma6-YN-XQm"/>
+                <constraint firstItem="127" firstAttribute="top" secondItem="132" secondAttribute="bottom" constant="8" symbolic="YES" id="p9m-2O-l7X"/>
+                <constraint firstItem="90" firstAttribute="leading" secondItem="132" secondAttribute="leading" id="rHu-hp-Zra"/>
+                <constraint firstItem="90" firstAttribute="trailing" secondItem="132" secondAttribute="trailing" id="vjG-7c-1hW"/>
+                <constraint firstItem="90" firstAttribute="top" secondItem="93" secondAttribute="bottom" constant="10" symbolic="YES" id="zHh-Gm-EBI"/>
+            </constraints>
+            <point key="canvasLocation" x="-275.5" y="129"/>
+        </customView>
+        <objectController id="99">
+            <declaredKeys>
+                <string>name</string>
+                <string>isDisabled</string>
+                <string>description</string>
+                <string>contactName</string>
+                <string>contactEmailRot13</string>
+            </declaredKeys>
+            <connections>
+                <binding destination="-2" name="contentObject" keyPath="properties" id="109"/>
+            </connections>
+        </objectController>
+    </objects>
+</document>

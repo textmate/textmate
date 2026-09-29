@@ -1,4 +1,4 @@
-#include <editor/clipboard.h>
+#include <editor/src/clipboard.h>
 
 @class OakPasteboard;
 

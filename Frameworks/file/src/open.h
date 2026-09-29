@@ -3,8 +3,8 @@
 
 #include "bytes.h"
 #include "encoding.h"
-#include <authorization/authorization.h>
-#include <plist/uuid.h>
+#include <authorization/src/authorization.h>
+#include <plist/src/uuid.h>
 
 struct bundle_command_t;
 

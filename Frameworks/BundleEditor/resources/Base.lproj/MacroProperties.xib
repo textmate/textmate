@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="22505" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="22505"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <customObject id="-2" userLabel="File's Owner" customClass="PropertiesViewController">
+            <connections>
+                <outlet property="objectController" destination="99" id="100"/>
+                <outlet property="view" destination="1" id="98"/>
+            </connections>
+        </customObject>
+        <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
+        <customObject id="-3" userLabel="Application" customClass="NSObject"/>
+        <customView id="1" userLabel="Macro Properties">
+            <rect key="frame" x="0.0" y="0.0" width="180" height="36"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+            <subviews>
+                <button translatesAutoresizingMaskIntoConstraints="NO" id="96">
+                    <rect key="frame" x="18" y="19" width="142" height="18"/>
+                    <buttonCell key="cell" type="check" title="Use local clipboard" bezelStyle="regularSquare" imagePosition="left" alignment="left" state="on" inset="2" id="97">
+                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                        <font key="font" metaFont="system"/>
+                    </buttonCell>
+                    <connections>
+                        <binding destination="99" name="value" keyPath="selection.useGlobalClipboard" id="130">
+                            <dictionary key="options">
+                                <string key="NSValueTransformerName">NSNegateBoolean</string>
+                            </dictionary>
+                        </binding>
+                    </connections>
+                </button>
+            </subviews>
+            <constraints>
+                <constraint firstItem="96" firstAttribute="top" secondItem="1" secondAttribute="top" id="CTX-9z-L3E"/>
+                <constraint firstAttribute="trailing" secondItem="96" secondAttribute="trailing" constant="20" symbolic="YES" id="IQS-CH-seI"/>
+                <constraint firstItem="96" firstAttribute="leading" secondItem="1" secondAttribute="leading" constant="20" symbolic="YES" id="Jl2-kG-ymk"/>
+                <constraint firstAttribute="bottom" secondItem="96" secondAttribute="bottom" constant="20" symbolic="YES" id="XJw-Ns-na4"/>
+            </constraints>
+            <point key="canvasLocation" x="-168" y="129"/>
+        </customView>
+        <objectController id="99">
+            <declaredKeys>
+                <string>useGlobalClipboard</string>
+            </declaredKeys>
+            <connections>
+                <binding destination="-2" name="contentObject" keyPath="properties" id="109"/>
+            </connections>
+        </objectController>
+    </objects>
+</document>

@@ -1,9 +1,9 @@
 #import "OakCommandRefresh.h"
-#import <OakCommand/OakCommand.h>
-#import <document/OakDocument.h>
-#import <HTMLOutput/HTMLOutput.h>
-#import <settings/settings.h>
-#import <ns/ns.h>
+#import <OakCommand/src/OakCommand.h>
+#import <document/src/OakDocument.h>
+#import <HTMLOutput/src/HTMLOutput.h>
+#import <settings/src/settings.h>
+#import <ns/src/ns.h>
 
 @interface OakCommandRefresher ()
 {
@@ -166,7 +166,7 @@ static NSMutableSet<OakCommandRefresher*>* CommandRefreshers = [NSMutableSet set
 
 - (void)execute
 {
-	if(_shouldRun = (_running == YES))
+	if((_shouldRun = (_running == YES)))
 		return;
 
 	NSFileHandle* stdinFH;

@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>beforeRunningCommand</key>
+	<string>nop</string>
+	<key>command</key>
+	<string><![CDATA[#!/bin/bash
+
+# Ask Pyright's language server for the definition at the clicked word,
+# then open the returned file and line in TextMate.
+
+export PATH="$PATH:/opt/homebrew/bin:/usr/local/bin:$HOME/.local/bin"
+/usr/bin/python3 <<'PYEOF'
+import json
+import os
+import select
+import shutil
+import subprocess
+import sys
+import time
+import urllib.parse
+
+LOG = "/tmp/tm-python-diagnostics.log"
+
+def log(msg):
+    with open(LOG, "a") as f:
+        f.write(msg + "\n")
+
+def resolve_tool(env_var, name):
+    candidate = os.environ.get(env_var) or shutil.which(name)
+    return candidate if candidate and os.path.isfile(candidate) else None
+
+def resolve_pyright_langserver():
+    server = resolve_tool("TM_PYRIGHT_LANGSERVER", "pyright-langserver")
+    if server:
+        return server
+
+    pyright = resolve_tool("TM_PYRIGHT", "pyright")
+    if pyright:
+        sibling = os.path.join(os.path.dirname(pyright), "pyright-langserver")
+        if os.path.isfile(sibling):
+            return sibling
+    return None
+
+def file_uri(path):
+    return urllib.parse.urljoin("file:", urllib.parse.quote(os.path.abspath(path)))
+
+def path_from_uri(uri):
+    parsed = urllib.parse.urlparse(uri)
+    if parsed.scheme != "file":
+        return None
+    return urllib.parse.unquote(parsed.path)
+
+def pyright_workspace_root(filepath):
+    directory = os.path.abspath(os.path.dirname(filepath))
+    while True:
+        if os.path.isfile(os.path.join(directory, "pyrightconfig.json")):
+            return directory
+
+        parent = os.path.dirname(directory)
+        if parent == directory:
+            break
+        directory = parent
+
+    fallback = os.environ.get("TM_PYRIGHT_PROJECT")
+    if fallback and os.path.isfile(os.path.expanduser(fallback)):
+        return os.path.dirname(os.path.abspath(os.path.expanduser(fallback)))
+
+    return os.environ.get("TM_PROJECT_DIRECTORY") or os.path.dirname(filepath)
+
+def utf16_units(text):
+    return len(text.encode("utf-16-le")) // 2
+
+def lsp_character_from_textmate_line_index(line_text):
+    try:
+        byte_index = int(os.environ.get("TM_LINE_INDEX", "0"))
+    except ValueError:
+        byte_index = 0
+
+    try:
+        prefix = line_text.encode("utf-8")[:byte_index].decode("utf-8")
+    except UnicodeDecodeError:
+        prefix = line_text.encode("utf-8")[:byte_index].decode("utf-8", "ignore")
+    char_index = len(prefix)
+
+    word = os.environ.get("TM_CURRENT_WORD")
+    if word:
+        matches = []
+        start = line_text.find(word)
+        while start != -1:
+            end = start + len(word)
+            if start <= char_index <= end:
+                char_index = min(max(char_index, start), max(start, end - 1))
+                break
+            matches.append((abs(char_index - start), start, end))
+            start = line_text.find(word, end)
+        else:
+            if matches:
+                _, start, end = min(matches)
+                char_index = min(max(char_index, start), max(start, end - 1))
+
+    prefix = line_text[:char_index]
+    return utf16_units(prefix)
+
+class LSP:
+    def __init__(self, argv, cwd):
+        self.process = subprocess.Popen(argv, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                                        stderr=subprocess.DEVNULL, cwd=cwd)
+        self.next_id = 1
+        self.buffer = b""
+
+    def send(self, payload):
+        body = json.dumps(payload, separators=(",", ":")).encode("utf-8")
+        header = ("Content-Length: %d\r\n\r\n" % len(body)).encode("ascii")
+        self.process.stdin.write(header + body)
+        self.process.stdin.flush()
+
+    def notify(self, method, params=None):
+        payload = {"jsonrpc": "2.0", "method": method}
+        if params is not None:
+            payload["params"] = params
+        self.send(payload)
+
+    def request(self, method, params=None, timeout=15):
+        request_id = self.next_id
+        self.next_id += 1
+        payload = {"jsonrpc": "2.0", "id": request_id, "method": method}
+        if params is not None:
+            payload["params"] = params
+        self.send(payload)
+
+        deadline = time.time() + timeout
+        while time.time() < deadline:
+            msg = self.read_message(deadline - time.time())
+            if msg is None:
+                break
+
+            if msg.get("id") == request_id:
+                if "error" in msg:
+                    raise RuntimeError(msg["error"].get("message", "LSP request failed"))
+                return msg.get("result")
+
+            if "id" in msg and "method" in msg:
+                self.answer_server_request(msg)
+
+        raise TimeoutError("%s timed out" % method)
+
+    def answer_server_request(self, msg):
+        method = msg.get("method")
+        params = msg.get("params") or {}
+        if method == "workspace/configuration":
+            result = [{} for _ in params.get("items", [])]
+        else:
+            result = None
+        self.send({"jsonrpc": "2.0", "id": msg["id"], "result": result})
+
+    def read_message(self, timeout):
+        fd = self.process.stdout.fileno()
+        deadline = time.time() + max(0, timeout)
+
+        while b"\r\n\r\n" not in self.buffer:
+            remaining = deadline - time.time()
+            if remaining <= 0:
+                return None
+            readable, _, _ = select.select([fd], [], [], remaining)
+            if not readable:
+                return None
+            chunk = os.read(fd, 4096)
+            if not chunk:
+                return None
+            self.buffer += chunk
+
+        header, self.buffer = self.buffer.split(b"\r\n\r\n", 1)
+        length = 0
+        for line in header.decode("ascii", "replace").split("\r\n"):
+            name, _, value = line.partition(":")
+            if name.lower() == "content-length":
+                length = int(value.strip())
+                break
+        if not length:
+            return None
+
+        while len(self.buffer) < length:
+            remaining = deadline - time.time()
+            if remaining <= 0:
+                return None
+            readable, _, _ = select.select([fd], [], [], remaining)
+            if not readable:
+                return None
+            chunk = os.read(fd, 4096)
+            if not chunk:
+                return None
+            self.buffer += chunk
+
+        body, self.buffer = self.buffer[:length], self.buffer[length:]
+        return json.loads(body.decode("utf-8"))
+
+    def close(self):
+        try:
+            self.request("shutdown", timeout=5)
+            self.notify("exit")
+        except Exception:
+            pass
+        try:
+            self.process.wait(timeout=2)
+        except subprocess.TimeoutExpired:
+            self.process.kill()
+
+def pick_location(result):
+    if not result:
+        return None
+    if isinstance(result, list):
+        if not result:
+            return None
+        result = result[0]
+    uri = result.get("targetUri") or result.get("uri")
+    target_range = result.get("targetSelectionRange") or result.get("targetRange") or result.get("range")
+    if not uri or not target_range:
+        return None
+    start = target_range["start"]
+    return uri, start["line"] + 1, start["character"] + 1
+
+filepath = os.environ.get("TM_FILEPATH")
+if not filepath or not os.path.isfile(filepath):
+    print("Goto Definition needs a saved Python file.")
+    raise SystemExit(1)
+
+mate = os.environ.get("TM_MATE", "")
+if not os.path.isfile(mate):
+    for candidate in (shutil.which("mate") or "", "/Applications/TextMate.app/Contents/MacOS/mate"):
+        if candidate and os.path.isfile(candidate):
+            mate = candidate
+            break
+if not os.path.isfile(mate):
+    print("The mate command-line tool was not found.")
+    raise SystemExit(1)
+
+server = resolve_pyright_langserver()
+if not server:
+    print("pyright-langserver was not found. Install Pyright or set TM_PYRIGHT_LANGSERVER.")
+    raise SystemExit(1)
+
+cwd = pyright_workspace_root(filepath)
+root_uri = file_uri(cwd)
+doc_uri = file_uri(filepath)
+line = max(0, int(os.environ.get("TM_LINE_NUMBER", "1")) - 1)
+character = lsp_character_from_textmate_line_index(os.environ.get("TM_CURRENT_LINE", ""))
+
+log("goto-definition pyright-root=%s file=%s" % (cwd, filepath))
+lsp = LSP([server, "--stdio"], cwd)
+try:
+    lsp.request("initialize", {
+        "processId": os.getpid(),
+        "rootUri": root_uri,
+        "workspaceFolders": [{"uri": root_uri, "name": os.path.basename(cwd) or cwd}],
+        "capabilities": {
+            "textDocument": {"definition": {"dynamicRegistration": False, "linkSupport": True}},
+            "workspace": {"configuration": True, "workspaceFolders": True}
+        }
+    })
+    lsp.notify("initialized", {})
+
+    with open(filepath, "r", encoding="utf-8", errors="replace") as f:
+        text = f.read()
+
+    lsp.notify("textDocument/didOpen", {
+        "textDocument": {
+            "uri": doc_uri,
+            "languageId": "python",
+            "version": 1,
+            "text": text
+        }
+    })
+
+    result = lsp.request("textDocument/definition", {
+        "textDocument": {"uri": doc_uri},
+        "position": {"line": line, "character": character}
+    })
+
+    location = pick_location(result)
+    if not location:
+        print("No definition found for '%s'." % os.environ.get("TM_CURRENT_WORD", "selection"))
+        raise SystemExit(1)
+
+    target_uri, target_line, target_column = location
+    target_path = path_from_uri(target_uri)
+    if not target_path:
+        print("Definition target is not a local file: %s" % target_uri)
+        raise SystemExit(1)
+
+    log("goto-definition %s:%d:%d" % (target_path, target_line, target_column))
+    subprocess.run([mate, "--line", "%d:%d" % (target_line, target_column), target_path])
+finally:
+    lsp.close()
+PYEOF
+]]></string>
+	<key>input</key>
+	<string>none</string>
+	<key>name</key>
+	<string>Goto Definition</string>
+	<key>outputLocation</key>
+	<string>toolTip</string>
+	<key>scope</key>
+	<string>source.python</string>
+	<key>semanticClass</key>
+	<string>callback.context-menu</string>
+	<key>uuid</key>
+	<string>9CA55C74-7B37-45EB-8995-9AB7A2DC17B8</string>
+	<key>version</key>
+	<integer>2</integer>
+</dict>
+</plist>

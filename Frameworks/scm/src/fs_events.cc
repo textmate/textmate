@@ -1,6 +1,6 @@
 #include "fs_events.h"
-#include <io/path.h>
-#include <cf/cf.h>
+#include <io/src/path.h>
+#include <cf/src/cf.h>
 
 namespace scm
 {
@@ -19,7 +19,7 @@ namespace scm
 		std::string devicePath = path::relative_to(path, mount_point);
 
 		FSEventStreamContext contextInfo = { 0, this, nullptr, nullptr, nullptr };
-		if(stream = FSEventStreamCreateRelativeToDevice(kCFAllocatorDefault, &callback_function, &contextInfo, device, cf::wrap(std::vector<std::string>(1, devicePath)), kFSEventStreamEventIdSinceNow, 1, kFSEventStreamCreateFlagNone))
+		if((stream = FSEventStreamCreateRelativeToDevice(kCFAllocatorDefault, &callback_function, &contextInfo, device, cf::wrap(std::vector<std::string>(1, devicePath)), kFSEventStreamEventIdSinceNow, 1, kFSEventStreamCreateFlagNone)))
 		{
 			FSEventStreamScheduleWithRunLoop(stream, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
 			FSEventStreamStart(stream);

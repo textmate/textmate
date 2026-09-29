@@ -1,10 +1,10 @@
 #include "paragraph.h"
 #include "ct.h"
 #include "render.h"
-#include <cf/cf.h>
-#include <text/parse.h>
-#include <text/utf8.h>
-#include <regexp/format_string.h>
+#include <cf/src/cf.h>
+#include <text/src/parse.h>
+#include <text/src/utf8.h>
+#include <regexp/src/format_string.h>
 
 static double const kFoldingDotsRatio = 20.0 / 10.0; // FIXME Folding dots ratio should be obtained from the image and given to layout_t
 static size_t const kCTLineMaxSize = 2048;
@@ -22,7 +22,7 @@ namespace ng
 				0xFEFF  // ZERO WIDTH NO-BREAK SPACE
 			};
 
-			if(0x20 <= ch && ch <= 0x7E || ch == '\t' || ch == '\n')
+			if((0x20 <= ch && ch <= 0x7E) || ch == '\t' || ch == '\n')
 				return NULL_STR;
 
 			switch(ch)
@@ -106,6 +106,7 @@ namespace ng
 
 		switch(_type)
 		{
+			case kNodeTypeNewline: break;
 			case kNodeTypeText:
 			{
 				_line = std::make_shared<ct::line_t>(buffer.substr(bufferOffset, bufferOffset + _length), buffer.scopes(bufferOffset, bufferOffset + _length), theme, tabSize, metrics, nullptr);
@@ -162,6 +163,8 @@ namespace ng
 			scope::scope_t scope = _type == kNodeTypeSoftBreak ? buffer.scope(bufferOffset).left : buffer.scope(bufferOffset).right;
 			switch(_type)
 			{
+				case kNodeTypeText:        break; // Handled by the enclosing condition.
+				case kNodeTypeNewline:     break;
 				case kNodeTypeUnprintable: scope.push_scope("deco.unprintable");   break;
 				case kNodeTypeFolding:     scope.push_scope("deco.folding");       break;
 				case kNodeTypeSoftBreak:   scope.push_scope("deco.indented-wrap"); break;
@@ -188,6 +191,9 @@ namespace ng
 			scope::scope_t scope = buffer.scope(bufferOffset).right;
 			switch(_type)
 			{
+				case kNodeTypeText:
+				case kNodeTypeUnprintable:
+				case kNodeTypeSoftBreak: break;
 				case kNodeTypeNewline:
 					str = context.newline();
 					scope.push_scope("deco.invisible.newline");
@@ -728,6 +734,10 @@ namespace ng
 		{
 			CGFloat x = lines[i].x;
 			size_t offset = lines[i].offset;
+			styles_t const styles = theme->styles_for_scope(buffer.scope(bufferOffset + offset).right);
+			if(!CFEqual(backgroundColor, styles.background()))
+				render::fill_rect(context, styles.background(), CGRectMake(CGRectGetMinX(visibleRect), anchor.y + lines[i].y, CGRectGetWidth(visibleRect), lines[i].height));
+
 			foreach(node, _nodes.begin() + lines[i].first, _nodes.begin() + lines[i].last)
 			{
 				node->draw_background(theme, context, isFlipped, visibleRect, backgroundColor, buffer, bufferOffset + offset, CGPointMake(anchor.x + x, anchor.y + lines[i].y), lines[i].height);

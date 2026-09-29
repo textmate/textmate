@@ -95,7 +95,8 @@ namespace scope
 				res = std::make_shared<group_t>(group);
 				return true;
 			}
-			return it = bt, false;
+			it = bt;
+			return false;
 		}
 
 		bool context_t::parse_filter (any_ptr& res)
@@ -110,7 +111,8 @@ namespace scope
 				res = std::make_shared<filter_t>(filter);
 				return true;
 			}
-			return it = bt, false;
+			it = bt;
+			return false;
 		}
 
 		bool context_t::parse_expression (expression_t& res)
@@ -168,7 +170,8 @@ namespace scope
 				return false;
 			if(dst)
 				*dst = *it;
-			return ++it, true;
+			++it;
+			return true;
 		}
 
 		// =======

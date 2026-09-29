@@ -1,8 +1,8 @@
 #ifndef NG_UNDO_H_MZSRPG3
 #define NG_UNDO_H_MZSRPG3
 
-#include <buffer/buffer.h>
-#include <selection/selection.h>
+#include <buffer/src/buffer.h>
+#include <selection/src/selection.h>
 
 namespace ng
 {

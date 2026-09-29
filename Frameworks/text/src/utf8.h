@@ -56,8 +56,14 @@ namespace utf8
 	}
 
 	template <typename _Iter>
-	struct iterator_t : public std::iterator<std::bidirectional_iterator_tag, uint32_t>
+	struct iterator_t
 	{
+		typedef std::bidirectional_iterator_tag iterator_category;
+		typedef uint32_t value_type;
+		typedef ptrdiff_t difference_type;
+		typedef uint32_t* pointer;
+		typedef uint32_t& reference;
+
 		typedef iterator_t self;
 
 		iterator_t (_Iter const& base_iterator) : base_iterator(base_iterator) { }
@@ -186,7 +192,7 @@ namespace utf8
 		}
 	};
 
-	static struct { char mask, expect; } const UTF8LengthCodes[] =
+	static struct { unsigned char mask, expect; } const UTF8LengthCodes[] =
 	{
 		{ 0b10000000, 0b00000000 },
 		{ 0b11100000, 0b11000000 },
@@ -220,7 +226,7 @@ namespace utf8
 			bool valid = false;
 			for(auto const& code : UTF8LengthCodes)
 			{
-				if(valid = ((*bt & code.mask) == code.expect))
+				if((valid = ((*bt & code.mask) == code.expect)))
 					break;
 				if(++it == last || (*it & 0b11000000) != 0b10000000)
 					break;
@@ -238,8 +244,14 @@ namespace utf8
 namespace diacritics
 {
 	template <typename _Iter>
-	struct iterator_t : public std::iterator<std::bidirectional_iterator_tag, uint32_t>
+	struct iterator_t
 	{
+		typedef std::bidirectional_iterator_tag iterator_category;
+		typedef uint32_t value_type;
+		typedef ptrdiff_t difference_type;
+		typedef uint32_t* pointer;
+		typedef uint32_t& reference;
+
 		typedef iterator_t self;
 
 		iterator_t (utf8::iterator_t<_Iter> const& first, utf8::iterator_t<_Iter> const& last) : current(first), stop(last) { }

@@ -1,10 +1,10 @@
 #include "path_info.h"
-#include <scm/scm.h>
-#include <settings/settings.h>
-#include <io/entries.h>
-#include <regexp/glob.h>
-#include <plist/ascii.h>
-#include <text/tokenize.h>
+#include <scm/src/scm.h>
+#include <settings/src/settings.h>
+#include <io/src/entries.h>
+#include <regexp/src/glob.h>
+#include <plist/src/ascii.h>
+#include <text/src/tokenize.h>
 #include <oak/oak.h>
 #include <oak/compat.h>
 

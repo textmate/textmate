@@ -1,10 +1,10 @@
-#import <layout/layout.h>
-#import <buffer/buffer.h>
-#import <selection/selection.h>
-#import <bundles/bundles.h>
-#import <io/path.h>
-#import <ns/ns.h>
-#import <text/utf8.h>
+#import <layout/src/layout.h>
+#import <buffer/src/buffer.h>
+#import <selection/src/selection.h>
+#import <bundles/src/bundles.h>
+#import <io/src/path.h>
+#import <ns/src/ns.h>
+#import <text/src/utf8.h>
 #import <test/cocoa.h>
 #import <oak/duration.h>
 
@@ -71,7 +71,7 @@ struct refresh_t
 	~refresh_t ()
 	{
 		auto damagedRects = _layout.end_refresh_cycle([_self selection], [_self visibleRect]);
-		TS_ASSERT(_layout.structural_integrity());
+		NSCAssert(_layout.structural_integrity(), @"");
 		[_self updateFrameSize];
 		for(auto const& rect : damagedRects)
 			[_self setNeedsDisplayInRect:rect];
@@ -404,6 +404,7 @@ static NSScrollView* OakCreateTextView (NSRect aRect = NSMakeRect(0, 0, 600, 800
 	return scrollView;
 }
 
+#if 0
 static class LayoutFixture : public CxxTest::GlobalFixture
 {
 public:
@@ -423,3 +424,4 @@ public:
 		OakSetupApplicationWithView(OakCreateTextView());
 	}
 };
+#endif

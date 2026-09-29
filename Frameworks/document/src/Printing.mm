@@ -1,10 +1,10 @@
 #import "Printing.h"
 #import "OakDocument Private.h"
-#import <OakAppKit/OakUIConstructionFunctions.h>
-#import <theme/theme.h>
-#import <layout/layout.h>
-#import <ns/ns.h>
-#import <text/ctype.h>
+#import <OakAppKit/src/OakUIConstructionFunctions.h>
+#import <theme/src/theme.h>
+#import <layout/src/layout.h>
+#import <ns/src/ns.h>
+#import <text/src/my_ctype.h>
 
 @interface OakDocumentPrintOptionsViewController ()
 {

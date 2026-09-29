@@ -1,7 +1,7 @@
 #include "entries.h"
 #include "path.h"
-#include <regexp/glob.h>
-#include <text/format.h>
+#include <regexp/src/glob.h>
+#include <text/src/format.h>
 
 namespace path
 {

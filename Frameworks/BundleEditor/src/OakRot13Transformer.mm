@@ -1,6 +1,6 @@
 #import "OakRot13Transformer.h"
-#import <OakFoundation/NSString Additions.h>
-#import <text/decode.h>
+#import <OakFoundation/src/NSString Additions.h>
+#import <text/src/decode.h>
 
 @implementation OakRot13Transformer
 + (void)register                        { [NSValueTransformer setValueTransformer:[OakRot13Transformer new] forName:@"OakRot13Transformer"]; }

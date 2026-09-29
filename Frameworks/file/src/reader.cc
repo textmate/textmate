@@ -1,9 +1,9 @@
 #include "reader.h"
 #include "path_info.h"
-#include <encoding/encoding.h>
-#include <text/utf8.h>
-#include <io/path.h>
-#include <settings/settings.h>
+#include <encoding/src/encoding.h>
+#include <text/src/utf8.h>
+#include <io/src/path.h>
+#include <settings/src/settings.h>
 
 namespace file
 {

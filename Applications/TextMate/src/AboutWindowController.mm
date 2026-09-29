@@ -1,10 +1,10 @@
 #import "AboutWindowController.h"
-#import <OakAppKit/OakUIConstructionFunctions.h>
-#import <OakFoundation/OakFoundation.h>
-#import <OakFoundation/NSString Additions.h>
-#import <BundlesManager/BundlesManager.h>
-#import <license/LicenseManager.h>
-#import <ns/ns.h>
+#import <OakAppKit/src/OakUIConstructionFunctions.h>
+#import <OakFoundation/src/OakFoundation.h>
+#import <OakFoundation/src/NSString Additions.h>
+#import <BundlesManager/src/BundlesManager.h>
+// #import <license/LicenseManager.h>
+#import <ns/src/ns.h>
 
 static NSString* const kUserDefaultsReleaseNotesDigestKey = @"releaseNotesDigest";
 
@@ -91,7 +91,7 @@ static NSData* Digest (NSString* someString)
 				NSDictionary* variables = @{
 					@"version":   [NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"],
 					@"copyright": [NSBundle.mainBundle objectForInfoDictionaryKey:@"NSHumanReadableCopyright"],
-					@"licensees": LicenseManager.sharedInstance.owner ?: [NSNull null],
+					// @"licensees": LicenseManager.sharedInstance.owner ?: [NSNull null],
 				};
 
 				[variables enumerateKeysAndObjectsUsingBlock:^(NSString* key, NSString* value, BOOL* stop){
@@ -325,9 +325,9 @@ static NSDictionary* RemoveOldCommits (NSDictionary* src)
 			os_log(log, "%{public}@: %{public}@", self.webView.title, payload[@"message"]);
 		}
 	}
-	else if([command isEqualToString:@"addLicense"])
-	{
-		[LicenseManager.sharedInstance showAddLicenseWindow:self];
-	}
+//	else if([command isEqualToString:@"addLicense"])
+//	{
+//		[LicenseManager.sharedInstance showAddLicenseWindow:self];
+//	}
 }
 @end

@@ -1,8 +1,8 @@
 #import "ns.h"
-#import <OakFoundation/NSString Additions.h>
+#import <OakFoundation/src/NSString Additions.h>
 #import <oak/oak.h>
 #import <oak/debug.h>
-#import <text/utf8.h>
+#import <text/src/utf8.h>
 
 NSString* to_ns (std::string const& str)
 {

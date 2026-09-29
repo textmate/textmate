@@ -2,7 +2,7 @@
 
 __attribute__((constructor)) static void setup ()
 {
-        onig_init();
+	onig_init();
 
 	static OnigSyntaxType syntax;
 	onig_copy_syntax(&syntax, ONIG_SYNTAX_RUBY);

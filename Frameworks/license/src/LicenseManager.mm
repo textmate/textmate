@@ -1,8 +1,8 @@
 #import "LicenseManager.h"
 #import "license.h"
-#import <OakAppKit/OakUIConstructionFunctions.h>
-#import <OakFoundation/OakFoundation.h>
-#import <ns/ns.h>
+#import <OakAppKit/src/OakUIConstructionFunctions.h>
+#import <OakFoundation/src/OakFoundation.h>
+#import <ns/src/ns.h>
 
 @interface License : NSObject
 @property (nonatomic) NSString* owner;

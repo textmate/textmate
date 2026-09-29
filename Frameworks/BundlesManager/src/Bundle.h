@@ -24,6 +24,7 @@
 @property (nonatomic)                        NSString* path;
 @property (nonatomic)                        NSDate*   lastUpdated;
 @property (nonatomic, getter = isDependency) BOOL      dependency; // Another bundle depends on us
+@property (nonatomic, getter = isBundled)    BOOL      bundled;    // Shipped inside TextMate.app
 
 // Generated
 @property (nonatomic, readonly)                        BOOL hasUpdate;

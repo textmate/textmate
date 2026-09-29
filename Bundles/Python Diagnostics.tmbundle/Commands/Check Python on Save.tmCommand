@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>beforeRunningCommand</key>
+	<string>nop</string>
+	<key>command</key>
+	<string>#!/bin/bash
+
+# Runs Ruff and Pyright against the saved file and converts their JSON
+# diagnostics into TextMate marks: gutter icon, line tint, squiggly
+# underline, and a message banner with one-click fixes and suppressions.
+#
+# Requirements:    ruff and/or pyright on PATH  (brew install ruff pyright)
+# Disable:         TM_PYTHON_DIAGNOSTICS = disabled   (.tm_properties, any scope)
+# Configuration:   ruff.toml / pyrightconfig.json per project, or user-level
+#                  ~/.config/ruff/ruff.toml; pyright falls back to
+#                  ~/Library/Application Support/TextMate/pyrightconfig.json
+#                  (override with TM_PYRIGHT_PROJECT). Extra flags via
+#                  TM_RUFF_ARGS / TM_PYRIGHT_ARGS. Pyright targets Python 3.13
+#                  by default; override with TM_PYRIGHT_PYTHON_VERSION.
+# Troubleshooting: tail -f /tmp/tm-python-diagnostics.log
+
+LOG=/tmp/tm-python-diagnostics.log
+echo "$(date +%T) did-save fired: file=$TM_FILEPATH scope=$TM_SCOPE mate=$TM_MATE" &gt;&gt; "$LOG"
+[[ -n "$TM_FILEPATH" ]] || exit 0
+
+if [[ "$(defaults read com.macromates.TextMate pythonDiagnosticsDisabled 2&gt;/dev/null)" == "1" ]]; then
+	echo "skipped: disabled via Bundles menu toggle" &gt;&gt; "$LOG"
+	exit 0
+fi
+
+case "${TM_PYTHON_DIAGNOSTICS:-enabled}" in
+	disable|disabled|off|false|no|0)
+		echo "skipped: disabled via TM_PYTHON_DIAGNOSTICS" &gt;&gt; "$LOG"
+		exit 0
+		;;
+esac
+
+# Detach so saving never blocks on the checkers (pyright takes seconds).
+{
+	export PATH="$PATH:/opt/homebrew/bin:/usr/local/bin:$HOME/.local/bin"
+	/usr/bin/python3 &lt;&lt;'PYEOF'
+import json, os, re, shlex, shutil, subprocess, time, tokenize
+
+LOG = "/tmp/tm-python-diagnostics.log"
+
+def log(msg):
+    with open(LOG, "a") as f:
+        f.write(msg + chr(10))
+
+def notify(msg):
+    # at most one notification per hour, so a missing tool nags only gently
+    stamp = "/tmp/tm-python-diagnostics.notified"
+    try:
+        if time.time() - os.path.getmtime(stamp) &lt; 3600:
+            return
+    except OSError:
+        pass
+    open(stamp, "w").close()
+    subprocess.run(["osascript", "-e",
+        'display notification "%s" with title "Python Diagnostics"' % msg.replace('"', chr(39))])
+
+def resolve(env_var, name):
+    candidate = os.environ.get(env_var) or shutil.which(name)
+    return candidate if candidate and os.path.isfile(candidate) else None
+
+mate = os.environ.get("TM_MATE", "")
+if not os.path.isfile(mate):
+    for candidate in (shutil.which("mate") or "", "/Applications/TextMate.app/Contents/MacOS/mate"):
+        if candidate and os.path.isfile(candidate):
+            mate = candidate
+            break
+if not os.path.isfile(mate):
+    log("ERROR: no usable mate binary found")
+    notify("The mate command-line tool was not found. Diagnostics cannot reach the editor.")
+    raise SystemExit(1)
+
+uuid     = os.environ["TM_DOCUMENT_UUID"]
+filepath = os.environ["TM_FILEPATH"]
+cwd      = os.environ.get("TM_PROJECT_DIRECTORY") or os.path.dirname(filepath)
+
+try:
+    with tokenize.open(filepath) as source_file:
+        source_lines = source_file.read().splitlines()
+except (OSError, SyntaxError, UnicodeError) as e:
+    log("WARNING: could not decode source for diagnostic coordinates: %r" % (e,))
+    source_lines = []
+
+def utf8_column(text, character_index):
+    character_index = max(0, min(character_index, len(text)))
+    return len(text[:character_index].encode("utf-8")) + 1
+
+def character_index_from_utf16(text, units):
+    used = 0
+    for index, character in enumerate(text):
+        width = len(character.encode("utf-16-le")) // 2
+        if used + width &gt; units:
+            return index
+        used += width
+        if used == units:
+            return index + 1
+    return len(text)
+
+def codepoint_column_to_utf8(row, column):
+    if 1 &lt;= row &lt;= len(source_lines):
+        return utf8_column(source_lines[row - 1], max(0, column - 1))
+    return column
+
+def utf16_column_to_utf8(row, column):
+    if 1 &lt;= row &lt;= len(source_lines):
+        line = source_lines[row - 1]
+        return utf8_column(line, character_index_from_utf16(line, max(0, column - 1)))
+    return column
+
+def ruff_position_to_mate(position):
+    result = dict(position)
+    result["column"] = codepoint_column_to_utf8(result["row"], result["column"])
+    return result
+
+def ruff_edit_to_mate(edit):
+    result = dict(edit)
+    result["location"] = ruff_position_to_mate(edit["location"])
+    result["end_location"] = ruff_position_to_mate(edit["end_location"])
+    return result
+
+def type_ignore_edit(row):
+    if not 1 &lt;= row &lt;= len(source_lines):
+        return None
+    line = source_lines[row - 1]
+    if re.search(r"#\s*(?:type|pyright)\s*:\s*ignore\b", line):
+        return None
+    stripped = line.rstrip()
+    return {
+        "content": ("  " if stripped else "") + "# type: ignore",
+        "location": {"row": row, "column": utf8_column(line, len(stripped))},
+        "end_location": {"row": row, "column": utf8_column(line, len(line))},
+    }
+
+ruff    = resolve("TM_RUFF", "ruff")
+pyright = resolve("TM_PYRIGHT", "pyright")
+if not ruff and not pyright:
+    log("ERROR: neither ruff nor pyright found")
+    notify("No Python checkers found. Install with: brew install ruff pyright")
+    raise SystemExit(1)
+
+def set_mark(kind, line, col, length, message):
+    subprocess.run([mate, "--uuid", uuid, "--line", "%d:%d" % (line, col),
+                    "--set-mark", "%s:%d|%s" % (kind, length, message)])
+
+diagnostics = []
+
+if ruff:
+    ruff_args = shlex.split(os.environ.get("TM_RUFF_ARGS", ""))
+    r = subprocess.run([ruff, "check", "--output-format=json", "--exit-zero"] + ruff_args + [filepath],
+                       capture_output=True, text=True, cwd=cwd)
+    try:
+        for d in json.loads(r.stdout or "[]"):
+            code = d.get("code")
+            kind = "error" if code in (None, "E999") else "warning"
+            row, raw_col = d["location"]["row"], d["location"]["column"]
+            end = d.get("end_location") or {}
+            end_row, raw_end_col = end.get("row", row), end.get("column", raw_col)
+            col = codepoint_column_to_utf8(row, raw_col)
+            end_col = codepoint_column_to_utf8(end_row, raw_end_col)
+            length = max(0, end_col - col) if end_row == row else 0
+            msg = ("%s %s" % (code, d["message"])) if code else d["message"]
+            fix = d.get("fix")
+            if fix and fix.get("edits"):
+                payload = {
+                    "message": (fix.get("message") or "Apply fix").splitlines()[0],
+                    "edits": [ruff_edit_to_mate(edit) for edit in fix["edits"]]
+                }
+                msg = msg + chr(31) + json.dumps(payload, separators=(",", ":"))
+            diagnostics.append((kind, row, col, length, msg))
+    except ValueError:
+        log("WARNING: could not parse ruff output")
+
+if pyright:
+    pyright_args = shlex.split(os.environ.get("TM_PYRIGHT_ARGS", ""))
+    # Keep the analysis language level independent of whichever Python happens
+    # to be first on TextMate's PATH. An explicit argument remains the most
+    # specific override for backwards compatibility.
+    if not any(arg == "--pythonversion" or arg.startswith("--pythonversion=")
+               for arg in pyright_args):
+        python_version = os.environ.get("TM_PYRIGHT_PYTHON_VERSION", "3.13").strip()
+        if python_version:
+            pyright_args += ["--pythonversion", python_version]
+    pyright_cwd = cwd
+    pyright_config = None
+    # pyright resolves pyrightconfig.json from cwd, not from the checked file:
+    # walk up from the file; fall back to a user-level config for loose files.
+    d = os.path.dirname(filepath)
+    while True:
+        candidate = os.path.join(d, "pyrightconfig.json")
+        if os.path.isfile(candidate):
+            pyright_cwd = d
+            pyright_config = candidate
+            break
+        parent = os.path.dirname(d)
+        if parent == d:
+            fallback = os.environ.get("TM_PYRIGHT_PROJECT") or os.path.expanduser("~/Library/Application Support/TextMate/pyrightconfig.json")
+            fallback = os.path.abspath(os.path.expanduser(fallback))
+            if os.path.isfile(fallback):
+                pyright_args += ["--project", fallback]
+                pyright_config = fallback
+            break
+        d = parent
+    log("pyright cwd=%s args=%s" % (pyright_cwd, pyright_args))
+    r = subprocess.run([pyright, "--outputjson"] + pyright_args + [filepath],
+                       capture_output=True, text=True, cwd=pyright_cwd)
+    try:
+        for d in json.loads(r.stdout or "{}").get("generalDiagnostics", []):
+            sev = d.get("severity", "error")
+            kind = {"error": "error", "warning": "warning"}.get(sev, "note")
+            start = d["range"]["start"]; end = d["range"]["end"]
+            row, raw_col = start["line"] + 1, start["character"] + 1
+            end_row, raw_end_col = end["line"] + 1, end["character"] + 1
+            col = utf16_column_to_utf8(row, raw_col)
+            end_col = utf16_column_to_utf8(end_row, raw_end_col)
+            length = max(0, end_col - col) if end_row == row else 0
+            rule = d.get("rule")
+            msg = ("%s (%s)" % (d["message"].splitlines()[0], rule)) if rule else d["message"].splitlines()[0]
+            if rule and kind in ("error", "warning"):
+                fixes = []
+                edit = type_ignore_edit(row)
+                if edit:
+                    fixes.append({"message": "Ignore this line", "edits": [edit], "requiresOption": True})
+                if pyright_config:
+                    fixes.append({
+                        "message": "Disable \u201c%s\u201d in Pyright config" % rule,
+                        "action": "disablePyrightRule",
+                        "path": pyright_config,
+                        "rule": rule,
+                        "requiresOption": True,
+                    })
+                if fixes:
+                    msg += chr(31) + json.dumps({"fixes": fixes}, separators=(",", ":"))
+            diagnostics.append((kind, row, col, length, msg))
+    except ValueError:
+        log("WARNING: could not parse pyright output")
+
+# Replace old marks only after the checkers ran, so they don't flicker on save.
+log("ruff=%s pyright=%s diagnostics=%d" % (ruff, pyright, len(diagnostics)))
+for kind in ("error", "warning", "note"):
+    subprocess.run([mate, "--uuid", uuid, "--clear-mark", kind])
+for d in diagnostics:
+    set_mark(*d)
+PYEOF
+} &amp;&gt;/dev/null &amp;
+</string>
+	<key>input</key>
+	<string>none</string>
+	<key>name</key>
+	<string>Check Python on Save</string>
+	<key>outputLocation</key>
+	<string>discard</string>
+	<key>scope</key>
+	<string>source.python</string>
+	<key>semanticClass</key>
+	<string>callback.document.did-save</string>
+	<key>uuid</key>
+	<string>8A9726C0-9DCE-4578-9255-950BE2774E3E</string>
+	<key>version</key>
+	<string>2</string>
+</dict>
+</plist>

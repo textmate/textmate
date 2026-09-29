@@ -1,22 +1,23 @@
 #import "BundleItemChooser.h"
+#import <oak/TextMateResponderActions.h>
 #import "OakAbbreviations.h"
-#import <OakAppKit/OakAppKit.h>
-#import <OakAppKit/OakUIConstructionFunctions.h>
-#import <OakAppKit/OakKeyEquivalentView.h>
-#import <OakAppKit/OakScopeBarView.h>
-#import <OakAppKit/NSColor Additions.h>
-#import <OakAppKit/NSImage Additions.h>
-#import <OakFoundation/OakFoundation.h>
-#import <OakFoundation/NSString Additions.h>
-#import <OakSystem/application.h>
-#import <TMFileReference/TMFileReference.h>
-#import <bundles/bundles.h>
-#import <settings/settings.h>
-#import <text/ranker.h>
-#import <text/case.h>
-#import <text/ctype.h>
-#import <regexp/format_string.h>
-#import <ns/ns.h>
+#import <OakAppKit/src/OakAppKit.h>
+#import <OakAppKit/src/OakUIConstructionFunctions.h>
+#import <OakAppKit/src/OakKeyEquivalentView.h>
+#import <OakAppKit/src/OakScopeBarView.h>
+#import <OakAppKit/src/NSColor Additions.h>
+#import <OakAppKit/src/NSImage Additions.h>
+#import <OakFoundation/src/OakFoundation.h>
+#import <OakFoundation/src/NSString Additions.h>
+#import <OakSystem/src/application.h>
+#import <TMFileReference/src/TMFileReference.h>
+#import <bundles/src/bundles.h>
+#import <settings/src/settings.h>
+#import <text/src/ranker.h>
+#import <text/src/case.h>
+#import <text/src/my_ctype.h>
+#import <regexp/src/format_string.h>
+#import <ns/src/ns.h>
 
 static NSUInteger const kBundleItemTitleField          = 0;
 static NSUInteger const kBundleItemKeyEquivalentField  = 1;
@@ -98,7 +99,7 @@ static NSString* OakMenuItemIdentifier (NSMenuItem* menuItem)
 			std::vector<std::pair<size_t, size_t>> cover;
 			if(searchSource & (kSearchSourceActionItems|kSearchSourceMenuItems|kSearchSourceKeyBindingItems))
 			{
-				if(rank = oak::rank(filter, name, &cover))
+				if((rank = oak::rank(filter, name, &cover)))
 						rank += 1;
 				else	rank = oak::rank(filter, path + " " + name, &cover);
 			}
@@ -138,7 +139,7 @@ static NSString* OakMenuItemIdentifier (NSMenuItem* menuItem)
 			rank = OakContainsString(_scopeSelector, to_ns(filter)) ? rank : 0;
 	}
 
-	if(_matched = (rank > 0 ? YES : NO))
+	if((_matched = (rank > 0 ? YES : NO)))
 	{
 		if(bundleItemField == kBundleItemTitleField)
 		{
@@ -384,7 +385,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 - (void)setBackgroundStyle:(NSBackgroundStyle)backgroundStyle
 {
 	[super setBackgroundStyle:backgroundStyle];
-	if(backgroundStyle == NSBackgroundStyleDark)
+	if(backgroundStyle == NSBackgroundStyleEmphasized)
 	{
 		self.textField.objectValue        = [self selectedStringForString:[self valueForKeyPath:@"objectValue.name"]];
 		self.contextTextField.textColor   = [NSColor colorWithCalibratedWhite:0.9 alpha:1];
@@ -398,15 +399,13 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 	}
 }
 
-- (id)accessibilityAttributeValue:(NSString*)attribute
+- (NSArray*)accessibilityChildren
 {
-	if([attribute isEqualToString:NSAccessibilityChildrenAttribute])
-			return @[ self.textField.cell, self.imageView.cell, self.contextTextField.cell, self.shortcutTextField.cell ];
-	else	return [super accessibilityAttributeValue:attribute];
+	return @[ self.textField.cell, self.imageView.cell, self.contextTextField.cell, self.shortcutTextField.cell ];
 }
 @end
 
-@interface BundleItemChooser () <NSToolbarDelegate>
+@interface BundleItemChooser () <NSToolbarDelegate, NSMenuItemValidation>
 {
 	NSArray<ActionItem*>* _unfilteredItems;
 }
@@ -993,13 +992,13 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 - (BOOL)canAccept
 {
 	ActionItem* item = self.tableView.selectedRow != -1 ? self.items[self.tableView.selectedRow] : nil;
-	return item.menuItem || item.action || item.uuid && bundles::lookup(to_s(item.uuid))->kind() != bundles::kItemTypeSettings;
+	return item.menuItem || item.action || (item.uuid && bundles::lookup(to_s(item.uuid))->kind() != bundles::kItemTypeSettings);
 }
 
 - (BOOL)canEdit
 {
 	ActionItem* item = self.tableView.selectedRow != -1 ? self.items[self.tableView.selectedRow] : nil;
-	return item.uuid && self.editAction || item.file;
+	return (item.uuid && self.editAction) || item.file;
 }
 
 - (void)accept:(id)sender

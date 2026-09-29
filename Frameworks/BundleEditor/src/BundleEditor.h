@@ -1,4 +1,4 @@
-#include <bundles/bundles.h>
+#include <bundles/src/bundles.h>
 
 @interface BundleEditor : NSWindowController <NSBrowserDelegate>
 @property (class, readonly) BundleEditor* sharedInstance;

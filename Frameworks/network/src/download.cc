@@ -1,11 +1,11 @@
 #include "download.h"
 #include "proxy.h"
 #include "user_agent.h"
-#include <cf/cf.h>
-#include <text/format.h>
-#include <text/case.h>
-#include <text/hexdump.h>
-#include <io/path.h>
+#include <cf/src/cf.h>
+#include <text/src/format.h>
+#include <text/src/case.h>
+#include <text/src/hexdump.h>
+#include <io/src/path.h>
 #include <oak/debug.h>
 
 namespace network

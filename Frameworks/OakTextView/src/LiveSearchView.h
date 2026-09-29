@@ -1,4 +1,4 @@
-#import <OakAppKit/OakUIConstructionFunctions.h>
+#import <OakAppKit/src/OakUIConstructionFunctions.h>
 
 @interface LiveSearchView : OakBackgroundFillView
 @property (nonatomic) NSTextField* textField;

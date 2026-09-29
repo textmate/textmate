@@ -1,4 +1,4 @@
-#include <regexp/glob.h>
+#include <regexp/src/glob.h>
 
 void test_empty_glob_list ()
 {

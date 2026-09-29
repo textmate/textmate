@@ -1,0 +1,2 @@
+@interface SettingsWindowController : NSWindowController
+@end

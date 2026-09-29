@@ -1,7 +1,7 @@
 #include "editor.h"
 #include "transform.h"
 #include "clipboard.h"
-#include <command/parser.h>
+#include <command/src/parser.h>
 
 namespace
 {

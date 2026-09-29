@@ -1,5 +1,5 @@
 #include "parse.h"
-#include "ctype.h"
+#include "my_ctype.h"
 #include "utf8.h"
 #include <oak/oak.h>
 #include <oak/debug.h>

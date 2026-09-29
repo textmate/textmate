@@ -1,9 +1,9 @@
 #import "clipboard.h"
-#import <OakAppKit/OakPasteboard.h>
-#import <OakFoundation/NSString Additions.h>
-#import <plist/plist.h>
-#import <cf/cf.h>
-#import <ns/ns.h>
+#import <OakAppKit/src/OakPasteboard.h>
+#import <OakFoundation/src/NSString Additions.h>
+#import <plist/src/plist.h>
+#import <cf/src/cf.h>
+#import <ns/src/ns.h>
 
 static clipboard_t::entry_ptr to_entry (OakPasteboardEntry* src, BOOL includeFindOptions)
 {

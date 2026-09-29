@@ -1,7 +1,7 @@
 #ifndef ADD_TO_BUFFER_H_U7OGWZ60
 #define ADD_TO_BUFFER_H_U7OGWZ60
 
-#include <text/utf8.h>
+#include <text/src/utf8.h>
 
 static std::pair<std::string::iterator, std::string::iterator> add_bytes_to_utf8_buffer (std::string& buf, char const* first, char const* last, bool clearPrevious)
 {

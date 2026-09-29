@@ -1,8 +1,8 @@
 #import "FileItem.h"
-#import <OakAppKit/OakFinderTag.h>
-#import <OakFoundation/OakFoundation.h>
-#import <Preferences/Keys.h>
-#import <ns/ns.h>
+#import <OakAppKit/src/OakFinderTag.h>
+#import <OakFoundation/src/OakFoundation.h>
+#import <Preferences/src/Keys.h>
+#import <ns/src/ns.h>
 
 NSURL* const kURLLocationComputer  = [[NSURL alloc] initWithString:@"computer:///"];
 NSURL* const kURLLocationFavorites = [[NSURL alloc] initFileURLWithPath:[NSHomeDirectory() stringByAppendingPathComponent:@"Library/Application Support/TextMate/Favorites"] isDirectory:YES];

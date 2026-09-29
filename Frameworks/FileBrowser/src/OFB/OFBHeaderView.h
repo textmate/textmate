@@ -1,6 +1,6 @@
-#import <OakAppKit/OakUIConstructionFunctions.h>
+#import <Cocoa/Cocoa.h>
 
-@interface OFBHeaderView : NSVisualEffectView
+@interface OFBHeaderView : NSView
 @property (nonatomic) NSPopUpButton* folderPopUpButton;
 @property (nonatomic) NSButton* goBackButton;
 @property (nonatomic) NSButton* goForwardButton;

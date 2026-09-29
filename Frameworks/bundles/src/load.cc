@@ -1,7 +1,7 @@
 #include "load.h"
-#include <plist/delta.h>
-#include <regexp/glob.h>
-#include <text/format.h>
+#include <plist/src/delta.h>
+#include <regexp/src/glob.h>
+#include <text/src/format.h>
 #include <oak/debug.h>
 
 static std::string const kSeparatorString = "------------------------------------";
@@ -50,11 +50,17 @@ std::pair<std::vector<bundles::item_ptr>, std::map< oak::uuid_t, std::vector<oak
 	bool local = true;
 	for(auto const& bundlesPath : bundlesPaths)
 	{
-		for(auto const& bundlePath : cache.entries(bundlesPath, "*.tm[Bb]undle"))
+		auto const bundleEntries = cache.entries(bundlesPath, "*.tm[Bb]undle");
+		size_t loadedBundles = 0;
+		size_t skippedBundles = 0;
+		os_log(OS_LOG_DEFAULT, "Bundle index scan: %{public}s (%zu candidates)", bundlesPath.c_str(), bundleEntries.size());
+
+		for(auto const& bundlePath : bundleEntries)
 		{
 			bundles::item_ptr bundle;
 			std::set<oak::uuid_t> hiddenItems;
 			bool skipEclipsedBundle = false;
+			oak::uuid_t bundleUUID;
 
 			auto const entries = cache.entries(bundlePath, "{[Ii]nfo.plist,Commands,DragCommands,Macros,Preferences,Proxies,Snippets,Syntaxes,Themes}");
 			for(auto const& infoPlistPath : entries)
@@ -63,7 +69,6 @@ std::pair<std::vector<bundles::item_ptr>, std::map< oak::uuid_t, std::vector<oak
 				if(name != "info.plist" && name != "Info.plist")
 					continue;
 
-				oak::uuid_t bundleUUID;
 				plist::dictionary_t plist = cache.content(infoPlistPath);
 				if(!plist::get_key_path(plist, bundles::kFieldUUID, bundleUUID))
 				{
@@ -98,6 +103,7 @@ std::pair<std::vector<bundles::item_ptr>, std::map< oak::uuid_t, std::vector<oak
 				}
 				else if(loadedItems.find(bundleUUID) != loadedItems.end())
 				{
+					os_log(OS_LOG_DEFAULT, "Skip eclipsed bundle ‘%{public}s’ with UUID %{public}s", bundlePath.c_str(), to_s(bundleUUID).c_str());
 					bundle.reset();
 					skipEclipsedBundle = true;
 					break;
@@ -151,8 +157,10 @@ std::pair<std::vector<bundles::item_ptr>, std::map< oak::uuid_t, std::vector<oak
 			{
 				if(!skipEclipsedBundle)
 					os_log_error(OS_LOG_DEFAULT, "Not a bundle at ‘%{public}s’", bundlePath.c_str());
+				++skippedBundles;
 				continue;
 			}
+			++loadedBundles;
 
 			for(auto dirPath : entries)
 			{
@@ -236,6 +244,7 @@ std::pair<std::vector<bundles::item_ptr>, std::map< oak::uuid_t, std::vector<oak
 				loadedItems.insert(bundle->uuid());
 		}
 
+		os_log(OS_LOG_DEFAULT, "Bundle index scan result: %{public}s (%zu loaded, %zu skipped)", bundlesPath.c_str(), loadedBundles, skippedBundles);
 		local = false;
 	}
 

@@ -1,5 +1,5 @@
 #import <oak/oak.h>
-#import <regexp/find.h> // for find::options_t
+#import <regexp/src/find.h> // for find::options_t
 
 extern NSNotificationName const OakPasteboardDidChangeNotification;
 

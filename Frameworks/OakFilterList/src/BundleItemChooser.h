@@ -1,5 +1,5 @@
 #import "OakChooser.h"
-#import <scope/scope.h>
+#import <scope/src/scope.h>
 
 @interface BundleItemChooser : OakChooser
 @property (class, readonly) BundleItemChooser* sharedInstance;

@@ -1,5 +1,5 @@
 #include "merge.h"
-#include <io/io.h>
+#include <io/src/io.h>
 
 std::string merge (std::string const& oldContent, std::string const& myContent, std::string const& yourContent, bool* conflict)
 {

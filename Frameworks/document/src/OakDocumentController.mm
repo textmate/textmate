@@ -1,10 +1,10 @@
 #import "OakDocumentController.h"
 #import "OakDocument Private.h"
-#import <plist/uuid.h>
-#import <ns/ns.h>
-#import <io/entries.h>
-#import <text/ctype.h>
-#import <regexp/glob.h>
+#import <plist/src/uuid.h>
+#import <ns/src/ns.h>
+#import <io/src/entries.h>
+#import <text/src/my_ctype.h>
+#import <regexp/src/glob.h>
 
 NSString* kSearchFollowDirectoryLinksKey  = @"FollowDirectoryLinks";
 NSString* kSearchFollowFileLinksKey       = @"FollowFileLinks";
