@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TextMate theme preview</title>
+  <!-- Embedded CSS exercises a second grammar inside the HTML document. -->
+  <style>
+    :root { --accent: #58a6ff; --spacing: 1.25rem; }
+    body { font: 16px/1.6 system-ui; margin: 0; }
+    main { max-width: 60rem; margin-inline: auto; padding: var(--spacing); }
+    .card[data-active="true"] { border: 1px solid var(--accent); }
+    a:hover { color: rgb(120 80 200 / 90%); }
+    @media (prefers-color-scheme: dark) {
+      body { background: #1d2233; color: white; }
+    }
+  </style>
+</head>
+<body>
+  <header id="top" class="site-header">
+    <h1>TextMate <em>theme preview</em></h1>
+    <nav aria-label="Main navigation">
+      <a href="#example">Example &amp; details</a>
+      <a href="https://example.com" rel="noreferrer">Documentation</a>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Comments, attributes, entities, numbers, and nested elements. -->
+    <article id="example" class="card" data-active="true">
+      <h2>Hello, world! &#9733;</h2>
+      <p>A <strong>bold phrase</strong>, an <em>italic phrase</em>, and &lt;code&gt;.</p>
+      <pre><code>const theme = "TextMate";</code></pre>
+      <ul>
+        <li>Foreground and background colors</li>
+        <li>Comments, strings, tags, and punctuation</li>
+        <li>Selection, caret, indentation, and folding</li>
+      </ul>
+      <form action="/preview" method="get">
+        <label for="theme">Theme name</label>
+        <input id="theme" name="theme" value="TextMate" required>
+        <button type="submit" disabled>Preview only</button>
+      </form>
+    </article>
+  </main>
+
+  <!-- Embedded JavaScript exercises interpolation and function names. -->
+  <script type="module">
+    const title = document.querySelector("h1");
+    const numbers = [42, 3.14159, 0xff];
+    function describe(name = "TextMate") {
+      return `${name}: ${numbers.join(", ")}`;
+    }
+    console.log(describe(), title?.textContent);
+  </script>
+  <footer><small>&copy; Theme preview. This sample is not executed.</small></footer>
+</body>
+</html>

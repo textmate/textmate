@@ -1,0 +1,1288 @@
+#import <Cocoa/Cocoa.h>
+#import "appearance.h"
+#import "colors.h"
+#import "samples.h"
+#import "rule_matching.h"
+#import <mach-o/dyld.h>
+#import <OakSystem/application.h>
+#import <OakTextView/OakDocumentView.h>
+#import <Preferences/Keys.h>
+#import <bundles/load.h>
+#import <bundles/locations.h>
+#import <bundles/query.h>
+#import <document/OakDocument.h>
+#import <io/path.h>
+#import <ns/ns.h>
+#import <settings/settings.h>
+
+static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
+{
+	NSDictionary* dictionary = ns::to_dictionary(value);
+	return CFBridgingRelease(CFPropertyListCreateDeepCopy(kCFAllocatorDefault, (__bridge CFPropertyListRef)dictionary, kCFPropertyListMutableContainersAndLeaves));
+}
+
+// A short inspector should stay at the top of its scroll view.
+@interface ThemeInspectorStackView : NSStackView
+@end
+@implementation ThemeInspectorStackView
+- (BOOL)isFlipped { return YES; }
+@end
+
+// NSTextField changes its alignment insets when it becomes editable.
+@interface ThemeNameField : NSTextField
+@end
+@implementation ThemeNameField
+- (NSEdgeInsets)alignmentRectInsets { return NSEdgeInsetsZero; }
+@end
+
+@protocol ThemeListDelegate <NSTableViewDelegate>
+- (void)renameThemeAtRow:(NSInteger)row;
+- (NSMenu*)themeMenuForRow:(NSInteger)row;
+@end
+
+@interface ThemeListView : NSTableView
+@end
+@implementation ThemeListView
+- (NSMenu*)menuForEvent:(NSEvent*)event
+{
+	NSInteger row = [self rowAtPoint:[self convertPoint:event.locationInWindow fromView:nil]];
+	return [(id<ThemeListDelegate>)self.delegate themeMenuForRow:row];
+}
+
+- (void)mouseDown:(NSEvent*)event
+{
+	if((event.modifierFlags & NSEventModifierFlagDeviceIndependentFlagsMask) == NSEventModifierFlagCommand)
+	{
+		NSInteger row = [self rowAtPoint:[self convertPoint:event.locationInWindow fromView:nil]];
+		if(row >= 0)
+			[(id<ThemeListDelegate>)self.delegate renameThemeAtRow:row];
+		return;
+	}
+	[super mouseDown:event];
+}
+@end
+
+// OakDocumentView creates a placeholder document during initialization too.
+@interface ThemePreviewView : OakDocumentView
+@end
+@implementation ThemePreviewView
+- (void)setDocument:(OakDocument*)document
+{
+	document.disableLanguageServices = YES;
+	[super setDocument:document];
+}
+@end
+
+@interface ThemeEditorController : NSObject <NSApplicationDelegate, NSWindowDelegate, NSTableViewDataSource, ThemeListDelegate, NSTextFieldDelegate, OakTextViewDelegate, NSSplitViewDelegate>
+{
+	std::vector<bundles::item_ptr> _themes;
+	struct theme_row_t
+	{
+		NSString* title;
+		bundles::item_ptr item;
+	};
+	std::vector<theme_row_t> _themeRows;
+	BOOL _rebuildingThemes;
+	bundles::item_ptr _source;
+	oak::uuid_t _previewUUID;
+	NSMutableDictionary* _draft;
+	plist::dictionary_t _loadedTheme;
+	NSMutableDictionary<NSString*, NSData*>* _originalFiles;
+	NSWindow* _window;
+	NSTableView* _table;
+	NSButton* _saveButton;
+	NSButton* _revertButton;
+	NSStackView* _controls;
+	NSStackView* _fontControls;
+	NSStackView* _gutterControls;
+	OakDocumentView* _preview;
+	NSPopUpButton* _rules;
+	NSSegmentedControl* _appearance;
+	NSPopUpButton* _sampleLanguage;
+	NSTextField* _sampleStatus;
+	NSTextField* _inspectedScope;
+	NSMutableDictionary<NSString*, NSString*>* _sampleEdits;
+	NSString* _currentSample;
+	BOOL _previewShowInvisibles;
+	NSFont* _baseFont;
+	NSTextField* _scope;
+	NSMutableDictionary<NSString*, NSTextField*>* _fields;
+	NSMutableDictionary<NSString*, NSColorWell*>* _wells;
+	BOOL _dirty;
+	NSString* _renameOriginalName;
+	BOOL _renameWasDirty;
+	BOOL _newTheme;
+	NSInteger _activeRule;
+	NSMutableSet<NSString*>* _invalidFields;
+	NSInteger _selectedRow;
+}
+@end
+
+@implementation ThemeEditorController
+- (NSAlert*)themeAlert
+{
+	NSAlert* alert = [NSAlert new];
+	alert.icon = NSApp.applicationIconImage;
+	return alert;
+}
+
+- (NSButton*)button:(NSString*)title action:(SEL)action
+{
+	return [NSButton buttonWithTitle:title target:self action:action];
+}
+
+- (NSTextField*)field:(NSString*)label action:(SEL)action
+{
+	return [self field:label action:action inStack:_controls];
+}
+
+- (NSTextField*)field:(NSString*)label action:(SEL)action inStack:(NSStackView*)stack
+{
+	[stack addArrangedSubview:[NSTextField labelWithString:label]];
+	NSTextField* field = [NSTextField textFieldWithString:@""];
+	field.target = self;
+	field.action = action;
+	field.delegate = self;
+	field.continuous = NO;
+	field.accessibilityLabel = label;
+	[stack addArrangedSubview:field];
+	[field.widthAnchor constraintEqualToConstant:275].active = YES;
+	return field;
+}
+
+- (void)addColorControlForKey:(NSString*)key label:(NSString*)title inStack:(NSStackView*)stack
+{
+	NSColorWell* well = [[NSColorWell alloc] initWithFrame:NSMakeRect(0, 0, 40, 24)];
+	well.identifier = key;
+	well.accessibilityLabel = title;
+	well.target = self;
+	well.action = @selector(colorChanged:);
+	[well.widthAnchor constraintEqualToConstant:40].active = YES;
+	[well.heightAnchor constraintEqualToConstant:24].active = YES;
+	_wells[key] = well;
+
+	NSTextField* label = [NSTextField labelWithString:title];
+	label.font = [NSFont systemFontOfSize:NSFont.smallSystemFontSize];
+	label.lineBreakMode = NSLineBreakByTruncatingTail;
+	label.toolTip = title;
+	[label.widthAnchor constraintEqualToConstant:100].active = YES;
+
+	NSTextField* field = [NSTextField textFieldWithString:@""];
+	field.identifier = key;
+	field.accessibilityLabel = [title stringByAppendingString:@" hex color"];
+	field.placeholderString = @"#RRGGBB[AA]";
+	field.toolTip = @"Enter #RRGGBB or #RRGGBBAA. Leave blank to inherit the color.";
+	field.font = [NSFont monospacedSystemFontOfSize:12 weight:NSFontWeightRegular];
+	field.target = self;
+	field.action = @selector(settingChanged:);
+	field.delegate = self;
+	field.continuous = NO;
+	[field.widthAnchor constraintEqualToConstant:119].active = YES;
+	_fields[key] = field;
+
+	NSStackView* row = [NSStackView stackViewWithViews:@[ well, label, field ]];
+	row.alignment = NSLayoutAttributeCenterY;
+	row.spacing = 8;
+	[row.widthAnchor constraintEqualToConstant:275].active = YES;
+	[stack addArrangedSubview:row];
+}
+
+- (void)applicationDidFinishLaunching:(NSNotification*)notification
+{
+	// Direct CLI launches can retain a cached generic Dock/app-switcher icon.
+	if(NSURL* iconURL = [NSBundle.mainBundle URLForResource:@"ThemeEditor" withExtension:@"icns"])
+	{
+		if(NSImage* icon = [[NSImage alloc] initWithContentsOfURL:iconURL])
+			NSApp.applicationIconImage = icon;
+	}
+	_previewUUID.generate();
+	_selectedRow = -1;
+	std::vector<std::string> paths;
+	for(auto const& location : bundles::locations())
+		paths.push_back(path::join(location, "Bundles"));
+	plist::cache_t cache;
+	auto index = create_bundle_index(paths, cache);
+	bundles::set_index(index.first, index.second);
+	_themes = bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeTheme);
+	std::sort(_themes.begin(), _themes.end(), [](auto const& lhs, auto const& rhs) { return [to_ns(lhs->name()) localizedCaseInsensitiveCompare:to_ns(rhs->name())] == NSOrderedAscending; });
+
+	[self rebuildThemesSelecting:bundles::item_ptr()];
+
+	_window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 1280, 800) styleMask:NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskMiniaturizable|NSWindowStyleMaskResizable backing:NSBackingStoreBuffered defer:NO];
+	_window.title = @"Theme Editor";
+	_window.minSize = NSMakeSize(1000, 600);
+	_window.delegate = self;
+	[_window setFrameAutosaveName:@"ThemeEditorWindow"];
+	NSSplitView* split = [[NSSplitView alloc] initWithFrame:_window.contentView.bounds];
+	split.vertical = YES;
+	split.delegate = self;
+	split.dividerStyle = NSSplitViewDividerStyleThin;
+	split.autoresizingMask = NSViewWidthSizable|NSViewHeightSizable;
+	_window.contentView = split;
+
+	NSView* sidebar = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 230, 800)];
+	NSScrollView* themeScroll = [[NSScrollView alloc] initWithFrame:NSMakeRect(0, 48, 230, 752)];
+	themeScroll.autoresizingMask = NSViewWidthSizable|NSViewHeightSizable;
+	themeScroll.hasVerticalScroller = YES;
+	_table = [[ThemeListView alloc] initWithFrame:themeScroll.bounds];
+	NSTableColumn* column = [[NSTableColumn alloc] initWithIdentifier:@"theme"];
+	column.title = @"Installed themes";
+	column.width = 230;
+	[_table addTableColumn:column];
+	_table.dataSource = self;
+
+	_table.allowsEmptySelection = NO;
+	_table.floatsGroupRows = NO;
+	_table.accessibilityLabel = @"Installed TextMate themes";
+	themeScroll.documentView = _table;
+	[sidebar addSubview:themeScroll];
+	NSButton* newTheme = [self button:@"" action:@selector(newTheme:)];
+	newTheme.image = [NSImage imageWithSystemSymbolName:@"plus" accessibilityDescription:nil];
+	newTheme.accessibilityLabel = @"New theme";
+	newTheme.toolTip = @"Create a new theme.";
+	newTheme.frame = NSMakeRect(12, 10, 32, 30);
+	[sidebar addSubview:newTheme];
+	[split addSubview:sidebar];
+
+	NSView* inspectorPane = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 320, 800)];
+	NSScrollView* inspector = [NSScrollView new];
+	inspector.translatesAutoresizingMaskIntoConstraints = NO;
+	inspector.hasVerticalScroller = YES;
+	[inspectorPane addSubview:inspector];
+	_controls = [ThemeInspectorStackView new];
+	_controls.orientation = NSUserInterfaceLayoutOrientationVertical;
+	_controls.alignment = NSLayoutAttributeLeading;
+	_controls.spacing = 6;
+	_controls.detachesHiddenViews = YES;
+	_controls.edgeInsets = NSEdgeInsetsMake(12, 12, 12, 12);
+	inspector.documentView = _controls;
+	_controls.translatesAutoresizingMaskIntoConstraints = NO;
+	[_controls.widthAnchor constraintEqualToAnchor:inspector.contentView.widthAnchor].active = YES;
+	[_controls addArrangedSubview:[NSTextField labelWithString:@"Appearance"]];
+	_appearance = [NSSegmentedControl segmentedControlWithLabels:@[ @"Light", @"Dark", @"Unspecified" ] trackingMode:NSSegmentSwitchTrackingSelectOne target:self action:@selector(appearanceChanged:)];
+	_appearance.segmentDistribution = NSSegmentDistributionFillEqually;
+	[_appearance setToolTip:@"Available for either light or dark appearance." forSegment:2];
+	_appearance.accessibilityLabel = @"Theme appearance";
+	[_appearance.widthAnchor constraintEqualToConstant:275].active = YES;
+	[_controls addArrangedSubview:_appearance];
+	[_controls addArrangedSubview:[NSTextField labelWithString:@"Style rule"]];
+	_rules = [[NSPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:NO];
+	_rules.target = self;
+	_rules.action = @selector(ruleSelected:);
+	[_rules.widthAnchor constraintEqualToConstant:275].active = YES;
+	[_controls addArrangedSubview:_rules];
+	_inspectedScope = [NSTextField wrappingLabelWithString:@"Command-click preview text to select its style rule."];
+	_inspectedScope.font = [NSFont systemFontOfSize:NSFont.smallSystemFontSize];
+	_inspectedScope.textColor = NSColor.secondaryLabelColor;
+	_inspectedScope.accessibilityLabel = @"Inspected syntax scope";
+	[_inspectedScope.widthAnchor constraintEqualToConstant:275].active = YES;
+	[_controls addArrangedSubview:_inspectedScope];
+	[_controls addArrangedSubview:[NSStackView stackViewWithViews:@[ [self button:@"Add rule" action:@selector(addRule:)], [self button:@"Remove rule" action:@selector(removeRule:)] ]]];
+	_scope = [self field:@"Scope selector (blank applies globally)" action:@selector(ruleMetadataChanged:)];
+	_fields = [NSMutableDictionary dictionary];
+	_invalidFields = [NSMutableSet set];
+	_wells = [NSMutableDictionary dictionary];
+	for(NSArray<NSString*>* color in @[ @[ @"foreground", @"Foreground" ], @[ @"background", @"Background" ], @[ @"caret", @"Caret" ], @[ @"selection", @"Selection" ], @[ @"invisibles", @"Invisibles" ] ])
+		[self addColorControlForKey:color[0] label:color[1] inStack:_controls];
+	[_controls setCustomSpacing:18 afterView:_controls.arrangedSubviews.lastObject];
+	NSButton* fontDisclosure = [self button:@"Font settings" action:@selector(toggleFontControls:)];
+	[fontDisclosure setButtonType:NSButtonTypeOnOff];
+	fontDisclosure.bordered = NO;
+	fontDisclosure.imagePosition = NSImageLeft;
+	fontDisclosure.image = [NSImage imageWithSystemSymbolName:@"chevron.right" accessibilityDescription:nil];
+	fontDisclosure.alternateImage = [NSImage imageWithSystemSymbolName:@"chevron.down" accessibilityDescription:nil];
+	fontDisclosure.alternateTitle = fontDisclosure.title;
+	fontDisclosure.accessibilityLabel = @"Font settings";
+	fontDisclosure.toolTip = @"Show or hide font settings for the selected style rule.";
+	[_controls addArrangedSubview:fontDisclosure];
+	_fontControls = [NSStackView new];
+	_fontControls.orientation = NSUserInterfaceLayoutOrientationVertical;
+	_fontControls.alignment = NSLayoutAttributeLeading;
+	_fontControls.spacing = 6;
+	[_controls addArrangedSubview:_fontControls];
+	_fontControls.hidden = YES;
+	for(NSString* key in @[ @"fontName", @"fontSize", @"fontStyle" ])
+	{
+		NSTextField* field = [self field:key action:@selector(settingChanged:) inStack:_fontControls];
+		field.identifier = key;
+		_fields[key] = field;
+	}
+	_fields[@"fontName"].placeholderString = @"PostScript name, e.g. Menlo-Regular";
+	_fields[@"fontSize"].placeholderString = @"e.g. 13";
+	_fields[@"fontStyle"].placeholderString = @"plain, bold, italic, underline, strikethrough";
+	[_fontControls addArrangedSubview:[self button:@"Choose Font…" action:@selector(chooseFont:)]];
+	[_controls setCustomSpacing:18 afterView:_controls.arrangedSubviews.lastObject];
+	NSButton* gutterDisclosure = [self button:@"Gutter colors" action:@selector(toggleGutterControls:)];
+	[gutterDisclosure setButtonType:NSButtonTypeOnOff];
+	gutterDisclosure.bordered = NO;
+	gutterDisclosure.imagePosition = NSImageLeft;
+	gutterDisclosure.image = [NSImage imageWithSystemSymbolName:@"chevron.right" accessibilityDescription:nil];
+	gutterDisclosure.alternateImage = [NSImage imageWithSystemSymbolName:@"chevron.down" accessibilityDescription:nil];
+	gutterDisclosure.alternateTitle = gutterDisclosure.title;
+	gutterDisclosure.accessibilityLabel = @"Gutter colors";
+	gutterDisclosure.toolTip = @"Show or hide colors for line numbers and the editor margin.";
+	[_controls addArrangedSubview:gutterDisclosure];
+	_gutterControls = [NSStackView new];
+	_gutterControls.orientation = NSUserInterfaceLayoutOrientationVertical;
+	_gutterControls.alignment = NSLayoutAttributeLeading;
+	_gutterControls.spacing = 4;
+	NSTextField* gutterHint = [NSTextField wrappingLabelWithString:@"Line numbers and the editor margin. Applies to every style rule."];
+	gutterHint.font = [NSFont systemFontOfSize:NSFont.smallSystemFontSize];
+	gutterHint.textColor = NSColor.secondaryLabelColor;
+	[gutterHint.widthAnchor constraintEqualToConstant:275].active = YES;
+	[_gutterControls addArrangedSubview:gutterHint];
+	[_controls addArrangedSubview:_gutterControls];
+	_gutterControls.hidden = YES;
+	for(NSArray<NSString*>* color in @[ @[ @"foreground", @"Line numbers" ], @[ @"background", @"Background" ], @[ @"divider", @"Divider" ], @[ @"selectionForeground", @"Selected numbers" ], @[ @"selectionBackground", @"Selected background" ] ])
+		[self addColorControlForKey:[@"gutter." stringByAppendingString:color[0]] label:color[1] inStack:_gutterControls];
+	// Keep actions outside the scrolling form so they remain visible at any height.
+	NSView* footer = [NSView new];
+	footer.identifier = @"theme-actions";
+	footer.translatesAutoresizingMaskIntoConstraints = NO;
+	[inspectorPane addSubview:footer];
+	NSBox* separator = [NSBox new];
+	separator.boxType = NSBoxSeparator;
+	separator.translatesAutoresizingMaskIntoConstraints = NO;
+	[footer addSubview:separator];
+	_saveButton = [self button:@"Save" action:@selector(saveTheme:)];
+	_revertButton = [self button:@"Revert" action:@selector(revertTheme:)];
+	_saveButton.enabled = _revertButton.enabled = NO;
+	NSStackView* actions = [NSStackView stackViewWithViews:@[ _saveButton, _revertButton ]];
+	actions.spacing = 8;
+	actions.translatesAutoresizingMaskIntoConstraints = NO;
+	[footer addSubview:actions];
+	[NSLayoutConstraint activateConstraints:@[
+		[inspector.leadingAnchor constraintEqualToAnchor:inspectorPane.leadingAnchor],
+		[inspector.trailingAnchor constraintEqualToAnchor:inspectorPane.trailingAnchor],
+		[inspector.topAnchor constraintEqualToAnchor:inspectorPane.topAnchor],
+		[inspector.bottomAnchor constraintEqualToAnchor:footer.topAnchor],
+		[footer.leadingAnchor constraintEqualToAnchor:inspectorPane.leadingAnchor],
+		[footer.trailingAnchor constraintEqualToAnchor:inspectorPane.trailingAnchor],
+		[footer.bottomAnchor constraintEqualToAnchor:inspectorPane.bottomAnchor],
+		[footer.heightAnchor constraintEqualToConstant:52],
+		[actions.leadingAnchor constraintEqualToAnchor:footer.leadingAnchor constant:12],
+		[actions.centerYAnchor constraintEqualToAnchor:footer.centerYAnchor],
+		[separator.leadingAnchor constraintEqualToAnchor:footer.leadingAnchor],
+		[separator.trailingAnchor constraintEqualToAnchor:footer.trailingAnchor],
+		[separator.topAnchor constraintEqualToAnchor:footer.topAnchor],
+		[separator.heightAnchor constraintEqualToConstant:1],
+	]];
+	[split addSubview:inspectorPane];
+
+	_preview = [[ThemePreviewView alloc] initWithFrame:NSMakeRect(0, 0, 730, 800)];
+	_preview.showsLineNumbers = YES;
+	_preview.accessibilityLabel = @"Live TextMate preview";
+	_preview.textView.delegate = self;
+	_sampleEdits = [NSMutableDictionary dictionary];
+	_sampleLanguage = [[NSPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:NO];
+	_sampleLanguage.accessibilityLabel = @"Sample language";
+	_sampleLanguage.target = self;
+	_sampleLanguage.action = @selector(sampleLanguageChanged:);
+	[_sampleLanguage.widthAnchor constraintEqualToConstant:180].active = YES;
+	for(auto const& sample : theme_editor::samples())
+		[_sampleLanguage addItemWithTitle:to_ns(sample.name)];
+	NSString* remembered = [NSUserDefaults.standardUserDefaults stringForKey:@"ThemeEditorSampleLanguage"];
+	NSInteger initialSample = 0;
+	for(size_t index = 0; index < theme_editor::samples().size(); ++index)
+		if([remembered isEqualToString:to_ns(theme_editor::samples()[index].file)])
+			initialSample = index;
+	[_sampleLanguage selectItemAtIndex:initialSample];
+	NSButton* invisibles = [NSButton checkboxWithTitle:@"Invisibles" target:self action:@selector(togglePreviewInvisibles:)];
+	NSStackView* sampleActions = [NSStackView stackViewWithViews:@[
+		_sampleLanguage, [self button:@"Reset Sample" action:@selector(resetSample:)], invisibles
+	]];
+	sampleActions.spacing = 8;
+	_sampleStatus = [NSTextField wrappingLabelWithString:@""];
+	_sampleStatus.font = [NSFont systemFontOfSize:NSFont.smallSystemFontSize];
+	_sampleStatus.textColor = NSColor.secondaryLabelColor;
+	_sampleStatus.accessibilityLabel = @"Sample highlighting status";
+	NSStackView* sampleBar = [NSStackView stackViewWithViews:@[ sampleActions, _sampleStatus ]];
+	sampleBar.orientation = NSUserInterfaceLayoutOrientationVertical;
+	sampleBar.alignment = NSLayoutAttributeLeading;
+	sampleBar.spacing = 6;
+	sampleBar.edgeInsets = NSEdgeInsetsMake(10, 12, 10, 12);
+	[_sampleStatus.widthAnchor constraintEqualToAnchor:sampleBar.widthAnchor constant:-24].active = YES;
+	[_preview addAuxiliaryView:sampleBar atEdge:NSMaxYEdge];
+	[self displaySampleReset:NO];
+	[split addSubview:_preview];
+	// Keep the navigation and controls at their chosen widths as the window grows.
+	[split setHoldingPriority:480 forSubviewAtIndex:0];
+	[split setHoldingPriority:480 forSubviewAtIndex:1];
+	[split setHoldingPriority:NSLayoutPriorityDefaultLow forSubviewAtIndex:2];
+	[split adjustSubviews];
+	[split setPosition:230 ofDividerAtIndex:0];
+	[split setPosition:230 + split.dividerThickness + 320 ofDividerAtIndex:1];
+	[self createMenu];
+	_table.delegate = self;
+	if(!_themes.empty())
+	{
+		_source = _themes.front();
+		[self loadSource];
+	}
+	else
+		[self newTheme:nil];
+	[_window center];
+	[_window makeKeyAndOrderFront:nil];
+	[_controls layoutSubtreeIfNeeded];
+	[_controls scrollPoint:NSZeroPoint];
+	[NSApp activateIgnoringOtherApps:YES];
+}
+
+- (CGFloat)splitView:(NSSplitView*)splitView constrainMinCoordinate:(CGFloat)position ofSubviewAt:(NSInteger)divider
+{
+	CGFloat minimum = divider == 0 ? NSMinX(splitView.bounds) + 160 : NSMinX(splitView.subviews[1].frame) + 320;
+	return std::max(position, minimum);
+}
+
+- (CGFloat)splitView:(NSSplitView*)splitView constrainMaxCoordinate:(CGFloat)position ofSubviewAt:(NSInteger)divider
+{
+	CGFloat maximum = divider == 0 ? NSMaxX(splitView.subviews[1].frame) - splitView.dividerThickness - 320 : NSMaxX(splitView.bounds) - splitView.dividerThickness - 360;
+	return std::min(position, maximum);
+}
+
+- (void)splitView:(NSSplitView*)splitView resizeSubviewsWithOldSize:(NSSize)oldSize
+{
+	if(splitView.subviews.count != 3)
+	{
+		[splitView adjustSubviews];
+		return;
+	}
+	// Preserve chosen widths while they fit; shrink them safely in smaller windows.
+	CGFloat available = NSWidth(splitView.bounds) - 2 * splitView.dividerThickness;
+	CGFloat sidebar = std::clamp(NSWidth(splitView.subviews[0].frame), CGFloat(160), std::max(CGFloat(160), available - 320 - 360));
+	CGFloat inspector = std::clamp(NSWidth(splitView.subviews[1].frame), CGFloat(320), std::max(CGFloat(320), available - sidebar - 360));
+	CGFloat widths[] = { sidebar, inspector, available - sidebar - inspector };
+	CGFloat x = NSMinX(splitView.bounds);
+	for(size_t index = 0; index < 3; ++index)
+	{
+		splitView.subviews[index].frame = NSMakeRect(x, NSMinY(splitView.bounds), widths[index], NSHeight(splitView.bounds));
+		x += widths[index] + splitView.dividerThickness;
+	}
+}
+
+- (void)toggleFontControls:(NSButton*)sender
+{
+	if(sender.state == NSControlStateValueOff)
+	{
+		for(NSString* key in _invalidFields)
+		{
+			if([key hasPrefix:@"font"])
+			{
+				sender.state = NSControlStateValueOn;
+				NSBeep();
+				return;
+			}
+		}
+	}
+	_fontControls.hidden = sender.state != NSControlStateValueOn;
+}
+
+- (void)toggleGutterControls:(NSButton*)sender
+{
+	if(sender.state == NSControlStateValueOff)
+	{
+		for(NSString* key in _invalidFields)
+		{
+			if([key hasPrefix:@"gutter."])
+			{
+				sender.state = NSControlStateValueOn;
+				NSBeep();
+				return;
+			}
+		}
+	}
+	_gutterControls.hidden = sender.state != NSControlStateValueOn;
+}
+
+- (void)displaySampleReset:(BOOL)reset
+{
+	auto const& sample = theme_editor::samples()[_sampleLanguage.indexOfSelectedItem];
+	NSString* file = to_ns(sample.file);
+	if(_currentSample && _preview.document)
+		_sampleEdits[_currentSample] = _preview.document.content;
+	if(reset)
+		[_sampleEdits removeObjectForKey:file];
+	NSError* error;
+	NSString* content = _sampleEdits[file];
+	if(!content)
+	{
+		NSURL* url = [NSBundle.mainBundle URLForResource:file withExtension:nil subdirectory:@"Samples"];
+		content = url ? [NSString stringWithContentsOfURL:url encoding:NSUTF8StringEncoding error:&error] : nil;
+	}
+	if(!content)
+	{
+		_sampleStatus.stringValue = @"The sample could not be loaded. Rebuild or reinstall Theme Editor.";
+		return;
+	}
+
+	std::string scope = "text.plain";
+	for(auto const& candidate : sample.scopes)
+	{
+		if(!bundles::query(bundles::kFieldGrammarScope, candidate, scope::wildcard, bundles::kItemTypeGrammar).empty())
+		{
+			scope = candidate;
+			break;
+		}
+	}
+	OakDocument* document = [OakDocument documentWithString:content fileType:to_ns(scope) customName:file];
+	document.virtualPath = file;
+	document.recentTrackingDisabled = YES;
+	document.keepBackupFile = NO;
+	// Set the type after inserting the content; first-line sniffing may change it.
+	document.fileType = to_ns(scope);
+	_preview.document = document;
+	_preview.textView.showInvisibles = _previewShowInvisibles;
+	_baseFont = _preview.textView.font;
+	_currentSample = file;
+	[NSUserDefaults.standardUserDefaults setObject:file forKey:@"ThemeEditorSampleLanguage"];
+	_inspectedScope.stringValue = @"Command-click preview text to select its style rule.";
+	_sampleStatus.stringValue = scope == "text.plain"
+		? [NSString stringWithFormat:@"Install the %@ language bundle in TextMate for syntax highlighting. Showing plain text.", to_ns(sample.name)]
+		: @"Command-click text to select its style rule. Sample edits stay in this preview.";
+	if(_draft)
+		[self changed:_dirty];
+}
+
+- (void)sampleLanguageChanged:(id)sender { [self displaySampleReset:NO]; }
+- (void)resetSample:(id)sender { [self displaySampleReset:YES]; }
+- (void)togglePreviewInvisibles:(NSButton*)sender
+{
+	_previewShowInvisibles = sender.state == NSControlStateValueOn;
+	_preview.textView.showInvisibles = _previewShowInvisibles;
+}
+
+- (void)createMenu
+{
+	NSMenu* menu = [NSMenu new];
+	NSMenuItem* app = [NSMenuItem new];
+	app.submenu = [NSMenu new];
+	[app.submenu addItemWithTitle:@"Quit Theme Editor" action:@selector(terminate:) keyEquivalent:@"q"];
+	[menu addItem:app];
+	NSMenuItem* file = [NSMenuItem new];
+	file.title = @"File";
+	file.submenu = [[NSMenu alloc] initWithTitle:@"File"];
+	for(NSArray* entry in @[ @[ @"New Theme", NSStringFromSelector(@selector(newTheme:)), @"n" ], @[ @"Save Theme", NSStringFromSelector(@selector(saveTheme:)), @"s" ] ])
+	{
+		NSMenuItem* item = [file.submenu addItemWithTitle:entry[0] action:NSSelectorFromString(entry[1]) keyEquivalent:entry[2]];
+		item.target = self;
+	}
+	[menu addItem:file];
+	NSMenuItem* edit = [NSMenuItem new];
+	edit.title = @"Edit";
+	edit.submenu = [[NSMenu alloc] initWithTitle:@"Edit"];
+	[edit.submenu addItemWithTitle:@"Undo" action:@selector(undo:) keyEquivalent:@"z"];
+	[edit.submenu addItemWithTitle:@"Cut" action:@selector(cut:) keyEquivalent:@"x"];
+	[edit.submenu addItemWithTitle:@"Copy" action:@selector(copy:) keyEquivalent:@"c"];
+	[edit.submenu addItemWithTitle:@"Paste" action:@selector(paste:) keyEquivalent:@"v"];
+	[edit.submenu addItemWithTitle:@"Select All" action:@selector(selectAll:) keyEquivalent:@"a"];
+	[menu addItem:edit];
+	NSApp.mainMenu = menu;
+}
+
+- (void)rebuildThemesSelecting:(bundles::item_ptr)itemToSelect
+{
+	_rebuildingThemes = YES;
+	std::sort(_themes.begin(), _themes.end(), [](auto const& lhs, auto const& rhs) { return [to_ns(lhs->name()) localizedCaseInsensitiveCompare:to_ns(rhs->name())] == NSOrderedAscending; });
+	_themeRows.clear();
+	_selectedRow = -1;
+	for(auto category : { theme_editor::light, theme_editor::dark, theme_editor::unspecified })
+	{
+		NSString* heading = category == theme_editor::light ? @"Light" : category == theme_editor::dark ? @"Dark" : @"Unspecified";
+		_themeRows.push_back({ heading, bundles::item_ptr() });
+		for(auto const& item : _themes)
+		{
+			auto appearance = item == _source && _draft ? theme_editor::appearance(plist::convert((__bridge CFPropertyListRef)_draft)) : theme_editor::appearance(item->value_for_field(bundles::kFieldSemanticClass));
+			if(appearance != category)
+				continue;
+			if(itemToSelect && item->uuid() == itemToSelect->uuid())
+				_selectedRow = _themeRows.size();
+			NSString* title = item == _source && _draft ? _draft[@"name"] : to_ns(item->name());
+			_themeRows.push_back({ [title stringByAppendingString:item->paths().empty() ? @" (unsaved)" : @""], item });
+		}
+	}
+	[_table reloadData];
+	if(_selectedRow >= 0)
+	{
+		[_table selectRowIndexes:[NSIndexSet indexSetWithIndex:_selectedRow] byExtendingSelection:NO];
+		[_table scrollRowToVisible:_selectedRow];
+	}
+	_rebuildingThemes = NO;
+}
+
+- (NSInteger)numberOfRowsInTableView:(NSTableView*)tableView { return _themeRows.size(); }
+- (BOOL)tableView:(NSTableView*)tableView isGroupRow:(NSInteger)row { return !_themeRows[row].item; }
+- (NSView*)tableView:(NSTableView*)tableView viewForTableColumn:(NSTableColumn*)column row:(NSInteger)row
+{
+	NSTableCellView* cell = [NSTableCellView new];
+	NSTextField* label = [ThemeNameField labelWithString:_themeRows[row].title];
+	label.font = _themeRows[row].item ? [NSFont systemFontOfSize:NSFont.systemFontSize] : [NSFont boldSystemFontOfSize:NSFont.smallSystemFontSize];
+	label.textColor = _themeRows[row].item ? NSColor.labelColor : NSColor.secondaryLabelColor;
+	label.lineBreakMode = NSLineBreakByTruncatingTail;
+	if(_themeRows[row].item)
+	{
+		label.identifier = @"theme-name";
+		label.toolTip = @"Command-click to rename this theme.";
+		label.delegate = self;
+		label.target = self;
+		label.action = @selector(finishRenamingTheme:);
+	}
+	label.translatesAutoresizingMaskIntoConstraints = NO;
+	[cell addSubview:label];
+	cell.textField = label;
+	[NSLayoutConstraint activateConstraints:@[
+		[label.leadingAnchor constraintEqualToAnchor:cell.leadingAnchor],
+		[label.trailingAnchor constraintEqualToAnchor:cell.trailingAnchor],
+		[label.centerYAnchor constraintEqualToAnchor:cell.centerYAnchor],
+		[label.heightAnchor constraintEqualToConstant:ceil(label.intrinsicContentSize.height)],
+	]];
+	return cell;
+}
+
+- (void)appearanceChanged:(id)sender
+{
+	auto value = plist::convert((__bridge CFPropertyListRef)_draft);
+	theme_editor::set_appearance(value, static_cast<theme_editor::appearance_t>(_appearance.selectedSegment));
+	_draft = MutableTheme(value);
+	[self changed:YES];
+	[self rebuildThemesSelecting:_source];
+}
+
+- (BOOL)confirmDiscard
+{
+	[_window makeFirstResponder:nil];
+	if(!_dirty)
+		return YES;
+	NSAlert* alert = [self themeAlert];
+	alert.messageText = @"Save changes to this theme?";
+	[alert addButtonWithTitle:@"Save"];
+	[alert addButtonWithTitle:@"Cancel"];
+	[alert addButtonWithTitle:@"Discard"];
+	NSModalResponse response = [alert runModal];
+	return response == NSAlertThirdButtonReturn || (response == NSAlertFirstButtonReturn && [self saveCurrentTheme]);
+}
+
+- (BOOL)tableView:(NSTableView*)tableView shouldSelectRow:(NSInteger)row
+{
+	if(!_themeRows[row].item)
+		return NO;
+	return _rebuildingThemes || row == _selectedRow || [self confirmDiscard];
+}
+
+- (void)tableViewSelectionDidChange:(NSNotification*)notification
+{
+	if(_rebuildingThemes)
+		return;
+	NSInteger row = _table.selectedRow;
+	if(row < 0 || row >= (NSInteger)_themeRows.size() || !_themeRows[row].item)
+		return;
+	_selectedRow = row;
+	if(_source && _source->uuid() == _themeRows[row].item->uuid())
+		return;
+	_source = _themeRows[row].item;
+	[self loadSource];
+}
+
+- (BOOL)selectThemeAtRow:(NSInteger)row
+{
+	if(row < 0 || row >= (NSInteger)_themeRows.size() || !_themeRows[row].item)
+		return NO;
+	if(row != _table.selectedRow)
+	{
+		auto uuid = _themeRows[row].item->uuid();
+		if(![self tableView:_table shouldSelectRow:row])
+			return NO;
+		// Saving the previous draft can change the sorted rows.
+		row = -1;
+		for(size_t index = 0; index < _themeRows.size(); ++index)
+		{
+			if(_themeRows[index].item && _themeRows[index].item->uuid() == uuid)
+			{
+				row = index;
+				break;
+			}
+		}
+		if(row < 0)
+			return NO;
+		[_table selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+	}
+	return YES;
+}
+
+- (void)renameThemeAtRow:(NSInteger)row
+{
+	if(![self selectThemeAtRow:row])
+		return;
+	row = _table.selectedRow;
+	[_table scrollRowToVisible:row];
+	NSTextField* label = ((NSTableCellView*)[_table viewAtColumn:0 row:row makeIfNecessary:YES]).textField;
+	if(label.currentEditor)
+	{
+		[label selectText:nil];
+		return;
+	}
+	_renameOriginalName = [_draft[@"name"] copy];
+	_renameWasDirty = _dirty;
+	label.stringValue = _draft[@"name"] ?: @"Untitled Theme";
+	label.editable = YES;
+	label.selectable = YES;
+	label.drawsBackground = YES;
+	label.backgroundColor = NSColor.textBackgroundColor;
+	label.textColor = NSColor.textColor;
+	[label selectText:nil];
+}
+
+- (void)finishRenamingTheme:(id)sender
+{
+	[_window makeFirstResponder:_table];
+}
+
+- (BOOL)control:(NSControl*)control textView:(NSTextView*)textView doCommandBySelector:(SEL)command
+{
+	if(![control.identifier isEqualToString:@"theme-name"] || command != @selector(cancelOperation:))
+		return NO;
+	if(_renameOriginalName)
+	{
+		textView.string = _renameOriginalName;
+		((NSTextField*)control).stringValue = _renameOriginalName;
+		[self nameChanged:control];
+		[self changed:_renameWasDirty];
+	}
+	[_window makeFirstResponder:_table];
+	return YES;
+}
+
+- (void)controlTextDidEndEditing:(NSNotification*)notification
+{
+	NSTextField* field = notification.object;
+	if(![field.identifier isEqualToString:@"theme-name"])
+		return;
+	[self nameChanged:field];
+	field.editable = NO;
+	field.selectable = NO;
+	field.bordered = NO;
+	field.drawsBackground = NO;
+	field.textColor = NSColor.labelColor;
+	NSInteger row = [_table rowForView:field];
+	if(row >= 0 && row < (NSInteger)_themeRows.size())
+		field.stringValue = _themeRows[row].title;
+	_renameOriginalName = nil;
+}
+
+- (void)loadSource
+{
+	[self loadSourceSelectingRule:0];
+}
+
+- (void)loadSourceSelectingRule:(NSInteger)selectedRule
+{
+	_draft = MutableTheme(_source->plist());
+	_newTheme = _source->paths().empty();
+	_originalFiles = [NSMutableDictionary dictionary];
+	for(auto const& path : _source->paths())
+	{
+		NSString* file = to_ns(path);
+		_originalFiles[file] = [NSData dataWithContentsOfFile:file] ?: [NSData data];
+	}
+	NSMutableArray* rules = _draft[@"settings"];
+	if(!rules)
+		_draft[@"settings"] = rules = [NSMutableArray array];
+	BOOL hasGlobal = NO;
+	for(NSDictionary* rule in rules)
+		hasGlobal |= ![rule[@"scope"] length];
+	if(!hasGlobal)
+		[rules insertObject:[@{ @"settings": [NSMutableDictionary dictionary] } mutableCopy] atIndex:0];
+	_loadedTheme = plist::convert((__bridge CFPropertyListRef)_draft);
+	_inspectedScope.stringValue = @"Command-click preview text to select its style rule.";
+	_appearance.selectedSegment = theme_editor::appearance(_source->plist());
+	[self reloadRules:std::clamp(selectedRule, NSInteger(0), NSInteger(rules.count) - 1)];
+	[self changed:NO];
+	[self rebuildThemesSelecting:_source];
+}
+
+- (BOOL)textView:(OakTextView*)textView inspectScope:(NSString*)scope
+{
+	[_window makeFirstResponder:textView];
+	if(_invalidFields.count)
+	{
+		_inspectedScope.stringValue = @"Correct the highlighted setting before selecting another style rule.";
+		NSBeep();
+		return YES;
+	}
+	auto value = plist::convert((__bridge CFPropertyListRef)_draft);
+	plist::array_t rules;
+	plist::get_key_path(value, "settings", rules);
+	if(auto match = theme_editor::matching_rule(rules, scope::scope_t(to_s(scope))))
+	{
+		[_rules selectItemAtIndex:*match];
+		[self ruleSelected:nil];
+		_inspectedScope.stringValue = [@"Scope: " stringByAppendingString:scope];
+		_inspectedScope.toolTip = scope;
+		[_rules scrollRectToVisible:_rules.bounds];
+	}
+	return YES;
+}
+
+- (NSMutableDictionary*)currentRule { return _draft[@"settings"][_rules.indexOfSelectedItem]; }
+- (void)reloadRules:(NSInteger)selected
+{
+	[_rules removeAllItems];
+	for(NSDictionary* rule in _draft[@"settings"])
+	{
+		NSString* title = [rule[@"scope"] length] ? (rule[@"name"] ?: rule[@"scope"]) : @"Global editor style";
+		// addItemWithTitle coalesces duplicate titles; preserve one entry per rule.
+		[_rules.menu addItem:[[NSMenuItem alloc] initWithTitle:title action:nil keyEquivalent:@""]];
+	}
+	[_rules selectItemAtIndex:selected];
+	[self ruleSelected:nil];
+}
+
+- (void)ruleSelected:(id)sender
+{
+	if(sender && _invalidFields.count)
+	{
+		[_rules selectItemAtIndex:_activeRule];
+		NSBeep();
+		return;
+	}
+	_activeRule = _rules.indexOfSelectedItem;
+	NSMutableDictionary* rule = [self currentRule];
+	_scope.stringValue = rule[@"scope"] ?: @"";
+	NSDictionary* settings = rule[@"settings"];
+	for(NSString* key in _fields)
+	{
+		_fields[key].textColor = NSColor.controlTextColor;
+		id value = [key hasPrefix:@"gutter."] ? _draft[@"gutterSettings"][[key substringFromIndex:7]] : settings[key];
+		_fields[key].stringValue = value ? [value description] : @"";
+		_wells[key].color = theme_editor::parse_color(_fields[key].stringValue, theme_editor::color_space(_draft)) ?: NSColor.clearColor;
+	}
+	[self updateInheritedGutterColors];
+}
+
+- (void)updateInheritedGutterColors
+{
+	if(theme_ptr theme = _preview.textView.theme)
+	{
+		auto const& gutter = theme->gutter_styles();
+		NSDictionary<NSString*, NSColor*>* colors = @{
+			@"gutter.foreground": [NSColor colorWithCGColor:gutter.foreground],
+			@"gutter.background": [NSColor colorWithCGColor:gutter.background],
+			@"gutter.divider": [NSColor colorWithCGColor:gutter.divider],
+			@"gutter.selectionForeground": [NSColor colorWithCGColor:gutter.selectionForeground],
+			@"gutter.selectionBackground": [NSColor colorWithCGColor:gutter.selectionBackground],
+		};
+		for(NSString* key in colors)
+		{
+			// An unset override inherits a visible color; it is not transparent.
+			if(!_fields[key].stringValue.length)
+				_wells[key].color = colors[key];
+		}
+	}
+}
+
+- (void)changed:(BOOL)dirty
+{
+	_dirty = dirty && (_newTheme || _invalidFields.count || plist::convert((__bridge CFPropertyListRef)_draft) != _loadedTheme);
+	_saveButton.enabled = _revertButton.enabled = _dirty;
+	if(!dirty)
+		[_invalidFields removeAllObjects];
+	_window.documentEdited = _dirty;
+	_window.title = [NSString stringWithFormat:@"%@ — Theme Editor", _draft[@"name"]];
+	NSString* fontName = _baseFont.fontName;
+	CGFloat fontSize = _baseFont.pointSize;
+	for(NSDictionary* rule in _draft[@"settings"])
+	{
+		if([rule[@"scope"] length])
+			continue;
+		NSDictionary* settings = rule[@"settings"];
+		fontName = settings[@"fontName"] ?: fontName;
+		if([settings[@"fontSize"] doubleValue] > 0)
+			fontSize = [settings[@"fontSize"] doubleValue];
+	}
+	_preview.textView.font = [NSFont fontWithName:fontName size:fontSize] ?: _baseFont;
+	// Use a private UUID and uncached styles so drafts cannot affect installed themes.
+	auto value = plist::convert((__bridge CFPropertyListRef)_draft);
+	value["uuid"] = to_s(_previewUUID);
+	auto item = std::make_shared<bundles::item_t>(_previewUUID, bundles::item_ptr(), bundles::kItemTypeTheme);
+	item->set_plist(value);
+	_preview.textView.theme = std::make_shared<theme_t>(item, NULL_STR, 12, false);
+	[self updateInheritedGutterColors];
+}
+
+- (void)controlTextDidChange:(NSNotification*)notification
+{
+	NSTextField* field = notification.object;
+	if([field.identifier isEqualToString:@"theme-name"])
+		[self updateThemeName:field.currentEditor.string ?: field.stringValue forField:field];
+	else if(field == _scope)
+		[self ruleMetadataChanged:field];
+	else
+		[self settingChanged:field];
+}
+
+- (void)nameChanged:(id)sender
+{
+	NSTextField* field = sender;
+	[self updateThemeName:field.stringValue forField:field];
+}
+
+- (void)updateThemeName:(NSString*)name forField:(NSTextField*)field
+{
+	NSInteger row = [_table rowForView:field];
+	if(row != _selectedRow || row < 0 || [_draft[@"name"] isEqualToString:name])
+		return;
+	_draft[@"name"] = [name copy];
+	_themeRows[row].title = [name stringByAppendingString:_newTheme ? @" (unsaved)" : @""];
+	[self changed:YES];
+}
+
+- (void)ruleMetadataChanged:(id)sender
+{
+	NSMutableDictionary* rule = [self currentRule];
+	rule[@"scope"] = _scope.stringValue;
+	[self reloadRules:_rules.indexOfSelectedItem];
+	[self changed:YES];
+}
+
+- (void)settingChanged:(NSTextField*)field
+{
+	NSString* key = field.identifier;
+	NSString* value = field.stringValue;
+	BOOL valid = YES;
+	if(value.length && _wells[key])
+		valid = theme_editor::parse_color(value, theme_editor::color_space(_draft)) != nil;
+	if(value.length && [key isEqualToString:@"fontSize"])
+		{
+		NSScanner* scanner = [NSScanner scannerWithString:value];
+		double size = 0;
+		valid = [scanner scanDouble:&size] && scanner.isAtEnd && size >= 4 && size <= 200;
+	}
+	if(value.length && [key isEqualToString:@"fontName"])
+		valid = [NSFont fontWithName:value size:12] != nil;
+	field.textColor = valid ? NSColor.controlTextColor : NSColor.systemRedColor;
+	if(!valid)
+	{
+		[_invalidFields addObject:key];
+		_dirty = YES;
+		_saveButton.enabled = _revertButton.enabled = YES;
+		_window.documentEdited = YES;
+		return;
+	}
+	[_invalidFields removeObject:key];
+	NSMutableDictionary* rule = [key hasPrefix:@"gutter."] ? _draft : [self currentRule];
+	NSString* settingsKey = [key hasPrefix:@"gutter."] ? @"gutterSettings" : @"settings";
+	NSString* valueKey = [key hasPrefix:@"gutter."] ? [key substringFromIndex:7] : key;
+	NSMutableDictionary* settings = rule[settingsKey];
+	if(!settings)
+		rule[settingsKey] = settings = [NSMutableDictionary dictionary];
+	if(value.length)
+		settings[valueKey] = value;
+	else
+		[settings removeObjectForKey:valueKey];
+	if(NSColor* color = theme_editor::parse_color(value, theme_editor::color_space(_draft)))
+		_wells[key].color = color;
+	[self changed:YES];
+}
+
+- (void)colorChanged:(NSColorWell*)well
+{
+	NSString* value = theme_editor::color_string(well.color, theme_editor::color_space(_draft));
+	if(!value)
+		return;
+	_fields[well.identifier].stringValue = value;
+	[self settingChanged:_fields[well.identifier]];
+}
+
+- (void)chooseFont:(id)sender
+{
+	NSFontManager* manager = NSFontManager.sharedFontManager;
+	manager.target = self;
+	[manager setSelectedFont:_preview.textView.font isMultiple:NO];
+	[manager orderFrontFontPanel:sender];
+}
+
+- (void)changeFont:(NSFontManager*)sender
+{
+	NSFont* font = [sender convertFont:_preview.textView.font];
+	_fields[@"fontName"].stringValue = font.fontName;
+	_fields[@"fontSize"].stringValue = [NSString stringWithFormat:@"%g", font.pointSize];
+	[self settingChanged:_fields[@"fontName"]];
+	[self settingChanged:_fields[@"fontSize"]];
+}
+
+- (void)addRule:(id)sender
+{
+	if(_invalidFields.count) { NSBeep(); return; }
+	NSAlert* alert = [self themeAlert];
+	alert.messageText = @"Add a style rule";
+	alert.informativeText = @"Enter a name for the new rule. You can set its scope and appearance in the middle pane.";
+	[alert addButtonWithTitle:@"Add rule"];
+	[alert addButtonWithTitle:@"Cancel"];
+	NSTextField* name = [NSTextField textFieldWithString:@"New rule"];
+	name.frame = NSMakeRect(0, 0, 300, 24);
+	name.identifier = @"new-rule-name";
+	name.accessibilityLabel = @"Rule name";
+	alert.accessoryView = name;
+	alert.window.initialFirstResponder = name;
+	NSString* title;
+	while(YES)
+	{
+		[name selectText:nil];
+		if([alert runModal] != NSAlertFirstButtonReturn)
+			return;
+		[alert.window makeFirstResponder:nil];
+		title = [name.stringValue stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
+		if(title.length)
+			break;
+		alert.informativeText = @"Enter a rule name before adding the rule.";
+	}
+	[_draft[@"settings"] addObject:[@{ @"name": title, @"scope": @"comment", @"settings": [NSMutableDictionary dictionary] } mutableCopy]];
+	[self reloadRules:[_draft[@"settings"] count] - 1];
+	[self changed:YES];
+}
+
+- (void)removeRule:(id)sender
+{
+	if(_invalidFields.count) { NSBeep(); return; }
+	NSMutableArray* rules = _draft[@"settings"];
+	if(rules.count <= 1)
+		return;
+	NSAlert* alert = [self themeAlert];
+	alert.alertStyle = NSAlertStyleWarning;
+	alert.messageText = [NSString stringWithFormat:@"Remove the “%@” rule?", _rules.titleOfSelectedItem];
+	alert.informativeText = @"This removes the rule from the theme draft. Save the theme to apply the change.";
+	[alert addButtonWithTitle:@"Cancel"];
+	[alert addButtonWithTitle:@"Remove"];
+	if([alert runModal] != NSAlertSecondButtonReturn)
+		return;
+	[rules removeObjectAtIndex:_rules.indexOfSelectedItem];
+	[self reloadRules:0];
+	[self changed:YES];
+}
+
+- (void)createThemeDuplicating:(BOOL)duplicate
+{
+	if(![self confirmDiscard])
+		return;
+	plist::dictionary_t value;
+	if(duplicate && _source)
+		value = _source->plist();
+	else
+		value = plist::dictionary_t{ { "settings", plist::array_t{ plist::dictionary_t{ { "settings", plist::dictionary_t{ { "foreground", "#202020" }, { "background", "#FFFFFF" }, { "caret", "#202020" }, { "selection", "#B5D5FF" } } } } } } };
+	oak::uuid_t uuid;
+	uuid.generate();
+	value["uuid"] = to_s(uuid);
+	if(!duplicate)
+		theme_editor::set_appearance(value, theme_editor::light);
+	value["name"] = duplicate ? to_s((NSString*)_draft[@"name"]) + " Copy" : "Untitled Theme";
+	// Each new theme gets its own local bundle; installed themes retain their bundle.
+	oak::uuid_t const bundleUUID = "1C514B9A-BA40-4E6C-A79B-E169CE2AF4D2";
+	auto bundle = bundles::lookup(bundleUUID);
+	if(!bundle)
+	{
+		bundle = std::make_shared<bundles::item_t>(bundleUUID, bundles::item_ptr(), bundles::kItemTypeBundle);
+		bundle->set_plist({ { "uuid", to_s(bundleUUID) }, { "name", "Theme Editor" } });
+	}
+	auto item = std::make_shared<bundles::item_t>(uuid, bundle, bundles::kItemTypeTheme);
+	item->set_plist(value);
+	_themes.push_back(item);
+	_dirty = NO;
+	_source = item;
+	[self loadSource];
+	[self changed:YES];
+}
+
+- (void)newTheme:(id)sender { [self createThemeDuplicating:NO]; }
+- (void)duplicateTheme:(id)sender { [self createThemeDuplicating:YES]; }
+
+- (NSMenu*)themeMenuForRow:(NSInteger)row
+{
+	if(row < 0 || row >= (NSInteger)_themeRows.size() || !_themeRows[row].item)
+		return nil;
+	NSMenu* menu = [NSMenu new];
+	for(NSArray<NSString*>* entry in @[ @[ @"Duplicate", NSStringFromSelector(@selector(duplicateThemeFromMenu:)) ], @[ @"Delete", NSStringFromSelector(@selector(deleteThemeFromMenu:)) ] ])
+	{
+		NSMenuItem* item = [menu addItemWithTitle:entry[0] action:NSSelectorFromString(entry[1]) keyEquivalent:@""];
+		item.target = self;
+		item.representedObject = to_ns(to_s(_themeRows[row].item->uuid()));
+	}
+	return menu;
+}
+
+- (BOOL)selectThemeForMenuItem:(NSMenuItem*)item
+{
+	for(size_t row = 0; row < _themeRows.size(); ++row)
+	{
+		if(_themeRows[row].item && [to_ns(to_s(_themeRows[row].item->uuid())) isEqual:item.representedObject])
+			return [self selectThemeAtRow:row];
+	}
+	return NO;
+}
+
+- (void)duplicateThemeFromMenu:(NSMenuItem*)item
+{
+	if([self selectThemeForMenuItem:item])
+		[self duplicateTheme:item];
+}
+
+- (void)deleteThemeFromMenu:(NSMenuItem*)item
+{
+	if(![self selectThemeForMenuItem:item])
+		return;
+	[_window makeFirstResponder:nil];
+	NSAlert* alert = [self themeAlert];
+	alert.alertStyle = NSAlertStyleWarning;
+	alert.messageText = [NSString stringWithFormat:@"Delete the theme “%@”?", _draft[@"name"]];
+	alert.informativeText = @"This removes the theme from TextMate. Any unsaved changes to this theme will be discarded.";
+	[alert addButtonWithTitle:@"Cancel"];
+	[alert addButtonWithTitle:@"Delete"];
+	if([alert runModal] != NSAlertSecondButtonReturn)
+		return;
+	auto deleted = _source;
+	auto original = deleted->plist();
+	if(!deleted->move_to_trash())
+	{
+		deleted->set_plist(original);
+		NSAlert* failure = [self themeAlert];
+		failure.messageText = @"The theme could not be deleted.";
+		failure.informativeText = @"Check that your TextMate bundle folder is writable. The theme remains selected.";
+		[failure runModal];
+		return;
+	}
+	bundles::remove_item(deleted);
+	auto position = std::find(_themes.begin(), _themes.end(), deleted);
+	size_t index = position - _themes.begin();
+	if(position != _themes.end())
+		_themes.erase(position);
+	_source.reset();
+	_draft = nil;
+	_dirty = NO;
+	if(_themes.empty())
+		[self createThemeDuplicating:NO];
+	else
+	{
+		_source = _themes[std::min(index, _themes.size() - 1)];
+		[self loadSource];
+	}
+}
+
+- (BOOL)saveCurrentTheme
+{
+	if(!_source)
+		return NO;
+	[_window makeFirstResponder:nil];
+	if(![[_draft[@"name"] description] stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet].length)
+	{
+		NSAlert* alert = [self themeAlert];
+		alert.messageText = @"Enter a theme name before saving.";
+		[alert runModal];
+		return NO;
+	}
+	for(NSString* key in _fields)
+	{
+		if([_invalidFields containsObject:key])
+		{
+			NSAlert* alert = [self themeAlert];
+			alert.messageText = @"Correct the highlighted setting before saving.";
+			[alert runModal];
+			return NO;
+		}
+	}
+	for(NSString* path in _originalFiles)
+	{
+		if(![[_originalFiles objectForKey:path] isEqual:[NSData dataWithContentsOfFile:path]])
+		{
+			NSAlert* alert = [self themeAlert];
+			alert.messageText = @"This theme changed on disk.";
+			alert.informativeText = @"Your draft has been kept. Reopen Theme Editor to load the latest version before saving.";
+			[alert runModal];
+			return NO;
+		}
+	}
+	// Detect local overrides created by another TextMate process after launch.
+	std::vector<std::string> paths;
+	for(auto const& location : bundles::locations())
+		paths.push_back(path::join(location, "Bundles"));
+	plist::cache_t cache;
+	auto current = create_bundle_index(paths, cache);
+	for(auto const& item : current.first)
+	{
+		if(item->uuid() == _source->uuid() && item->plist() != _source->plist())
+		{
+			NSAlert* alert = [self themeAlert];
+			alert.messageText = @"This theme changed in another editor.";
+			alert.informativeText = @"Your draft has been kept. Reopen Theme Editor to load the latest version.";
+			[alert runModal];
+			return NO;
+		}
+	}
+	NSInteger const selectedRule = _rules.indexOfSelectedItem;
+	auto original = _source->plist();
+	_source->set_plist(plist::convert((__bridge CFPropertyListRef)_draft));
+	if(!_source->save())
+	{
+		_source->set_plist(original);
+		NSAlert* alert = [self themeAlert];
+		alert.messageText = @"The theme could not be saved.";
+		alert.informativeText = @"Check that your TextMate bundle folder is writable. Your draft has been kept.";
+		[alert runModal];
+		return NO;
+	}
+	if(_newTheme)
+	{
+		if(!bundles::lookup(_source->bundle_uuid()))
+			bundles::add_item(_source->bundle());
+		bundles::add_item(_source);
+	}
+	// One guarded refresh retains the theme by UUID and the current style rule.
+	[self loadSourceSelectingRule:selectedRule];
+	return YES;
+}
+
+- (void)saveTheme:(id)sender { [_window makeFirstResponder:nil]; [self saveCurrentTheme]; }
+- (void)revertTheme:(id)sender { if([self confirmDiscard]) [self loadSource]; }
+- (BOOL)windowShouldClose:(NSWindow*)sender { if(![self confirmDiscard]) return NO; [NSApp terminate:nil]; return NO; }
+- (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication*)sender { return [self confirmDiscard] ? NSTerminateNow : NSTerminateCancel; }
+@end
+
+#ifndef THEME_EDITOR_TESTING
+int main (int argc, char const* argv[])
+{
+	@autoreleasepool
+	{
+		if(argc > 1)
+		{
+			fprintf(stdout, "Usage: tm-theme-editor\nOpens the native TextMate theme editor.\n");
+			return strcmp(argv[1], "--help") == 0 ? 0 : 1;
+		}
+		oak::application_t application(argc, argv);
+		oak::application_t::set_name("TextMate");
+		// Resolve symlinks so invocation through PATH still finds the containing app.
+		uint32_t length = 0;
+		_NSGetExecutablePath(nullptr, &length);
+		std::vector<char> executablePath(length);
+		_NSGetExecutablePath(executablePath.data(), &length);
+		NSString* executable = to_ns(path::resolve(executablePath.data()));
+		NSBundle* bundle = [NSBundle bundleWithPath:executable.stringByDeletingLastPathComponent.stringByDeletingLastPathComponent.stringByDeletingLastPathComponent];
+		NSBundle* containingBundle = [NSBundle bundleWithPath:bundle.bundlePath.stringByDeletingLastPathComponent.stringByDeletingLastPathComponent.stringByDeletingLastPathComponent];
+		if([containingBundle.bundleIdentifier hasPrefix:@"com.macromates.TextMate"])
+			bundle = containingBundle;
+		if(bundle.bundleIdentifier)
+			oak::application_t::set_path(to_s(bundle.bundlePath));
+		else
+			bundle = NSBundle.mainBundle;
+		if(bundle.bundleIdentifier && ![bundle.bundleIdentifier isEqualToString:NSBundle.mainBundle.bundleIdentifier])
+			[NSUserDefaults.standardUserDefaults addSuiteNamed:bundle.bundleIdentifier];
+		RegisterDefaults();
+		settings_t::set_global_settings_path(oak::application_t::support("Global.tmProperties"));
+		if(NSString* defaults = [bundle pathForResource:@"Default" ofType:@"tmProperties"])
+			settings_t::set_default_settings_path(to_s(defaults));
+		[NSApplication sharedApplication];
+		[NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
+		NSColorPanel.sharedColorPanel.showsAlpha = YES;
+		ThemeEditorController* controller = [ThemeEditorController new];
+		NSApp.delegate = controller;
+		[NSApp run];
+	}
+	return 0;
+}
+#endif

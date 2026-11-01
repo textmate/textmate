@@ -5,11 +5,14 @@
 #import <command/parser.h>
 #import <oak/debug.h>
 
+extern NSNotificationName const OakTextViewThemeDidChangeNotification;
+
 extern int32_t const NSWrapColumnWindowWidth;
 extern int32_t const NSWrapColumnAskUser;
 extern NSString* const kUserDefaultsWrapColumnPresetsKey;
 
 @class OakDocument;
+@class OakTextView;
 
 namespace bundles { struct item_t; typedef std::shared_ptr<item_t> item_ptr; }
 
@@ -25,6 +28,8 @@ enum OTVFontSmoothing : NSUInteger
 
 @protocol OakTextViewDelegate <NSObject>
 @optional
+// Return YES to consume a Command-click for scope inspection.
+- (BOOL)textView:(OakTextView*)textView inspectScope:(NSString*)scope;
 - (NSString*)scopeAttributes;
 - (std::map<std::string, std::string>)variables;
 @end

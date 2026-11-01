@@ -43,6 +43,7 @@
 
 @interface AppController (BundlesMenu)
 - (BOOL)validateThemeMenuItem:(NSMenuItem*)item;
+- (IBAction)openThemeEditor:(id)sender;
 @end
 
 void OakOpenDocuments (NSArray* paths, BOOL treatFilePackageAsFolder = NO);

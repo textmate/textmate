@@ -67,7 +67,7 @@ typedef std::shared_ptr<theme_t> theme_ptr;
 
 struct theme_t
 {
-	theme_t (bundles::item_ptr const& themeItem, std::string const& fontName = NULL_STR, CGFloat fontSize = 12);
+	theme_t (bundles::item_ptr const& themeItem, std::string const& fontName = NULL_STR, CGFloat fontSize = 12, bool shareStyles = true);
 
 	theme_ptr copy_with_font_name_and_size (std::string const& fontName, CGFloat fontSize);
 

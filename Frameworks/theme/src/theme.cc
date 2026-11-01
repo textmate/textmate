@@ -173,14 +173,20 @@ bool gutter_styles_t::is_transparent () const
 
 theme_ptr theme_t::copy_with_font_name_and_size (std::string const& fontName, CGFloat fontSize)
 {
-	if(_font_name == fontName && _font_size == fontSize)
-		return std::make_shared<theme_t>(*this);
-	return std::make_shared<theme_t>(this->_item, fontName, fontSize);
+	auto copy = std::make_shared<theme_t>(*this);
+	if(_font_name != fontName || _font_size != fontSize)
+	{
+		copy->_font_name = fontName;
+		copy->_font_size = fontSize;
+		copy->_cache.clear();
+	}
+	return copy;
 }
 
-theme_t::theme_t (bundles::item_ptr const& themeItem, std::string const& fontName, CGFloat fontSize) :_item(themeItem), _font_name(fontName), _font_size(fontSize)
+theme_t::theme_t (bundles::item_ptr const& themeItem, std::string const& fontName, CGFloat fontSize, bool shareStyles) :_item(themeItem), _font_name(fontName), _font_size(fontSize)
 {
-	_styles = find_shared_styles(themeItem);
+	// Draft previews must not reuse or replace the installed theme’s cached styles.
+	_styles = shareStyles ? find_shared_styles(themeItem) : std::make_shared<shared_styles_t>(themeItem);
 }
 
 static CGColorRef OakColorCreateCopySoften (CGColorPtr cgColor, CGFloat factor)

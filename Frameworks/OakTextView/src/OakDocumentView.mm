@@ -108,6 +108,7 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 		for(NSString* keyPath in self.observedKeys)
 			[_textView addObserver:self forKeyPath:keyPath options:NSKeyValueObservingOptionInitial context:NULL];
 
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(themeDidChange:) name:OakTextViewThemeDidChangeNotification object:_textView];
 		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(lspDiagnosticsDidChange:) name:LSPDiagnosticsDidChangeNotification object:nil];
 		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(lspServerStatusDidChange:) name:LSPServerStatusDidChangeNotification object:nil];
 		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(lspShowMessage:) name:LSPShowMessageNotification object:nil];
@@ -357,6 +358,11 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 	}
 }
 
+- (void)themeDidChange:(NSNotification*)notification
+{
+	[self updateStyle];
+}
+
 - (void)updateStyle
 {
 	if(theme_ptr theme = _textView.theme)
@@ -388,10 +394,20 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 	}
 }
 
+- (BOOL)showsLineNumbers
+{
+	return [gutterView visibilityForColumnWithIdentifier:GVLineNumbersColumnIdentifier];
+}
+
+- (void)setShowsLineNumbers:(BOOL)flag
+{
+	[gutterView setVisibility:flag forColumnWithIdentifier:GVLineNumbersColumnIdentifier];
+}
+
 - (IBAction)toggleLineNumbers:(id)sender
 {
-	BOOL isVisibleFlag = ![gutterView visibilityForColumnWithIdentifier:GVLineNumbersColumnIdentifier];
-	[gutterView setVisibility:isVisibleFlag forColumnWithIdentifier:GVLineNumbersColumnIdentifier];
+	BOOL isVisibleFlag = !self.showsLineNumbers;
+	self.showsLineNumbers = isVisibleFlag;
 	if(isVisibleFlag)
 			[NSUserDefaults.standardUserDefaults removeObjectForKey:@"DocumentView Disable Line Numbers"];
 	else	[NSUserDefaults.standardUserDefaults setObject:@YES forKey:@"DocumentView Disable Line Numbers"];

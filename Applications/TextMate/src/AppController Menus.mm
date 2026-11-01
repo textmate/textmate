@@ -110,6 +110,21 @@ static NSString* NameForLocaleIdentifier (NSString* languageCode)
 	[NSUserDefaults.standardUserDefaults setObject:[sender representedObject] forKey:@"darkModeThemeUUID"];
 }
 
+- (IBAction)openThemeEditor:(id)sender
+{
+	NSURL* editorURL = [NSBundle.mainBundle.bundleURL URLByAppendingPathComponent:@"Contents/Helpers/ThemeEditor.app" isDirectory:YES];
+	NSWorkspaceOpenConfiguration* configuration = [NSWorkspaceOpenConfiguration configuration];
+	configuration.activates = YES;
+	[NSWorkspace.sharedWorkspace openApplicationAtURL:editorURL configuration:configuration completionHandler:^(NSRunningApplication* app, NSError* error) {
+		if(error)
+		{
+			dispatch_async(dispatch_get_main_queue(), ^{
+				[NSApp presentError:error];
+			});
+		}
+	}];
+}
+
 - (BOOL)validateThemeMenuItem:(NSMenuItem*)item
 {
 	if(item.action == @selector(takeThemeAppearanceFrom:))
@@ -147,6 +162,9 @@ static NSString* NameForLocaleIdentifier (NSString* languageCode)
 - (void)themesMenuNeedsUpdate:(NSMenu*)aMenu
 {
 	[aMenu removeAllItems];
+	NSMenuItem* editorItem = [aMenu addItemWithTitle:@"Open Theme Editor…" action:@selector(openThemeEditor:) keyEquivalent:@""];
+	editorItem.target = self;
+	[aMenu addItem:[NSMenuItem separatorItem]];
 
 	std::map<std::string, std::multimap<std::string, bundles::item_ptr, text::less_t>> ordered;
 	for(auto const& item : bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeTheme))

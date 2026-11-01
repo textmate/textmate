@@ -137,6 +137,22 @@ Press **Cmd+Shift+P** to open the command palette — a unified fuzzy-search int
 
 Results are ranked by fuzzy match score. Frequently used items are boosted over time.
 
+## Theme Editor
+
+Choose **View → Theme → Open Theme Editor…** or run `tm-theme-editor` to open the native macOS theme editor bundled with TextMate. Its three panes show the installed themes, color and font controls, and a live preview using TextMate's own editor, syntax highlighting, gutter, and selection rendering.
+
+Select a theme to edit its global style or individual syntax scope rules. Use **+** for a blank theme, right-click a theme for **Duplicate** or **Delete**, and use **Save** (**Cmd+S**) to write changes. Edits to bundled themes are stored as local overrides; new themes appear in TextMate's theme menu. Unsaved changes remain private to the preview, and switching themes or quitting offers Save, Cancel, and Discard.
+
+The executable lives at `TextMate.app/Contents/MacOS/tm-theme-editor`. For a development build, run:
+
+```sh
+build-debug/Applications/TextMate/TextMate.app/Contents/MacOS/tm-theme-editor
+```
+
+To run it by name, add the app's `Contents/MacOS` directory to your shell's `PATH`, or create a symlink to the executable in a directory already on your `PATH`.
+
+See [Theme Editor](docs/theme-editor.md) for editing and storage details.
+
 ## Project Changes
 
 Choose **View → Show Project Changes** to review changed files across the repository against the last Git commit. The window includes staged, unstaged, new, deleted, and unsaved named files, with colored diffs, previous/next change navigation, and an **Open File** action. It refreshes while open. See [Project Changes](docs/project-changes.md) for details.

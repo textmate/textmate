@@ -56,6 +56,8 @@ typedef NS_ENUM(NSInteger, OakDocumentIOResult) {
 @property (nonatomic, readonly) NSImage* icon;
 @property (nonatomic) NSString* backupPath;
 
+// Auxiliary previews can opt out of language servers and completion services.
+@property (nonatomic) BOOL disableLanguageServices;
 @property (nonatomic) NSString* fileType;     // Lazy: Depends on path and firstLine
 @property (nonatomic) NSString* diskEncoding;
 @property (nonatomic) NSString* diskNewlines;

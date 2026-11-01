@@ -9,7 +9,7 @@ void test_missing_theme_item_still_sets_gutter_colors ()
 	OAK_ASSERT_EQ(to_s(gutter.divider),               "#666666FF");
 	OAK_ASSERT_EQ(to_s(gutter.selectionBorder),       "#666666FF");
 	OAK_ASSERT_EQ(to_s(gutter.foreground),            "#808080FF");
-	OAK_ASSERT_EQ(to_s(gutter.background),            "#212121FF");
+	OAK_ASSERT_EQ(to_s(gutter.background),            "#171717FF");
 	OAK_ASSERT_EQ(to_s(gutter.icons),                 "#808080FF");
 	OAK_ASSERT_EQ(to_s(gutter.iconsHover),            "#808080FF");
 	OAK_ASSERT_EQ(to_s(gutter.iconsPressed),          "#808080FF");

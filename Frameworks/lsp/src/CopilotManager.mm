@@ -137,6 +137,8 @@ static settings_t settingsForCopilotDocument(OakDocument* document)
 
 - (void)ensureClientForDocument:(OakDocument*)document
 {
+	if(document.disableLanguageServices)
+		return;
 	if(_client.running)
 		return;
 
@@ -485,6 +487,8 @@ static NSString* languageIdForDocument(OakDocument* doc)
 
 - (void)documentDidOpen:(OakDocument*)document
 {
+	if(document.disableLanguageServices)
+		return;
 	[self ensureClientForDocument:document];
 	if(!_client)
 		return;
@@ -597,6 +601,8 @@ static NSString* languageIdForDocument(OakDocument* doc)
 
 - (void)documentDidFocus:(OakDocument*)document
 {
+	if(document.disableLanguageServices)
+		return;
 	[self ensureClientForDocument:document];
 	if(!_client)
 		return;

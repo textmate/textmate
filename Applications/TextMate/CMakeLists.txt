@@ -106,6 +106,7 @@ file(GLOB _fw_res
   "${CMAKE_SOURCE_DIR}/Frameworks/scm/resources/*.xslt"
 )
 target_sources(TextMate PRIVATE ${_fw_res})
+target_sources(ThemeEditor PRIVATE ${_fw_res})
 set_source_files_properties(${_fw_res} PROPERTIES
   MACOSX_PACKAGE_LOCATION Resources)
 
@@ -131,6 +132,15 @@ set_source_files_properties(${_about_js} PROPERTIES
 
 # Embedded CLI tools
 textmate_embed(TextMate mate "MacOS")
+textmate_embed(TextMate tm-theme-editor "MacOS")
+textmate_embed(TextMate ThemeEditor "Helpers" DIRECTORY)
+# Remove the old helper name from existing build bundles before signing.
+add_custom_command(TARGET TextMate POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E remove_directory
+    "$<TARGET_BUNDLE_DIR:TextMate>/Contents/Helpers/theme-editor.app")
+# Refresh the embedded app when only the theme editor or launcher changes.
+set_property(TARGET TextMate APPEND PROPERTY LINK_DEPENDS
+  "$<TARGET_FILE:ThemeEditor>" "$<TARGET_FILE:tm-theme-editor>")
 textmate_embed(TextMate textmate-mcp "MacOS")
 textmate_embed(TextMate tm-codex "MacOS")
 textmate_embed(TextMate tm-claude "MacOS")
@@ -149,6 +159,8 @@ textmate_embed(TextMate TextMateQL "Library/QuickLook" DIRECTORY)
 # Sign embedded binaries (inner-to-outer, before app signature)
 textmate_codesign_file(TextMate "${CS_IDENTITY}"
   "$<TARGET_BUNDLE_DIR:TextMate>/Contents/MacOS/tm-pi")
+textmate_codesign_file(TextMate "${CS_IDENTITY}"
+  "$<TARGET_BUNDLE_DIR:TextMate>/Contents/MacOS/tm-theme-editor")
 textmate_codesign_file(TextMate "${CS_IDENTITY}"
   "$<TARGET_BUNDLE_DIR:TextMate>/Contents/MacOS/tm-opencode")
 textmate_codesign_file(TextMate "${CS_IDENTITY}"

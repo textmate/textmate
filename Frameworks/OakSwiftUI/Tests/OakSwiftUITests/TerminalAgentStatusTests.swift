@@ -50,9 +50,9 @@ private func reportedStatus(_ reports: String) -> [TerminalProgramStatus] {
 @MainActor
 @Test func agentStatusArrivesThroughTerminalDelegateAndSurvivesTransfer() async throws {
     _ = NSApplication.shared
-    let source = OakTerminalPanelController()
-    let destination = OakTerminalPanelController()
-    source.startSession(inDirectory: NSTemporaryDirectory())
+    let source = makeTerminalController()
+    let destination = makeTerminalController()
+    source.startSession()
     defer { source.stopSession(); destination.stopSession() }
     let terminal = try #require(source.terminal)
     let id = try #require(source.sessionIdentifiers.first)
