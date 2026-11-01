@@ -25,6 +25,32 @@
 <li class="commit commit-group-item">
     <img class="gravatar" src="https://www.gravatar.com/avatar/e904dfc2f19fa297256c24c2a620c629?s=48&amp;d=https://a248.e.akamai.net/assets.github.com%2Fimages%2Fgravatars%2Fgravatar-user-420.png" height="36" width="36">
     <p class="commit-title">
+      <a href="https://github.com/tectiv3/textmate/commit/7825c1f403f4a1252ff46cf30e3451ac02fabc05" class="message">Restore the bundle directory on PATH in login fish shells</a>
+        <span class="hidden-text-expander inline"><a href="javascript:;" class="js-details-target">…</a></span>
+</p>
+<div class="commit-desc"><pre>The terminal appends Contents/MacOS to PATH so tm-codex, tm-claude, tm-opencode and tm-pi resolve. nix-darwin&#39;s fish setup sources a set-environment script that runs `export PATH=...` unless __NIX_DARWIN_SET_ENVIRONMENT_DONE is set, and the terminal&#39;s whitelisted environment never carries that variable. The directory was therefore dropped during login and the launchers did not resolve.
+
+For fish with no caller-supplied arguments, launch with --init-command that re-appends the directory of TM_MCP_SERVER after the startup files have run. The command is idempotent and leaves $status at 0 when TM_MCP_SERVER is unset. TM_MCP_SERVER survives the startup files.
+
+Checked against a login fish started with the failing PATH. zsh and bash are not covered. The new test is not yet run: the OakSwiftUI test target already fails to compile at TerminalAgentStatusTests.swift:55, which calls a nonexistent startSession(inDirectory:).
+</pre></div>
+<div class="commit-meta">
+      <div class="commit-links">
+        <a href="https://github.com/tectiv3/textmate/commit/7825c1f403f4a1252ff46cf30e3451ac02fabc05" class="gobutton">
+          <span class="sha">7825c1f403<span class="mini-icon mini-icon-arr-right-mini"></span></span>
+        </a>
+        <a href="https://github.com/tectiv3/textmate/tree/7825c1f403f4a1252ff46cf30e3451ac02fabc05" class="browse-button" title="Browse the code at this point in the history" rel="nofollow">Browse code <span class="mini-icon mini-icon-arr-right"></span></a>
+      </div>
+      <div class="authorship">
+        <span class="author-name"><a href="https://github.com/tectiv3">tectiv3</a></span>
+        authored <time class="js-relative-date" datetime="2026-10-31T14:30:23Z" title="2026-10-31 14:30:23">October 31, 2026</time>
+      </div>
+    </div>
+</li>
+
+<li class="commit commit-group-item">
+    <img class="gravatar" src="https://www.gravatar.com/avatar/e904dfc2f19fa297256c24c2a620c629?s=48&amp;d=https://a248.e.akamai.net/assets.github.com%2Fimages%2Fgravatars%2Fgravatar-user-420.png" height="36" width="36">
+    <p class="commit-title">
       <a href="https://github.com/tectiv3/textmate/commit/48d1d52702c582a91b9f09e768eb5bcec2badf74" class="message">Add tm-pi launcher for the pi coding agent</a>
         <span class="hidden-text-expander inline"><a href="javascript:;" class="js-details-target">…</a></span>
 </p>
