@@ -93,8 +93,13 @@ namespace parse
 	// = grammar_t =
 	// =============
 
-	static void compile_patterns (rule_t* rule)
+	// Patterns are compiled lazily (by the parser, see collect_rule) since a grammar with includes can easily have thousands of rules, most of which are never used for a given document
+	void compile_patterns (rule_t* rule)
 	{
+		if(rule->patterns_compiled)
+			return;
+		rule->patterns_compiled = true;
+
 		if(rule->match_string != NULL_STR)
 		{
 			rule->match_pattern = regexp::pattern_t(rule->match_string);
@@ -116,9 +121,12 @@ namespace parse
 			if(!rule->end_pattern)
 				os_log_error(OS_LOG_DEFAULT, "Bad end pattern for %{public}s", rule->scope_string.c_str());
 		}
+	}
 
+	static void setup_injections (rule_t* rule)
+	{
 		for(rule_ptr child : rule->children)
-			compile_patterns(child.get());
+			setup_injections(child.get());
 
 		repository_ptr maps[] = { rule->repository, rule->injection_rules, rule->captures, rule->begin_captures, rule->while_captures, rule->end_captures };
 		for(auto const& map : maps)
@@ -127,7 +135,7 @@ namespace parse
 				continue;
 
 			for(auto const& pair : *map)
-				compile_patterns(pair.second.get());
+				setup_injections(pair.second.get());
 		}
 
 		if(rule->injection_rules)
@@ -219,7 +227,7 @@ namespace parse
 				if(rule_ptr grammar = convert_plist(item->plist()))
 				{
 					setup_includes(grammar, grammar, grammar, rule_stack_t(grammar.get()));
-					compile_patterns(grammar.get());
+					setup_injections(grammar.get());
 					res.emplace_back(injectionSelector, grammar);
 				}
 			}
@@ -234,7 +242,7 @@ namespace parse
 		{
 			_grammars.emplace(scope, grammar);
 			setup_includes(grammar, base ?: grammar, grammar, rule_stack_t(grammar.get()));
-			compile_patterns(grammar.get());
+			setup_injections(grammar.get());
 		}
 		return grammar;
 	}

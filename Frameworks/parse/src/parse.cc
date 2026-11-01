@@ -253,6 +253,7 @@ namespace parse
 		if(!rule || rule->included)
 			return;
 
+		compile_patterns(rule);
 		if(rule->match_pattern)
 		{
 			rule->included = true;
