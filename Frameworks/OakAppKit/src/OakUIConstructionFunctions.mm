@@ -255,7 +255,7 @@ OakRolloverButton* OakCreateCloseButton (NSString* accessibilityLabel)
 	{
 		NSColor* color = value;
 		[color set];
-		NSRectFill(aRect);
+		NSRectFill(NSIntersectionRect(aRect, self.bounds)); // dirty rect can extend beyond our bounds when linked against the macOS 14 SDK or later
 	}
 }
 @end
