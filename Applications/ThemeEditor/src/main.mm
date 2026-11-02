@@ -36,6 +36,66 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 - (NSEdgeInsets)alignmentRectInsets { return NSEdgeInsetsZero; }
 @end
 
+@interface ThemeRuleActionsBar : NSView
+@end
+@implementation ThemeRuleActionsBar
+- (void)drawRect:(NSRect)dirtyRect
+{
+	BOOL dark = [[self.effectiveAppearance bestMatchFromAppearancesWithNames:@[ NSAppearanceNameAqua, NSAppearanceNameDarkAqua ]] isEqualToString:NSAppearanceNameDarkAqua];
+	[[NSColor colorWithWhite:dark ? 0.19 : 0.94 alpha:1] setFill];
+	[[NSBezierPath bezierPathWithRoundedRect:self.bounds xRadius:10 yRadius:10] fill];
+	// Square upper corners meet the group; lower corners follow its outline.
+	NSRectFill(NSMakeRect(0, NSHeight(self.bounds) / 2, NSWidth(self.bounds), NSHeight(self.bounds) / 2));
+	[NSColor.separatorColor setFill];
+	NSRectFill(NSMakeRect(0, NSHeight(self.bounds) - 1 / self.window.backingScaleFactor, NSWidth(self.bounds), 1 / self.window.backingScaleFactor));
+}
+@end
+
+// A hidden horizontal scroller does not prevent trackpad panning of wider content.
+@interface ThemeListClipView : NSClipView
+@end
+@implementation ThemeListClipView
+- (void)scrollToPoint:(NSPoint)point
+{
+	point.x = 0;
+	[super scrollToPoint:point];
+}
+
+- (NSRect)constrainBoundsRect:(NSRect)proposedBounds
+{
+	NSRect bounds = [super constrainBoundsRect:proposedBounds];
+	bounds.origin.x = 0;
+	return bounds;
+}
+
+- (void)setBoundsOrigin:(NSPoint)origin
+{
+	origin.x = 0;
+	[super setBoundsOrigin:origin];
+}
+@end
+
+@interface ThemeListScrollView : NSScrollView
+@end
+@implementation ThemeListScrollView
+- (void)scrollWheel:(NSEvent*)event
+{
+	// Remove horizontal input before AppKit's scrolling and momentum animation.
+	if(event.scrollingDeltaX == 0)
+	{
+		[super scrollWheel:event];
+		return;
+	}
+	if(event.scrollingDeltaY == 0)
+		return;
+	CGEventRef verticalEvent = CGEventCreateCopy(event.CGEvent);
+	for(CGEventField field : { kCGScrollWheelEventDeltaAxis2, kCGScrollWheelEventFixedPtDeltaAxis2, kCGScrollWheelEventPointDeltaAxis2 })
+		CGEventSetIntegerValueField(verticalEvent, field, 0);
+	[super scrollWheel:[NSEvent eventWithCGEvent:verticalEvent]];
+	CFRelease(verticalEvent);
+}
+@end
+
 @protocol ThemeListDelegate <NSTableViewDelegate>
 - (void)renameThemeAtRow:(NSInteger)row;
 - (NSMenu*)themeMenuForRow:(NSInteger)row;
@@ -91,22 +151,19 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	NSMutableDictionary<NSString*, NSData*>* _originalFiles;
 	NSWindow* _window;
 	NSTableView* _table;
-	NSButton* _saveButton;
-	NSButton* _revertButton;
 	NSStackView* _controls;
 	NSStackView* _fontControls;
 	NSStackView* _gutterControls;
 	OakDocumentView* _preview;
 	NSPopUpButton* _rules;
+	NSButton* _removeRuleButton;
 	NSSegmentedControl* _appearance;
 	NSPopUpButton* _sampleLanguage;
 	NSTextField* _sampleStatus;
-	NSTextField* _inspectedScope;
 	NSMutableDictionary<NSString*, NSString*>* _sampleEdits;
 	NSString* _currentSample;
 	BOOL _previewShowInvisibles;
 	NSFont* _baseFont;
-	NSTextField* _scope;
 	NSMutableDictionary<NSString*, NSTextField*>* _fields;
 	NSMutableDictionary<NSString*, NSColorWell*>* _wells;
 	BOOL _dirty;
@@ -188,6 +245,51 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	[stack addArrangedSubview:row];
 }
 
+// Grouped settings stay visible, with inset separators between related controls.
+- (NSStackView*)settingsGroup:(NSString*)title
+{
+	NSTextField* heading = [NSTextField labelWithString:title];
+	heading.font = [NSFont boldSystemFontOfSize:NSFont.systemFontSize];
+	[_controls addArrangedSubview:heading];
+	NSBox* panel = [NSBox new];
+	panel.boxType = NSBoxCustom;
+	panel.borderWidth = 0;
+	panel.transparent = NO;
+	panel.titlePosition = NSNoTitle;
+	panel.fillColor = [NSColor colorWithName:nil dynamicProvider:^NSColor*(NSAppearance* appearance) {
+		BOOL dark = [[appearance bestMatchFromAppearancesWithNames:@[ NSAppearanceNameAqua, NSAppearanceNameDarkAqua ]] isEqualToString:NSAppearanceNameDarkAqua];
+		return [NSColor colorWithWhite:dark ? 0.16 : 0.965 alpha:1];
+	}];
+	panel.cornerRadius = 10;
+	panel.contentViewMargins = NSZeroSize;
+	panel.translatesAutoresizingMaskIntoConstraints = NO;
+	[_controls addArrangedSubview:panel];
+	[panel.widthAnchor constraintEqualToAnchor:_controls.widthAnchor constant:-24].active = YES;
+	NSStackView* stack = [NSStackView new];
+	stack.orientation = NSUserInterfaceLayoutOrientationVertical;
+	stack.alignment = NSLayoutAttributeLeading;
+	stack.spacing = 8;
+	stack.translatesAutoresizingMaskIntoConstraints = NO;
+	[panel.contentView addSubview:stack];
+	[NSLayoutConstraint activateConstraints:@[
+		[stack.leadingAnchor constraintEqualToAnchor:panel.contentView.leadingAnchor constant:10],
+		[stack.trailingAnchor constraintEqualToAnchor:panel.contentView.trailingAnchor constant:-10],
+		[stack.topAnchor constraintEqualToAnchor:panel.contentView.topAnchor constant:12],
+		[stack.bottomAnchor constraintEqualToAnchor:panel.contentView.bottomAnchor constant:-12],
+	]];
+	[_controls setCustomSpacing:18 afterView:panel];
+	return stack;
+}
+
+- (void)addSettingsDividerInStack:(NSStackView*)stack
+{
+	NSBox* divider = [NSBox new];
+	divider.boxType = NSBoxSeparator;
+	[stack addArrangedSubview:divider];
+	[divider.widthAnchor constraintEqualToAnchor:stack.widthAnchor].active = YES;
+	[divider.heightAnchor constraintEqualToConstant:1].active = YES;
+}
+
 - (void)applicationDidFinishLaunching:(NSNotification*)notification
 {
 	// Preserve macOS's app-icon framing and padding when launching through the CLI.
@@ -221,12 +323,17 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	_window.contentView = split;
 
 	NSView* sidebar = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 230, 800)];
-	NSScrollView* themeScroll = [[NSScrollView alloc] initWithFrame:NSMakeRect(0, 48, 230, 752)];
+	NSScrollView* themeScroll = [[ThemeListScrollView alloc] initWithFrame:NSMakeRect(0, 48, 230, 752)];
+	themeScroll.contentView = [[ThemeListClipView alloc] initWithFrame:themeScroll.contentView.frame];
 	themeScroll.autoresizingMask = NSViewWidthSizable|NSViewHeightSizable;
 	themeScroll.hasVerticalScroller = YES;
+	themeScroll.hasHorizontalScroller = NO;
+	themeScroll.horizontalScrollElasticity = NSScrollElasticityNone;
+	themeScroll.autohidesScrollers = YES;
+	themeScroll.usesPredominantAxisScrolling = NO;
 	_table = [[ThemeListView alloc] initWithFrame:themeScroll.bounds];
 	NSTableColumn* column = [[NSTableColumn alloc] initWithIdentifier:@"theme"];
-	column.title = @"Installed themes";
+	_table.headerView = nil;
 	column.width = 230;
 	[_table addTableColumn:column];
 	_table.dataSource = self;
@@ -254,118 +361,111 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	_controls.alignment = NSLayoutAttributeLeading;
 	_controls.spacing = 6;
 	_controls.detachesHiddenViews = YES;
+	inspector.backgroundColor = NSColor.controlBackgroundColor;
 	_controls.edgeInsets = NSEdgeInsetsMake(12, 12, 12, 12);
 	inspector.documentView = _controls;
 	_controls.translatesAutoresizingMaskIntoConstraints = NO;
 	[_controls.widthAnchor constraintEqualToAnchor:inspector.contentView.widthAnchor].active = YES;
-	[_controls addArrangedSubview:[NSTextField labelWithString:@"Appearance"]];
+	NSStackView* appearanceControls = [self settingsGroup:@"Appearance"];
 	_appearance = [NSSegmentedControl segmentedControlWithLabels:@[ @"Light", @"Dark", @"Unspecified" ] trackingMode:NSSegmentSwitchTrackingSelectOne target:self action:@selector(appearanceChanged:)];
 	_appearance.segmentDistribution = NSSegmentDistributionFillEqually;
 	[_appearance setToolTip:@"Available for either light or dark appearance." forSegment:2];
 	_appearance.accessibilityLabel = @"Theme appearance";
 	[_appearance.widthAnchor constraintEqualToConstant:275].active = YES;
-	[_controls addArrangedSubview:_appearance];
-	[_controls addArrangedSubview:[NSTextField labelWithString:@"Style rule"]];
+	[appearanceControls addArrangedSubview:_appearance];
+	NSStackView* ruleControls = [self settingsGroup:@"Style rule"];
 	_rules = [[NSPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:NO];
 	_rules.target = self;
 	_rules.action = @selector(ruleSelected:);
 	[_rules.widthAnchor constraintEqualToConstant:275].active = YES;
-	[_controls addArrangedSubview:_rules];
-	_inspectedScope = [NSTextField wrappingLabelWithString:@"Command-click preview text to select its style rule."];
-	_inspectedScope.font = [NSFont systemFontOfSize:NSFont.smallSystemFontSize];
-	_inspectedScope.textColor = NSColor.secondaryLabelColor;
-	_inspectedScope.accessibilityLabel = @"Inspected syntax scope";
-	[_inspectedScope.widthAnchor constraintEqualToConstant:275].active = YES;
-	[_controls addArrangedSubview:_inspectedScope];
-	[_controls addArrangedSubview:[NSStackView stackViewWithViews:@[ [self button:@"Add rule" action:@selector(addRule:)], [self button:@"Remove rule" action:@selector(removeRule:)] ]]];
-	_scope = [self field:@"Scope selector (blank applies globally)" action:@selector(ruleMetadataChanged:)];
+	[ruleControls addArrangedSubview:_rules];
+	ruleControls.spacing = 4;
+	NSButton* addRuleButton = [self button:@"" action:@selector(addRule:)];
+	addRuleButton.image = [NSImage imageWithSystemSymbolName:@"plus" accessibilityDescription:nil];
+	addRuleButton.accessibilityLabel = @"Add rule";
+	addRuleButton.toolTip = @"Add rule";
+	_removeRuleButton = [self button:@"" action:@selector(removeRule:)];
+	_removeRuleButton.image = [NSImage imageWithSystemSymbolName:@"minus" accessibilityDescription:nil];
+	_removeRuleButton.accessibilityLabel = @"Remove rule";
+	_removeRuleButton.toolTip = @"Remove rule";
+	for(NSButton* button in @[ addRuleButton, _removeRuleButton ])
+	{
+		button.bordered = NO;
+		button.imagePosition = NSImageOnly;
+		button.controlSize = NSControlSizeSmall;
+		button.contentTintColor = NSColor.secondaryLabelColor;
+		button.image = [button.image imageWithSymbolConfiguration:[NSImageSymbolConfiguration configurationWithPointSize:12 weight:NSFontWeightMedium]];
+		[button.widthAnchor constraintEqualToConstant:24].active = YES;
+		[button.heightAnchor constraintEqualToConstant:24].active = YES;
+	}
+	NSBox* ruleActionDivider = [NSBox new];
+	ruleActionDivider.boxType = NSBoxSeparator;
+	[ruleActionDivider.widthAnchor constraintEqualToConstant:1].active = YES;
+	[ruleActionDivider.heightAnchor constraintEqualToConstant:16].active = YES;
+	NSStackView* ruleActions = [NSStackView stackViewWithViews:@[ addRuleButton, ruleActionDivider, _removeRuleButton ]];
+	ruleActions.spacing = 0;
+	ruleActions.alignment = NSLayoutAttributeCenterY;
+	NSView* ruleGroupContent = ruleControls.superview;
+	for(NSLayoutConstraint* constraint in ruleGroupContent.constraints)
+	{
+		if(constraint.firstItem == ruleControls && constraint.firstAttribute == NSLayoutAttributeBottom)
+			constraint.active = NO;
+	}
+	ThemeRuleActionsBar* ruleBar = [ThemeRuleActionsBar new];
+	ruleBar.translatesAutoresizingMaskIntoConstraints = NO;
+	ruleActions.translatesAutoresizingMaskIntoConstraints = NO;
+	[ruleGroupContent addSubview:ruleBar];
+	[ruleBar addSubview:ruleActions];
+	[NSLayoutConstraint activateConstraints:@[
+		[ruleBar.leadingAnchor constraintEqualToAnchor:ruleGroupContent.leadingAnchor],
+		[ruleBar.trailingAnchor constraintEqualToAnchor:ruleGroupContent.trailingAnchor],
+		[ruleBar.bottomAnchor constraintEqualToAnchor:ruleGroupContent.bottomAnchor],
+		[ruleBar.heightAnchor constraintEqualToConstant:24],
+		[ruleControls.bottomAnchor constraintEqualToAnchor:ruleBar.topAnchor constant:-8],
+		[ruleActions.leadingAnchor constraintEqualToAnchor:ruleBar.leadingAnchor constant:0],
+		[ruleActions.centerYAnchor constraintEqualToAnchor:ruleBar.centerYAnchor],
+	]];
+	NSStackView* colorControls = [self settingsGroup:@"Colors"];
 	_fields = [NSMutableDictionary dictionary];
 	_invalidFields = [NSMutableSet set];
 	_wells = [NSMutableDictionary dictionary];
 	for(NSArray<NSString*>* color in @[ @[ @"foreground", @"Foreground" ], @[ @"background", @"Background" ], @[ @"caret", @"Caret" ], @[ @"selection", @"Selection" ], @[ @"invisibles", @"Invisibles" ] ])
-		[self addColorControlForKey:color[0] label:color[1] inStack:_controls];
-	[_controls setCustomSpacing:18 afterView:_controls.arrangedSubviews.lastObject];
-	NSButton* fontDisclosure = [self button:@"Font settings" action:@selector(toggleFontControls:)];
-	[fontDisclosure setButtonType:NSButtonTypeOnOff];
-	fontDisclosure.bordered = NO;
-	fontDisclosure.imagePosition = NSImageLeft;
-	fontDisclosure.image = [NSImage imageWithSystemSymbolName:@"chevron.right" accessibilityDescription:nil];
-	fontDisclosure.alternateImage = [NSImage imageWithSystemSymbolName:@"chevron.down" accessibilityDescription:nil];
-	fontDisclosure.alternateTitle = fontDisclosure.title;
-	fontDisclosure.accessibilityLabel = @"Font settings";
-	fontDisclosure.toolTip = @"Show or hide font settings for the selected style rule.";
-	[_controls addArrangedSubview:fontDisclosure];
-	_fontControls = [NSStackView new];
-	_fontControls.orientation = NSUserInterfaceLayoutOrientationVertical;
-	_fontControls.alignment = NSLayoutAttributeLeading;
-	_fontControls.spacing = 6;
-	[_controls addArrangedSubview:_fontControls];
-	_fontControls.hidden = YES;
+	{
+		if(colorControls.arrangedSubviews.count)
+			[self addSettingsDividerInStack:colorControls];
+		[self addColorControlForKey:color[0] label:color[1] inStack:colorControls];
+	}
+	_gutterControls = [self settingsGroup:@"Gutter colors"];
+	NSTextField* gutterHint = [NSTextField wrappingLabelWithString:@"Line numbers and the editor margin. Applies to every style rule."];
+	gutterHint.font = [NSFont systemFontOfSize:NSFont.smallSystemFontSize];
+	gutterHint.textColor = NSColor.secondaryLabelColor;
+	[gutterHint.widthAnchor constraintEqualToConstant:275].active = YES;
+	[_gutterControls addArrangedSubview:gutterHint];
+	for(NSArray<NSString*>* color in @[ @[ @"foreground", @"Line numbers" ], @[ @"background", @"Background" ], @[ @"divider", @"Divider" ], @[ @"selectionForeground", @"Selected numbers" ], @[ @"selectionBackground", @"Selected background" ] ])
+	{
+		[self addSettingsDividerInStack:_gutterControls];
+		[self addColorControlForKey:[@"gutter." stringByAppendingString:color[0]] label:color[1] inStack:_gutterControls];
+	}
+	_fontControls = [self settingsGroup:@"Font settings"];
 	for(NSString* key in @[ @"fontName", @"fontSize", @"fontStyle" ])
 	{
-		NSTextField* field = [self field:key action:@selector(settingChanged:) inStack:_fontControls];
+		if(_fontControls.arrangedSubviews.count)
+			[self addSettingsDividerInStack:_fontControls];
+		NSString* title = [@{ @"fontName": @"Font name", @"fontSize": @"Font size", @"fontStyle": @"Font style" } objectForKey:key];
+		NSTextField* field = [self field:title action:@selector(settingChanged:) inStack:_fontControls];
 		field.identifier = key;
 		_fields[key] = field;
 	}
 	_fields[@"fontName"].placeholderString = @"PostScript name, e.g. Menlo-Regular";
 	_fields[@"fontSize"].placeholderString = @"e.g. 13";
 	_fields[@"fontStyle"].placeholderString = @"plain, bold, italic, underline, strikethrough";
+	[self addSettingsDividerInStack:_fontControls];
 	[_fontControls addArrangedSubview:[self button:@"Choose Font…" action:@selector(chooseFont:)]];
-	[_controls setCustomSpacing:18 afterView:_controls.arrangedSubviews.lastObject];
-	NSButton* gutterDisclosure = [self button:@"Gutter colors" action:@selector(toggleGutterControls:)];
-	[gutterDisclosure setButtonType:NSButtonTypeOnOff];
-	gutterDisclosure.bordered = NO;
-	gutterDisclosure.imagePosition = NSImageLeft;
-	gutterDisclosure.image = [NSImage imageWithSystemSymbolName:@"chevron.right" accessibilityDescription:nil];
-	gutterDisclosure.alternateImage = [NSImage imageWithSystemSymbolName:@"chevron.down" accessibilityDescription:nil];
-	gutterDisclosure.alternateTitle = gutterDisclosure.title;
-	gutterDisclosure.accessibilityLabel = @"Gutter colors";
-	gutterDisclosure.toolTip = @"Show or hide colors for line numbers and the editor margin.";
-	[_controls addArrangedSubview:gutterDisclosure];
-	_gutterControls = [NSStackView new];
-	_gutterControls.orientation = NSUserInterfaceLayoutOrientationVertical;
-	_gutterControls.alignment = NSLayoutAttributeLeading;
-	_gutterControls.spacing = 4;
-	NSTextField* gutterHint = [NSTextField wrappingLabelWithString:@"Line numbers and the editor margin. Applies to every style rule."];
-	gutterHint.font = [NSFont systemFontOfSize:NSFont.smallSystemFontSize];
-	gutterHint.textColor = NSColor.secondaryLabelColor;
-	[gutterHint.widthAnchor constraintEqualToConstant:275].active = YES;
-	[_gutterControls addArrangedSubview:gutterHint];
-	[_controls addArrangedSubview:_gutterControls];
-	_gutterControls.hidden = YES;
-	for(NSArray<NSString*>* color in @[ @[ @"foreground", @"Line numbers" ], @[ @"background", @"Background" ], @[ @"divider", @"Divider" ], @[ @"selectionForeground", @"Selected numbers" ], @[ @"selectionBackground", @"Selected background" ] ])
-		[self addColorControlForKey:[@"gutter." stringByAppendingString:color[0]] label:color[1] inStack:_gutterControls];
-	// Keep actions outside the scrolling form so they remain visible at any height.
-	NSView* footer = [NSView new];
-	footer.identifier = @"theme-actions";
-	footer.translatesAutoresizingMaskIntoConstraints = NO;
-	[inspectorPane addSubview:footer];
-	NSBox* separator = [NSBox new];
-	separator.boxType = NSBoxSeparator;
-	separator.translatesAutoresizingMaskIntoConstraints = NO;
-	[footer addSubview:separator];
-	_saveButton = [self button:@"Save" action:@selector(saveTheme:)];
-	_revertButton = [self button:@"Revert" action:@selector(revertTheme:)];
-	_saveButton.enabled = _revertButton.enabled = NO;
-	NSStackView* actions = [NSStackView stackViewWithViews:@[ _saveButton, _revertButton ]];
-	actions.spacing = 8;
-	actions.translatesAutoresizingMaskIntoConstraints = NO;
-	[footer addSubview:actions];
 	[NSLayoutConstraint activateConstraints:@[
 		[inspector.leadingAnchor constraintEqualToAnchor:inspectorPane.leadingAnchor],
 		[inspector.trailingAnchor constraintEqualToAnchor:inspectorPane.trailingAnchor],
 		[inspector.topAnchor constraintEqualToAnchor:inspectorPane.topAnchor],
-		[inspector.bottomAnchor constraintEqualToAnchor:footer.topAnchor],
-		[footer.leadingAnchor constraintEqualToAnchor:inspectorPane.leadingAnchor],
-		[footer.trailingAnchor constraintEqualToAnchor:inspectorPane.trailingAnchor],
-		[footer.bottomAnchor constraintEqualToAnchor:inspectorPane.bottomAnchor],
-		[footer.heightAnchor constraintEqualToConstant:52],
-		[actions.leadingAnchor constraintEqualToAnchor:footer.leadingAnchor constant:12],
-		[actions.centerYAnchor constraintEqualToAnchor:footer.centerYAnchor],
-		[separator.leadingAnchor constraintEqualToAnchor:footer.leadingAnchor],
-		[separator.trailingAnchor constraintEqualToAnchor:footer.trailingAnchor],
-		[separator.topAnchor constraintEqualToAnchor:footer.topAnchor],
-		[separator.heightAnchor constraintEqualToConstant:1],
+		[inspector.bottomAnchor constraintEqualToAnchor:inspectorPane.bottomAnchor],
 	]];
 	[split addSubview:inspectorPane];
 
@@ -405,7 +505,7 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	[_preview addAuxiliaryView:sampleBar atEdge:NSMaxYEdge];
 	[self displaySampleReset:NO];
 	[split addSubview:_preview];
-	// Keep the navigation and controls at their chosen widths as the window grows.
+	// Only the preview changes width when the window resizes.
 	[split setHoldingPriority:480 forSubviewAtIndex:0];
 	[split setHoldingPriority:480 forSubviewAtIndex:1];
 	[split setHoldingPriority:NSLayoutPriorityDefaultLow forSubviewAtIndex:2];
@@ -428,16 +528,20 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	[NSApp activateIgnoringOtherApps:YES];
 }
 
-- (CGFloat)splitView:(NSSplitView*)splitView constrainMinCoordinate:(CGFloat)position ofSubviewAt:(NSInteger)divider
+- (CGFloat)splitView:(NSSplitView*)splitView constrainSplitPosition:(CGFloat)position ofSubviewAt:(NSInteger)divider
 {
-	CGFloat minimum = divider == 0 ? NSMinX(splitView.bounds) + 160 : NSMinX(splitView.subviews[1].frame) + 320;
-	return std::max(position, minimum);
+	return NSMinX(splitView.bounds) + (divider == 0 ? 230 : 230 + splitView.dividerThickness + 320);
 }
 
-- (CGFloat)splitView:(NSSplitView*)splitView constrainMaxCoordinate:(CGFloat)position ofSubviewAt:(NSInteger)divider
+- (NSRect)splitView:(NSSplitView*)splitView effectiveRect:(NSRect)proposedEffectiveRect forDrawnRect:(NSRect)drawnRect ofDividerAtIndex:(NSInteger)divider
 {
-	CGFloat maximum = divider == 0 ? NSMaxX(splitView.subviews[1].frame) - splitView.dividerThickness - 320 : NSMaxX(splitView.bounds) - splitView.dividerThickness - 360;
-	return std::min(position, maximum);
+	// Keep the thin visual separators without draggable divider hit areas.
+	return NSZeroRect;
+}
+
+- (BOOL)splitView:(NSSplitView*)splitView shouldAdjustSizeOfSubview:(NSView*)view
+{
+	return view == _preview;
 }
 
 - (void)splitView:(NSSplitView*)splitView resizeSubviewsWithOldSize:(NSSize)oldSize
@@ -447,51 +551,15 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 		[splitView adjustSubviews];
 		return;
 	}
-	// Preserve chosen widths while they fit; shrink them safely in smaller windows.
+	// The window minimum size leaves room for both fixed columns and the preview.
 	CGFloat available = NSWidth(splitView.bounds) - 2 * splitView.dividerThickness;
-	CGFloat sidebar = std::clamp(NSWidth(splitView.subviews[0].frame), CGFloat(160), std::max(CGFloat(160), available - 320 - 360));
-	CGFloat inspector = std::clamp(NSWidth(splitView.subviews[1].frame), CGFloat(320), std::max(CGFloat(320), available - sidebar - 360));
-	CGFloat widths[] = { sidebar, inspector, available - sidebar - inspector };
+	CGFloat widths[] = { 230, 320, available - 230 - 320 };
 	CGFloat x = NSMinX(splitView.bounds);
 	for(size_t index = 0; index < 3; ++index)
 	{
 		splitView.subviews[index].frame = NSMakeRect(x, NSMinY(splitView.bounds), widths[index], NSHeight(splitView.bounds));
 		x += widths[index] + splitView.dividerThickness;
 	}
-}
-
-- (void)toggleFontControls:(NSButton*)sender
-{
-	if(sender.state == NSControlStateValueOff)
-	{
-		for(NSString* key in _invalidFields)
-		{
-			if([key hasPrefix:@"font"])
-			{
-				sender.state = NSControlStateValueOn;
-				NSBeep();
-				return;
-			}
-		}
-	}
-	_fontControls.hidden = sender.state != NSControlStateValueOn;
-}
-
-- (void)toggleGutterControls:(NSButton*)sender
-{
-	if(sender.state == NSControlStateValueOff)
-	{
-		for(NSString* key in _invalidFields)
-		{
-			if([key hasPrefix:@"gutter."])
-			{
-				sender.state = NSControlStateValueOn;
-				NSBeep();
-				return;
-			}
-		}
-	}
-	_gutterControls.hidden = sender.state != NSControlStateValueOn;
 }
 
 - (void)displaySampleReset:(BOOL)reset
@@ -535,7 +603,6 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	_baseFont = _preview.textView.font;
 	_currentSample = file;
 	[NSUserDefaults.standardUserDefaults setObject:file forKey:@"ThemeEditorSampleLanguage"];
-	_inspectedScope.stringValue = @"Command-click preview text to select its style rule.";
 	_sampleStatus.stringValue = scope == "text.plain"
 		? [NSString stringWithFormat:@"Install the %@ language bundle in TextMate for syntax highlighting. Showing plain text.", to_ns(sample.name)]
 		: @"Command-click text to select its style rule. Sample edits stay in this preview.";
@@ -656,7 +723,8 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	alert.messageText = @"Save changes to this theme?";
 	[alert addButtonWithTitle:@"Save"];
 	[alert addButtonWithTitle:@"Cancel"];
-	[alert addButtonWithTitle:@"Discard"];
+	alert.informativeText = @"Changes appear immediately in the preview. Save to keep them, or revert to the last saved version before leaving this theme.";
+	[alert addButtonWithTitle:@"Revert Changes"];
 	NSModalResponse response = [alert runModal];
 	return response == NSAlertThirdButtonReturn || (response == NSAlertFirstButtonReturn && [self saveCurrentTheme]);
 }
@@ -792,7 +860,6 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	if(!hasGlobal)
 		[rules insertObject:[@{ @"settings": [NSMutableDictionary dictionary] } mutableCopy] atIndex:0];
 	_loadedTheme = plist::convert((__bridge CFPropertyListRef)_draft);
-	_inspectedScope.stringValue = @"Command-click preview text to select its style rule.";
 	_appearance.selectedSegment = theme_editor::appearance(_source->plist());
 	[self reloadRules:std::clamp(selectedRule, NSInteger(0), NSInteger(rules.count) - 1)];
 	[self changed:NO];
@@ -804,7 +871,6 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	[_window makeFirstResponder:textView];
 	if(_invalidFields.count)
 	{
-		_inspectedScope.stringValue = @"Correct the highlighted setting before selecting another style rule.";
 		NSBeep();
 		return YES;
 	}
@@ -815,8 +881,6 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	{
 		[_rules selectItemAtIndex:*match];
 		[self ruleSelected:nil];
-		_inspectedScope.stringValue = [@"Scope: " stringByAppendingString:scope];
-		_inspectedScope.toolTip = scope;
 		[_rules scrollRectToVisible:_rules.bounds];
 	}
 	return YES;
@@ -825,6 +889,7 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 - (NSMutableDictionary*)currentRule { return _draft[@"settings"][_rules.indexOfSelectedItem]; }
 - (void)reloadRules:(NSInteger)selected
 {
+	_removeRuleButton.enabled = [_draft[@"settings"] count] > 1;
 	[_rules removeAllItems];
 	for(NSDictionary* rule in _draft[@"settings"])
 	{
@@ -846,7 +911,6 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	}
 	_activeRule = _rules.indexOfSelectedItem;
 	NSMutableDictionary* rule = [self currentRule];
-	_scope.stringValue = rule[@"scope"] ?: @"";
 	NSDictionary* settings = rule[@"settings"];
 	for(NSString* key in _fields)
 	{
@@ -882,7 +946,6 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 - (void)changed:(BOOL)dirty
 {
 	_dirty = dirty && (_newTheme || _invalidFields.count || plist::convert((__bridge CFPropertyListRef)_draft) != _loadedTheme);
-	_saveButton.enabled = _revertButton.enabled = _dirty;
 	if(!dirty)
 		[_invalidFields removeAllObjects];
 	_window.documentEdited = _dirty;
@@ -913,8 +976,6 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	NSTextField* field = notification.object;
 	if([field.identifier isEqualToString:@"theme-name"])
 		[self updateThemeName:field.currentEditor.string ?: field.stringValue forField:field];
-	else if(field == _scope)
-		[self ruleMetadataChanged:field];
 	else
 		[self settingChanged:field];
 }
@@ -932,14 +993,6 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 		return;
 	_draft[@"name"] = [name copy];
 	_themeRows[row].title = [name stringByAppendingString:_newTheme ? @" (unsaved)" : @""];
-	[self changed:YES];
-}
-
-- (void)ruleMetadataChanged:(id)sender
-{
-	NSMutableDictionary* rule = [self currentRule];
-	rule[@"scope"] = _scope.stringValue;
-	[self reloadRules:_rules.indexOfSelectedItem];
 	[self changed:YES];
 }
 
@@ -963,7 +1016,6 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	{
 		[_invalidFields addObject:key];
 		_dirty = YES;
-		_saveButton.enabled = _revertButton.enabled = YES;
 		_window.documentEdited = YES;
 		return;
 	}

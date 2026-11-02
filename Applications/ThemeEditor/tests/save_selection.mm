@@ -123,10 +123,8 @@ int main ()
 				NSRect preview = split.subviews[2].frame;
 				NSView* pane = split.subviews[1];
 				NSScrollView* form = ((NSView*)[controller valueForKey:@"controls"]).enclosingScrollView;
-				NSView* footer = pane.subviews.lastObject;
-				Require([footer.identifier isEqualToString:@"theme-actions"], "Missing fixed action footer");
-				Require(fabs(NSMinY(footer.frame) - NSMinY(pane.bounds)) < 1, "Save and Revert moved away from the bottom");
-				Require(NSMinY(form.frame) >= NSMaxY(footer.frame) - 1, "Scrolling controls overlap the action buttons");
+				Require(pane.subviews.count == 1, "The controls pane still contains an action footer");
+				Require(NSEqualRects(form.frame, pane.bounds), "The scrolling controls do not fill the middle column");
 				Require(fabs(NSWidth(sidebar) - sidebarWidth) < 1, "Resizing expanded the theme list");
 				Require(fabs(NSWidth(inspector) - inspectorWidth) < 1, "Resizing left extra space beside the controls");
 				Require(fabs(NSMinX(preview) - NSMaxX(inspector) - split.dividerThickness) < 1, "Resizing left a gap before the preview");
@@ -140,8 +138,8 @@ int main ()
 				{
 					[split setPosition:position ofDividerAtIndex:divider];
 					[window layoutIfNeeded];
-					Require(NSWidth(split.subviews[0].frame) >= 160, "Dragging the divider collapsed the theme list");
-					Require(NSWidth(split.subviews[1].frame) >= 320, "Dragging the divider squeezed the controls below their minimum width");
+					Require(fabs(NSWidth(split.subviews[0].frame) - sidebarWidth) < 1, "Moving a divider resized the fixed theme list");
+					Require(fabs(NSWidth(split.subviews[1].frame) - inspectorWidth) < 1, "Moving a divider resized the fixed controls");
 					Require(NSWidth(split.subviews[2].frame) >= 360, "Dragging the divider squeezed the preview below its minimum width");
 				}
 			}
@@ -150,31 +148,53 @@ int main ()
 			[split setPosition:550 ofDividerAtIndex:0];
 			[window setContentSize:NSMakeSize(1000, 650)];
 			[window layoutIfNeeded];
-			Require(NSWidth(split.subviews[0].frame) >= 160 && NSWidth(split.subviews[1].frame) >= 320 && NSWidth(split.subviews[2].frame) >= 360, "Shrinking the window after moving dividers violated pane minimums");
+			Require(fabs(NSWidth(split.subviews[0].frame) - sidebarWidth) < 1 && fabs(NSWidth(split.subviews[1].frame) - inspectorWidth) < 1 && NSWidth(split.subviews[2].frame) >= 360, "Shrinking the window changed the fixed column widths");
 			[window setContentSize:originalSize];
 			[split setPosition:sidebarWidth ofDividerAtIndex:0];
 			[split setPosition:sidebarWidth + split.dividerThickness + inspectorWidth ofDividerAtIndex:1];
 			NSTableView* table = [controller valueForKey:@"table"];
+			NSClipView* themeClip = table.enclosingScrollView.contentView;
+			NSRect originalTableFrame = table.frame;
+			// Simulate overflowing content and diagonal panning, including negative overscroll.
+			[table setFrameSize:NSMakeSize(NSWidth(themeClip.bounds) + 300, NSHeight(themeClip.bounds) + 500)];
+			[themeClip scrollToPoint:NSMakePoint(0, 100)];
+			NSRect beforeHorizontalGesture = themeClip.bounds;
+			for(int delta : { -120, 120 })
+			{
+				CGEventRef gesture = CGEventCreateScrollWheelEvent(NULL, kCGScrollEventUnitPixel, 2, 0, delta);
+				[table.enclosingScrollView scrollWheel:[NSEvent eventWithCGEvent:gesture]];
+				CFRelease(gesture);
+				Require(NSEqualRects(themeClip.bounds, beforeHorizontalGesture), "Horizontal gestures changed the theme list position");
+			}
+			for(CGFloat x : { CGFloat(-120), CGFloat(120) })
+			{
+				NSRect proposed = themeClip.bounds;
+				proposed.origin = NSMakePoint(x, 100);
+				Require(NSMinX([themeClip constrainBoundsRect:proposed]) == 0, "Theme list permits horizontal gesture scrolling");
+				[themeClip scrollToPoint:proposed.origin];
+				Require(NSMinX(themeClip.bounds) == 0, "Theme list moved horizontally");
+				Require(NSMinY(themeClip.bounds) == 100, "Theme list no longer scrolls vertically");
+			}
+			table.frame = originalTableFrame;
+			[themeClip scrollToPoint:NSZeroPoint];
 			Require(!table.floatsGroupRows, "Theme section headings remain pinned while scrolling");
 			NSPopUpButton* rules = [controller valueForKey:@"rules"];
 			auto selectedName = [&] { return ((NSTableCellView*)[table viewAtColumn:0 row:table.selectedRow makeIfNecessary:YES]).textField; };
 			NSSegmentedControl* appearance = [controller valueForKey:@"appearance"];
 			Require(appearance.segmentCount == 3 && appearance.trackingMode == NSSegmentSwitchTrackingSelectOne, "Appearance is not a three-button exclusive choice");
 			Require([[appearance labelForSegment:0] isEqualToString:@"Light"] && [[appearance labelForSegment:1] isEqualToString:@"Dark"] && [[appearance labelForSegment:2] isEqualToString:@"Unspecified"], "Appearance buttons have incorrect labels");
-			NSButton* saveButton = [controller valueForKey:@"saveButton"];
-			NSButton* revertButton = [controller valueForKey:@"revertButton"];
-			auto requireActionsEnabled = [&] (BOOL enabled) {
-				Require(saveButton.enabled == enabled && revertButton.enabled == enabled, "Save and Revert do not match the theme's change state");
+			auto requireDirty = [&] (BOOL dirty) {
+				Require([[controller valueForKey:@"dirty"] boolValue] == dirty, "Theme change state does not match the current edits");
 			};
-			requireActionsEnabled(NO);
+			requireDirty(NO);
 			NSTextField* foreground = ((NSDictionary*)[controller valueForKey:@"fields"])[@"foreground"];
 			NSString* originalForeground = [foreground.stringValue copy];
 			foreground.stringValue = @"invalid color";
 			[controller settingChanged:foreground];
-			requireActionsEnabled(YES);
+			requireDirty(YES);
 			foreground.stringValue = originalForeground;
 			[controller settingChanged:foreground];
-			requireActionsEnabled(NO);
+			requireDirty(NO);
 			NSDictionary* fields = [controller valueForKey:@"fields"];
 			NSColorWell* gutterForeground = ((NSDictionary*)[controller valueForKey:@"wells"])[@"gutter.foreground"];
 			NSTextField* gutterForegroundField = fields[@"gutter.foreground"];
@@ -186,22 +206,11 @@ int main ()
 			[controller settingChanged:gutterForegroundField];
 			Require(gutterForeground.color.alphaComponent == 1, "Clearing the gutter override lost its inherited color");
 			[controller loadSource];
-			requireActionsEnabled(NO);
+			requireDirty(NO);
 			NSStackView* fontControls = [controller valueForKey:@"fontControls"];
-			Require(fontControls.hidden, "Font settings were not collapsed by default");
-			NSButton* fontDisclosure = nil;
-			for(NSView* view in ((NSStackView*)[controller valueForKey:@"controls"]).arrangedSubviews)
-			{
-				if([view isKindOfClass:NSButton.class] && [((NSButton*)view).title isEqualToString:@"Font settings"])
-					fontDisclosure = (NSButton*)view;
-			}
-			Require(fontDisclosure != nil, "Missing font settings disclosure");
-			[fontDisclosure performClick:nil];
-			Require(!fontControls.hidden, "Font settings did not expand");
-			NSDictionary* draftBeforeCollapse = [[controller valueForKey:@"draft"] copy];
-			[fontDisclosure performClick:nil];
-			Require(fontControls.hidden && [draftBeforeCollapse isEqual:[controller valueForKey:@"draft"]], "Collapsing font settings changed the draft");
-			Require(![[controller valueForKey:@"dirty"] boolValue], "Toggling font settings modified the theme");
+			Require(!fontControls.hidden, "Font settings should always be visible");
+			NSStackView* gutterControls = [controller valueForKey:@"gutterControls"];
+			Require(!gutterControls.hidden, "Gutter colors should always be visible");
 			auto commandClick = [&] (NSInteger row) {
 				NSRect rect = [table rectOfRow:row];
 				NSPoint point = [table convertPoint:NSMakePoint(NSMidX(rect), NSMidY(rect)) toView:nil];
@@ -244,17 +253,17 @@ int main ()
 			};
 			cancelRename();
 			Require(![[controller valueForKey:@"dirty"] boolValue], "Canceling a rename left a clean theme dirty");
-			requireActionsEnabled(NO);
+			requireDirty(NO);
 			appearance.selectedSegment = 1;
 			[controller appearanceChanged:appearance];
-			requireActionsEnabled(YES);
+			requireDirty(YES);
 			// The draft's appearance edit must survive cancellation of its rename.
 			cancelRename();
 			Require([[controller valueForKey:@"dirty"] boolValue], "Canceling a rename cleared earlier edits");
 			Require(appearance.selectedSegment == 1, "Canceling a rename changed the draft appearance");
 			appearance.selectedSegment = 0;
 			[controller appearanceChanged:appearance];
-			requireActionsEnabled(NO);
+			requireDirty(NO);
 
 			// Light header is row 0; Middle is deliberately not the first theme.
 			[table selectRowIndexes:[NSIndexSet indexSetWithIndex:2] byExtendingSelection:NO];
@@ -270,7 +279,7 @@ int main ()
 				Require(table.selectedRow == [[controller valueForKey:@"selectedRow"] integerValue], "Save lost the sidebar selection");
 				Require([selectedName().stringValue isEqualToString:expectedName], "Save selected a different sidebar theme");
 				Require(![[controller valueForKey:@"dirty"] boolValue], "Save left the draft dirty");
-				requireActionsEnabled(NO);
+				requireDirty(NO);
 			};
 			checkSave(@"Middle");
 
@@ -343,7 +352,7 @@ int main ()
 			Require([[controller valueForKey:@"dirty"] boolValue], "Confirmed removal did not update the draft");
 			[controller removeRule:nil];
 			Require(rules.numberOfItems == 1, "Removal deleted the last rule");
-			requireActionsEnabled(YES);
+			requireDirty(YES);
 			NSTimer* discard = [NSTimer timerWithTimeInterval:0.01 repeats:YES block:^(NSTimer* timer) {
 				if(NSApp.modalWindow)
 				{
@@ -355,7 +364,7 @@ int main ()
 			[controller revertTheme:nil];
 			[discard invalidate];
 			Require(rules.numberOfItems == 2, "Revert did not restore the saved rules");
-			requireActionsEnabled(NO);
+			requireDirty(NO);
 			NSInteger previousRow = table.selectedRow;
 			auto contextMenu = [&] (NSInteger row) {
 				NSRect rect = [table rectOfRow:row];
@@ -373,7 +382,7 @@ int main ()
 			[controller duplicateThemeFromMenu:menu.itemArray[0]];
 			Require([[[controller valueForKey:@"draft"] objectForKey:@"name"] isEqualToString:@"Alpha Copy"], "Context menu duplicated the selected theme instead of the clicked theme");
 			Require([[controller valueForKey:@"newTheme"] boolValue], "Duplicate is not a new theme");
-			requireActionsEnabled(YES);
+			requireDirty(YES);
 			NSMutableDictionary* draft = [controller valueForKey:@"draft"];
 			// Preserve settings not exposed in the inspector as well as unsaved edits.
 			draft[@"customMetadata"] = @{ @"author": @"Theme export test" };
@@ -385,7 +394,7 @@ int main ()
 			Require(format == NSPropertyListXMLFormat_v1_0 && [exported isEqual:draft], "Export did not preserve the complete theme as XML");
 			Require(table.selectedRow == [[controller valueForKey:@"selectedRow"] integerValue] && rules.indexOfSelectedItem == 0, "Export changed theme or rule selection");
 			Require([[controller valueForKey:@"newTheme"] boolValue] && [[controller valueForKey:@"dirty"] boolValue], "Export saved or cleared the unsaved draft");
-			requireActionsEnabled(YES);
+			requireDirty(YES);
 			Require(![controller writeThemeToURL:[NSURL fileURLWithPath:to_ns(jail.path("Missing/Downloaded.tmTheme"))] error:&exportError] && exportError != nil, "Export did not report a write failure");
 			NSMenuItem* deleteItem = contextMenu(table.selectedRow).itemArray[1];
 			auto deleteResponding = [&] (NSModalResponse response) {
@@ -409,7 +418,7 @@ int main ()
 				NSMenu* remaining = contextMenu(row);
 				Require(!remaining || ![remaining.itemArray[0].representedObject isEqual:deleteItem.representedObject], "Deleted theme remains in the list");
 			}
-			requireActionsEnabled(NO);
+			requireDirty(NO);
 		}
 		catch(std::exception const& error)
 		{
