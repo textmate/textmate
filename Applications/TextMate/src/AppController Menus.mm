@@ -12,6 +12,7 @@
 #import <OakFoundation/NSString Additions.h>
 #import <OakTextView/OakTextView.h>
 #import <DocumentWindow/DocumentWindowController.h>
+#import <document/OakDocument.h>
 #import <oak/debug.h>
 #import <BundleMenu/BundleMenu.h>
 #import <theme/theme.h>
@@ -124,7 +125,10 @@ static NSString* NameForLocaleIdentifier (NSString* languageCode)
 		BOOL dark = [appearance isEqualToString:@"dark"] || (![appearance isEqualToString:@"light"] && [[NSApp.effectiveAppearance bestMatchFromAppearancesWithNames:@[ NSAppearanceNameAqua, NSAppearanceNameDarkAqua ]] isEqualToString:NSAppearanceNameDarkAqua]);
 		themeUUID = [NSUserDefaults.standardUserDefaults stringForKey:dark ? @"darkModeThemeUUID" : @"universalThemeUUID"];
 	}
-	NSURL* selectionURL = [NSURL URLWithString:[@"textmate-theme-editor://theme/" stringByAppendingString:themeUUID ?: @""]];
+	NSURLComponents* selection = [NSURLComponents componentsWithString:[@"textmate-theme-editor://theme/" stringByAppendingString:themeUUID ?: @""]];
+	if(controller.selectedDocument.fileType.length)
+		selection.queryItems = @[ [NSURLQueryItem queryItemWithName:@"fileType" value:controller.selectedDocument.fileType] ];
+	NSURL* selectionURL = selection.URL;
 	[NSWorkspace.sharedWorkspace openURLs:@[ selectionURL ] withApplicationAtURL:editorURL configuration:configuration completionHandler:^(NSRunningApplication* app, NSError* error) {
 		if(error)
 		{

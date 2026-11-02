@@ -82,6 +82,11 @@ int main ()
 			grammar->set_plist({ { "uuid", to_s(uuid) }, { "name", scope }, { "scopeName", scope }, { "patterns", plist::array_t{} } });
 			Require(grammar->save(), "Could not create temporary grammar fixture");
 		}
+		auto themeURLWithFileType = [&] (NSString* name, NSString* fileType) {
+			NSURLComponents* url = [NSURLComponents componentsWithURL:themeURLs[name] resolvingAgainstBaseURL:NO];
+			url.queryItems = @[ [NSURLQueryItem queryItemWithName:@"fileType" value:fileType] ];
+			return url.URL;
+		};
 
 		[NSApplication sharedApplication];
 		[NSApp setActivationPolicy:NSApplicationActivationPolicyAccessory];
@@ -94,11 +99,16 @@ int main ()
 			id lineNumberPreference = [defaults objectForKey:@"DocumentView Disable Line Numbers"];
 			[defaults setBool:YES forKey:@"DocumentView Disable Line Numbers"];
 			[defaults setObject:@"Swift.swift" forKey:@"ThemeEditorSampleLanguage"];
-			[controller application:NSApp openURLs:@[ themeURLs[@"Middle"] ]];
+			[controller application:NSApp openURLs:@[ themeURLWithFileType(@"Middle", @"source.python") ]];
 			[controller applicationDidFinishLaunching:nil];
 			Require([[[controller valueForKey:@"draft"] objectForKey:@"name"] isEqualToString:@"Middle"], "Launch did not select the theme requested by TextMate");
-			[controller application:NSApp openURLs:@[ themeURLs[@"Zulu"] ]];
+			NSPopUpButton* launchLanguages = [controller valueForKey:@"sampleLanguage"];
+			Require([launchLanguages.titleOfSelectedItem isEqualToString:@"Python"], "Launch did not select the active file's sample language");
+			[controller application:NSApp openURLs:@[ themeURLWithFileType(@"Zulu", @"source.js.jsx") ]];
 			Require([[[controller valueForKey:@"draft"] objectForKey:@"name"] isEqualToString:@"Zulu"], "An already-running editor did not select TextMate's theme");
+			Require([launchLanguages.titleOfSelectedItem isEqualToString:@"JavaScript"], "An already-running editor did not select the sample for a language subtype");
+			[controller application:NSApp openURLs:@[ themeURLWithFileType(@"Zulu", @"source.rust") ]];
+			Require([launchLanguages.titleOfSelectedItem isEqualToString:@"JavaScript"], "Unsupported file type changed the sample language");
 			[controller application:NSApp openURLs:@[ [NSURL URLWithString:@"textmate-theme-editor://theme/invalid"] ]];
 			Require([[[controller valueForKey:@"draft"] objectForKey:@"name"] isEqualToString:@"Zulu"], "Invalid theme request changed the selection");
 			NSTextField* launchForeground = ((NSDictionary*)[controller valueForKey:@"fields"])[@"foreground"];
@@ -114,9 +124,10 @@ int main ()
 				}
 			}];
 			[[NSRunLoop currentRunLoop] addTimer:cancelThemeSwitch forMode:NSModalPanelRunLoopMode];
-			[controller application:NSApp openURLs:@[ themeURLs[@"Alpha"] ]];
+			[controller application:NSApp openURLs:@[ themeURLWithFileType(@"Alpha", @"source.python") ]];
 			[cancelThemeSwitch invalidate];
 			Require([[[controller valueForKey:@"draft"] objectForKey:@"name"] isEqualToString:@"Zulu"] && [[controller valueForKey:@"dirty"] boolValue], "Canceling a theme request lost the edited theme");
+			Require([launchLanguages.titleOfSelectedItem isEqualToString:@"JavaScript"], "Canceling the theme switch changed the sample language");
 			[controller loadSource];
 			[controller application:NSApp openURLs:@[ themeURLs[@"Alpha"] ]];
 			OakDocumentView* previewView = [controller valueForKey:@"preview"];

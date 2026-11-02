@@ -175,6 +175,7 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	NSMutableSet<NSString*>* _invalidFields;
 	NSInteger _selectedRow;
 	NSString* _requestedThemeUUID;
+	NSString* _requestedFileType;
 }
 @end
 
@@ -511,6 +512,9 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	for(size_t index = 0; index < _availableSamples.size(); ++index)
 		if([remembered isEqualToString:to_ns(_availableSamples[index].file)])
 			initialSample = index;
+	NSInteger requestedSample = [self sampleIndexForFileType:_requestedFileType];
+	if(requestedSample >= 0)
+		initialSample = requestedSample;
 	[_sampleLanguage selectItemAtIndex:initialSample];
 	NSButton* invisibles = [NSButton checkboxWithTitle:@"Invisibles" target:self action:@selector(togglePreviewInvisibles:)];
 	NSStackView* sampleActions = [NSStackView stackViewWithViews:@[
@@ -550,11 +554,33 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	else
 		[self newTheme:nil];
 	_requestedThemeUUID = nil;
+	_requestedFileType = nil;
 	[_window center];
 	[_window makeKeyAndOrderFront:nil];
 	[_controls layoutSubtreeIfNeeded];
 	[_controls scrollPoint:NSZeroPoint];
 	[NSApp activateIgnoringOtherApps:YES];
+}
+
+- (NSInteger)sampleIndexForFileType:(NSString*)fileType
+{
+	NSInteger match = -1;
+	size_t specificity = 0;
+	if(!fileType.length)
+		return match;
+	for(size_t index = 0; index < _availableSamples.size(); ++index)
+	{
+		for(auto const& scope : _availableSamples[index].scopes)
+		{
+			NSString* candidate = to_ns(scope);
+			if(scope.size() > specificity && ([fileType isEqualToString:candidate] || [fileType hasPrefix:[candidate stringByAppendingString:@"."]]))
+			{
+				match = index;
+				specificity = scope.size();
+			}
+		}
+	}
+	return match;
 }
 
 - (void)application:(NSApplication*)application openURLs:(NSArray<NSURL*>*)urls
@@ -566,9 +592,14 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 		NSUUID* uuid = [[NSUUID alloc] initWithUUIDString:url.lastPathComponent];
 		if(!uuid)
 			continue;
+		NSString* fileType = nil;
+		for(NSURLQueryItem* item in [NSURLComponents componentsWithURL:url resolvingAgainstBaseURL:NO].queryItems)
+			if([item.name isEqualToString:@"fileType"])
+				fileType = item.value;
 		if(!_window)
 		{
 			_requestedThemeUUID = uuid.UUIDString;
+			_requestedFileType = fileType;
 			continue;
 		}
 		for(size_t row = 0; row < _themeRows.size(); ++row)
@@ -576,7 +607,15 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 			if(_themeRows[row].item && [to_ns(to_s(_themeRows[row].item->uuid())) caseInsensitiveCompare:uuid.UUIDString] == NSOrderedSame)
 			{
 				if([self selectThemeAtRow:row])
+				{
 					[_table scrollRowToVisible:_table.selectedRow];
+					NSInteger sample = [self sampleIndexForFileType:fileType];
+					if(sample >= 0 && sample != _sampleLanguage.indexOfSelectedItem)
+					{
+						[_sampleLanguage selectItemAtIndex:sample];
+						[self displaySampleReset:NO];
+					}
+				}
 				break;
 			}
 		}
