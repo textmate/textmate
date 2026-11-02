@@ -125,7 +125,8 @@ static NSString* NameForLocaleIdentifier (NSString* languageCode)
 		BOOL dark = [appearance isEqualToString:@"dark"] || (![appearance isEqualToString:@"light"] && [[NSApp.effectiveAppearance bestMatchFromAppearancesWithNames:@[ NSAppearanceNameAqua, NSAppearanceNameDarkAqua ]] isEqualToString:NSAppearanceNameDarkAqua]);
 		themeUUID = [NSUserDefaults.standardUserDefaults stringForKey:dark ? @"darkModeThemeUUID" : @"universalThemeUUID"];
 	}
-	NSURLComponents* selection = [NSURLComponents componentsWithString:[@"textmate-theme-editor://theme/" stringByAppendingString:themeUUID ?: @""]];
+	NSURLComponents* selection = [NSURLComponents componentsWithString:@"textmate-theme-editor://theme/"];
+	selection.path = [@"/" stringByAppendingString:themeUUID ?: @""];
 	if(controller.selectedDocument.fileType.length)
 		selection.queryItems = @[ [NSURLQueryItem queryItemWithName:@"fileType" value:controller.selectedDocument.fileType] ];
 	NSURL* selectionURL = selection.URL;
@@ -176,9 +177,11 @@ static NSString* NameForLocaleIdentifier (NSString* languageCode)
 - (void)themesMenuNeedsUpdate:(NSMenu*)aMenu
 {
 	[aMenu removeAllItems];
-	NSMenuItem* editorItem = [aMenu addItemWithTitle:@"Open Theme Editor…" action:@selector(openThemeEditor:) keyEquivalent:@""];
-	editorItem.target = self;
-	[aMenu addItem:[NSMenuItem separatorItem]];
+	auto addThemeEditor = [&] {
+		[aMenu addItem:[NSMenuItem separatorItem]];
+		NSMenuItem* editorItem = [aMenu addItemWithTitle:@"Open Theme Editor…" action:@selector(openThemeEditor:) keyEquivalent:@""];
+		editorItem.target = self;
+	};
 
 	std::map<std::string, std::multimap<std::string, bundles::item_ptr, text::less_t>> ordered;
 	for(auto const& item : bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeTheme))
@@ -194,6 +197,7 @@ static NSString* NameForLocaleIdentifier (NSString* languageCode)
 	if(ordered.empty())
 	{
 		[aMenu addItemWithTitle:@"No Themes Loaded" action:@selector(nop:) keyEquivalent:@""];
+		addThemeEditor();
 		return;
 	}
 
@@ -232,6 +236,7 @@ static NSString* NameForLocaleIdentifier (NSString* languageCode)
 			}
 		}
 	}
+	addThemeEditor();
 }
 
 - (void)spellingMenuNeedsUpdate:(NSMenu*)aMenu

@@ -1,4 +1,5 @@
 #import <Cocoa/Cocoa.h>
+#import <QuartzCore/QuartzCore.h>
 #import <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
 #import "appearance.h"
 #import "colors.h"
@@ -22,11 +23,56 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	return CFBridgingRelease(CFPropertyListCreateDeepCopy(kCFAllocatorDefault, (__bridge CFPropertyListRef)dictionary, kCFPropertyListMutableContainersAndLeaves));
 }
 
+static NSColor* ThemePanelBackgroundColor ()
+{
+	return [NSColor colorWithName:nil dynamicProvider:^NSColor*(NSAppearance* appearance) {
+		BOOL dark = [[appearance bestMatchFromAppearancesWithNames:@[ NSAppearanceNameAqua, NSAppearanceNameDarkAqua ]] isEqualToString:NSAppearanceNameDarkAqua];
+		return dark ? [NSColor colorWithSRGBRed:50 / 255.0 green:45 / 255.0 blue:44 / 255.0 alpha:1] : [NSColor colorWithWhite:0.965 alpha:1];
+	}];
+}
+
+@interface ThemeSidebarPanel : NSView
+@end
+@implementation ThemeSidebarPanel
+- (void)drawRect:(NSRect)dirtyRect
+{
+	BOOL dark = [[self.effectiveAppearance bestMatchFromAppearancesWithNames:@[ NSAppearanceNameAqua, NSAppearanceNameDarkAqua ]] isEqualToString:NSAppearanceNameDarkAqua];
+	NSColor* background = dark ? [NSColor colorWithSRGBRed:35 / 255.0 green:31 / 255.0 blue:30 / 255.0 alpha:1] : ThemePanelBackgroundColor();
+	[background setFill];
+	NSRectFill(self.bounds);
+	if(dark)
+	{
+		[[NSColor colorWithSRGBRed:70 / 255.0 green:60 / 255.0 blue:57 / 255.0 alpha:1] setStroke];
+		NSBezierPath* outline = [NSBezierPath bezierPathWithRoundedRect:NSInsetRect(self.bounds, 0.5, 0.5) xRadius:13.5 yRadius:13.5];
+		outline.lineWidth = 1;
+		[outline stroke];
+	}
+}
+
+- (void)viewDidChangeEffectiveAppearance
+{
+	[super viewDidChangeEffectiveAppearance];
+	self.needsDisplay = YES;
+}
+@end
+
 // A short inspector should stay at the top of its scroll view.
 @interface ThemeInspectorStackView : NSStackView
 @end
 @implementation ThemeInspectorStackView
 - (BOOL)isFlipped { return YES; }
+@end
+
+@interface ThemeEditorSplitView : NSSplitView
+@end
+@implementation ThemeEditorSplitView
+- (void)drawDividerInRect:(NSRect)rect
+{
+	// The inset sidebar supplies its own edge instead of a full-height rule.
+	if(self.subviews.count && fabs(NSMinX(rect) - NSMaxX(self.subviews.firstObject.frame)) < 1)
+		return;
+	[super drawDividerInRect:rect];
+}
 @end
 
 // NSTextField changes its alignment insets when it becomes editable.
@@ -42,12 +88,21 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 - (void)drawRect:(NSRect)dirtyRect
 {
 	BOOL dark = [[self.effectiveAppearance bestMatchFromAppearancesWithNames:@[ NSAppearanceNameAqua, NSAppearanceNameDarkAqua ]] isEqualToString:NSAppearanceNameDarkAqua];
-	[[NSColor colorWithWhite:dark ? 0.19 : 0.94 alpha:1] setFill];
+	NSColor* background = [NSColor colorWithWhite:0.94 alpha:1];
+	if(dark)
+		background = [self.superview isKindOfClass:ThemeSidebarPanel.class] ? [NSColor colorWithSRGBRed:35 / 255.0 green:31 / 255.0 blue:30 / 255.0 alpha:1] : ThemePanelBackgroundColor();
+	[background setFill];
 	[[NSBezierPath bezierPathWithRoundedRect:self.bounds xRadius:10 yRadius:10] fill];
 	// Square upper corners meet the group; lower corners follow its outline.
 	NSRectFill(NSMakeRect(0, NSHeight(self.bounds) / 2, NSWidth(self.bounds), NSHeight(self.bounds) / 2));
 	[NSColor.separatorColor setFill];
 	NSRectFill(NSMakeRect(0, NSHeight(self.bounds) - 1 / self.window.backingScaleFactor, NSWidth(self.bounds), 1 / self.window.backingScaleFactor));
+}
+
+- (void)viewDidChangeEffectiveAppearance
+{
+	[super viewDidChangeEffectiveAppearance];
+	self.needsDisplay = YES;
 }
 @end
 
@@ -259,10 +314,7 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	panel.borderWidth = 0;
 	panel.transparent = NO;
 	panel.titlePosition = NSNoTitle;
-	panel.fillColor = [NSColor colorWithName:nil dynamicProvider:^NSColor*(NSAppearance* appearance) {
-		BOOL dark = [[appearance bestMatchFromAppearancesWithNames:@[ NSAppearanceNameAqua, NSAppearanceNameDarkAqua ]] isEqualToString:NSAppearanceNameDarkAqua];
-		return [NSColor colorWithWhite:dark ? 0.16 : 0.965 alpha:1];
-	}];
+	panel.fillColor = ThemePanelBackgroundColor();
 	panel.cornerRadius = 10;
 	panel.contentViewMargins = NSZeroSize;
 	panel.translatesAutoresizingMaskIntoConstraints = NO;
@@ -315,10 +367,12 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 
 	_window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 1280, 800) styleMask:NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskMiniaturizable|NSWindowStyleMaskResizable backing:NSBackingStoreBuffered defer:NO];
 	_window.title = @"Theme Editor";
+	_window.titlebarAppearsTransparent = YES;
+	_window.titlebarSeparatorStyle = NSTitlebarSeparatorStyleNone;
 	_window.minSize = NSMakeSize(1000, 600);
 	_window.delegate = self;
 	[_window setFrameAutosaveName:@"ThemeEditorWindow"];
-	NSSplitView* split = [[NSSplitView alloc] initWithFrame:_window.contentView.bounds];
+	NSSplitView* split = [[ThemeEditorSplitView alloc] initWithFrame:_window.contentView.bounds];
 	split.vertical = YES;
 	split.delegate = self;
 	split.dividerStyle = NSSplitViewDividerStyleThin;
@@ -326,8 +380,18 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	_window.contentView = split;
 
 	NSView* sidebar = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 230, 800)];
-	NSScrollView* themeScroll = [[ThemeListScrollView alloc] initWithFrame:NSMakeRect(0, 24, 230, 776)];
+	ThemeSidebarPanel* sidebarPanel = [[ThemeSidebarPanel alloc] initWithFrame:NSInsetRect(sidebar.bounds, 8, 8)];
+	sidebarPanel.identifier = @"theme-sidebar-panel";
+	sidebarPanel.autoresizingMask = NSViewWidthSizable|NSViewHeightSizable;
+	sidebarPanel.wantsLayer = YES;
+	sidebarPanel.layer.cornerRadius = 14;
+	sidebarPanel.layer.masksToBounds = YES;
+	[sidebar addSubview:sidebarPanel];
+	NSScrollView* themeScroll = [[ThemeListScrollView alloc] initWithFrame:NSMakeRect(0, 24, NSWidth(sidebarPanel.bounds), NSHeight(sidebarPanel.bounds) - 24)];
 	themeScroll.contentView = [[ThemeListClipView alloc] initWithFrame:themeScroll.contentView.frame];
+	themeScroll.drawsBackground = NO;
+	themeScroll.contentView.drawsBackground = NO;
+	themeScroll.borderType = NSNoBorder;
 	themeScroll.autoresizingMask = NSViewWidthSizable|NSViewHeightSizable;
 	themeScroll.hasVerticalScroller = YES;
 	themeScroll.hasHorizontalScroller = NO;
@@ -337,15 +401,18 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	_table = [[ThemeListView alloc] initWithFrame:themeScroll.bounds];
 	NSTableColumn* column = [[NSTableColumn alloc] initWithIdentifier:@"theme"];
 	_table.headerView = nil;
-	column.width = 230;
+	column.width = themeScroll.contentSize.width;
 	[_table addTableColumn:column];
 	_table.dataSource = self;
+	_table.style = NSTableViewStyleSourceList;
+	_table.backgroundColor = NSColor.clearColor;
+	_table.rowHeight = 26;
 
 	_table.allowsEmptySelection = NO;
 	_table.floatsGroupRows = NO;
 	_table.accessibilityLabel = @"Installed TextMate themes";
 	themeScroll.documentView = _table;
-	[sidebar addSubview:themeScroll];
+	[sidebarPanel addSubview:themeScroll];
 	NSButton* newTheme = [self button:@"" action:@selector(newTheme:)];
 	newTheme.image = [NSImage imageWithSystemSymbolName:@"plus" accessibilityDescription:nil];
 	newTheme.accessibilityLabel = @"New theme";
@@ -356,10 +423,23 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	newTheme.contentTintColor = NSColor.secondaryLabelColor;
 	newTheme.image = [newTheme.image imageWithSymbolConfiguration:[NSImageSymbolConfiguration configurationWithPointSize:12 weight:NSFontWeightMedium]];
 	newTheme.frame = NSMakeRect(0, 0, 24, 24);
-	ThemeActionsBar* themeActions = [[ThemeActionsBar alloc] initWithFrame:NSMakeRect(0, 0, 230, 24)];
+	ThemeActionsBar* themeActions = [[ThemeActionsBar alloc] initWithFrame:NSMakeRect(0, 0, NSWidth(sidebarPanel.bounds), 24)];
 	themeActions.autoresizingMask = NSViewWidthSizable;
 	[themeActions addSubview:newTheme];
-	[sidebar addSubview:themeActions];
+	NSBox* themeActionDivider = [[NSBox alloc] initWithFrame:NSMakeRect(24, 4, 1, 16)];
+	themeActionDivider.boxType = NSBoxSeparator;
+	[themeActions addSubview:themeActionDivider];
+	NSButton* deleteTheme = [self button:@"" action:@selector(deleteTheme:)];
+	deleteTheme.image = [[NSImage imageWithSystemSymbolName:@"minus" accessibilityDescription:nil] imageWithSymbolConfiguration:[NSImageSymbolConfiguration configurationWithPointSize:12 weight:NSFontWeightMedium]];
+	deleteTheme.accessibilityLabel = @"Delete theme";
+	deleteTheme.toolTip = @"Delete the selected theme.";
+	deleteTheme.bordered = NO;
+	deleteTheme.imagePosition = NSImageOnly;
+	deleteTheme.controlSize = NSControlSizeSmall;
+	deleteTheme.contentTintColor = NSColor.secondaryLabelColor;
+	deleteTheme.frame = NSMakeRect(25, 0, 24, 24);
+	[themeActions addSubview:deleteTheme];
+	[sidebarPanel addSubview:themeActions];
 	[split addSubview:sidebar];
 
 	NSView* inspectorPane = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 320, 800)];
@@ -372,7 +452,10 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	_controls.alignment = NSLayoutAttributeLeading;
 	_controls.spacing = 6;
 	_controls.detachesHiddenViews = YES;
-	inspector.backgroundColor = NSColor.controlBackgroundColor;
+	inspector.backgroundColor = [NSColor colorWithName:nil dynamicProvider:^NSColor*(NSAppearance* appearance) {
+		BOOL dark = [[appearance bestMatchFromAppearancesWithNames:@[ NSAppearanceNameAqua, NSAppearanceNameDarkAqua ]] isEqualToString:NSAppearanceNameDarkAqua];
+		return dark ? NSColor.windowBackgroundColor : NSColor.controlBackgroundColor;
+	}];
 	_controls.edgeInsets = NSEdgeInsetsMake(12, 12, 12, 12);
 	inspector.documentView = _controls;
 	_controls.translatesAutoresizingMaskIntoConstraints = NO;
@@ -467,7 +550,17 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	_fields[@"fontSize"].placeholderString = @"e.g. 13";
 	_fields[@"fontStyle"].placeholderString = @"plain, bold, italic, underline, strikethrough";
 	[self addSettingsDividerInStack:_fontControls];
-	[_fontControls addArrangedSubview:[self button:@"Choose Font…" action:@selector(chooseFont:)]];
+	NSButton* chooseFont = [self button:@"Choose Font…" action:@selector(chooseFont:)];
+	NSView* fontActions = [NSView new];
+	chooseFont.translatesAutoresizingMaskIntoConstraints = NO;
+	[fontActions addSubview:chooseFont];
+	[_fontControls addArrangedSubview:fontActions];
+	[NSLayoutConstraint activateConstraints:@[
+		[fontActions.widthAnchor constraintEqualToAnchor:_fontControls.widthAnchor],
+		[chooseFont.trailingAnchor constraintEqualToAnchor:fontActions.trailingAnchor],
+		[chooseFont.topAnchor constraintEqualToAnchor:fontActions.topAnchor],
+		[chooseFont.bottomAnchor constraintEqualToAnchor:fontActions.bottomAnchor],
+	]];
 	[NSLayoutConstraint activateConstraints:@[
 		[inspector.leadingAnchor constraintEqualToAnchor:inspectorPane.leadingAnchor],
 		[inspector.trailingAnchor constraintEqualToAnchor:inspectorPane.trailingAnchor],
@@ -691,7 +784,7 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	[NSUserDefaults.standardUserDefaults setObject:file forKey:@"ThemeEditorSampleLanguage"];
 	_sampleStatus.stringValue = scope == "text.plain"
 		? @"No supported language bundles are installed. Install a language bundle in TextMate, then reopen Theme Editor."
-		: @"Command-click text to select its style rule. Sample edits stay in this preview.";
+		: @"Command-click text to select its style rule.";
 	if(_draft)
 		[self changed:_dirty];
 }
@@ -1035,7 +1128,7 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	if(!dirty)
 		[_invalidFields removeAllObjects];
 	_window.documentEdited = _dirty;
-	_window.title = [NSString stringWithFormat:@"%@ — Theme Editor", _draft[@"name"]];
+	_window.title = [NSString stringWithFormat:@"%@ — Theme Editor", _draft[@"name"] ?: @"untitled"];
 	NSString* fontName = _baseFont.fontName;
 	CGFloat fontSize = _baseFont.pointSize;
 	for(NSDictionary* rule in _draft[@"settings"])
@@ -1307,10 +1400,17 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 {
 	if(![self selectThemeForMenuItem:item])
 		return;
+	[self deleteTheme:item];
+}
+
+- (void)deleteTheme:(id)sender
+{
+	if(!_source)
+		return;
 	[_window makeFirstResponder:nil];
 	NSAlert* alert = [self themeAlert];
 	alert.alertStyle = NSAlertStyleWarning;
-	alert.messageText = [NSString stringWithFormat:@"Delete the theme “%@”?", _draft[@"name"]];
+	alert.messageText = [NSString stringWithFormat:@"Delete the theme “%@”?", _draft[@"name"] ?: @"untitled"];
 	alert.informativeText = @"This removes the theme from TextMate. Any unsaved changes to this theme will be discarded.";
 	[alert addButtonWithTitle:@"Cancel"];
 	[alert addButtonWithTitle:@"Delete"];

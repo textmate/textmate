@@ -91,7 +91,7 @@ int main ()
 		[NSApplication sharedApplication];
 		[NSApp setActivationPolicy:NSApplicationActivationPolicyAccessory];
 		ThemeEditorController* controller = [ThemeEditorController new];
-		NSWindow* window;
+		NSWindow* window = nil;
 		int result = 0;
 		try
 		{
@@ -495,8 +495,11 @@ int main ()
 			fprintf(stderr, "%s\n", error.what());
 			result = 1;
 		}
-		window.delegate = nil;
-		[window close];
+		if(window)
+		{
+			window.delegate = nil;
+			[window close];
+		}
 		return result;
 	}
 }
