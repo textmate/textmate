@@ -21,6 +21,7 @@
 - (void)loadSource;
 - (void)duplicateThemeFromMenu:(NSMenuItem*)item;
 - (void)deleteThemeFromMenu:(NSMenuItem*)item;
+- (BOOL)writeThemeToURL:(NSURL*)url error:(NSError**)error;
 - (BOOL)saveCurrentTheme;
 @end
 
@@ -359,12 +360,28 @@ int main ()
 			};
 			Require(contextMenu(0) == nil, "Section heading has theme actions");
 			NSMenu* menu = contextMenu(1); // Alpha is not the selected theme.
-			Require(menu.numberOfItems == 2 && [menu.itemArray[0].title isEqualToString:@"Duplicate"] && [menu.itemArray[1].title isEqualToString:@"Delete"], "Theme context menu has incorrect actions");
+			Require(menu.numberOfItems == 3 && [menu.itemArray[0].title isEqualToString:@"Duplicate"] && [menu.itemArray[1].title isEqualToString:@"Delete"] && [menu.itemArray[2].title isEqualToString:@"Download Theme…"], "Theme context menu has incorrect actions");
+			Require(menu.itemArray[2].action == NSSelectorFromString(@"downloadThemeFromMenu:") && [menu.itemArray[2].representedObject isEqual:menu.itemArray[0].representedObject], "Download does not target the clicked theme");
+			NSMenuItem* download = [NSApp.mainMenu itemWithTitle:@"File"].submenu.itemArray.lastObject;
+			Require([download.title isEqualToString:@"Download Theme…"] && download.action == NSSelectorFromString(@"downloadTheme:"), "File menu is missing Download Theme");
 			Require(table.selectedRow == previousRow, "Opening the context menu changed selection");
 			[controller duplicateThemeFromMenu:menu.itemArray[0]];
 			Require([[[controller valueForKey:@"draft"] objectForKey:@"name"] isEqualToString:@"Alpha Copy"], "Context menu duplicated the selected theme instead of the clicked theme");
 			Require([[controller valueForKey:@"newTheme"] boolValue], "Duplicate is not a new theme");
 			requireActionsEnabled(YES);
+			NSMutableDictionary* draft = [controller valueForKey:@"draft"];
+			// Preserve settings not exposed in the inspector as well as unsaved edits.
+			draft[@"customMetadata"] = @{ @"author": @"Theme export test" };
+			NSURL* exportURL = [NSURL fileURLWithPath:to_ns(jail.path("Downloaded.tmTheme"))];
+			NSError* exportError = nil;
+			Require([controller writeThemeToURL:exportURL error:&exportError], "Could not export an unsaved theme");
+			NSPropertyListFormat format;
+			NSDictionary* exported = [NSPropertyListSerialization propertyListWithData:[NSData dataWithContentsOfURL:exportURL] options:0 format:&format error:&exportError];
+			Require(format == NSPropertyListXMLFormat_v1_0 && [exported isEqual:draft], "Export did not preserve the complete theme as XML");
+			Require(table.selectedRow == [[controller valueForKey:@"selectedRow"] integerValue] && rules.indexOfSelectedItem == 0, "Export changed theme or rule selection");
+			Require([[controller valueForKey:@"newTheme"] boolValue] && [[controller valueForKey:@"dirty"] boolValue], "Export saved or cleared the unsaved draft");
+			requireActionsEnabled(YES);
+			Require(![controller writeThemeToURL:[NSURL fileURLWithPath:to_ns(jail.path("Missing/Downloaded.tmTheme"))] error:&exportError] && exportError != nil, "Export did not report a write failure");
 			NSMenuItem* deleteItem = contextMenu(table.selectedRow).itemArray[1];
 			auto deleteResponding = [&] (NSModalResponse response) {
 				NSTimer* timer = [NSTimer timerWithTimeInterval:0.01 repeats:YES block:^(NSTimer* timer) {

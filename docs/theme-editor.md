@@ -22,6 +22,8 @@ Samples are editable: select text, fold code, or type more examples to inspect t
 
 ## Saving and reverting
 
+Use **File → Download Theme…** or right-click a theme and choose **Download Theme…** to export it as a standalone `.tmTheme` XML property list. Choose the filename and location in the save dialog. The download includes current valid unsaved edits, preserves the theme's UUID and metadata, and does not save changes to the installed theme or clear its unsaved state. The right-click action exports the clicked theme.
+
 **Save** and **Revert** stay fixed at the bottom of the middle pane and are disabled when there are no unsaved changes. They enable when the theme changes and disable again after saving, reverting, or restoring the original values. The editing controls scroll above that footer when space is limited. **Save** or **Cmd+S** persists the draft using TextMate's bundle item save API. The current theme and style rule stay selected, including when renaming or changing appearance moves the theme within the grouped list. Existing themes retain their UUID and parent bundle; managed or bundled themes receive a local delta override. New and duplicated themes get new UUIDs in a local **Theme Editor** bundle. TextMate's bundle watcher detects these files and refreshes its theme menu.
 
 Drafts have private preview UUIDs and uncached styles, so editing them does not modify installed theme objects. Switching themes, creating another theme, closing the window, or quitting offers **Save**, **Cancel**, and **Discard**. **Revert** uses the same prompt and restores the last loaded or saved version. Correct invalid highlighted settings before saving or switching rules.

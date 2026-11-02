@@ -13,7 +13,7 @@ set_source_files_properties(${_samples} PROPERTIES
 set_property(TARGET ThemeEditor APPEND PROPERTY LINK_DEPENDS ${_samples})
 target_link_libraries(ThemeEditor PRIVATE
   OakTextView OakSystem Preferences bundles document ns plist settings theme
-  ${TEXTMATE_DEBUG_LIBS} "-framework Cocoa")
+  ${TEXTMATE_DEBUG_LIBS} "-framework Cocoa" "-framework UniformTypeIdentifiers")
 set_target_properties(ThemeEditor PROPERTIES
   OUTPUT_NAME "ThemeEditor"
   MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/Info.plist"
@@ -57,7 +57,7 @@ if(BUILD_TESTING)
   target_compile_definitions(theme_editor_selection_tests PRIVATE THEME_EDITOR_TESTING=1)
   target_link_libraries(theme_editor_selection_tests PRIVATE
     OakTextView OakSystem Preferences bundles document ns plist settings theme
-    ${TEXTMATE_DEBUG_LIBS} "-framework Cocoa")
+    ${TEXTMATE_DEBUG_LIBS} "-framework Cocoa" "-framework UniformTypeIdentifiers")
   add_test(NAME theme-editor-selection COMMAND $<TARGET_FILE:theme_editor_selection_tests>)
   set_tests_properties(theme-editor-selection PROPERTIES RUN_SERIAL TRUE TIMEOUT 30)
 endif()

@@ -1,4 +1,5 @@
 #import <Cocoa/Cocoa.h>
+#import <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
 #import "appearance.h"
 #import "colors.h"
 #import "samples.h"
@@ -561,7 +562,7 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	NSMenuItem* file = [NSMenuItem new];
 	file.title = @"File";
 	file.submenu = [[NSMenu alloc] initWithTitle:@"File"];
-	for(NSArray* entry in @[ @[ @"New Theme", NSStringFromSelector(@selector(newTheme:)), @"n" ], @[ @"Save Theme", NSStringFromSelector(@selector(saveTheme:)), @"s" ] ])
+	for(NSArray* entry in @[ @[ @"New Theme", NSStringFromSelector(@selector(newTheme:)), @"n" ], @[ @"Save Theme", NSStringFromSelector(@selector(saveTheme:)), @"s" ], @[ @"Download Theme…", NSStringFromSelector(@selector(downloadTheme:)), @"" ] ])
 	{
 		NSMenuItem* item = [file.submenu addItemWithTitle:entry[0] action:NSSelectorFromString(entry[1]) keyEquivalent:entry[2]];
 		item.target = self;
@@ -1099,7 +1100,7 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	if(row < 0 || row >= (NSInteger)_themeRows.size() || !_themeRows[row].item)
 		return nil;
 	NSMenu* menu = [NSMenu new];
-	for(NSArray<NSString*>* entry in @[ @[ @"Duplicate", NSStringFromSelector(@selector(duplicateThemeFromMenu:)) ], @[ @"Delete", NSStringFromSelector(@selector(deleteThemeFromMenu:)) ] ])
+	for(NSArray<NSString*>* entry in @[ @[ @"Duplicate", NSStringFromSelector(@selector(duplicateThemeFromMenu:)) ], @[ @"Delete", NSStringFromSelector(@selector(deleteThemeFromMenu:)) ], @[ @"Download Theme…", NSStringFromSelector(@selector(downloadThemeFromMenu:)) ] ])
 	{
 		NSMenuItem* item = [menu addItemWithTitle:entry[0] action:NSSelectorFromString(entry[1]) keyEquivalent:@""];
 		item.target = self;
@@ -1122,6 +1123,47 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 {
 	if([self selectThemeForMenuItem:item])
 		[self duplicateTheme:item];
+}
+
+- (void)downloadThemeFromMenu:(NSMenuItem*)item
+{
+	if([self selectThemeForMenuItem:item])
+		[self downloadTheme:item];
+}
+
+- (BOOL)writeThemeToURL:(NSURL*)url error:(NSError**)error
+{
+	NSData* data = [NSPropertyListSerialization dataWithPropertyList:_draft format:NSPropertyListXMLFormat_v1_0 options:0 error:error];
+	return data && [data writeToURL:url options:NSDataWritingAtomic error:error];
+}
+
+- (void)downloadTheme:(id)sender
+{
+	if(!_source || ![_window makeFirstResponder:nil])
+		return;
+	NSString* name = [[_draft[@"name"] description] stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
+	if(!name.length || _invalidFields.count)
+	{
+		NSAlert* alert = [self themeAlert];
+		alert.messageText = !name.length ? @"Enter a theme name before downloading." : @"Correct the highlighted setting before downloading.";
+		[alert runModal];
+		return;
+	}
+	NSSavePanel* panel = [NSSavePanel savePanel];
+	panel.title = @"Download Theme";
+	panel.allowedContentTypes = @[ [UTType typeWithFilenameExtension:@"tmTheme"] ];
+	panel.canCreateDirectories = YES;
+	panel.nameFieldStringValue = [[name stringByReplacingOccurrencesOfString:@"/" withString:@":"] stringByAppendingPathExtension:@"tmTheme"];
+	if([panel runModal] != NSModalResponseOK)
+		return;
+	NSError* error = nil;
+	if(![self writeThemeToURL:panel.URL error:&error])
+	{
+		NSAlert* alert = [self themeAlert];
+		alert.messageText = @"The theme could not be downloaded.";
+		alert.informativeText = error.localizedDescription ?: @"Choose another location and try again.";
+		[alert runModal];
+	}
 }
 
 - (void)deleteThemeFromMenu:(NSMenuItem*)item
