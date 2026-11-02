@@ -36,9 +36,9 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 - (NSEdgeInsets)alignmentRectInsets { return NSEdgeInsetsZero; }
 @end
 
-@interface ThemeRuleActionsBar : NSView
+@interface ThemeActionsBar : NSView
 @end
-@implementation ThemeRuleActionsBar
+@implementation ThemeActionsBar
 - (void)drawRect:(NSRect)dirtyRect
 {
 	BOOL dark = [[self.effectiveAppearance bestMatchFromAppearancesWithNames:@[ NSAppearanceNameAqua, NSAppearanceNameDarkAqua ]] isEqualToString:NSAppearanceNameDarkAqua];
@@ -159,6 +159,7 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	NSButton* _removeRuleButton;
 	NSSegmentedControl* _appearance;
 	NSPopUpButton* _sampleLanguage;
+	std::vector<theme_editor::sample_t> _availableSamples;
 	NSTextField* _sampleStatus;
 	NSMutableDictionary<NSString*, NSString*>* _sampleEdits;
 	NSString* _currentSample;
@@ -173,6 +174,7 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	NSInteger _activeRule;
 	NSMutableSet<NSString*>* _invalidFields;
 	NSInteger _selectedRow;
+	NSString* _requestedThemeUUID;
 }
 @end
 
@@ -323,7 +325,7 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	_window.contentView = split;
 
 	NSView* sidebar = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 230, 800)];
-	NSScrollView* themeScroll = [[ThemeListScrollView alloc] initWithFrame:NSMakeRect(0, 48, 230, 752)];
+	NSScrollView* themeScroll = [[ThemeListScrollView alloc] initWithFrame:NSMakeRect(0, 24, 230, 776)];
 	themeScroll.contentView = [[ThemeListClipView alloc] initWithFrame:themeScroll.contentView.frame];
 	themeScroll.autoresizingMask = NSViewWidthSizable|NSViewHeightSizable;
 	themeScroll.hasVerticalScroller = YES;
@@ -347,8 +349,16 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	newTheme.image = [NSImage imageWithSystemSymbolName:@"plus" accessibilityDescription:nil];
 	newTheme.accessibilityLabel = @"New theme";
 	newTheme.toolTip = @"Create a new theme.";
-	newTheme.frame = NSMakeRect(12, 10, 32, 30);
-	[sidebar addSubview:newTheme];
+	newTheme.bordered = NO;
+	newTheme.imagePosition = NSImageOnly;
+	newTheme.controlSize = NSControlSizeSmall;
+	newTheme.contentTintColor = NSColor.secondaryLabelColor;
+	newTheme.image = [newTheme.image imageWithSymbolConfiguration:[NSImageSymbolConfiguration configurationWithPointSize:12 weight:NSFontWeightMedium]];
+	newTheme.frame = NSMakeRect(0, 0, 24, 24);
+	ThemeActionsBar* themeActions = [[ThemeActionsBar alloc] initWithFrame:NSMakeRect(0, 0, 230, 24)];
+	themeActions.autoresizingMask = NSViewWidthSizable;
+	[themeActions addSubview:newTheme];
+	[sidebar addSubview:themeActions];
 	[split addSubview:sidebar];
 
 	NSView* inspectorPane = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 320, 800)];
@@ -411,7 +421,7 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 		if(constraint.firstItem == ruleControls && constraint.firstAttribute == NSLayoutAttributeBottom)
 			constraint.active = NO;
 	}
-	ThemeRuleActionsBar* ruleBar = [ThemeRuleActionsBar new];
+	ThemeActionsBar* ruleBar = [ThemeActionsBar new];
 	ruleBar.translatesAutoresizingMaskIntoConstraints = NO;
 	ruleActions.translatesAutoresizingMaskIntoConstraints = NO;
 	[ruleGroupContent addSubview:ruleBar];
@@ -436,14 +446,10 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 		[self addColorControlForKey:color[0] label:color[1] inStack:colorControls];
 	}
 	_gutterControls = [self settingsGroup:@"Gutter colors"];
-	NSTextField* gutterHint = [NSTextField wrappingLabelWithString:@"Line numbers and the editor margin. Applies to every style rule."];
-	gutterHint.font = [NSFont systemFontOfSize:NSFont.smallSystemFontSize];
-	gutterHint.textColor = NSColor.secondaryLabelColor;
-	[gutterHint.widthAnchor constraintEqualToConstant:275].active = YES;
-	[_gutterControls addArrangedSubview:gutterHint];
 	for(NSArray<NSString*>* color in @[ @[ @"foreground", @"Line numbers" ], @[ @"background", @"Background" ], @[ @"divider", @"Divider" ], @[ @"selectionForeground", @"Selected numbers" ], @[ @"selectionBackground", @"Selected background" ] ])
 	{
-		[self addSettingsDividerInStack:_gutterControls];
+		if(_gutterControls.arrangedSubviews.count)
+			[self addSettingsDividerInStack:_gutterControls];
 		[self addColorControlForKey:[@"gutter." stringByAppendingString:color[0]] label:color[1] inStack:_gutterControls];
 	}
 	_fontControls = [self settingsGroup:@"Font settings"];
@@ -470,6 +476,7 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	[split addSubview:inspectorPane];
 
 	_preview = [[ThemePreviewView alloc] initWithFrame:NSMakeRect(0, 0, 730, 800)];
+	_preview.hideStatusBar = YES;
 	_preview.showsLineNumbers = YES;
 	_preview.accessibilityLabel = @"Live TextMate preview";
 	_preview.textView.delegate = self;
@@ -480,11 +487,29 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	_sampleLanguage.action = @selector(sampleLanguageChanged:);
 	[_sampleLanguage.widthAnchor constraintEqualToConstant:180].active = YES;
 	for(auto const& sample : theme_editor::samples())
+	{
+		for(auto const& scope : sample.scopes)
+		{
+			if(bundles::query(bundles::kFieldGrammarScope, scope, scope::wildcard, bundles::kItemTypeGrammar).empty())
+				continue;
+			_availableSamples.push_back({ sample.name, sample.file, { scope } });
+			break;
+		}
+	}
+	if(_availableSamples.empty())
+	{
+		_availableSamples.push_back({ "Plain Text", theme_editor::samples().front().file, { "text.plain" } });
+		_sampleLanguage.enabled = NO;
+	}
+	std::sort(_availableSamples.begin(), _availableSamples.end(), [](auto const& lhs, auto const& rhs) {
+		return [to_ns(lhs.name) localizedStandardCompare:to_ns(rhs.name)] == NSOrderedAscending;
+	});
+	for(auto const& sample : _availableSamples)
 		[_sampleLanguage addItemWithTitle:to_ns(sample.name)];
 	NSString* remembered = [NSUserDefaults.standardUserDefaults stringForKey:@"ThemeEditorSampleLanguage"];
 	NSInteger initialSample = 0;
-	for(size_t index = 0; index < theme_editor::samples().size(); ++index)
-		if([remembered isEqualToString:to_ns(theme_editor::samples()[index].file)])
+	for(size_t index = 0; index < _availableSamples.size(); ++index)
+		if([remembered isEqualToString:to_ns(_availableSamples[index].file)])
 			initialSample = index;
 	[_sampleLanguage selectItemAtIndex:initialSample];
 	NSButton* invisibles = [NSButton checkboxWithTitle:@"Invisibles" target:self action:@selector(togglePreviewInvisibles:)];
@@ -517,15 +542,45 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	if(!_themes.empty())
 	{
 		_source = _themes.front();
+		for(auto const& theme : _themes)
+			if(_requestedThemeUUID && [to_ns(to_s(theme->uuid())) caseInsensitiveCompare:_requestedThemeUUID] == NSOrderedSame)
+				_source = theme;
 		[self loadSource];
 	}
 	else
 		[self newTheme:nil];
+	_requestedThemeUUID = nil;
 	[_window center];
 	[_window makeKeyAndOrderFront:nil];
 	[_controls layoutSubtreeIfNeeded];
 	[_controls scrollPoint:NSZeroPoint];
 	[NSApp activateIgnoringOtherApps:YES];
+}
+
+- (void)application:(NSApplication*)application openURLs:(NSArray<NSURL*>*)urls
+{
+	for(NSURL* url in urls)
+	{
+		if(![url.scheme isEqualToString:@"textmate-theme-editor"] || ![url.host isEqualToString:@"theme"])
+			continue;
+		NSUUID* uuid = [[NSUUID alloc] initWithUUIDString:url.lastPathComponent];
+		if(!uuid)
+			continue;
+		if(!_window)
+		{
+			_requestedThemeUUID = uuid.UUIDString;
+			continue;
+		}
+		for(size_t row = 0; row < _themeRows.size(); ++row)
+		{
+			if(_themeRows[row].item && [to_ns(to_s(_themeRows[row].item->uuid())) caseInsensitiveCompare:uuid.UUIDString] == NSOrderedSame)
+			{
+				if([self selectThemeAtRow:row])
+					[_table scrollRowToVisible:_table.selectedRow];
+				break;
+			}
+		}
+	}
 }
 
 - (CGFloat)splitView:(NSSplitView*)splitView constrainSplitPosition:(CGFloat)position ofSubviewAt:(NSInteger)divider
@@ -564,7 +619,7 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 
 - (void)displaySampleReset:(BOOL)reset
 {
-	auto const& sample = theme_editor::samples()[_sampleLanguage.indexOfSelectedItem];
+	auto const& sample = _availableSamples[_sampleLanguage.indexOfSelectedItem];
 	NSString* file = to_ns(sample.file);
 	if(_currentSample && _preview.document)
 		_sampleEdits[_currentSample] = _preview.document.content;
@@ -583,15 +638,7 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 		return;
 	}
 
-	std::string scope = "text.plain";
-	for(auto const& candidate : sample.scopes)
-	{
-		if(!bundles::query(bundles::kFieldGrammarScope, candidate, scope::wildcard, bundles::kItemTypeGrammar).empty())
-		{
-			scope = candidate;
-			break;
-		}
-	}
+	std::string const& scope = sample.scopes.front();
 	OakDocument* document = [OakDocument documentWithString:content fileType:to_ns(scope) customName:file];
 	document.virtualPath = file;
 	document.recentTrackingDisabled = YES;
@@ -604,7 +651,7 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	_currentSample = file;
 	[NSUserDefaults.standardUserDefaults setObject:file forKey:@"ThemeEditorSampleLanguage"];
 	_sampleStatus.stringValue = scope == "text.plain"
-		? [NSString stringWithFormat:@"Install the %@ language bundle in TextMate for syntax highlighting. Showing plain text.", to_ns(sample.name)]
+		? @"No supported language bundles are installed. Install a language bundle in TextMate, then reopen Theme Editor."
 		: @"Command-click text to select its style rule. Sample edits stay in this preview.";
 	if(_draft)
 		[self changed:_dirty];
@@ -889,7 +936,6 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 - (NSMutableDictionary*)currentRule { return _draft[@"settings"][_rules.indexOfSelectedItem]; }
 - (void)reloadRules:(NSInteger)selected
 {
-	_removeRuleButton.enabled = [_draft[@"settings"] count] > 1;
 	[_rules removeAllItems];
 	for(NSDictionary* rule in _draft[@"settings"])
 	{
@@ -911,6 +957,7 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	}
 	_activeRule = _rules.indexOfSelectedItem;
 	NSMutableDictionary* rule = [self currentRule];
+	_removeRuleButton.enabled = [rule[@"scope"] length] > 0 && [_draft[@"settings"] count] > 1;
 	NSDictionary* settings = rule[@"settings"];
 	for(NSString* key in _fields)
 	{
@@ -1096,7 +1143,7 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 {
 	if(_invalidFields.count) { NSBeep(); return; }
 	NSMutableArray* rules = _draft[@"settings"];
-	if(rules.count <= 1)
+	if(rules.count <= 1 || ![[self currentRule][@"scope"] length])
 		return;
 	NSAlert* alert = [self themeAlert];
 	alert.alertStyle = NSAlertStyleWarning;

@@ -1,6 +1,7 @@
 #import <Cocoa/Cocoa.h>
 #import <OakSystem/application.h>
 #import <OakTextView/OakDocumentView.h>
+#import <document/OakDocument.h>
 #import <bundles/item.h>
 #import <bundles/locations.h>
 #import <test/jail.h>
@@ -9,6 +10,7 @@
 // Exercise the actual controller, including its AppKit selection notifications.
 @interface ThemeEditorController : NSObject
 - (void)applicationDidFinishLaunching:(NSNotification*)notification;
+- (void)application:(NSApplication*)application openURLs:(NSArray<NSURL*>*)urls;
 - (NSAlert*)themeAlert;
 - (void)ruleSelected:(id)sender;
 - (void)nameChanged:(id)sender;
@@ -17,6 +19,7 @@
 - (void)addRule:(id)sender;
 - (void)settingChanged:(NSTextField*)field;
 - (void)colorChanged:(NSColorWell*)well;
+- (void)sampleLanguageChanged:(id)sender;
 - (void)revertTheme:(id)sender;
 - (void)loadSource;
 - (void)duplicateThemeFromMenu:(NSMenuItem*)item;
@@ -55,10 +58,12 @@ int main ()
 		bundleUUID.generate();
 		auto bundle = std::make_shared<bundles::item_t>(bundleUUID, bundles::item_ptr(), bundles::kItemTypeBundle);
 		bundle->set_plist({ { "uuid", to_s(bundleUUID) }, { "name", "Selection Tests" } });
+		NSMutableDictionary<NSString*, NSURL*>* themeURLs = [NSMutableDictionary dictionary];
 		for(auto const& name : { "Alpha", "Middle", "Zulu" })
 		{
 			oak::uuid_t uuid;
 			uuid.generate();
+			themeURLs[to_ns(name)] = [NSURL URLWithString:[@"textmate-theme-editor://theme/" stringByAppendingString:to_ns(to_s(uuid))]];
 			auto item = std::make_shared<bundles::item_t>(uuid, bundle, bundles::kItemTypeTheme);
 			item->set_plist({
 				{ "uuid", to_s(uuid) }, { "name", name }, { "semanticClass", "theme.light.test" },
@@ -68,6 +73,14 @@ int main ()
 				} }
 			});
 			Require(item->save(), "Could not create temporary theme fixture");
+		}
+		for(auto const& scope : { "source.js", "source.python" })
+		{
+			oak::uuid_t uuid;
+			uuid.generate();
+			auto grammar = std::make_shared<bundles::item_t>(uuid, bundle, bundles::kItemTypeGrammar);
+			grammar->set_plist({ { "uuid", to_s(uuid) }, { "name", scope }, { "scopeName", scope }, { "patterns", plist::array_t{} } });
+			Require(grammar->save(), "Could not create temporary grammar fixture");
 		}
 
 		[NSApplication sharedApplication];
@@ -80,8 +93,42 @@ int main ()
 			NSUserDefaults* defaults = NSUserDefaults.standardUserDefaults;
 			id lineNumberPreference = [defaults objectForKey:@"DocumentView Disable Line Numbers"];
 			[defaults setBool:YES forKey:@"DocumentView Disable Line Numbers"];
+			[defaults setObject:@"Swift.swift" forKey:@"ThemeEditorSampleLanguage"];
+			[controller application:NSApp openURLs:@[ themeURLs[@"Middle"] ]];
 			[controller applicationDidFinishLaunching:nil];
+			Require([[[controller valueForKey:@"draft"] objectForKey:@"name"] isEqualToString:@"Middle"], "Launch did not select the theme requested by TextMate");
+			[controller application:NSApp openURLs:@[ themeURLs[@"Zulu"] ]];
+			Require([[[controller valueForKey:@"draft"] objectForKey:@"name"] isEqualToString:@"Zulu"], "An already-running editor did not select TextMate's theme");
+			[controller application:NSApp openURLs:@[ [NSURL URLWithString:@"textmate-theme-editor://theme/invalid"] ]];
+			Require([[[controller valueForKey:@"draft"] objectForKey:@"name"] isEqualToString:@"Zulu"], "Invalid theme request changed the selection");
+			NSTextField* launchForeground = ((NSDictionary*)[controller valueForKey:@"fields"])[@"foreground"];
+			launchForeground.stringValue = @"#123456";
+			[controller settingChanged:launchForeground];
+			[controller application:NSApp openURLs:@[ themeURLs[@"Zulu"] ]];
+			Require([[controller valueForKey:@"dirty"] boolValue] && [launchForeground.stringValue isEqualToString:@"#123456"], "Reopening the current theme discarded its edits");
+			NSTimer* cancelThemeSwitch = [NSTimer timerWithTimeInterval:0.01 repeats:YES block:^(NSTimer* timer) {
+				if(NSApp.modalWindow)
+				{
+					[NSApp stopModalWithCode:NSAlertSecondButtonReturn];
+					[timer invalidate];
+				}
+			}];
+			[[NSRunLoop currentRunLoop] addTimer:cancelThemeSwitch forMode:NSModalPanelRunLoopMode];
+			[controller application:NSApp openURLs:@[ themeURLs[@"Alpha"] ]];
+			[cancelThemeSwitch invalidate];
+			Require([[[controller valueForKey:@"draft"] objectForKey:@"name"] isEqualToString:@"Zulu"] && [[controller valueForKey:@"dirty"] boolValue], "Canceling a theme request lost the edited theme");
+			[controller loadSource];
+			[controller application:NSApp openURLs:@[ themeURLs[@"Alpha"] ]];
 			OakDocumentView* previewView = [controller valueForKey:@"preview"];
+			NSPopUpButton* languages = [controller valueForKey:@"sampleLanguage"];
+			Require([languages.itemTitles isEqual:@[ @"JavaScript", @"Python" ]], "Sample menu includes languages without installed grammars");
+			Require([languages.titleOfSelectedItem isEqualToString:@"JavaScript"], "Missing remembered grammar did not select the first supported sample");
+			[languages selectItemWithTitle:@"Python"];
+			[controller sampleLanguageChanged:languages];
+			Require([previewView.document.fileType isEqualToString:@"source.python"], "Filtered sample menu selected the wrong grammar");
+			Require([previewView.document.virtualPath isEqualToString:@"Python.py"], "Filtered sample menu selected the wrong sample file");
+			[languages selectItemWithTitle:@"JavaScript"];
+			[controller sampleLanguageChanged:languages];
 			Require(previewView.showsLineNumbers, "Preview did not show line numbers when the editor preference hides them");
 			Require([defaults boolForKey:@"DocumentView Disable Line Numbers"], "Preview changed the editor's line-number preference");
 			if(lineNumberPreference)
@@ -179,6 +226,18 @@ int main ()
 			[themeClip scrollToPoint:NSZeroPoint];
 			Require(!table.floatsGroupRows, "Theme section headings remain pinned while scrolling");
 			NSPopUpButton* rules = [controller valueForKey:@"rules"];
+			NSButton* removeRuleButton = [controller valueForKey:@"removeRuleButton"];
+			[rules selectItemAtIndex:0];
+			[controller ruleSelected:nil];
+			Require(!removeRuleButton.enabled, "Global editor style can be removed through the minus button");
+			NSDictionary* beforeGlobalRemoval = [[controller valueForKey:@"draft"] copy];
+			[controller removeRule:nil];
+			Require(rules.numberOfItems == 2 && [beforeGlobalRemoval isEqual:[controller valueForKey:@"draft"]] && ![[controller valueForKey:@"dirty"] boolValue], "Removing Global editor style changed the theme");
+			[rules selectItemAtIndex:1];
+			[controller ruleSelected:nil];
+			Require(removeRuleButton.enabled, "A scoped style rule cannot be removed");
+			[rules selectItemAtIndex:0];
+			[controller ruleSelected:nil];
 			auto selectedName = [&] { return ((NSTableCellView*)[table viewAtColumn:0 row:table.selectedRow makeIfNecessary:YES]).textField; };
 			NSSegmentedControl* appearance = [controller valueForKey:@"appearance"];
 			Require(appearance.segmentCount == 3 && appearance.trackingMode == NSSegmentSwitchTrackingSelectOne, "Appearance is not a three-button exclusive choice");

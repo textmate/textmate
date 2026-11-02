@@ -12,4 +12,8 @@
 	<key>LSMinimumSystemVersion</key><string>14.0</string>
 	<key>NSHighResolutionCapable</key><true/>
 	<key>NSPrincipalClass</key><string>NSApplication</string>
+	<key>CFBundleURLTypes</key><array><dict>
+		<key>CFBundleURLName</key><string>com.macromates.TextMate.ThemeEditor</string>
+		<key>CFBundleURLSchemes</key><array><string>textmate-theme-editor</string></array>
+	</dict></array>
 </dict></plist>

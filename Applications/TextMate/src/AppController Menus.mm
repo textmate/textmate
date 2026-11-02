@@ -11,6 +11,7 @@
 #import <MenuBuilder/MenuBuilder.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakTextView/OakTextView.h>
+#import <DocumentWindow/DocumentWindowController.h>
 #import <oak/debug.h>
 #import <BundleMenu/BundleMenu.h>
 #import <theme/theme.h>
@@ -115,7 +116,16 @@ static NSString* NameForLocaleIdentifier (NSString* languageCode)
 	NSURL* editorURL = [NSBundle.mainBundle.bundleURL URLByAppendingPathComponent:@"Contents/Helpers/ThemeEditor.app" isDirectory:YES];
 	NSWorkspaceOpenConfiguration* configuration = [NSWorkspaceOpenConfiguration configuration];
 	configuration.activates = YES;
-	[NSWorkspace.sharedWorkspace openApplicationAtURL:editorURL configuration:configuration completionHandler:^(NSRunningApplication* app, NSError* error) {
+	DocumentWindowController* controller = [NSApp targetForAction:@selector(selectedDocument)];
+	NSString* themeUUID = controller.textView.themeUUID;
+	if(!themeUUID.length)
+	{
+		NSString* appearance = [NSUserDefaults.standardUserDefaults stringForKey:@"themeAppearance"];
+		BOOL dark = [appearance isEqualToString:@"dark"] || (![appearance isEqualToString:@"light"] && [[NSApp.effectiveAppearance bestMatchFromAppearancesWithNames:@[ NSAppearanceNameAqua, NSAppearanceNameDarkAqua ]] isEqualToString:NSAppearanceNameDarkAqua]);
+		themeUUID = [NSUserDefaults.standardUserDefaults stringForKey:dark ? @"darkModeThemeUUID" : @"universalThemeUUID"];
+	}
+	NSURL* selectionURL = [NSURL URLWithString:[@"textmate-theme-editor://theme/" stringByAppendingString:themeUUID ?: @""]];
+	[NSWorkspace.sharedWorkspace openURLs:@[ selectionURL ] withApplicationAtURL:editorURL configuration:configuration completionHandler:^(NSRunningApplication* app, NSError* error) {
 		if(error)
 		{
 			dispatch_async(dispatch_get_main_queue(), ^{
