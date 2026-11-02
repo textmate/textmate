@@ -190,12 +190,11 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 
 - (void)applicationDidFinishLaunching:(NSNotification*)notification
 {
-	// Direct CLI launches can retain a cached generic Dock/app-switcher icon.
-	if(NSURL* iconURL = [NSBundle.mainBundle URLForResource:@"ThemeEditor" withExtension:@"icns"])
-	{
-		if(NSImage* icon = [[NSImage alloc] initWithContentsOfURL:iconURL])
-			NSApp.applicationIconImage = icon;
-	}
+	// Preserve macOS's app-icon framing and padding when launching through the CLI.
+	NSImage* appIcon = [[NSWorkspace.sharedWorkspace iconForFile:NSBundle.mainBundle.bundlePath] copy];
+	// NSApplication snapshots this image at its nominal size; 32pt produces blur.
+	appIcon.size = NSMakeSize(512, 512);
+	NSApp.applicationIconImage = appIcon;
 	_previewUUID.generate();
 	_selectedRow = -1;
 	std::vector<std::string> paths;
@@ -562,7 +561,7 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	NSMenuItem* file = [NSMenuItem new];
 	file.title = @"File";
 	file.submenu = [[NSMenu alloc] initWithTitle:@"File"];
-	for(NSArray* entry in @[ @[ @"New Theme", NSStringFromSelector(@selector(newTheme:)), @"n" ], @[ @"Save Theme", NSStringFromSelector(@selector(saveTheme:)), @"s" ], @[ @"Download Theme…", NSStringFromSelector(@selector(downloadTheme:)), @"" ] ])
+	for(NSArray* entry in @[ @[ @"New Theme", NSStringFromSelector(@selector(newTheme:)), @"n" ], @[ @"Save Theme", NSStringFromSelector(@selector(saveTheme:)), @"s" ], @[ @"Download...", NSStringFromSelector(@selector(downloadTheme:)), @"" ] ])
 	{
 		NSMenuItem* item = [file.submenu addItemWithTitle:entry[0] action:NSSelectorFromString(entry[1]) keyEquivalent:entry[2]];
 		item.target = self;
@@ -1100,7 +1099,7 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	if(row < 0 || row >= (NSInteger)_themeRows.size() || !_themeRows[row].item)
 		return nil;
 	NSMenu* menu = [NSMenu new];
-	for(NSArray<NSString*>* entry in @[ @[ @"Duplicate", NSStringFromSelector(@selector(duplicateThemeFromMenu:)) ], @[ @"Delete", NSStringFromSelector(@selector(deleteThemeFromMenu:)) ], @[ @"Download Theme…", NSStringFromSelector(@selector(downloadThemeFromMenu:)) ] ])
+	for(NSArray<NSString*>* entry in @[ @[ @"Duplicate", NSStringFromSelector(@selector(duplicateThemeFromMenu:)) ], @[ @"Delete", NSStringFromSelector(@selector(deleteThemeFromMenu:)) ], @[ @"Download...", NSStringFromSelector(@selector(downloadThemeFromMenu:)) ] ])
 	{
 		NSMenuItem* item = [menu addItemWithTitle:entry[0] action:NSSelectorFromString(entry[1]) keyEquivalent:@""];
 		item.target = self;

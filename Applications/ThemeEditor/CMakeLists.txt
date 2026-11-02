@@ -53,6 +53,7 @@ if(BUILD_TESTING)
     src/main.mm tests/save_selection.mm ${_samples} "${_icon}")
   set_target_properties(theme_editor_selection_tests PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER "com.macromates.TextMate.ThemeEditor.Tests"
+    MACOSX_BUNDLE_ICON_FILE "ThemeEditor.icns"
     BUILD_RPATH "${CMAKE_BINARY_DIR}/lib")
   target_compile_definitions(theme_editor_selection_tests PRIVATE THEME_EDITOR_TESTING=1)
   target_link_libraries(theme_editor_selection_tests PRIVATE

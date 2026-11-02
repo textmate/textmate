@@ -90,13 +90,18 @@ int main ()
 				[defaults removeObjectForKey:@"DocumentView Disable Line Numbers"];
 			NSImage* bundledIcon = [[NSImage alloc] initWithContentsOfURL:[NSBundle.mainBundle URLForResource:@"ThemeEditor" withExtension:@"icns"]];
 			Require(bundledIcon != nil, "Missing bundled application icon");
-			auto expectedIcon = IconPixels(bundledIcon);
+			BOOL hasFullResolutionIcon = NO;
+			for(NSImageRep* representation in NSApp.applicationIconImage.representations)
+				hasFullResolutionIcon |= representation.pixelsWide >= 1024 && representation.pixelsHigh >= 1024;
+			Require(hasFullResolutionIcon, "Running app icon was reduced to a blurry thumbnail");
+			NSImage* systemIcon = [NSWorkspace.sharedWorkspace iconForFile:NSBundle.mainBundle.bundlePath];
+			auto expectedIcon = IconPixels(systemIcon);
 			auto runningIcon = IconPixels(NSApp.applicationIconImage);
 			double iconDifference = 0;
 			for(size_t index = 0; index < expectedIcon.size(); ++index)
 				iconDifference += abs(int(expectedIcon[index]) - int(runningIcon[index]));
 			// AppKit snapshots the assigned image in the display's color space.
-			Require(iconDifference / expectedIcon.size() < 3, "Running app did not adopt its bundled icon");
+			Require(iconDifference / expectedIcon.size() < 3, "Running app did not preserve the system-rendered icon framing");
 			auto dialogIcon = IconPixels([controller themeAlert].icon);
 			double dialogIconDifference = 0;
 			for(size_t index = 0; index < expectedIcon.size(); ++index)
@@ -360,10 +365,10 @@ int main ()
 			};
 			Require(contextMenu(0) == nil, "Section heading has theme actions");
 			NSMenu* menu = contextMenu(1); // Alpha is not the selected theme.
-			Require(menu.numberOfItems == 3 && [menu.itemArray[0].title isEqualToString:@"Duplicate"] && [menu.itemArray[1].title isEqualToString:@"Delete"] && [menu.itemArray[2].title isEqualToString:@"Download Theme…"], "Theme context menu has incorrect actions");
+			Require(menu.numberOfItems == 3 && [menu.itemArray[0].title isEqualToString:@"Duplicate"] && [menu.itemArray[1].title isEqualToString:@"Delete"] && [menu.itemArray[2].title isEqualToString:@"Download..."], "Theme context menu has incorrect actions");
 			Require(menu.itemArray[2].action == NSSelectorFromString(@"downloadThemeFromMenu:") && [menu.itemArray[2].representedObject isEqual:menu.itemArray[0].representedObject], "Download does not target the clicked theme");
 			NSMenuItem* download = [NSApp.mainMenu itemWithTitle:@"File"].submenu.itemArray.lastObject;
-			Require([download.title isEqualToString:@"Download Theme…"] && download.action == NSSelectorFromString(@"downloadTheme:"), "File menu is missing Download Theme");
+			Require([download.title isEqualToString:@"Download..."] && download.action == NSSelectorFromString(@"downloadTheme:"), "File menu is missing Download Theme");
 			Require(table.selectedRow == previousRow, "Opening the context menu changed selection");
 			[controller duplicateThemeFromMenu:menu.itemArray[0]];
 			Require([[[controller valueForKey:@"draft"] objectForKey:@"name"] isEqualToString:@"Alpha Copy"], "Context menu duplicated the selected theme instead of the clicked theme");

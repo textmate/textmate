@@ -6,6 +6,13 @@ transparent overlay, composited over the top-right corner at each original
 TextMate icon size. The flower remains pixel-for-pixel identical everywhere
 outside that overlay.
 
+At runtime, the app uses `NSWorkspace`'s rendered bundle icon, matching TextMate's
+system-provided framing and padding. Assigning the raw `.icns` image directly to
+`NSApp.applicationIconImage` bypasses that presentation and makes the flower look
+larger in the Dock, even when the source pixels match.
+The rendered image is requested at 512 points before assignment so AppKit keeps
+a full 1024-pixel Retina representation instead of snapshotting a 64-pixel thumbnail.
+
 `ThemeEditor.png` is the full-resolution preview; `ThemeEditor.icns` is bundled
 with the application. Rebuild both from the repository root with:
 
