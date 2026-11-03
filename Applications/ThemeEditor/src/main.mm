@@ -519,15 +519,13 @@ static NSColor* ThemePanelBackgroundColor ()
 		[ruleActions.leadingAnchor constraintEqualToAnchor:ruleBar.leadingAnchor constant:0],
 		[ruleActions.centerYAnchor constraintEqualToAnchor:ruleBar.centerYAnchor],
 	]];
-	NSStackView* colorControls = [self settingsGroup:@"Colors"];
 	_fields = [NSMutableDictionary dictionary];
 	_invalidFields = [NSMutableSet set];
 	_wells = [NSMutableDictionary dictionary];
 	for(NSArray<NSString*>* color in @[ @[ @"foreground", @"Foreground" ], @[ @"background", @"Background" ], @[ @"caret", @"Caret" ], @[ @"selection", @"Selection" ], @[ @"invisibles", @"Invisibles" ] ])
 	{
-		if(colorControls.arrangedSubviews.count)
-			[self addSettingsDividerInStack:colorControls];
-		[self addColorControlForKey:color[0] label:color[1] inStack:colorControls];
+		[self addSettingsDividerInStack:ruleControls];
+		[self addColorControlForKey:color[0] label:color[1] inStack:ruleControls];
 	}
 	_gutterControls = [self settingsGroup:@"Gutter colors"];
 	for(NSArray<NSString*>* color in @[ @[ @"foreground", @"Line numbers" ], @[ @"background", @"Background" ], @[ @"divider", @"Divider" ], @[ @"selectionForeground", @"Selected numbers" ], @[ @"selectionBackground", @"Selected background" ] ])
