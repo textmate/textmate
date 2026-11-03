@@ -207,9 +207,12 @@ static NSColor* ThemePanelBackgroundColor ()
 	NSWindow* _window;
 	NSTableView* _table;
 	NSStackView* _controls;
-	NSStackView* _fontControls;
 	NSStackView* _gutterControls;
+	NSTextField* _gutterHeading;
 	OakDocumentView* _preview;
+	NSPopUpButton* _fontFamily;
+	NSPopUpButton* _fontTypeface;
+	NSSegmentedControl* _fontStyles;
 	NSPopUpButton* _rules;
 	NSButton* _removeRuleButton;
 	NSSegmentedControl* _appearance;
@@ -281,7 +284,7 @@ static NSColor* ThemePanelBackgroundColor ()
 	label.font = [NSFont systemFontOfSize:NSFont.smallSystemFontSize];
 	label.lineBreakMode = NSLineBreakByTruncatingTail;
 	label.toolTip = title;
-	[label.widthAnchor constraintEqualToConstant:100].active = YES;
+	[label.widthAnchor constraintEqualToConstant:120].active = YES;
 
 	NSTextField* field = [NSTextField textFieldWithString:@""];
 	field.identifier = key;
@@ -293,10 +296,13 @@ static NSColor* ThemePanelBackgroundColor ()
 	field.action = @selector(settingChanged:);
 	field.delegate = self;
 	field.continuous = NO;
-	[field.widthAnchor constraintEqualToConstant:119].active = YES;
+	[field.widthAnchor constraintEqualToConstant:90].active = YES;
 	_fields[key] = field;
 
-	NSStackView* row = [NSStackView stackViewWithViews:@[ well, label, field ]];
+	NSView* spacer = [NSView new];
+	[spacer setContentHuggingPriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
+	[spacer setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
+	NSStackView* row = [NSStackView stackViewWithViews:@[ well, label, spacer, field ]];
 	row.alignment = NSLayoutAttributeCenterY;
 	row.spacing = 8;
 	[row.widthAnchor constraintEqualToConstant:275].active = YES;
@@ -309,6 +315,8 @@ static NSColor* ThemePanelBackgroundColor ()
 	NSTextField* heading = [NSTextField labelWithString:title];
 	heading.font = [NSFont boldSystemFontOfSize:NSFont.systemFontSize];
 	[_controls addArrangedSubview:heading];
+	if([title isEqualToString:@"Gutter colors"])
+		_gutterHeading = heading;
 	NSBox* panel = [NSBox new];
 	panel.boxType = NSBoxCustom;
 	panel.borderWidth = 0;
@@ -527,6 +535,63 @@ static NSColor* ThemePanelBackgroundColor ()
 		[self addSettingsDividerInStack:ruleControls];
 		[self addColorControlForKey:color[0] label:color[1] inStack:ruleControls];
 	}
+	[self addSettingsDividerInStack:ruleControls];
+	[ruleControls setCustomSpacing:14 afterView:ruleControls.arrangedSubviews.lastObject];
+	for(NSString* key in @[ @"fontName", @"fontStyle" ])
+	{
+		NSTextField* field = [NSTextField textFieldWithString:@""];
+		field.identifier = key;
+		_fields[key] = field;
+	}
+	_fontFamily = [[NSPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:NO];
+	[_fontFamily addItemWithTitle:@"Inherited"];
+	for(NSString* family in [NSFontManager.sharedFontManager.availableFontFamilies sortedArrayUsingSelector:@selector(localizedStandardCompare:)])
+		[_fontFamily addItemWithTitle:family];
+	_fontFamily.target = self;
+	_fontFamily.action = @selector(fontFamilyChanged:);
+	_fontFamily.accessibilityLabel = @"Font family";
+	[_fontFamily.widthAnchor constraintEqualToConstant:275].active = YES;
+	[ruleControls addArrangedSubview:_fontFamily];
+	[ruleControls setCustomSpacing:10 afterView:_fontFamily];
+	_fontTypeface = [[NSPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:NO];
+	_fontTypeface.target = self;
+	_fontTypeface.action = @selector(fontTypefaceChanged:);
+	_fontTypeface.accessibilityLabel = @"Typeface";
+	[_fontTypeface.widthAnchor constraintEqualToConstant:193].active = YES;
+	NSTextField* size = [NSTextField textFieldWithString:@""];
+	size.identifier = @"fontSize";
+	size.placeholderString = @"Auto";
+	size.accessibilityLabel = @"Font size in points";
+	size.toolTip = @"Font size in points (4–200). Clear to inherit.";
+	size.delegate = self;
+	size.target = self;
+	size.action = @selector(settingChanged:);
+	[size.widthAnchor constraintEqualToConstant:74].active = YES;
+	_fields[@"fontSize"] = size;
+	NSStackView* fontRow = [NSStackView stackViewWithViews:@[ _fontTypeface, size ]];
+	fontRow.spacing = 8;
+	fontRow.alignment = NSLayoutAttributeCenterY;
+	[ruleControls addArrangedSubview:fontRow];
+	[ruleControls setCustomSpacing:10 afterView:fontRow];
+	_fontStyles = [NSSegmentedControl segmentedControlWithLabels:@[ @"B", @"I", @"U", @"S" ] trackingMode:NSSegmentSwitchTrackingSelectAny target:self action:@selector(fontStylesChanged:)];
+	_fontStyles.segmentDistribution = NSSegmentDistributionFillEqually;
+	NSArray* styleNames = @[ @"Bold", @"Italic", @"Underline", @"Strikethrough" ];
+	NSArray* symbols = @[ @"bold", @"italic", @"underline", @"strikethrough" ];
+	for(NSInteger i = 0; i < 4; ++i)
+	{
+		[_fontStyles setImage:[NSImage imageWithSystemSymbolName:symbols[i] accessibilityDescription:styleNames[i]] forSegment:i];
+		[_fontStyles setLabel:@"" forSegment:i];
+		[_fontStyles setToolTip:styleNames[i] forSegment:i];
+	}
+	_fontStyles.accessibilityLabel = @"Font formatting";
+	[_fontStyles.widthAnchor constraintEqualToConstant:180].active = YES;
+	NSButton* resetStyle = [self button:@"Inherited" action:@selector(resetFontStyle:)];
+	resetStyle.controlSize = NSControlSizeSmall;
+	resetStyle.toolTip = @"Remove the formatting override for this rule.";
+	NSStackView* styleRow = [NSStackView stackViewWithViews:@[ _fontStyles, resetStyle ]];
+	styleRow.spacing = 8;
+	styleRow.alignment = NSLayoutAttributeCenterY;
+	[ruleControls addArrangedSubview:styleRow];
 	_gutterControls = [self settingsGroup:@"Gutter colors"];
 	for(NSArray<NSString*>* color in @[ @[ @"foreground", @"Line numbers" ], @[ @"background", @"Background" ], @[ @"divider", @"Divider" ], @[ @"selectionForeground", @"Selected numbers" ], @[ @"selectionBackground", @"Selected background" ] ])
 	{
@@ -534,31 +599,6 @@ static NSColor* ThemePanelBackgroundColor ()
 			[self addSettingsDividerInStack:_gutterControls];
 		[self addColorControlForKey:[@"gutter." stringByAppendingString:color[0]] label:color[1] inStack:_gutterControls];
 	}
-	_fontControls = [self settingsGroup:@"Font settings"];
-	for(NSString* key in @[ @"fontName", @"fontSize", @"fontStyle" ])
-	{
-		if(_fontControls.arrangedSubviews.count)
-			[self addSettingsDividerInStack:_fontControls];
-		NSString* title = [@{ @"fontName": @"Font name", @"fontSize": @"Font size", @"fontStyle": @"Font style" } objectForKey:key];
-		NSTextField* field = [self field:title action:@selector(settingChanged:) inStack:_fontControls];
-		field.identifier = key;
-		_fields[key] = field;
-	}
-	_fields[@"fontName"].placeholderString = @"PostScript name, e.g. Menlo-Regular";
-	_fields[@"fontSize"].placeholderString = @"e.g. 13";
-	_fields[@"fontStyle"].placeholderString = @"plain, bold, italic, underline, strikethrough";
-	[self addSettingsDividerInStack:_fontControls];
-	NSButton* chooseFont = [self button:@"Choose Font…" action:@selector(chooseFont:)];
-	NSView* fontActions = [NSView new];
-	chooseFont.translatesAutoresizingMaskIntoConstraints = NO;
-	[fontActions addSubview:chooseFont];
-	[_fontControls addArrangedSubview:fontActions];
-	[NSLayoutConstraint activateConstraints:@[
-		[fontActions.widthAnchor constraintEqualToAnchor:_fontControls.widthAnchor],
-		[chooseFont.trailingAnchor constraintEqualToAnchor:fontActions.trailingAnchor],
-		[chooseFont.topAnchor constraintEqualToAnchor:fontActions.topAnchor],
-		[chooseFont.bottomAnchor constraintEqualToAnchor:fontActions.bottomAnchor],
-	]];
 	[NSLayoutConstraint activateConstraints:@[
 		[inspector.leadingAnchor constraintEqualToAnchor:inspectorPane.leadingAnchor],
 		[inspector.trailingAnchor constraintEqualToAnchor:inspectorPane.trailingAnchor],
@@ -1088,6 +1128,9 @@ static NSColor* ThemePanelBackgroundColor ()
 	_activeRule = _rules.indexOfSelectedItem;
 	NSMutableDictionary* rule = [self currentRule];
 	_removeRuleButton.enabled = [rule[@"scope"] length] > 0 && [_draft[@"settings"] count] > 1;
+	BOOL isGlobalRule = ![rule[@"scope"] length];
+	_gutterHeading.hidden = !isGlobalRule;
+	_gutterControls.superview.superview.hidden = !isGlobalRule;
 	NSDictionary* settings = rule[@"settings"];
 	for(NSString* key in _fields)
 	{
@@ -1097,6 +1140,7 @@ static NSColor* ThemePanelBackgroundColor ()
 		_wells[key].color = theme_editor::parse_color(_fields[key].stringValue, theme_editor::color_space(_draft)) ?: NSColor.clearColor;
 	}
 	[self updateInheritedGutterColors];
+	[self reloadFontControls];
 }
 
 - (void)updateInheritedGutterColors
@@ -1219,6 +1263,72 @@ static NSColor* ThemePanelBackgroundColor ()
 		return;
 	_fields[well.identifier].stringValue = value;
 	[self settingChanged:_fields[well.identifier]];
+}
+
+- (void)reloadFontControls
+{
+	NSFont* font = [NSFont fontWithName:_fields[@"fontName"].stringValue size:12];
+	[_fontFamily selectItemAtIndex:0];
+	if(font)
+	{
+		if([_fontFamily indexOfItemWithTitle:font.familyName] < 0)
+			[_fontFamily addItemWithTitle:font.familyName];
+		[_fontFamily selectItemWithTitle:font.familyName];
+	}
+	[_fontTypeface removeAllItems];
+	[_fontTypeface addItemWithTitle:font ? @"Default" : @"Inherited"];
+	_fontTypeface.enabled = font != nil;
+	for(NSArray* member in (font ? [NSFontManager.sharedFontManager availableMembersOfFontFamily:font.familyName] : @[]))
+	{
+		NSMenuItem* item = [[NSMenuItem alloc] initWithTitle:member[1] action:nil keyEquivalent:@""];
+		item.representedObject = member[0];
+		[_fontTypeface.menu addItem:item];
+		if([member[0] isEqualToString:font.fontName])
+			[_fontTypeface selectItem:item];
+	}
+	NSArray* styles = [_fields[@"fontStyle"].stringValue componentsSeparatedByString:@" "];
+	NSArray* keys = @[ @"bold", @"italic", @"underline", @"strikethrough" ];
+	for(NSInteger i = 0; i < 4; ++i)
+		[_fontStyles setSelected:[styles containsObject:keys[i]] forSegment:i];
+	_fontStyles.toolTip = _fields[@"fontStyle"].stringValue.length ? @"Explicit formatting override" : @"Formatting inherited from other matching rules";
+}
+
+- (void)fontFamilyChanged:(id)sender
+{
+	NSString* name = @"";
+	if(_fontFamily.indexOfSelectedItem > 0)
+		name = [NSFontManager.sharedFontManager fontWithFamily:_fontFamily.titleOfSelectedItem traits:0 weight:5 size:12].fontName ?: @"";
+	_fields[@"fontName"].stringValue = name;
+	[self settingChanged:_fields[@"fontName"]];
+	[self reloadFontControls];
+}
+
+- (void)fontTypefaceChanged:(id)sender
+{
+	NSFont* current = [NSFont fontWithName:_fields[@"fontName"].stringValue size:12];
+	NSFont* regular = [NSFontManager.sharedFontManager fontWithFamily:current.familyName traits:0 weight:5 size:12];
+	_fields[@"fontName"].stringValue = _fontTypeface.selectedItem.representedObject ?: regular.fontName ?: @"";
+	[self settingChanged:_fields[@"fontName"]];
+	[self reloadFontControls];
+}
+
+- (void)fontStylesChanged:(id)sender
+{
+	NSMutableArray* styles = [NSMutableArray array];
+	NSArray* keys = @[ @"bold", @"italic", @"underline", @"strikethrough" ];
+	for(NSInteger i = 0; i < 4; ++i)
+		if([_fontStyles isSelectedForSegment:i])
+			[styles addObject:keys[i]];
+	_fields[@"fontStyle"].stringValue = styles.count ? [styles componentsJoinedByString:@" "] : @"plain";
+	[self settingChanged:_fields[@"fontStyle"]];
+	[self reloadFontControls];
+}
+
+- (void)resetFontStyle:(id)sender
+{
+	_fields[@"fontStyle"].stringValue = @"";
+	[self settingChanged:_fields[@"fontStyle"]];
+	[self reloadFontControls];
 }
 
 - (void)chooseFont:(id)sender
