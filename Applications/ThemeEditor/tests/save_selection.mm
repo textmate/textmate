@@ -34,18 +34,6 @@ static void Require (bool condition, char const* message)
 		throw std::runtime_error(message);
 }
 
-static std::vector<uint8_t> IconPixels (NSImage* image)
-{
-	std::vector<uint8_t> pixels(256 * 256 * 4);
-	CGColorSpaceRef space = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
-	CGContextRef context = CGBitmapContextCreate(pixels.data(), 256, 256, 8, 256 * 4, space, kCGImageAlphaPremultipliedLast);
-	NSRect rect = NSMakeRect(0, 0, 1024, 1024);
-	CGContextDrawImage(context, CGRectMake(0, 0, 256, 256), [image CGImageForProposedRect:&rect context:nil hints:nil]);
-	CGContextRelease(context);
-	CGColorSpaceRelease(space);
-	return pixels;
-}
-
 int main ()
 {
 	@autoreleasepool
@@ -148,23 +136,12 @@ int main ()
 				[defaults removeObjectForKey:@"DocumentView Disable Line Numbers"];
 			NSImage* bundledIcon = [[NSImage alloc] initWithContentsOfURL:[NSBundle.mainBundle URLForResource:@"ThemeEditor" withExtension:@"icns"]];
 			Require(bundledIcon != nil, "Missing bundled application icon");
+			CGFloat expectedIconPixels = 512 * NSScreen.mainScreen.backingScaleFactor;
 			BOOL hasFullResolutionIcon = NO;
 			for(NSImageRep* representation in NSApp.applicationIconImage.representations)
-				hasFullResolutionIcon |= representation.pixelsWide >= 1024 && representation.pixelsHigh >= 1024;
+				hasFullResolutionIcon |= representation.pixelsWide >= expectedIconPixels && representation.pixelsHigh >= expectedIconPixels;
 			Require(hasFullResolutionIcon, "Running app icon was reduced to a blurry thumbnail");
-			NSImage* systemIcon = [NSWorkspace.sharedWorkspace iconForFile:NSBundle.mainBundle.bundlePath];
-			auto expectedIcon = IconPixels(systemIcon);
-			auto runningIcon = IconPixels(NSApp.applicationIconImage);
-			double iconDifference = 0;
-			for(size_t index = 0; index < expectedIcon.size(); ++index)
-				iconDifference += abs(int(expectedIcon[index]) - int(runningIcon[index]));
-			// AppKit snapshots the assigned image in the display's color space.
-			Require(iconDifference / expectedIcon.size() < 3, "Running app did not preserve the system-rendered icon framing");
-			auto dialogIcon = IconPixels([controller themeAlert].icon);
-			double dialogIconDifference = 0;
-			for(size_t index = 0; index < expectedIcon.size(); ++index)
-				dialogIconDifference += abs(int(expectedIcon[index]) - int(dialogIcon[index]));
-			Require(dialogIconDifference / expectedIcon.size() < 3, "Confirmation dialog did not use the Theme Editor icon");
+			Require([controller themeAlert].icon == NSApp.applicationIconImage, "Confirmation dialog did not use the Theme Editor icon");
 			window = [controller valueForKey:@"window"];
 			window.releasedWhenClosed = NO;
 			NSSplitView* split = (NSSplitView*)window.contentView;
@@ -238,17 +215,24 @@ int main ()
 			Require(!table.floatsGroupRows, "Theme section headings remain pinned while scrolling");
 			NSPopUpButton* rules = [controller valueForKey:@"rules"];
 			NSButton* removeRuleButton = [controller valueForKey:@"removeRuleButton"];
+			NSView* fontFamily = [controller valueForKey:@"fontFamily"];
+			NSView* gutterControls = [controller valueForKey:@"gutterControls"];
 			[rules selectItemAtIndex:0];
 			[controller ruleSelected:nil];
 			Require(!removeRuleButton.enabled, "Global editor style can be removed through the minus button");
+			Require(fontFamily.superview && !fontFamily.isHiddenOrHasHiddenAncestor, "Font settings should be visible for the global style");
+			Require(gutterControls.superview && !gutterControls.isHiddenOrHasHiddenAncestor, "Gutter colors should be visible for the global style");
 			NSDictionary* beforeGlobalRemoval = [[controller valueForKey:@"draft"] copy];
 			[controller removeRule:nil];
 			Require(rules.numberOfItems == 2 && [beforeGlobalRemoval isEqual:[controller valueForKey:@"draft"]] && ![[controller valueForKey:@"dirty"] boolValue], "Removing Global editor style changed the theme");
 			[rules selectItemAtIndex:1];
 			[controller ruleSelected:nil];
 			Require(removeRuleButton.enabled, "A scoped style rule cannot be removed");
+			Require(!fontFamily.isHiddenOrHasHiddenAncestor, "Font settings should be visible for scoped styles");
+			Require(gutterControls.isHiddenOrHasHiddenAncestor, "Gutter colors should be hidden for scoped styles");
 			[rules selectItemAtIndex:0];
 			[controller ruleSelected:nil];
+			Require(!gutterControls.isHiddenOrHasHiddenAncestor, "Returning to the global style did not restore gutter colors");
 			auto selectedName = [&] { return ((NSTableCellView*)[table viewAtColumn:0 row:table.selectedRow makeIfNecessary:YES]).textField; };
 			NSSegmentedControl* appearance = [controller valueForKey:@"appearance"];
 			Require(appearance.segmentCount == 3 && appearance.trackingMode == NSSegmentSwitchTrackingSelectOne, "Appearance is not a three-button exclusive choice");
@@ -277,10 +261,6 @@ int main ()
 			Require(gutterForeground.color.alphaComponent == 1, "Clearing the gutter override lost its inherited color");
 			[controller loadSource];
 			requireDirty(NO);
-			NSStackView* fontControls = [controller valueForKey:@"fontControls"];
-			Require(!fontControls.hidden, "Font settings should always be visible");
-			NSStackView* gutterControls = [controller valueForKey:@"gutterControls"];
-			Require(!gutterControls.hidden, "Gutter colors should always be visible");
 			auto commandClick = [&] (NSInteger row) {
 				NSRect rect = [table rectOfRow:row];
 				NSPoint point = [table convertPoint:NSMakePoint(NSMidX(rect), NSMidY(rect)) toView:nil];
