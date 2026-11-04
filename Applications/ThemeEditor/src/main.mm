@@ -199,6 +199,7 @@ static NSColor* ThemePanelBackgroundColor ()
 	};
 	std::vector<theme_row_t> _themeRows;
 	BOOL _rebuildingThemes;
+	BOOL _pendingThemeSelection;
 	bundles::item_ptr _source;
 	oak::uuid_t _previewUUID;
 	NSMutableDictionary* _draft;
@@ -948,9 +949,30 @@ static NSColor* ThemePanelBackgroundColor ()
 
 - (BOOL)tableView:(NSTableView*)tableView shouldSelectRow:(NSInteger)row
 {
-	if(!_themeRows[row].item)
+	if(_pendingThemeSelection || row < 0 || row >= (NSInteger)_themeRows.size() || !_themeRows[row].item)
 		return NO;
-	return _rebuildingThemes || row == _selectedRow || [self confirmDiscard];
+	if(_rebuildingThemes || row == _selectedRow)
+		return YES;
+	auto uuid = _themeRows[row].item->uuid();
+	if(![self confirmDiscard])
+		return NO;
+	if(row < (NSInteger)_themeRows.size() && _themeRows[row].item && _themeRows[row].item->uuid() == uuid)
+		return YES;
+	// Saving reordered the rows. Finish AppKit's navigation before selecting
+	// the intended UUID, and reject any other rows it probes in this event.
+	_pendingThemeSelection = YES;
+	[NSTimer scheduledTimerWithTimeInterval:0 repeats:NO block:^(NSTimer*) {
+		_pendingThemeSelection = NO;
+		for(size_t index = 0; index < _themeRows.size(); ++index)
+		{
+			if(_themeRows[index].item && _themeRows[index].item->uuid() == uuid)
+			{
+				[self selectThemeAtRow:index];
+				break;
+			}
+		}
+	}];
+	return NO;
 }
 
 - (void)tableViewSelectionDidChange:(NSNotification*)notification
@@ -974,7 +996,7 @@ static NSColor* ThemePanelBackgroundColor ()
 	if(row != _table.selectedRow)
 	{
 		auto uuid = _themeRows[row].item->uuid();
-		if(![self tableView:_table shouldSelectRow:row])
+		if(![self confirmDiscard])
 			return NO;
 		// Saving the previous draft can change the sorted rows.
 		row = -1;

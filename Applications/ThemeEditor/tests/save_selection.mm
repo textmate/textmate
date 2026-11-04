@@ -474,6 +474,32 @@ int main ()
 				Require(!remaining || ![remaining.itemArray[0].representedObject isEqual:deleteItem.representedObject], "Deleted theme remains in the list");
 			}
 			requireDirty(NO);
+			[controller application:NSApp openURLs:@[ themeURLs[@"Alpha"] ]];
+			Require([selectedName().stringValue isEqualToString:@"Alpha"], "Rename-on-save fixture did not select Alpha");
+			commandClick(table.selectedRow);
+			NSTextView* renameEditor = (NSTextView*)selectedName().currentEditor;
+			[renameEditor insertText:@"Zzz" replacementRange:renameEditor.selectedRange];
+			[renameEditor didChangeText];
+			[window makeFirstResponder:table];
+			requireDirty(YES);
+			NSTimer* saveBeforeSelection = [NSTimer timerWithTimeInterval:0.01 repeats:YES block:^(NSTimer* timer) {
+				if(NSApp.modalWindow)
+				{
+					[NSApp stopModalWithCode:NSAlertFirstButtonReturn];
+					[timer invalidate];
+				}
+			}];
+			[[NSRunLoop currentRunLoop] addTimer:saveBeforeSelection forMode:NSModalPanelRunLoopMode];
+			NSEvent* arrowDown = [NSEvent keyEventWithType:NSEventTypeKeyDown location:NSZeroPoint modifierFlags:0 timestamp:0 windowNumber:window.windowNumber context:nil characters:@"\uF701" charactersIgnoringModifiers:@"\uF701" isARepeat:NO keyCode:125];
+			[table keyDown:arrowDown];
+			[saveBeforeSelection invalidate];
+			NSDate* selectionDeadline = [NSDate dateWithTimeIntervalSinceNow:1];
+			while([[controller valueForKey:@"pendingThemeSelection"] boolValue] && selectionDeadline.timeIntervalSinceNow > 0)
+				[[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.01]];
+			Require([[[controller valueForKey:@"draft"] objectForKey:@"uuid"] isEqualToString:themeURLs[@"Zulu"].lastPathComponent], "Arrow-down selected the wrong theme after rename-on-save reordered the rows");
+			Require([selectedName().stringValue isEqualToString:@"Zulu"], "Sidebar selection did not follow the intended theme after rename-on-save");
+			Require(table.selectedRow == [[controller valueForKey:@"selectedRow"] integerValue], "Rename-on-save left the controller and sidebar selections out of sync");
+			requireDirty(NO);
 		}
 		catch(std::exception const& error)
 		{
