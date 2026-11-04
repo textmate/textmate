@@ -562,6 +562,21 @@ int main ()
 			discardNewTheme(YES);
 			Require([[[controller valueForKey:@"draft"] objectForKey:@"uuid"] isEqual:newBUUID], "Discarding a new theme changed the requested destination");
 			discardNewTheme(NO);
+			NSMutableDictionary* falseValueDraft = [controller valueForKey:@"draft"];
+			falseValueDraft[@"customFlag"] = @NO;
+			falseValueDraft[@"customEnabled"] = @YES;
+			falseValueDraft[@"customZero"] = @0;
+			NSTimer* unexpectedSaveAlert = [NSTimer timerWithTimeInterval:0.01 repeats:YES block:^(NSTimer*) {
+				if(NSApp.modalWindow)
+					[NSApp stopModalWithCode:NSAlertFirstButtonReturn];
+			}];
+			[[NSRunLoop currentRunLoop] addTimer:unexpectedSaveAlert forMode:NSModalPanelRunLoopMode];
+			BOOL firstFalseValueSave = [controller saveCurrentTheme];
+			BOOL secondFalseValueSave = firstFalseValueSave && [controller saveCurrentTheme];
+			[unexpectedSaveAlert invalidate];
+			Require(firstFalseValueSave && secondFalseValueSave, "A top-level false value prevented repeated saves");
+			NSDictionary* savedFalseValueDraft = [controller valueForKey:@"draft"];
+			Require([savedFalseValueDraft[@"customFlag"] isEqual:@NO] && [savedFalseValueDraft[@"customEnabled"] isEqual:@YES] && [savedFalseValueDraft[@"customZero"] isEqual:@0], "Repeated saves changed unrelated draft values");
 			NSArray<NSDictionary*>* malformedThemes = @[
 				@{ @"settings": @[ @"not a rule", @{ @"scope": @"string", @"name": @"Strings", @"settings": @{ @"foreground": @"#123456" } } ] },
 				@{ @"settings": @"not an array" },

@@ -1682,7 +1682,7 @@ static NSColor* ThemePanelBackgroundColor ()
 	auto current = create_bundle_index(paths, cache);
 	for(auto const& item : current.first)
 	{
-		if(item->uuid() == _source->uuid() && item->plist() != _source->plist())
+		if(item->uuid() == _source->uuid() && bundles::erase_false_values(item->plist()) != bundles::erase_false_values(_source->plist()))
 		{
 			NSAlert* alert = [self themeAlert];
 			alert.messageText = @"This theme changed in another editor.";
