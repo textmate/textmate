@@ -26,10 +26,20 @@
 - (void)loadSource;
 - (void)duplicateThemeFromMenu:(NSMenuItem*)item;
 - (void)deleteThemeFromMenu:(NSMenuItem*)item;
+- (void)downloadThemeFromMenu:(NSMenuItem*)item;
+- (void)downloadThemeWithPropertyList:(NSDictionary*)theme;
 - (BOOL)writeThemeToURL:(NSURL*)url error:(NSError**)error;
 - (BOOL)saveCurrentTheme;
 - (BOOL)confirmDiscard;
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication*)sender;
+@end
+
+// Capture the save panel's input while exercising the actual context-menu action.
+@interface ExportTestThemeEditorController : ThemeEditorController
+@property (nonatomic, strong) NSDictionary* exportedTheme;
+@end
+@implementation ExportTestThemeEditorController
+- (void)downloadThemeWithPropertyList:(NSDictionary*)theme { self.exportedTheme = theme; }
 @end
 
 static void Require (bool condition, char const* message)
@@ -82,7 +92,7 @@ int main ()
 
 		[NSApplication sharedApplication];
 		[NSApp setActivationPolicy:NSApplicationActivationPolicyAccessory];
-		ThemeEditorController* controller = [ThemeEditorController new];
+		ExportTestThemeEditorController* controller = [ExportTestThemeEditorController new];
 		NSWindow* window = nil;
 		int result = 0;
 		try
@@ -455,6 +465,24 @@ int main ()
 			Require([[controller valueForKey:@"newTheme"] boolValue] && [[controller valueForKey:@"dirty"] boolValue], "Export saved or cleared the unsaved draft");
 			requireDirty(YES);
 			Require(![controller writeThemeToURL:[NSURL fileURLWithPath:to_ns(jail.path("Missing/Downloaded.tmTheme"))] error:&exportError] && exportError != nil, "Export did not report a write failure");
+			NSInteger selectionBeforeExport = table.selectedRow;
+			__block NSUInteger exportPromptCount = 0;
+			NSTimer* unexpectedExportPrompt = [NSTimer timerWithTimeInterval:0.01 repeats:YES block:^(NSTimer*) {
+				if(NSApp.modalWindow)
+				{
+					++exportPromptCount;
+					[NSApp stopModalWithCode:NSAlertSecondButtonReturn];
+				}
+			}];
+			[[NSRunLoop currentRunLoop] addTimer:unexpectedExportPrompt forMode:NSModalPanelRunLoopMode];
+			[controller downloadThemeFromMenu:contextMenu(1).itemArray[2]]; // Export Alpha while Alpha Copy is dirty.
+			[unexpectedExportPrompt invalidate];
+			Require(exportPromptCount == 0, "Exporting another theme prompted to save or revert the current draft");
+			Require([controller.exportedTheme[@"uuid"] isEqual:themeURLs[@"Alpha"].lastPathComponent] && [controller.exportedTheme[@"name"] isEqualToString:@"Alpha"], "Context-menu export did not use the clicked theme's property list");
+			auto clickedTheme = bundles::lookup(oak::uuid_t(to_s(themeURLs[@"Alpha"].lastPathComponent)));
+			Require([controller.exportedTheme isEqual:ns::to_dictionary(clickedTheme->plist())], "Context-menu export did not preserve the clicked theme's complete property list");
+			Require(table.selectedRow == selectionBeforeExport && [controller valueForKey:@"draft"] == draft, "Exporting another theme changed the selected draft");
+			Require([draft[@"customMetadata"] isEqual:@{ @"author": @"Theme export test" }] && [[controller valueForKey:@"dirty"] boolValue], "Exporting another theme lost unsaved edits");
 			NSMenuItem* deleteItem = contextMenu(table.selectedRow).itemArray[1];
 			auto deleteResponding = [&] (NSModalResponse response) {
 				NSTimer* timer = [NSTimer timerWithTimeInterval:0.01 repeats:YES block:^(NSTimer* timer) {

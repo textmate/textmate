@@ -1554,13 +1554,24 @@ static NSColor* ThemePanelBackgroundColor ()
 
 - (void)downloadThemeFromMenu:(NSMenuItem*)item
 {
-	if([self selectThemeForMenuItem:item])
-		[self downloadTheme:item];
+	for(auto const& theme : _themes)
+	{
+		if([to_ns(to_s(theme->uuid())) isEqual:item.representedObject])
+		{
+			[self downloadThemeWithPropertyList:ns::to_dictionary(theme->plist())];
+			return;
+		}
+	}
 }
 
 - (BOOL)writeThemeToURL:(NSURL*)url error:(NSError**)error
 {
-	NSData* data = [NSPropertyListSerialization dataWithPropertyList:_draft format:NSPropertyListXMLFormat_v1_0 options:0 error:error];
+	return [self writeTheme:_draft toURL:url error:error];
+}
+
+- (BOOL)writeTheme:(NSDictionary*)theme toURL:(NSURL*)url error:(NSError**)error
+{
+	NSData* data = [NSPropertyListSerialization dataWithPropertyList:theme format:NSPropertyListXMLFormat_v1_0 options:0 error:error];
 	return data && [data writeToURL:url options:NSDataWritingAtomic error:error];
 }
 
@@ -1576,6 +1587,14 @@ static NSColor* ThemePanelBackgroundColor ()
 		[alert runModal];
 		return;
 	}
+	[self downloadThemeWithPropertyList:_draft];
+}
+
+- (void)downloadThemeWithPropertyList:(NSDictionary*)theme
+{
+	NSString* name = [theme[@"name"] isKindOfClass:NSString.class] ? [theme[@"name"] stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet] : nil;
+	if(!name.length)
+		name = @"Untitled Theme";
 	NSSavePanel* panel = [NSSavePanel savePanel];
 	panel.title = @"Download Theme";
 	panel.allowedContentTypes = @[ [UTType typeWithFilenameExtension:@"tmTheme"] ];
@@ -1584,7 +1603,7 @@ static NSColor* ThemePanelBackgroundColor ()
 	if([panel runModal] != NSModalResponseOK)
 		return;
 	NSError* error = nil;
-	if(![self writeThemeToURL:panel.URL error:&error])
+	if(![self writeTheme:theme toURL:panel.URL error:&error])
 	{
 		NSAlert* alert = [self themeAlert];
 		alert.messageText = @"The theme could not be downloaded.";
