@@ -264,13 +264,26 @@ int main ()
 			foreground.stringValue = originalForeground;
 			[controller settingChanged:foreground];
 			requireDirty(NO);
+			for(NSString* shorthand in @[ @"#123", @"#1234" ])
+			{
+				foreground.stringValue = shorthand;
+				[controller settingChanged:foreground];
+				Require([[controller valueForKey:@"invalidFields"] count] == 0, "Shorthand color was marked invalid");
+				NSColorWell* well = ((NSDictionary*)[controller valueForKey:@"wells"])[@"foreground"];
+				CGFloat alpha = shorthand.length == 4 ? 1 : 4.0 / 15;
+				Require(fabs(well.color.alphaComponent - alpha) < 0.00001, "Shorthand color swatch has the wrong alpha");
+				Require([controller saveCurrentTheme] && [foreground.stringValue isEqual:shorthand], "Saving did not preserve a retyped shorthand color");
+			}
+			foreground.stringValue = originalForeground;
+			[controller settingChanged:foreground];
+			Require([controller saveCurrentTheme], "Could not restore the color fixture");
 			NSDictionary* fields = [controller valueForKey:@"fields"];
 			NSColorWell* gutterForeground = ((NSDictionary*)[controller valueForKey:@"wells"])[@"gutter.foreground"];
 			NSTextField* gutterForegroundField = fields[@"gutter.foreground"];
 			Require(gutterForegroundField.stringValue.length == 0 && gutterForeground.color.alphaComponent == 1, "Inherited gutter foreground opens the picker as transparent");
 			gutterForeground.color = [NSColor colorWithCalibratedRed:0.8 green:0.2 blue:0.1 alpha:gutterForeground.color.alphaComponent];
 			[controller colorChanged:gutterForeground];
-			Require([gutterForegroundField.stringValue hasSuffix:@"FF"] && previewView.showsLineNumbers && CGColorGetAlpha(previewView.textView.theme->gutter_styles().foreground) == 1, "Changing the gutter foreground hid the line numbers");
+			Require(gutterForegroundField.stringValue.length == 7 && previewView.showsLineNumbers && CGColorGetAlpha(previewView.textView.theme->gutter_styles().foreground) == 1, "Changing the gutter foreground hid the line numbers");
 			gutterForegroundField.stringValue = @"";
 			[controller settingChanged:gutterForegroundField];
 			Require(gutterForeground.color.alphaComponent == 1, "Clearing the gutter override lost its inherited color");

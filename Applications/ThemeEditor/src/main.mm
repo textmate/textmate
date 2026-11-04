@@ -328,7 +328,7 @@ static NSColor* ThemePanelBackgroundColor ()
 	field.identifier = key;
 	field.accessibilityLabel = [title stringByAppendingString:@" hex color"];
 	field.placeholderString = @"#RRGGBB[AA]";
-	field.toolTip = @"Enter #RRGGBB or #RRGGBBAA. Leave blank to inherit the color.";
+	field.toolTip = @"Enter #RGB, #RGBA, #RRGGBB, or #RRGGBBAA. Leave blank to inherit the color.";
 	field.font = [NSFont monospacedSystemFontOfSize:12 weight:NSFontWeightRegular];
 	field.target = self;
 	field.action = @selector(settingChanged:);

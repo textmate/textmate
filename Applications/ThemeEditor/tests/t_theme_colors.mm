@@ -56,3 +56,22 @@ void test_wide_gamut_picker_colors_produce_valid_theme_hex ()
 		OAK_ASSERT(theme_editor::parse_color(value, space) != nil);
 	}
 }
+
+void test_shorthand_colors_match_expanded_values ()
+{
+	for(NSColorSpace* space in @[ NSColorSpace.genericRGBColorSpace, NSColorSpace.sRGBColorSpace ])
+	{
+		for(NSArray<NSString*>* pair in @[ @[ @"#123", @"#112233" ], @[ @"#aBc", @"#AABBCC" ], @[ @"#1234", @"#11223344" ], @[ @"#0000", @"#00000000" ], @[ @"#ffff", @"#FFFFFF" ] ])
+		{
+			NSColor* shorthand = theme_editor::parse_color(pair[0], space);
+			NSColor* expanded = theme_editor::parse_color(pair[1], space);
+			OAK_ASSERT(shorthand != nil);
+			OAK_ASSERT(CFEqual(shorthand.CGColor, expanded.CGColor));
+			OAK_ASSERT([theme_editor::color_string(shorthand, space) isEqualToString:pair[1]]);
+		}
+		OAK_ASSERT([theme_editor::color_string(theme_editor::parse_color(@"#123456", space), space) isEqualToString:@"#123456"]);
+		OAK_ASSERT([theme_editor::color_string(theme_editor::parse_color(@"#123456FF", space), space) isEqualToString:@"#123456"]);
+		for(NSString* invalid in @[ @"#12", @"#12345", @"#1234567", @"#12G", @"#123Z", @"123", @"#123456789" ])
+			OAK_ASSERT(theme_editor::parse_color(invalid, space) == nil);
+	}
+}
