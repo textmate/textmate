@@ -23,6 +23,7 @@
 - (void)sampleLanguageChanged:(id)sender;
 - (void)revertTheme:(id)sender;
 - (void)newTheme:(id)sender;
+- (void)duplicateTheme:(id)sender;
 - (void)loadSource;
 - (void)duplicateThemeFromMenu:(NSMenuItem*)item;
 - (void)deleteThemeFromMenu:(NSMenuItem*)item;
@@ -628,6 +629,26 @@ int main ()
 			Require(closePromptCount == 1, "Reverting while closing prompted again during termination");
 			requireDirty(NO);
 			Require([foreground.stringValue isEqual:savedForeground], "Revert cleared the dirty state without restoring the saved settings");
+			[controller application:NSApp openURLs:@[ themeURLs[@"Zulu"] ]];
+			renameCurrentTheme(@"Edited Name");
+			requireDirty(YES);
+			__block NSUInteger duplicatePromptCount = 0;
+			NSTimer* revertBeforeDuplicating = [NSTimer timerWithTimeInterval:0.01 repeats:YES block:^(NSTimer*) {
+				if(NSApp.modalWindow)
+				{
+					++duplicatePromptCount;
+					[NSApp stopModalWithCode:NSAlertThirdButtonReturn];
+				}
+			}];
+			[[NSRunLoop currentRunLoop] addTimer:revertBeforeDuplicating forMode:NSModalPanelRunLoopMode];
+			[controller duplicateTheme:nil];
+			[revertBeforeDuplicating invalidate];
+			NSDictionary* revertedCopy = [controller valueForKey:@"draft"];
+			Require(duplicatePromptCount == 1 && [revertedCopy[@"name"] isEqualToString:@"Zulu Copy"], "Duplicate used the discarded draft name after Revert");
+			Require(![revertedCopy[@"uuid"] isEqual:themeURLs[@"Zulu"].lastPathComponent], "Duplicate retained the source theme UUID");
+			auto zulu = bundles::lookup(oak::uuid_t(to_s(themeURLs[@"Zulu"].lastPathComponent)));
+			Require([revertedCopy[@"settings"] isEqual:ns::to_dictionary(zulu->plist())[@"settings"]], "Duplicate did not copy the reverted source settings");
+			requireDirty(YES);
 			NSArray<NSDictionary*>* malformedThemes = @[
 				@{ @"settings": @[ @"not a rule", @{ @"scope": @"string", @"name": @"Strings", @"settings": @{ @"foreground": @"#123456" } } ] },
 				@{ @"settings": @"not an array" },

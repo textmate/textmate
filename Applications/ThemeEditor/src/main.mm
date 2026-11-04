@@ -1498,7 +1498,9 @@ static NSColor* ThemePanelBackgroundColor ()
 	value["uuid"] = to_s(uuid);
 	if(!duplicate)
 		theme_editor::set_appearance(value, theme_editor::light);
-	value["name"] = duplicate ? to_s((NSString*)_draft[@"name"]) + " Copy" : "Untitled Theme";
+	std::string sourceName = "Untitled Theme";
+	plist::get_key_path(value, "name", sourceName);
+	value["name"] = duplicate ? sourceName + " Copy" : "Untitled Theme";
 	// Keep one bundle object even before any of its themes has been saved.
 	if(!_themeEditorBundle)
 	{
