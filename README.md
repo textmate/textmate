@@ -141,7 +141,7 @@ Results are ranked by fuzzy match score. Frequently used items are boosted over 
 
 Choose **View → Theme → Open Theme Editor…** or run `tm-theme-editor` to open the native macOS theme editor bundled with TextMate. Its three panes show the installed themes, color and font controls, and a live preview using TextMate's own editor, syntax highlighting, gutter, and selection rendering.
 
-Select a theme to edit its global style or individual syntax scope rules. Use **+** for a blank theme, right-click a theme for **Duplicate** or **Delete**, and use **Save** (**Cmd+S**) to write changes. Edits to bundled themes are stored as local overrides; new themes appear in TextMate's theme menu. Unsaved changes remain private to the preview, and switching themes or quitting offers Save, Cancel, and Discard.
+Select a theme to edit its global style or individual syntax scope rules. Use **+** for a blank theme, right-click a theme for **Duplicate**, **Delete**, or **Export Theme…**, and use **Save Theme** (**Cmd+S**) to write changes. **File → Export Theme…** exports the current draft to a local `.tmTheme` file. Edits to bundled themes are stored as local overrides; new themes appear in TextMate's theme menu. Unsaved changes remain private to the preview, and switching themes or quitting offers **Save**, **Cancel**, and **Revert Changes**.
 
 The executable lives at `TextMate.app/Contents/MacOS/tm-theme-editor`. For a development build, run:
 

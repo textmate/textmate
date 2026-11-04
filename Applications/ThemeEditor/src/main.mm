@@ -289,25 +289,6 @@ static NSColor* ThemePanelBackgroundColor ()
 	return [NSButton buttonWithTitle:title target:self action:action];
 }
 
-- (NSTextField*)field:(NSString*)label action:(SEL)action
-{
-	return [self field:label action:action inStack:_controls];
-}
-
-- (NSTextField*)field:(NSString*)label action:(SEL)action inStack:(NSStackView*)stack
-{
-	[stack addArrangedSubview:[NSTextField labelWithString:label]];
-	NSTextField* field = [NSTextField textFieldWithString:@""];
-	field.target = self;
-	field.action = action;
-	field.delegate = self;
-	field.continuous = NO;
-	field.accessibilityLabel = label;
-	[stack addArrangedSubview:field];
-	[field.widthAnchor constraintEqualToConstant:275].active = YES;
-	return field;
-}
-
 - (void)addColorControlForKey:(NSString*)key label:(NSString*)title inStack:(NSStackView*)stack
 {
 	NSColorWell* well = [[NSColorWell alloc] initWithFrame:NSMakeRect(0, 0, 40, 24)];
@@ -884,7 +865,7 @@ static NSColor* ThemePanelBackgroundColor ()
 	NSMenuItem* file = [NSMenuItem new];
 	file.title = @"File";
 	file.submenu = [[NSMenu alloc] initWithTitle:@"File"];
-	for(NSArray* entry in @[ @[ @"New Theme", NSStringFromSelector(@selector(newTheme:)), @"n" ], @[ @"Save Theme", NSStringFromSelector(@selector(saveTheme:)), @"s" ], @[ @"Download...", NSStringFromSelector(@selector(downloadTheme:)), @"" ] ])
+	for(NSArray* entry in @[ @[ @"New Theme", NSStringFromSelector(@selector(newTheme:)), @"n" ], @[ @"Save Theme", NSStringFromSelector(@selector(saveTheme:)), @"s" ], @[ @"Export Theme…", NSStringFromSelector(@selector(exportTheme:)), @"" ] ])
 	{
 		NSMenuItem* item = [file.submenu addItemWithTitle:entry[0] action:NSSelectorFromString(entry[1]) keyEquivalent:entry[2]];
 		item.target = self;
@@ -1413,23 +1394,6 @@ static NSColor* ThemePanelBackgroundColor ()
 	[self reloadFontControls];
 }
 
-- (void)chooseFont:(id)sender
-{
-	NSFontManager* manager = NSFontManager.sharedFontManager;
-	manager.target = self;
-	[manager setSelectedFont:_preview.textView.font isMultiple:NO];
-	[manager orderFrontFontPanel:sender];
-}
-
-- (void)changeFont:(NSFontManager*)sender
-{
-	NSFont* font = [sender convertFont:_preview.textView.font];
-	_fields[@"fontName"].stringValue = font.fontName;
-	_fields[@"fontSize"].stringValue = [NSString stringWithFormat:@"%g", font.pointSize];
-	[self settingChanged:_fields[@"fontName"]];
-	[self settingChanged:_fields[@"fontSize"]];
-}
-
 - (void)addRule:(id)sender
 {
 	if(_invalidFields.count) { NSBeep(); return; }
@@ -1541,7 +1505,7 @@ static NSColor* ThemePanelBackgroundColor ()
 	if(row < 0 || row >= (NSInteger)_themeRows.size() || !_themeRows[row].item)
 		return nil;
 	NSMenu* menu = [NSMenu new];
-	for(NSArray<NSString*>* entry in @[ @[ @"Duplicate", NSStringFromSelector(@selector(duplicateThemeFromMenu:)) ], @[ @"Delete", NSStringFromSelector(@selector(deleteThemeFromMenu:)) ], @[ @"Download...", NSStringFromSelector(@selector(downloadThemeFromMenu:)) ] ])
+	for(NSArray<NSString*>* entry in @[ @[ @"Duplicate", NSStringFromSelector(@selector(duplicateThemeFromMenu:)) ], @[ @"Delete", NSStringFromSelector(@selector(deleteThemeFromMenu:)) ], @[ @"Export Theme…", NSStringFromSelector(@selector(exportThemeFromMenu:)) ] ])
 	{
 		NSMenuItem* item = [menu addItemWithTitle:entry[0] action:NSSelectorFromString(entry[1]) keyEquivalent:@""];
 		item.target = self;
@@ -1566,13 +1530,13 @@ static NSColor* ThemePanelBackgroundColor ()
 		[self duplicateTheme:item];
 }
 
-- (void)downloadThemeFromMenu:(NSMenuItem*)item
+- (void)exportThemeFromMenu:(NSMenuItem*)item
 {
 	for(auto const& theme : _themes)
 	{
 		if([to_ns(to_s(theme->uuid())) isEqual:item.representedObject])
 		{
-			[self downloadThemeWithPropertyList:ns::to_dictionary(theme->plist())];
+			[self exportThemeWithPropertyList:ns::to_dictionary(theme->plist())];
 			return;
 		}
 	}
@@ -1589,7 +1553,7 @@ static NSColor* ThemePanelBackgroundColor ()
 	return data && [data writeToURL:url options:NSDataWritingAtomic error:error];
 }
 
-- (void)downloadTheme:(id)sender
+- (void)exportTheme:(id)sender
 {
 	if(!_source || ![_window makeFirstResponder:nil])
 		return;
@@ -1597,20 +1561,20 @@ static NSColor* ThemePanelBackgroundColor ()
 	if(!name.length || _invalidFields.count)
 	{
 		NSAlert* alert = [self themeAlert];
-		alert.messageText = !name.length ? @"Enter a theme name before downloading." : @"Correct the highlighted setting before downloading.";
+		alert.messageText = !name.length ? @"Enter a theme name before exporting." : @"Correct the highlighted setting before exporting.";
 		[alert runModal];
 		return;
 	}
-	[self downloadThemeWithPropertyList:_draft];
+	[self exportThemeWithPropertyList:_draft];
 }
 
-- (void)downloadThemeWithPropertyList:(NSDictionary*)theme
+- (void)exportThemeWithPropertyList:(NSDictionary*)theme
 {
 	NSString* name = [theme[@"name"] isKindOfClass:NSString.class] ? [theme[@"name"] stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet] : nil;
 	if(!name.length)
 		name = @"Untitled Theme";
 	NSSavePanel* panel = [NSSavePanel savePanel];
-	panel.title = @"Download Theme";
+	panel.title = @"Export Theme";
 	panel.allowedContentTypes = @[ [UTType typeWithFilenameExtension:@"tmTheme"] ];
 	panel.canCreateDirectories = YES;
 	panel.nameFieldStringValue = [[name stringByReplacingOccurrencesOfString:@"/" withString:@":"] stringByAppendingPathExtension:@"tmTheme"];
@@ -1620,7 +1584,7 @@ static NSColor* ThemePanelBackgroundColor ()
 	if(![self writeTheme:theme toURL:panel.URL error:&error])
 	{
 		NSAlert* alert = [self themeAlert];
-		alert.messageText = @"The theme could not be downloaded.";
+		alert.messageText = @"The theme could not be exported.";
 		alert.informativeText = error.localizedDescription ?: @"Choose another location and try again.";
 		[alert runModal];
 	}
@@ -1753,7 +1717,6 @@ static NSColor* ThemePanelBackgroundColor ()
 }
 
 - (void)saveTheme:(id)sender { [_window makeFirstResponder:nil]; [self saveCurrentTheme]; }
-- (void)revertTheme:(id)sender { if([self confirmDiscard]) [self loadSource]; }
 - (BOOL)windowShouldClose:(NSWindow*)sender { if(![self confirmDiscard]) return NO; [NSApp terminate:nil]; return NO; }
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication*)sender { return [self confirmDiscard] ? NSTerminateNow : NSTerminateCancel; }
 @end

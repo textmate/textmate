@@ -22,14 +22,13 @@
 - (void)settingChanged:(NSTextField*)field;
 - (void)colorChanged:(NSColorWell*)well;
 - (void)sampleLanguageChanged:(id)sender;
-- (void)revertTheme:(id)sender;
 - (void)newTheme:(id)sender;
 - (void)duplicateTheme:(id)sender;
 - (void)loadSource;
 - (void)duplicateThemeFromMenu:(NSMenuItem*)item;
 - (void)deleteThemeFromMenu:(NSMenuItem*)item;
-- (void)downloadThemeFromMenu:(NSMenuItem*)item;
-- (void)downloadThemeWithPropertyList:(NSDictionary*)theme;
+- (void)exportThemeFromMenu:(NSMenuItem*)item;
+- (void)exportThemeWithPropertyList:(NSDictionary*)theme;
 - (BOOL)writeThemeToURL:(NSURL*)url error:(NSError**)error;
 - (BOOL)saveCurrentTheme;
 - (BOOL)confirmDiscard;
@@ -41,7 +40,7 @@
 @property (nonatomic, strong) NSDictionary* exportedTheme;
 @end
 @implementation ExportTestThemeEditorController
-- (void)downloadThemeWithPropertyList:(NSDictionary*)theme { self.exportedTheme = theme; }
+- (void)exportThemeWithPropertyList:(NSDictionary*)theme { self.exportedTheme = theme; }
 @end
 
 static void Require (bool condition, char const* message)
@@ -479,7 +478,7 @@ int main ()
 				}
 			}];
 			[[NSRunLoop currentRunLoop] addTimer:discard forMode:NSModalPanelRunLoopMode];
-			[controller revertTheme:nil];
+			Require([controller confirmDiscard], "Reverting the draft was canceled");
 			[discard invalidate];
 			Require(rules.numberOfItems == 2, "Revert did not restore the saved rules");
 			requireDirty(NO);
@@ -492,10 +491,10 @@ int main ()
 			};
 			Require(contextMenu(0) == nil, "Section heading has theme actions");
 			NSMenu* menu = contextMenu(1); // Alpha is not the selected theme.
-			Require(menu.numberOfItems == 3 && [menu.itemArray[0].title isEqualToString:@"Duplicate"] && [menu.itemArray[1].title isEqualToString:@"Delete"] && [menu.itemArray[2].title isEqualToString:@"Download..."], "Theme context menu has incorrect actions");
-			Require(menu.itemArray[2].action == NSSelectorFromString(@"downloadThemeFromMenu:") && [menu.itemArray[2].representedObject isEqual:menu.itemArray[0].representedObject], "Download does not target the clicked theme");
-			NSMenuItem* download = [NSApp.mainMenu itemWithTitle:@"File"].submenu.itemArray.lastObject;
-			Require([download.title isEqualToString:@"Download..."] && download.action == NSSelectorFromString(@"downloadTheme:"), "File menu is missing Download Theme");
+			Require(menu.numberOfItems == 3 && [menu.itemArray[0].title isEqualToString:@"Duplicate"] && [menu.itemArray[1].title isEqualToString:@"Delete"] && [menu.itemArray[2].title isEqualToString:@"Export Theme…"], "Theme context menu has incorrect actions");
+			Require(menu.itemArray[2].action == NSSelectorFromString(@"exportThemeFromMenu:") && [menu.itemArray[2].representedObject isEqual:menu.itemArray[0].representedObject], "Export does not target the clicked theme");
+			NSMenuItem* exportItem = [NSApp.mainMenu itemWithTitle:@"File"].submenu.itemArray.lastObject;
+			Require([exportItem.title isEqualToString:@"Export Theme…"] && exportItem.action == NSSelectorFromString(@"exportTheme:"), "File menu is missing Export Theme");
 			Require(table.selectedRow == previousRow, "Opening the context menu changed selection");
 			[controller duplicateThemeFromMenu:menu.itemArray[0]];
 			Require([[[controller valueForKey:@"draft"] objectForKey:@"name"] isEqualToString:@"Alpha Copy"], "Context menu duplicated the selected theme instead of the clicked theme");
@@ -504,7 +503,7 @@ int main ()
 			NSMutableDictionary* draft = [controller valueForKey:@"draft"];
 			// Preserve settings not exposed in the inspector as well as unsaved edits.
 			draft[@"customMetadata"] = @{ @"author": @"Theme export test" };
-			NSURL* exportURL = [NSURL fileURLWithPath:to_ns(jail.path("Downloaded.tmTheme"))];
+			NSURL* exportURL = [NSURL fileURLWithPath:to_ns(jail.path("Exported.tmTheme"))];
 			NSError* exportError = nil;
 			Require([controller writeThemeToURL:exportURL error:&exportError], "Could not export an unsaved theme");
 			NSPropertyListFormat format;
@@ -513,7 +512,7 @@ int main ()
 			Require(table.selectedRow == [[controller valueForKey:@"selectedRow"] integerValue] && rules.indexOfSelectedItem == 0, "Export changed theme or rule selection");
 			Require([[controller valueForKey:@"newTheme"] boolValue] && [[controller valueForKey:@"dirty"] boolValue], "Export saved or cleared the unsaved draft");
 			requireDirty(YES);
-			Require(![controller writeThemeToURL:[NSURL fileURLWithPath:to_ns(jail.path("Missing/Downloaded.tmTheme"))] error:&exportError] && exportError != nil, "Export did not report a write failure");
+			Require(![controller writeThemeToURL:[NSURL fileURLWithPath:to_ns(jail.path("Missing/Exported.tmTheme"))] error:&exportError] && exportError != nil, "Export did not report a write failure");
 			NSInteger selectionBeforeExport = table.selectedRow;
 			__block NSUInteger exportPromptCount = 0;
 			NSTimer* unexpectedExportPrompt = [NSTimer timerWithTimeInterval:0.01 repeats:YES block:^(NSTimer*) {
@@ -524,7 +523,7 @@ int main ()
 				}
 			}];
 			[[NSRunLoop currentRunLoop] addTimer:unexpectedExportPrompt forMode:NSModalPanelRunLoopMode];
-			[controller downloadThemeFromMenu:contextMenu(1).itemArray[2]]; // Export Alpha while Alpha Copy is dirty.
+			[controller exportThemeFromMenu:contextMenu(1).itemArray[2]]; // Export Alpha while Alpha Copy is dirty.
 			[unexpectedExportPrompt invalidate];
 			Require(exportPromptCount == 0, "Exporting another theme prompted to save or revert the current draft");
 			Require([controller.exportedTheme[@"uuid"] isEqual:themeURLs[@"Alpha"].lastPathComponent] && [controller.exportedTheme[@"name"] isEqualToString:@"Alpha"], "Context-menu export did not use the clicked theme's property list");
@@ -627,7 +626,7 @@ int main ()
 				if(switchAway)
 					[controller application:NSApp openURLs:@[ [NSURL URLWithString:[@"textmate-theme-editor://theme/" stringByAppendingString:newBUUID]] ]];
 				else
-					[controller revertTheme:nil];
+					Require([controller confirmDiscard], "Reverting the draft was canceled");
 				[timer invalidate];
 				Require(table.numberOfRows == rowsBeforeDiscard - 1, "Reverting a new theme left an unsaved row in the list");
 				for(NSInteger row = 0; row < table.numberOfRows; ++row)

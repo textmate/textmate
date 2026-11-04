@@ -133,10 +133,6 @@ set_source_files_properties(${_about_js} PROPERTIES
 textmate_embed(TextMate mate "MacOS")
 textmate_embed(TextMate tm-theme-editor "MacOS")
 textmate_embed(TextMate ThemeEditor "Helpers" DIRECTORY)
-# Remove the old helper name from existing build bundles before signing.
-add_custom_command(TARGET TextMate POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E remove_directory
-    "$<TARGET_BUNDLE_DIR:TextMate>/Contents/Helpers/theme-editor.app")
 # Refresh the embedded app when only the theme editor or launcher changes.
 set_property(TARGET TextMate APPEND PROPERTY LINK_DEPENDS
   "$<TARGET_FILE:ThemeEditor>" "$<TARGET_FILE:tm-theme-editor>")
