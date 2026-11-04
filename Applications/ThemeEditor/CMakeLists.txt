@@ -11,6 +11,16 @@ set_source_files_properties(${_samples} PROPERTIES
   HEADER_FILE_ONLY TRUE MACOSX_PACKAGE_LOCATION "Resources/Samples")
 # Sample edits must refresh both the helper signature and the embedded app.
 set_property(TARGET ThemeEditor APPEND PROPERTY LINK_DEPENDS ${_samples})
+# OakTextView is static, so its preview images belong in this app's bundle.
+# Source bundle locations must be set in the directory defining these targets.
+file(GLOB _preview_resources CONFIGURE_DEPENDS
+  "${CMAKE_SOURCE_DIR}/Frameworks/OakTextView/resources/*.pdf"
+  "${CMAKE_SOURCE_DIR}/Frameworks/OakTextView/resources/*.tiff"
+  "${CMAKE_SOURCE_DIR}/Frameworks/OakTextView/resources/*.png")
+target_sources(ThemeEditor PRIVATE ${_preview_resources})
+set_source_files_properties(${_preview_resources} PROPERTIES
+  MACOSX_PACKAGE_LOCATION "Resources")
+set_property(TARGET ThemeEditor APPEND PROPERTY LINK_DEPENDS ${_preview_resources})
 target_link_libraries(ThemeEditor PRIVATE
   OakTextView OakSystem Preferences bundles document ns plist settings theme
   ${TEXTMATE_DEBUG_LIBS} "-framework Cocoa" "-framework UniformTypeIdentifiers")
@@ -50,7 +60,7 @@ if(BUILD_TESTING)
   add_test(NAME theme-editor COMMAND theme_editor_tests --no-parallel)
 
   add_executable(theme_editor_selection_tests MACOSX_BUNDLE
-    src/main.mm tests/save_selection.mm ${_samples} "${_icon}")
+    src/main.mm tests/save_selection.mm ${_samples} ${_preview_resources} "${_icon}")
   set_target_properties(theme_editor_selection_tests PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER "com.macromates.TextMate.ThemeEditor.Tests"
     MACOSX_BUNDLE_ICON_FILE "ThemeEditor.icns"

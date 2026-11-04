@@ -5,6 +5,7 @@
 #import "colors.h"
 #import "samples.h"
 #import "rule_matching.h"
+#import <theme/font_size.h>
 #import <mach-o/dyld.h>
 #import <OakSystem/application.h>
 #import <OakTextView/OakDocumentView.h>
@@ -600,7 +601,7 @@ static NSColor* ThemePanelBackgroundColor ()
 	size.identifier = @"fontSize";
 	size.placeholderString = @"Auto";
 	size.accessibilityLabel = @"Font size in points";
-	size.toolTip = @"Font size in points (4–200). Clear to inherit.";
+	size.toolTip = @"Font size in points (4–200), percent (120%), or em (1.2em). Clear to inherit.";
 	size.delegate = self;
 	size.target = self;
 	size.action = @selector(settingChanged:);
@@ -1249,13 +1250,23 @@ static NSColor* ThemePanelBackgroundColor ()
 			continue;
 		NSDictionary* settings = rule[@"settings"];
 		fontName = settings[@"fontName"] ?: fontName;
-		if([settings[@"fontSize"] doubleValue] > 0)
-			fontSize = [settings[@"fontSize"] doubleValue];
+		if(auto size = theme::parse_font_size(to_s([settings[@"fontSize"] description])))
+			fontSize = *size > 0 ? *size : fontSize * -*size;
 	}
 	_preview.textView.font = [NSFont fontWithName:fontName size:fontSize] ?: _baseFont;
 	// Use a private UUID and uncached styles so drafts cannot affect installed themes.
 	auto value = plist::convert((__bridge CFPropertyListRef)_draft);
 	value["uuid"] = to_s(_previewUUID);
+	// The preview's base font already includes global sizes. Keep scoped sizes
+	// in the private theme so relative overrides apply once to that base.
+	for(auto& entry : plist::get<plist::array_t>(value["settings"]))
+	{
+		auto& rule = plist::get<plist::dictionary_t>(entry);
+		std::string scope;
+		plist::get_key_path(rule, "scope", scope);
+		if(scope.empty())
+			plist::get<plist::dictionary_t>(rule["settings"]).erase("fontSize");
+	}
 	auto item = std::make_shared<bundles::item_t>(_previewUUID, bundles::item_ptr(), bundles::kItemTypeTheme);
 	item->set_plist(value);
 	_preview.textView.theme = std::make_shared<theme_t>(item, NULL_STR, 12, false);
@@ -1295,10 +1306,11 @@ static NSColor* ThemePanelBackgroundColor ()
 	if(value.length && _wells[key])
 		valid = theme_editor::parse_color(value, theme_editor::color_space(_draft)) != nil;
 	if(value.length && [key isEqualToString:@"fontSize"])
-		{
-		NSScanner* scanner = [NSScanner scannerWithString:value];
-		double size = 0;
-		valid = [scanner scanDouble:&size] && scanner.isAtEnd && size >= 4 && size <= 200;
+	{
+		auto size = theme::parse_font_size(to_s(value));
+		CGFloat base = [[self currentRule][@"scope"] length] ? _preview.textView.font.pointSize : _baseFont.pointSize;
+		double points = size ? (*size > 0 ? *size : base * -*size) : 0;
+		valid = points >= 4 && points <= 200;
 	}
 	if(value.length && [key isEqualToString:@"fontName"])
 		valid = [NSFont fontWithName:value size:12] != nil;

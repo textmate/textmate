@@ -106,7 +106,6 @@ file(GLOB _fw_res
   "${CMAKE_SOURCE_DIR}/Frameworks/scm/resources/*.xslt"
 )
 target_sources(TextMate PRIVATE ${_fw_res})
-target_sources(ThemeEditor PRIVATE ${_fw_res})
 set_source_files_properties(${_fw_res} PROPERTIES
   MACOSX_PACKAGE_LOCATION Resources)
 

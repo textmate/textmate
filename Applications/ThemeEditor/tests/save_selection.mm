@@ -1,6 +1,7 @@
 #import <Cocoa/Cocoa.h>
 #import <OakSystem/application.h>
 #import <OakTextView/OakDocumentView.h>
+#import <OakAppKit/NSImage Additions.h>
 #import <document/OakDocument.h>
 #import <bundles/item.h>
 #import <bundles/locations.h>
@@ -144,6 +145,11 @@ int main ()
 			[languages selectItemWithTitle:@"JavaScript"];
 			[controller sampleLanguageChanged:languages];
 			Require(previewView.showsLineNumbers, "Preview did not show line numbers when the editor preference hides them");
+			for(NSString* imageName in @[ @"FoldingDots Template", @"Folding Top Template", @"Folding Top Hover Template", @"Folding Bottom Template", @"Folding Bottom Hover Template", @"Folding Collapsed Template", @"Folding Collapsed Hover Template", @"Bookmark Template", @"Bookmark Hover Add Template", @"Bookmark Hover Remove Template", @"InsertBookmarkTemplate", @"RemoveBookmarkTemplate" ])
+			{
+				Require([NSBundle.mainBundle URLForResource:imageName withExtension:@"pdf"] != nil, "A preview gutter image is missing from the app bundle");
+				Require([NSImage imageNamed:imageName inSameBundleAsClass:OakDocumentView.class] != nil, "The preview cannot load a folding or bookmark image");
+			}
 			Require([defaults boolForKey:@"DocumentView Disable Line Numbers"], "Preview changed the editor's line-number preference");
 			if(lineNumberPreference)
 				[defaults setObject:lineNumberPreference forKey:@"DocumentView Disable Line Numbers"];
@@ -278,6 +284,35 @@ int main ()
 			[controller settingChanged:foreground];
 			Require([controller saveCurrentTheme], "Could not restore the color fixture");
 			NSDictionary* fields = [controller valueForKey:@"fields"];
+			NSTextField* fontSizeField = fields[@"fontSize"];
+			NSString* originalFontSize = [fontSizeField.stringValue copy];
+			CGFloat baseFontSize = ((NSFont*)[controller valueForKey:@"baseFont"]).pointSize;
+			for(NSArray* entry in @[ @[ @"120%", @(baseFontSize * 1.2) ], @[ @"1.2em", @(baseFontSize * 1.2) ], @[ @"18pt", @18 ], @[ @"18", @18 ] ])
+			{
+				fontSizeField.stringValue = entry[0];
+				[controller settingChanged:fontSizeField];
+				Require([[controller valueForKey:@"invalidFields"] count] == 0, "A supported font size unit was marked invalid");
+				CGFloat expected = [entry[1] doubleValue];
+				Require(fabs(previewView.textView.font.pointSize - expected) < 0.00001, "Global font size was not resolved against the base font");
+				CGFloat rendered = CTFontGetSize(previewView.textView.theme->styles_for_scope(scope::scope_t("source.js")).font());
+				Require(fabs(rendered - expected) < 0.00001, "Preview applied the global font size more than once");
+				Require([controller saveCurrentTheme] && [fontSizeField.stringValue isEqual:entry[0]], "Saving did not preserve a font size with units");
+			}
+			[rules selectItemAtIndex:1];
+			[controller ruleSelected:nil];
+			fontSizeField.stringValue = @"120%";
+			[controller settingChanged:fontSizeField];
+			Require([[controller valueForKey:@"invalidFields"] count] == 0, "Scoped relative font size was marked invalid");
+			Require(fabs(CTFontGetSize(previewView.textView.theme->styles_for_scope(scope::scope_t("source.js comment")).font()) - 21.6) < 0.00001, "Scoped font size did not scale the global size once");
+			[controller loadSource];
+			[rules selectItemAtIndex:0];
+			[controller ruleSelected:nil];
+			fontSizeField.stringValue = @"12px";
+			[controller settingChanged:fontSizeField];
+			Require([[controller valueForKey:@"invalidFields"] containsObject:@"fontSize"], "An unsupported font size unit was accepted");
+			fontSizeField.stringValue = originalFontSize;
+			[controller settingChanged:fontSizeField];
+			Require([controller saveCurrentTheme], "Could not restore the font size fixture");
 			NSColorWell* gutterForeground = ((NSDictionary*)[controller valueForKey:@"wells"])[@"gutter.foreground"];
 			NSTextField* gutterForegroundField = fields[@"gutter.foreground"];
 			Require(gutterForegroundField.stringValue.length == 0 && gutterForeground.color.alphaComponent == 1, "Inherited gutter foreground opens the picker as transparent");
