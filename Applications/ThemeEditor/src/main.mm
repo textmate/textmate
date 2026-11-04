@@ -1353,16 +1353,31 @@ static NSColor* ThemePanelBackgroundColor ()
 	if(_invalidFields.count) { NSBeep(); return; }
 	NSAlert* alert = [self themeAlert];
 	alert.messageText = @"Add a style rule";
-	alert.informativeText = @"Enter a name for the new rule. You can set its scope and appearance in the middle pane.";
+	alert.informativeText = @"Enter a name and scope selector for the new rule (for example, string for strings or comment for comments).";
 	[alert addButtonWithTitle:@"Add rule"];
 	[alert addButtonWithTitle:@"Cancel"];
 	NSTextField* name = [NSTextField textFieldWithString:@"New rule"];
-	name.frame = NSMakeRect(0, 0, 300, 24);
+	name.frame = NSMakeRect(0, 70, 300, 24);
 	name.identifier = @"new-rule-name";
 	name.accessibilityLabel = @"Rule name";
-	alert.accessoryView = name;
+	NSTextField* scope = [NSTextField textFieldWithString:@""];
+	scope.frame = NSMakeRect(0, 0, 300, 24);
+	scope.identifier = @"new-rule-scope";
+	scope.accessibilityLabel = @"Scope selector";
+	scope.placeholderString = @"e.g. string.quoted or comment";
+	NSView* form = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 300, 116)];
+	NSTextField* nameLabel = [NSTextField labelWithString:@"Rule name"];
+	nameLabel.frame = NSMakeRect(0, 96, 300, 20);
+	NSTextField* scopeLabel = [NSTextField labelWithString:@"Scope selector"];
+	scopeLabel.frame = NSMakeRect(0, 26, 300, 20);
+	for(NSView* view in @[ nameLabel, name, scopeLabel, scope ])
+		[form addSubview:view];
+	name.nextKeyView = scope;
+	scope.nextKeyView = name;
+	alert.accessoryView = form;
 	alert.window.initialFirstResponder = name;
 	NSString* title;
+	NSString* selector;
 	while(YES)
 	{
 		[name selectText:nil];
@@ -1370,11 +1385,12 @@ static NSColor* ThemePanelBackgroundColor ()
 			return;
 		[alert.window makeFirstResponder:nil];
 		title = [name.stringValue stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
-		if(title.length)
+		selector = [scope.stringValue stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
+		if(title.length && selector.length)
 			break;
-		alert.informativeText = @"Enter a rule name before adding the rule.";
+		alert.informativeText = title.length ? @"Enter a scope selector before adding the rule (for example, string or comment)." : @"Enter a rule name before adding the rule.";
 	}
-	[_draft[@"settings"] addObject:[@{ @"name": title, @"scope": @"comment", @"settings": [NSMutableDictionary dictionary] } mutableCopy]];
+	[_draft[@"settings"] addObject:[@{ @"name": title, @"scope": selector, @"settings": [NSMutableDictionary dictionary] } mutableCopy]];
 	[self reloadRules:[_draft[@"settings"] count] - 1];
 	[self changed:YES];
 }

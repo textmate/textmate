@@ -359,37 +359,42 @@ int main ()
 				[controller removeRule:nil];
 				[timer invalidate];
 			};
-			auto addRuleResponding = [&] (NSModalResponse response) {
+			auto addRuleResponding = [&] (NSModalResponse response, NSArray<NSString*>* scopes) {
+				__block NSUInteger attempt = 0;
 				NSTimer* timer = [NSTimer timerWithTimeInterval:0.01 repeats:YES block:^(NSTimer* timer) {
 					if(!NSApp.modalWindow)
 						return;
+					[NSApp.modalWindow makeFirstResponder:nil];
 					NSMutableArray<NSView*>* pending = [NSMutableArray arrayWithObject:NSApp.modalWindow.contentView];
 					while(pending.count)
 					{
 						NSView* view = pending.lastObject;
 						[pending removeLastObject];
 						if([view.identifier isEqualToString:@"new-rule-name"])
-						{
-							[NSApp.modalWindow makeFirstResponder:nil];
-							((NSTextField*)view).stringValue = @"  Named rule  ";
-							[NSApp stopModalWithCode:response];
-							[timer invalidate];
-							return;
-						}
+							((NSTextField*)view).stringValue = @"  Strings  ";
+						if([view.identifier isEqualToString:@"new-rule-scope"])
+							((NSTextField*)view).stringValue = scopes[attempt];
 						[pending addObjectsFromArray:view.subviews];
 					}
+					[NSApp stopModalWithCode:response];
+					if(++attempt == scopes.count)
+						[timer invalidate];
 				}];
 				[[NSRunLoop currentRunLoop] addTimer:timer forMode:NSModalPanelRunLoopMode];
 				[controller addRule:nil];
 				[timer invalidate];
 			};
-			addRuleResponding(NSAlertSecondButtonReturn);
+			addRuleResponding(NSAlertSecondButtonReturn, @[ @"string" ]);
 			Require(rules.numberOfItems == 2 && rules.indexOfSelectedItem == 1, "Canceling Add rule changed the rules");
 			Require(![[controller valueForKey:@"dirty"] boolValue], "Canceling Add rule modified the theme");
-			addRuleResponding(NSAlertFirstButtonReturn);
+			addRuleResponding(NSAlertFirstButtonReturn, @[ @"  ", @"  string  " ]);
 			Require(rules.numberOfItems == 3 && rules.indexOfSelectedItem == 2, "Adding a named rule did not select it");
-			Require([rules.titleOfSelectedItem isEqualToString:@"Named rule"], "The rule did not use the dialog name");
+			Require([rules.titleOfSelectedItem isEqualToString:@"Strings"], "The rule did not use the dialog name");
 			Require([[controller valueForKey:@"dirty"] boolValue], "Adding a rule did not update the draft");
+			NSArray* addedRules = [controller valueForKey:@"draft"][@"settings"];
+			Require([addedRules.lastObject[@"scope"] isEqualToString:@"string"], "Adding a Strings rule did not preserve its scope selector");
+			Require([addedRules[1][@"scope"] isEqualToString:@"comment"], "Adding a Strings rule changed the existing comment rule");
+			Require(removeRuleButton.enabled && gutterControls.isHiddenOrHasHiddenAncestor, "The added rule was treated as a global style");
 			removeRuleResponding(NSAlertSecondButtonReturn);
 			[rules selectItemAtIndex:1];
 			[controller ruleSelected:nil];
