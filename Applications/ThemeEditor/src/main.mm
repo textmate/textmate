@@ -1725,11 +1725,6 @@ int main (int argc, char const* argv[])
 {
 	@autoreleasepool
 	{
-		if(argc > 1)
-		{
-			fprintf(stdout, "Usage: tm-theme-editor\nOpens the native TextMate theme editor.\n");
-			return strcmp(argv[1], "--help") == 0 ? 0 : 1;
-		}
 		oak::application_t application(argc, argv);
 		oak::application_t::set_name("TextMate");
 		// Resolve symlinks so invocation through PATH still finds the containing app.
