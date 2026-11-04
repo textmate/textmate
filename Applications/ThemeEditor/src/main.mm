@@ -985,6 +985,11 @@ static NSColor* ThemePanelBackgroundColor ()
 	{
 		if(_newTheme)
 			[self removeCurrentThemeFromList];
+		else
+			[self loadSource];
+		// Closing the window is followed by another termination check. A fresh
+		// placeholder, when no themes remain, also has no edits to discard.
+		[self changed:NO];
 		return YES;
 	}
 	return response == NSAlertFirstButtonReturn && [self saveCurrentTheme];

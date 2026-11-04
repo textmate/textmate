@@ -28,6 +28,8 @@
 - (void)deleteThemeFromMenu:(NSMenuItem*)item;
 - (BOOL)writeThemeToURL:(NSURL*)url error:(NSError**)error;
 - (BOOL)saveCurrentTheme;
+- (BOOL)confirmDiscard;
+- (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication*)sender;
 @end
 
 static void Require (bool condition, char const* message)
@@ -577,6 +579,27 @@ int main ()
 			Require(firstFalseValueSave && secondFalseValueSave, "A top-level false value prevented repeated saves");
 			NSDictionary* savedFalseValueDraft = [controller valueForKey:@"draft"];
 			Require([savedFalseValueDraft[@"customFlag"] isEqual:@NO] && [savedFalseValueDraft[@"customEnabled"] isEqual:@YES] && [savedFalseValueDraft[@"customZero"] isEqual:@0], "Repeated saves changed unrelated draft values");
+			NSString* savedForeground = [foreground.stringValue copy];
+			foreground.stringValue = @"#FEDCBA";
+			[controller settingChanged:foreground];
+			requireDirty(YES);
+			__block NSUInteger closePromptCount = 0;
+			NSTimer* revertBeforeClosing = [NSTimer timerWithTimeInterval:0.01 repeats:YES block:^(NSTimer*) {
+				if(NSApp.modalWindow)
+				{
+					++closePromptCount;
+					[NSApp stopModalWithCode:NSAlertThirdButtonReturn];
+				}
+			}];
+			[[NSRunLoop currentRunLoop] addTimer:revertBeforeClosing forMode:NSModalPanelRunLoopMode];
+			// Window closing confirms first, then NSApp performs its termination check.
+			BOOL closeConfirmed = [controller confirmDiscard];
+			NSApplicationTerminateReply termination = [controller applicationShouldTerminate:NSApp];
+			[revertBeforeClosing invalidate];
+			Require(closeConfirmed && termination == NSTerminateNow, "Reverting changes did not allow window closing and termination");
+			Require(closePromptCount == 1, "Reverting while closing prompted again during termination");
+			requireDirty(NO);
+			Require([foreground.stringValue isEqual:savedForeground], "Revert cleared the dirty state without restoring the saved settings");
 			NSArray<NSDictionary*>* malformedThemes = @[
 				@{ @"settings": @[ @"not a rule", @{ @"scope": @"string", @"name": @"Strings", @"settings": @{ @"foreground": @"#123456" } } ] },
 				@{ @"settings": @"not an array" },
