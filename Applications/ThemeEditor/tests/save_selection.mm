@@ -4,6 +4,7 @@
 #import <document/OakDocument.h>
 #import <bundles/item.h>
 #import <bundles/locations.h>
+#import <bundles/query.h>
 #import <test/jail.h>
 #import <ns/ns.h>
 
@@ -21,6 +22,7 @@
 - (void)colorChanged:(NSColorWell*)well;
 - (void)sampleLanguageChanged:(id)sender;
 - (void)revertTheme:(id)sender;
+- (void)newTheme:(id)sender;
 - (void)loadSource;
 - (void)duplicateThemeFromMenu:(NSMenuItem*)item;
 - (void)deleteThemeFromMenu:(NSMenuItem*)item;
@@ -500,6 +502,66 @@ int main ()
 			Require([selectedName().stringValue isEqualToString:@"Zulu"], "Sidebar selection did not follow the intended theme after rename-on-save");
 			Require(table.selectedRow == [[controller valueForKey:@"selectedRow"] integerValue], "Rename-on-save left the controller and sidebar selections out of sync");
 			requireDirty(NO);
+			auto renameCurrentTheme = [&] (NSString* title) {
+				commandClick(table.selectedRow);
+				NSTextView* editor = (NSTextView*)selectedName().currentEditor;
+				[editor insertText:title replacementRange:editor.selectedRange];
+				[editor didChangeText];
+				[window makeFirstResponder:table];
+			};
+			[controller newTheme:nil];
+			renameCurrentTheme(@"New A");
+			NSString* newAUUID = [controller valueForKey:@"draft"][@"uuid"];
+			// Retain a clean unsaved fixture so both drafts predate bundle registration.
+			[controller loadSource];
+			[controller newTheme:nil];
+			renameCurrentTheme(@"New B");
+			NSString* newBUUID = [controller valueForKey:@"draft"][@"uuid"];
+			Require([controller saveCurrentTheme], "Could not save the second new theme");
+			[controller application:NSApp openURLs:@[ [NSURL URLWithString:[@"textmate-theme-editor://theme/" stringByAppendingString:newAUUID]] ]];
+			Require([controller saveCurrentTheme], "Could not save the first new theme after the second");
+			auto newA = bundles::lookup(oak::uuid_t(to_s(newAUUID)));
+			auto newB = bundles::lookup(oak::uuid_t(to_s(newBUUID)));
+			Require(newA && newB && newA->bundle() == newB->bundle(), "New themes with the same bundle UUID did not reuse one bundle object");
+			NSString* bundleDirectory = to_ns(jail.path("Support/Bundles"));
+			NSUInteger editorBundleCount = 0;
+			for(NSString* entry in [NSFileManager.defaultManager contentsOfDirectoryAtPath:bundleDirectory error:nil])
+			{
+				NSString* infoPath = [[bundleDirectory stringByAppendingPathComponent:entry] stringByAppendingPathComponent:@"info.plist"];
+				NSDictionary* info = [NSDictionary dictionaryWithContentsOfFile:infoPath];
+				if([info[@"uuid"] isEqualToString:@"1C514B9A-BA40-4E6C-A79B-E169CE2AF4D2"])
+					++editorBundleCount;
+			}
+			Require(editorBundleCount == 1, "Saving new themes created multiple bundles with the Theme Editor UUID");
+			auto discardNewTheme = [&] (BOOL switchAway) {
+				[controller newTheme:nil];
+				NSString* discardedUUID = [controller valueForKey:@"draft"][@"uuid"];
+				NSInteger rowsBeforeDiscard = table.numberOfRows;
+				NSTimer* timer = [NSTimer timerWithTimeInterval:0.01 repeats:YES block:^(NSTimer* timer) {
+					if(NSApp.modalWindow)
+					{
+						[NSApp stopModalWithCode:NSAlertThirdButtonReturn];
+						[timer invalidate];
+					}
+				}];
+				[[NSRunLoop currentRunLoop] addTimer:timer forMode:NSModalPanelRunLoopMode];
+				if(switchAway)
+					[controller application:NSApp openURLs:@[ [NSURL URLWithString:[@"textmate-theme-editor://theme/" stringByAppendingString:newBUUID]] ]];
+				else
+					[controller revertTheme:nil];
+				[timer invalidate];
+				Require(table.numberOfRows == rowsBeforeDiscard - 1, "Reverting a new theme left an unsaved row in the list");
+				for(NSInteger row = 0; row < table.numberOfRows; ++row)
+				{
+					NSMenu* menu = contextMenu(row);
+					Require(!menu || ![menu.itemArray[0].representedObject isEqual:discardedUUID], "The discarded new theme remains selectable");
+				}
+				Require(![[controller valueForKey:@"newTheme"] boolValue], "Reverting a new theme did not select a saved theme");
+				requireDirty(NO);
+			};
+			discardNewTheme(YES);
+			Require([[[controller valueForKey:@"draft"] objectForKey:@"uuid"] isEqual:newBUUID], "Discarding a new theme changed the requested destination");
+			discardNewTheme(NO);
 		}
 		catch(std::exception const& error)
 		{

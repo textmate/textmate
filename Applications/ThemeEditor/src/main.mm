@@ -201,6 +201,7 @@ static NSColor* ThemePanelBackgroundColor ()
 	BOOL _rebuildingThemes;
 	BOOL _pendingThemeSelection;
 	bundles::item_ptr _source;
+	bundles::item_ptr _themeEditorBundle;
 	oak::uuid_t _previewUUID;
 	NSMutableDictionary* _draft;
 	plist::dictionary_t _loadedTheme;
@@ -944,7 +945,13 @@ static NSColor* ThemePanelBackgroundColor ()
 	alert.informativeText = @"Changes appear immediately in the preview. Save to keep them, or revert to the last saved version before leaving this theme.";
 	[alert addButtonWithTitle:@"Revert Changes"];
 	NSModalResponse response = [alert runModal];
-	return response == NSAlertThirdButtonReturn || (response == NSAlertFirstButtonReturn && [self saveCurrentTheme]);
+	if(response == NSAlertThirdButtonReturn)
+	{
+		if(_newTheme)
+			[self removeCurrentThemeFromList];
+		return YES;
+	}
+	return response == NSAlertFirstButtonReturn && [self saveCurrentTheme];
 }
 
 - (BOOL)tableView:(NSTableView*)tableView shouldSelectRow:(NSInteger)row
@@ -1451,15 +1458,18 @@ static NSColor* ThemePanelBackgroundColor ()
 	if(!duplicate)
 		theme_editor::set_appearance(value, theme_editor::light);
 	value["name"] = duplicate ? to_s((NSString*)_draft[@"name"]) + " Copy" : "Untitled Theme";
-	// Each new theme gets its own local bundle; installed themes retain their bundle.
-	oak::uuid_t const bundleUUID = "1C514B9A-BA40-4E6C-A79B-E169CE2AF4D2";
-	auto bundle = bundles::lookup(bundleUUID);
-	if(!bundle)
+	// Keep one bundle object even before any of its themes has been saved.
+	if(!_themeEditorBundle)
 	{
-		bundle = std::make_shared<bundles::item_t>(bundleUUID, bundles::item_ptr(), bundles::kItemTypeBundle);
-		bundle->set_plist({ { "uuid", to_s(bundleUUID) }, { "name", "Theme Editor" } });
+		oak::uuid_t const bundleUUID = "1C514B9A-BA40-4E6C-A79B-E169CE2AF4D2";
+		_themeEditorBundle = bundles::lookup(bundleUUID);
+		if(!_themeEditorBundle)
+		{
+			_themeEditorBundle = std::make_shared<bundles::item_t>(bundleUUID, bundles::item_ptr(), bundles::kItemTypeBundle);
+			_themeEditorBundle->set_plist({ { "uuid", to_s(bundleUUID) }, { "name", "Theme Editor" } });
+		}
 	}
-	auto item = std::make_shared<bundles::item_t>(uuid, bundle, bundles::kItemTypeTheme);
+	auto item = std::make_shared<bundles::item_t>(uuid, _themeEditorBundle, bundles::kItemTypeTheme);
 	item->set_plist(value);
 	_themes.push_back(item);
 	_dirty = NO;
@@ -1574,7 +1584,12 @@ static NSColor* ThemePanelBackgroundColor ()
 		return;
 	}
 	bundles::remove_item(deleted);
-	auto position = std::find(_themes.begin(), _themes.end(), deleted);
+	[self removeCurrentThemeFromList];
+}
+
+- (void)removeCurrentThemeFromList
+{
+	auto position = std::find(_themes.begin(), _themes.end(), _source);
 	size_t index = position - _themes.begin();
 	if(position != _themes.end())
 		_themes.erase(position);
