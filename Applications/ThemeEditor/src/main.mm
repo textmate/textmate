@@ -20,7 +20,43 @@
 static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 {
 	NSDictionary* dictionary = ns::to_dictionary(value);
-	return CFBridgingRelease(CFPropertyListCreateDeepCopy(kCFAllocatorDefault, (__bridge CFPropertyListRef)dictionary, kCFPropertyListMutableContainersAndLeaves));
+	NSMutableDictionary* draft = CFBridgingRelease(CFPropertyListCreateDeepCopy(kCFAllocatorDefault, (__bridge CFPropertyListRef)dictionary, kCFPropertyListMutableContainersAndLeaves));
+	// Treat malformed values like the renderer's missing settings. Never turn
+	// an invalid scoped rule into a global rule, which would restyle all text.
+	if(![draft[@"name"] isKindOfClass:NSString.class])
+		draft[@"name"] = @"Untitled Theme";
+	if(draft[@"colorSpaceName"] && ![draft[@"colorSpaceName"] isKindOfClass:NSString.class])
+		[draft removeObjectForKey:@"colorSpaceName"];
+	if(draft[@"gutterSettings"] && ![draft[@"gutterSettings"] isKindOfClass:NSDictionary.class])
+		[draft removeObjectForKey:@"gutterSettings"];
+	NSMutableArray* rules = [NSMutableArray array];
+	if([draft[@"settings"] isKindOfClass:NSArray.class])
+	{
+		for(id entry in draft[@"settings"])
+		{
+			if(![entry isKindOfClass:NSDictionary.class])
+				continue;
+			NSMutableDictionary* rule = entry;
+			if(rule[@"scope"] && ![rule[@"scope"] isKindOfClass:NSString.class])
+				continue;
+			if(rule[@"name"] && ![rule[@"name"] isKindOfClass:NSString.class])
+				[rule removeObjectForKey:@"name"];
+			if(![rule[@"settings"] isKindOfClass:NSDictionary.class])
+				rule[@"settings"] = [NSMutableDictionary dictionary];
+			NSMutableDictionary* settings = rule[@"settings"];
+			for(NSString* key in @[ @"fontName", @"fontStyle" ])
+			{
+				if(settings[key] && ![settings[key] isKindOfClass:NSString.class])
+					[settings removeObjectForKey:key];
+			}
+			id size = settings[@"fontSize"];
+			if(size && ![size isKindOfClass:NSString.class] && ![size isKindOfClass:NSNumber.class])
+				[settings removeObjectForKey:@"fontSize"];
+			[rules addObject:rule];
+		}
+	}
+	draft[@"settings"] = rules;
+	return draft;
 }
 
 static NSColor* ThemePanelBackgroundColor ()

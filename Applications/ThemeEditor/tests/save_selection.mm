@@ -562,6 +562,65 @@ int main ()
 			discardNewTheme(YES);
 			Require([[[controller valueForKey:@"draft"] objectForKey:@"uuid"] isEqual:newBUUID], "Discarding a new theme changed the requested destination");
 			discardNewTheme(NO);
+			NSArray<NSDictionary*>* malformedThemes = @[
+				@{ @"settings": @[ @"not a rule", @{ @"scope": @"string", @"name": @"Strings", @"settings": @{ @"foreground": @"#123456" } } ] },
+				@{ @"settings": @"not an array" },
+				@{ @"settings": @{ @"scope": @"comment" } },
+				@{ @"settings": @[ @{ @"scope": @"string", @"settings": @"not a dictionary" } ] },
+				@{ @"settings": @[ @{ @"scope": @"string", @"settings": @[ @"not a dictionary" ] } ] },
+				@{ @"settings": @[ @{ @"scope": @42, @"settings": @{} }, @{ @"scope": @[], @"settings": @{} }, @{ @"scope": @{}, @"settings": @{} } ] },
+				@{ @"settings": @[ @{ @"scope": @"string", @"name": @42, @"settings": @{} } ] },
+				@{ @"name": @42, @"settings": @[] },
+				@{ @"name": @[], @"settings": @[] },
+				@{ @"settings": @[ @{ @"settings": @{ @"fontName": @{}, @"fontStyle": @[], @"fontSize": @[] } } ], @"gutterSettings": @[], @"colorSpaceName": @42 },
+			];
+			NSMutableArray<NSURL*>* malformedURLs = [NSMutableArray array];
+			NSMutableArray<NSString*>* malformedFiles = [NSMutableArray array];
+			NSMutableArray<NSData*>* malformedOriginals = [NSMutableArray array];
+			for(NSDictionary* malformed in malformedThemes)
+			{
+				oak::uuid_t uuid;
+				uuid.generate();
+				NSMutableDictionary* value = [@{ @"uuid": to_ns(to_s(uuid)), @"name": @"Malformed fixture", @"customMetadata": @{ @"author": @"Keep me" } } mutableCopy];
+				[value addEntriesFromDictionary:malformed];
+				auto item = std::make_shared<bundles::item_t>(uuid, bundle, bundles::kItemTypeTheme);
+				item->set_plist(plist::convert((__bridge CFPropertyListRef)value));
+				Require(item->save(), "Could not save malformed theme fixture");
+				NSString* file = to_ns(item->paths().front());
+				[malformedFiles addObject:file];
+				[malformedOriginals addObject:[NSData dataWithContentsOfFile:file]];
+				[malformedURLs addObject:[NSURL URLWithString:[@"textmate-theme-editor://theme/" stringByAppendingString:to_ns(to_s(uuid))]]];
+			}
+			ThemeEditorController* malformedController = [ThemeEditorController new];
+			[malformedController application:NSApp openURLs:@[ malformedURLs.firstObject ]];
+			[malformedController applicationDidFinishLaunching:nil];
+			for(NSUInteger index = 0; index < malformedURLs.count; ++index)
+			{
+				[malformedController application:NSApp openURLs:@[ malformedURLs[index] ]];
+				NSDictionary* draft = [malformedController valueForKey:@"draft"];
+				Require([draft[@"uuid"] isEqual:malformedURLs[index].lastPathComponent], "Malformed theme did not load");
+				Require([draft[@"name"] isKindOfClass:NSString.class], "Malformed theme name was not sanitized");
+				Require([draft[@"settings"] isKindOfClass:NSArray.class] && [draft[@"settings"] count] > 0, "Malformed settings did not produce an editable global rule");
+				Require([draft[@"customMetadata"] isEqual:@{ @"author": @"Keep me" }], "Sanitizing a theme removed unrelated metadata");
+				NSPopUpButton* malformedRules = [malformedController valueForKey:@"rules"];
+				for(NSInteger row = 0; row < malformedRules.numberOfItems; ++row)
+				{
+					[malformedRules selectItemAtIndex:row];
+					[malformedController ruleSelected:nil];
+				}
+				if(index == 0)
+					Require([draft[@"settings"] count] == 2 && [draft[@"settings"][1][@"settings"][@"foreground"] isEqualToString:@"#123456"], "Sanitizing malformed entries lost a valid scoped rule");
+				if(index == 5)
+					Require([draft[@"settings"] count] == 1, "Malformed scopes became global rules");
+				if(index == 6)
+					Require([malformedRules.titleOfSelectedItem isEqualToString:@"string"], "Malformed rule name did not fall back to its scope");
+				Require(![[malformedController valueForKey:@"dirty"] boolValue], "Loading a malformed theme marked it edited");
+				Require([[NSData dataWithContentsOfFile:malformedFiles[index]] isEqual:malformedOriginals[index]], "Loading a malformed theme modified its file");
+			}
+			NSWindow* malformedWindow = [malformedController valueForKey:@"window"];
+			malformedWindow.releasedWhenClosed = NO;
+			malformedWindow.delegate = nil;
+			[malformedWindow close];
 		}
 		catch(std::exception const& error)
 		{
