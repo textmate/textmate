@@ -3,6 +3,9 @@
 #import <oak/compat.h>
 #import <text/format.h>
 
+#include <dlfcn.h>
+#include <mach-o/dyld.h>
+
 @interface OakExceptionHandlerDelegate : NSObject { }
 @end
 
@@ -101,6 +104,122 @@ void OakPrintBadAssertion (char const* lhs, char const* op, char const* rhs, std
 	_exit(EXIT_FAILURE);
 }
 
+static std::string OakMainExecutablePath ()
+{
+	static std::string const path = []{
+		char buf[PATH_MAX];
+		uint32_t size = sizeofA(buf);
+		if(_NSGetExecutablePath(buf, &size) != 0)
+			return std::string();
+
+		char resolved[PATH_MAX];
+		return realpath(buf, resolved) ? std::string(resolved) : std::string(buf);
+	}();
+	return path;
+}
+
+static std::string OakImagePathForAddress (void* address, std::string* symbolName)
+{
+	Dl_info info;
+	if(!dladdr(address, &info))
+		return std::string();
+
+	if(symbolName)
+		*symbolName = info.dli_sname ? info.dli_sname : "";
+
+	if(!info.dli_fname)
+		return std::string();
+
+	char resolved[PATH_MAX];
+	return realpath(info.dli_fname, resolved) ? std::string(resolved) : std::string(info.dli_fname);
+}
+
+static std::vector<void*> OakExceptionThrowStack (NSException* exception)
+{
+	std::vector<void*> addresses;
+	for(NSValue* value in [exception callStackReturnAddresses])
+		addresses.push_back([value pointerValue]);
+
+	if(addresses.empty())
+	{
+		// Foundation generated an NSRangeException with no callStackSymbols here, so the throw stack
+		// only exists as the hex dump NSExceptionHandler stores in userInfo.
+		NSString* trace = [[exception userInfo] objectForKey:NSStackTraceKey];
+		for(NSString* token in [trace componentsSeparatedByString:@" "])
+		{
+			if(char const* str = token.UTF8String)
+				addresses.push_back(reinterpret_cast<void*>(static_cast<uintptr_t>(strtoull(str, NULL, 16))));
+		}
+	}
+
+	if(addresses.empty())
+	{
+		// The delegate is called from inside objc_exception_throw, so the frames below that one
+		// are the throw stack.
+		void* frames[128];
+		int count = backtrace(frames, sizeofA(frames));
+		for(int i = 0; i < count; ++i)
+		{
+			std::string symbolName;
+			OakImagePathForAddress(frames[i], &symbolName);
+			if(symbolName == "objc_exception_throw")
+			{
+				addresses.assign(frames + i + 1, frames + count);
+				break;
+			}
+		}
+	}
+
+	return addresses;
+}
+
+static bool OakShouldSwallowException (std::vector<void*> const& addresses)
+{
+	if(addresses.empty())
+		return false;
+
+	std::string const executable = OakMainExecutablePath();
+	bool foundOwnFrame = false;
+	for(void* address : addresses)
+	{
+		std::string symbolName;
+		std::string const imagePath = OakImagePathForAddress(address, &symbolName);
+
+		if(imagePath.find("Accessibility") != std::string::npos || symbolName.find("Accessibility") != std::string::npos || symbolName.find("_AX") != std::string::npos)
+			return true;
+
+		if(executable.empty() || imagePath != executable)
+			continue;
+
+		// main is the entry point every main-thread stack ends in, not a TextMate call site, so it
+		// does not make the throw TextMate's responsibility.
+		if(symbolName != "main" && symbolName != "_main")
+			foundOwnFrame = true;
+	}
+
+	return !foundOwnFrame;
+}
+
+static void OakLogSwallowedException (NSException* exception, std::vector<void*> const& addresses)
+{
+	std::string trace;
+	for(void* address : addresses)
+	{
+		std::string symbolName;
+		std::string const imagePath = OakImagePathForAddress(address, &symbolName);
+		trace += text::format("  %s :: %s\n", imagePath.empty() ? "?" : imagePath.c_str(), symbolName.empty() ? "?" : symbolName.c_str());
+	}
+
+	for(NSString* symbol in [exception callStackSymbols])
+		trace += text::format("  %s\n", symbol.UTF8String);
+
+	os_log_error(OS_LOG_DEFAULT, "SWALLOWED-APPKIT-INTERNAL %{public}@: %{public}@\n%{public}s", [exception name], [exception reason], trace.c_str());
+
+	// The dev workflow runs the app with stderr redirected to a file, where os_log output is invisible.
+	fprintf(stderr, "SWALLOWED-APPKIT-INTERNAL %s: %s\n%s", [exception name].UTF8String ?: "", [exception reason].UTF8String ?: "", trace.c_str());
+	fflush(stderr);
+}
+
 @implementation OakExceptionHandlerDelegate
 + (void)load
 {
@@ -121,18 +240,26 @@ void OakPrintBadAssertion (char const* lhs, char const* op, char const* rhs, std
 	if([[exception name] isEqualToString:@"FSExecutionErrorException"])
 		return NO;
 
-	for(NSString* frame in [exception callStackSymbols])
+	std::vector<void*> const addresses = OakExceptionThrowStack(exception);
+	if(OakShouldSwallowException(addresses))
 	{
-		if([frame containsString:@"Accessibility"] || [frame containsString:@"_AX"])
-		{
-			os_log_info(OS_LOG_DEFAULT, "Suppressed accessibility exception: %{public}@: %{public}@", exception.name, exception.reason);
-			return NO;
-		}
+		OakLogSwallowedException(exception, addresses);
+		return NO;
 	}
 
 	os_log_error(OS_LOG_DEFAULT, "%{public}@: %{public}@\n", exception.name, exception.reason);
 	abort();
 	return YES;
+}
+
+- (BOOL)exceptionHandler:(NSExceptionHandler*)sender shouldHandleException:(NSException*)exception mask:(NSUInteger)mask
+{
+	// Answering NO keeps the handler from applying default handling to an exception we have already
+	// logged ourselves; an uncaught exception is terminated by Foundation regardless of the answer.
+	if([[exception name] isEqualToString:@"FSExecutionErrorException"])
+		return NO;
+
+	return !OakShouldSwallowException(OakExceptionThrowStack(exception));
 }
 @end
 
