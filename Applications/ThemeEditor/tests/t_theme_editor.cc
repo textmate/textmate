@@ -4,6 +4,7 @@
 #include <bundles/locations.h>
 #include <test/jail.h>
 #include "../src/appearance.h"
+#include "../src/bundle_index.h"
 #include "../src/samples.h"
 #include "../src/rule_matching.h"
 
@@ -85,6 +86,9 @@ void test_save_new_theme_and_edit_managed_theme_as_local_override ()
 			installed = item;
 	OAK_ASSERT(installed);
 	OAK_ASSERT(!installed->local());
+	// Leave a persisted index from before the local override was created.
+	std::string const cachePath = jail.path("BundlesIndex.plist");
+	cache.save(cachePath);
 	std::string managedPath = installed->paths().front();
 	value["name"] = "Edited Theme";
 	theme_editor::set_appearance(value, theme_editor::dark);
@@ -92,18 +96,22 @@ void test_save_new_theme_and_edit_managed_theme_as_local_override ()
 	OAK_ASSERT(installed->save());
 	OAK_ASSERT_EQ(plist::load(managedPath)["name"], plist::any_t("Test Theme"));
 
-	plist::cache_t reloadedCache;
-	auto reloaded = create_bundle_index({ jail.path("Local/Bundles"), jail.path("Managed/Bundles") }, reloadedCache);
+	auto reloaded = theme_editor::load_bundle_index(cachePath);
 	bool found = false;
 	for(auto const& item : reloaded.first)
 	{
 		if(item->uuid() == uuid)
 		{
+			OAK_ASSERT_EQ(item->name(), "Edited Theme");
 			OAK_ASSERT_EQ(item->plist(), value);
 			found = true;
 		}
 	}
 	OAK_ASSERT(found);
+
+	// A missing disk cache must still discover all installed themes.
+	auto uncached = theme_editor::load_bundle_index(jail.path("MissingIndex.plist"));
+	OAK_ASSERT_EQ(uncached.first.size(), reloaded.first.size());
 }
 
 void test_appearance_matches_textmate_theme_menu ()

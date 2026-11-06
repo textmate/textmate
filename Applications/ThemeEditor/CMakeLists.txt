@@ -52,7 +52,7 @@ if(BUILD_TESTING)
     COMMAND "${CMAKE_SOURCE_DIR}/bin/gen_test"
       "${CMAKE_CURRENT_SOURCE_DIR}/tests/t_theme_editor.cc"
       "${CMAKE_CURRENT_SOURCE_DIR}/tests/t_theme_colors.mm" > "${_runner}"
-    DEPENDS tests/t_theme_editor.cc tests/t_theme_colors.mm src/appearance.h src/colors.h src/samples.h src/rule_matching.h "${CMAKE_SOURCE_DIR}/bin/gen_test")
+    DEPENDS tests/t_theme_editor.cc tests/t_theme_colors.mm src/appearance.h src/bundle_index.h src/colors.h src/samples.h src/rule_matching.h "${CMAKE_SOURCE_DIR}/bin/gen_test")
   add_executable(theme_editor_tests "${_runner}")
   target_link_libraries(theme_editor_tests PRIVATE theme bundles ${TEXTMATE_DEBUG_LIBS} "-framework Cocoa")
   target_compile_definitions(theme_editor_tests PRIVATE

@@ -2,6 +2,7 @@
 #import <QuartzCore/QuartzCore.h>
 #import <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
 #import "appearance.h"
+#import "bundle_index.h"
 #import "colors.h"
 #import "samples.h"
 #import "rule_matching.h"
@@ -10,8 +11,6 @@
 #import <OakSystem/application.h>
 #import <OakTextView/OakDocumentView.h>
 #import <Preferences/Keys.h>
-#import <bundles/load.h>
-#import <bundles/locations.h>
 #import <bundles/query.h>
 #import <document/OakDocument.h>
 #import <io/path.h>
@@ -382,11 +381,7 @@ static NSColor* ThemePanelBackgroundColor ()
 	NSApp.applicationIconImage = appIcon;
 	_previewUUID.generate();
 	_selectedRow = -1;
-	std::vector<std::string> paths;
-	for(auto const& location : bundles::locations())
-		paths.push_back(path::join(location, "Bundles"));
-	plist::cache_t cache;
-	auto index = create_bundle_index(paths, cache);
+	auto index = theme_editor::load_bundle_index();
 	bundles::set_index(index.first, index.second);
 	_themes = bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeTheme);
 	std::sort(_themes.begin(), _themes.end(), [](auto const& lhs, auto const& rhs) { return [to_ns(lhs->name()) localizedCaseInsensitiveCompare:to_ns(rhs->name())] == NSOrderedAscending; });
@@ -1677,11 +1672,7 @@ static NSColor* ThemePanelBackgroundColor ()
 		}
 	}
 	// Detect local overrides created by another TextMate process after launch.
-	std::vector<std::string> paths;
-	for(auto const& location : bundles::locations())
-		paths.push_back(path::join(location, "Bundles"));
-	plist::cache_t cache;
-	auto current = create_bundle_index(paths, cache);
+	auto current = theme_editor::load_bundle_index();
 	for(auto const& item : current.first)
 	{
 		if(item->uuid() == _source->uuid() && bundles::erase_false_values(item->plist()) != bundles::erase_false_values(_source->plist()))
