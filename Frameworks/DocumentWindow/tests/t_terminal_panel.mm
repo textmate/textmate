@@ -407,6 +407,9 @@ void test_terminal_tab_status_presentation ()
         OAK_ASSERT(spinner != nil);
         NSUInteger workingStarts = StartCalls(spinner);
         OAK_ASSERT(workingStarts > 0);
+        OAK_ASSERT(spinner != nil && spinner.superview == tab);
+        NSView* statusView = [tab valueForKey:@"statusView"];
+        OAK_ASSERT(statusView.hidden && NSWidth(statusView.frame) == 0);
         source.status = OakTabStatusBlocked;
         source.statusDescription = @"Needs approval";
         [bar reloadData];
@@ -415,6 +418,8 @@ void test_terminal_tab_status_presentation ()
         OAK_ASSERT(StopCalls(spinner) > 0);
         OAK_ASSERT(StartCalls(spinner) == workingStarts);
         NSUInteger stoppedCalls = StopCalls(spinner);
+        [bar layoutSubtreeIfNeeded];
+        OAK_ASSERT(!statusView.hidden && NSWidth(statusView.frame) == 18);
         source.status = OakTabStatusNone;
         source.statusDescription = @"";
         [bar reloadData];
@@ -422,5 +427,6 @@ void test_terminal_tab_status_presentation ()
         OAK_ASSERT([tab.accessibilityLabel isEqualToString:@"Agent"]);
         OAK_ASSERT(StopCalls(spinner) > stoppedCalls);
         RemoveAnimationCounters();
+        OAK_ASSERT(statusView.hidden && NSWidth(statusView.frame) == 0);
     });
 }
