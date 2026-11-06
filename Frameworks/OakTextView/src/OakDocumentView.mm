@@ -104,7 +104,7 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 
 		self.document = [OakDocument documentWithString:@"" fileType:@"text.plain" customName:@"placeholder"];
 
-		self.observedKeys = @[ @"selectionString", @"symbol", @"recordingMacro", @"themeUUID" ];
+		self.observedKeys = @[ @"selectionString", @"symbol", @"recordingMacro" ];
 		for(NSString* keyPath in self.observedKeys)
 			[_textView addObserver:self forKeyPath:keyPath options:NSKeyValueObservingOptionInitial context:NULL];
 
@@ -288,10 +288,6 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 	else if([aKeyPath isEqualToString:@"softTabs"])
 	{
 		_statusBar.softTabs = self.document.softTabs;
-	}
-	else if([aKeyPath isEqualToString:@"themeUUID"])
-	{
-		[self updateStyle];
 	}
 }
 
