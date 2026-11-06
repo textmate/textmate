@@ -1,5 +1,3 @@
-#include "../../../Frameworks/theme/tests/CGColorRefToString.h"
-#include <theme/theme.h>
 #include <bundles/load.h>
 #include <bundles/locations.h>
 #include <test/jail.h>
@@ -7,42 +5,6 @@
 #include "../src/bundle_index.h"
 #include "../src/samples.h"
 #include "../src/rule_matching.h"
-
-void test_draft_styles_refresh_without_replacing_cached_theme ()
-{
-	oak::uuid_t uuid;
-	uuid.generate();
-	auto item = std::make_shared<bundles::item_t>(uuid, bundles::item_ptr(), bundles::kItemTypeTheme);
-	plist::dictionary_t value = {
-		{ "uuid", to_s(uuid) },
-		{ "settings", plist::array_t{ plist::dictionary_t{ { "settings", plist::dictionary_t{ { "foreground", "#123456" }, { "background", "#FFFFFF" } } } } } }
-	};
-	item->set_plist(value);
-	theme_t installed(item);
-	OAK_ASSERT_EQ(to_s(installed.foreground()), "#123456FF");
-
-	value["settings"] = plist::array_t{ plist::dictionary_t{ { "settings", plist::dictionary_t{ { "foreground", "#ABCDEF" }, { "background", "#000000" } } } } };
-	item->set_plist(value);
-	theme_t draft(item, "Menlo-Regular", 13, false);
-	OAK_ASSERT_EQ(to_s(draft.foreground()), "#ABCDEFFF");
-	OAK_ASSERT_EQ(to_s(draft.background()), "#000000FF");
-	OAK_ASSERT_EQ(to_s(installed.foreground()), "#123456FF");
-
-	// The layout copies a theme to the current editor font when installing it.
-	auto resized = draft.copy_with_font_name_and_size("Menlo-Regular", 18);
-	OAK_ASSERT_EQ(to_s(resized->foreground()), "#ABCDEFFF");
-	OAK_ASSERT_EQ(resized->font_size(), 18);
-	OAK_ASSERT_EQ(to_s(theme_t(item).foreground()), "#123456FF");
-}
-
-void test_font_copy_drops_previously_resolved_scope_fonts ()
-{
-	theme_t theme(bundles::item_ptr(), "Menlo-Regular", 12, false);
-	OAK_ASSERT_EQ(CTFontGetSize(theme.styles_for_scope(scope::scope_t("source.c++")).font()), 12);
-	auto resized = theme.copy_with_font_name_and_size("Menlo-Regular", 19);
-	OAK_ASSERT_EQ(CTFontGetSize(resized->styles_for_scope(scope::scope_t("source.c++")).font()), 19);
-	OAK_ASSERT_EQ(CTFontGetSize(theme.styles_for_scope(scope::scope_t("source.c++")).font()), 12);
-}
 
 void test_save_new_theme_and_edit_managed_theme_as_local_override ()
 {

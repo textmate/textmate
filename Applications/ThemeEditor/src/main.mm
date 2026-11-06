@@ -1622,8 +1622,26 @@ static NSColor* ThemePanelBackgroundColor ()
 
 - (void)removeCurrentThemeFromList
 {
+	bundles::item_ptr nextTheme;
+	auto row = std::find_if(_themeRows.begin(), _themeRows.end(), [&](auto const& row) { return row.item == _source; });
+	if(row != _themeRows.end())
+	{
+		// Follow the displayed groups, skipping headings; at the end, go back.
+		for(auto next = std::next(row); next != _themeRows.end(); ++next)
+		{
+			if(next->item)
+			{
+				nextTheme = next->item;
+				break;
+			}
+		}
+		while(!nextTheme && row != _themeRows.begin())
+		{
+			--row;
+			nextTheme = row->item;
+		}
+	}
 	auto position = std::find(_themes.begin(), _themes.end(), _source);
-	size_t index = position - _themes.begin();
 	if(position != _themes.end())
 		_themes.erase(position);
 	_source.reset();
@@ -1633,7 +1651,7 @@ static NSColor* ThemePanelBackgroundColor ()
 		[self createThemeDuplicating:NO];
 	else
 	{
-		_source = _themes[std::min(index, _themes.size() - 1)];
+		_source = nextTheme ? nextTheme : _themes.front();
 		[self loadSource];
 	}
 }

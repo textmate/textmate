@@ -548,6 +548,7 @@ int main ()
 			Require([[[controller valueForKey:@"draft"] objectForKey:@"name"] isEqualToString:@"Alpha Copy"], "Cancel deleted the theme");
 			deleteResponding(NSAlertSecondButtonReturn);
 			Require(![[[controller valueForKey:@"draft"] objectForKey:@"name"] isEqualToString:@"Alpha Copy"], "Confirmed deletion retained the theme");
+			Require([[[controller valueForKey:@"draft"] objectForKey:@"uuid"] isEqualToString:themeURLs[@"Zulu"].lastPathComponent], "Deletion did not select the next displayed theme across the grouped sort order");
 			for(NSInteger row = 0; row < table.numberOfRows; ++row)
 			{
 				NSMenu* remaining = contextMenu(row);
