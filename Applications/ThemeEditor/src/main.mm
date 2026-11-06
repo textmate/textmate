@@ -536,14 +536,14 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	_rules = [[NSPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:NO];
 	_rules.target = self;
 	_rules.action = @selector(ruleSelected:);
-	NSButton* renameRuleButton = [self button:@"" action:@selector(renameRule:)];
-	renameRuleButton.image = [NSImage imageWithSystemSymbolName:@"pencil" accessibilityDescription:nil];
-	renameRuleButton.accessibilityLabel = @"Rename rule";
-	renameRuleButton.toolTip = @"Rename the selected style rule";
+	NSButton* editRuleButton = [self button:@"" action:@selector(renameRule:)];
+	editRuleButton.image = [NSImage imageWithSystemSymbolName:@"pencil" accessibilityDescription:nil];
+	editRuleButton.accessibilityLabel = @"Edit style rule";
+	editRuleButton.toolTip = @"Edit the selected rule’s name and scope selector";
 	[_rules setContentHuggingPriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
 	[_rules setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
-	[renameRuleButton setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
-	NSStackView* ruleSelector = [NSStackView stackViewWithViews:@[ _rules, renameRuleButton ]];
+	[editRuleButton setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
+	NSStackView* ruleSelector = [NSStackView stackViewWithViews:@[ _rules, editRuleButton ]];
 	ruleSelector.spacing = 8;
 	ruleSelector.alignment = NSLayoutAttributeCenterY;
 	ruleSelector.distribution = NSStackViewDistributionFill;
@@ -558,7 +558,7 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	_removeRuleButton.image = [NSImage imageWithSystemSymbolName:@"minus" accessibilityDescription:nil];
 	_removeRuleButton.accessibilityLabel = @"Remove rule";
 	_removeRuleButton.toolTip = @"Remove rule";
-	for(NSButton* button in @[ renameRuleButton, addRuleButton, _removeRuleButton ])
+	for(NSButton* button in @[ editRuleButton, addRuleButton, _removeRuleButton ])
 	{
 		button.bordered = NO;
 		button.imagePosition = NSImageOnly;
@@ -592,7 +592,7 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 		[ruleBar.bottomAnchor constraintEqualToAnchor:ruleGroupContent.bottomAnchor],
 		[ruleBar.heightAnchor constraintEqualToConstant:24],
 		[ruleControls.bottomAnchor constraintEqualToAnchor:ruleBar.topAnchor constant:-8],
-		[ruleActions.leadingAnchor constraintEqualToAnchor:ruleBar.leadingAnchor constant:0],
+		[ruleActions.leadingAnchor constraintEqualToAnchor:ruleBar.leadingAnchor],
 		[ruleActions.centerYAnchor constraintEqualToAnchor:ruleBar.centerYAnchor],
 	]];
 	_fields = [NSMutableDictionary dictionary];
@@ -1343,24 +1343,51 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	if(![_window makeFirstResponder:nil] || _invalidFields.count) { NSBeep(); return; }
 	NSMutableDictionary* rule = [self currentRule];
 	NSAlert* alert = [self themeAlert];
-	alert.messageText = @"Rename style rule";
-	alert.informativeText = @"Enter a new name for the selected rule. Clear the name to use its scope selector, or Global editor style for a global rule.";
-	[alert addButtonWithTitle:@"Rename"];
+	alert.messageText = @"Edit style rule";
+	alert.informativeText = [rule[@"scope"] length] ? @"Edit the rule’s name and scope selector. A scope selector is required; clear the name to display the selector in the menu." : @"Edit the global rule’s name. Its empty scope applies to the whole editor.";
+	[alert addButtonWithTitle:@"Apply"];
 	[alert addButtonWithTitle:@"Cancel"];
 	NSTextField* name = [NSTextField textFieldWithString:rule[@"name"] ?: @""];
-	name.frame = NSMakeRect(0, 0, 300, 24);
+	name.frame = NSMakeRect(0, 70, 300, 24);
 	name.identifier = @"rename-rule-name";
 	name.accessibilityLabel = @"Rule name";
 	name.placeholderString = [rule[@"scope"] length] ? rule[@"scope"] : @"Global editor style";
-	alert.accessoryView = name;
+	BOOL scoped = [rule[@"scope"] length] > 0;
+	NSTextField* scope = [NSTextField textFieldWithString:rule[@"scope"] ?: @""];
+	scope.frame = NSMakeRect(0, 0, 300, 24);
+	scope.identifier = @"edit-rule-scope";
+	scope.accessibilityLabel = @"Scope selector";
+	scope.enabled = scoped;
+	scope.placeholderString = scoped ? @"e.g. string.quoted or comment" : @"Global editor style (all scopes)";
+	NSView* form = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 300, 116)];
+	NSTextField* nameLabel = [NSTextField labelWithString:@"Rule name"];
+	nameLabel.frame = NSMakeRect(0, 96, 300, 20);
+	NSTextField* scopeLabel = [NSTextField labelWithString:@"Scope selector"];
+	scopeLabel.frame = NSMakeRect(0, 26, 300, 20);
+	for(NSView* view in @[ nameLabel, name, scopeLabel, scope ])
+		[form addSubview:view];
+	name.nextKeyView = scoped ? scope : name;
+	scope.nextKeyView = name;
+	alert.accessoryView = form;
 	alert.window.initialFirstResponder = name;
-	[name selectText:nil];
-	if([alert runModal] != NSAlertFirstButtonReturn)
+	NSString* title;
+	NSString* selector;
+	while(YES)
+	{
+		if([alert runModal] != NSAlertFirstButtonReturn)
+			return;
+		[alert.window makeFirstResponder:nil];
+		title = [name.stringValue stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
+		selector = [scope.stringValue stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
+		if(!scoped || selector.length)
+			break;
+		alert.informativeText = @"Enter a scope selector before applying the rule (for example, string or comment).";
+		alert.window.initialFirstResponder = scope;
+	}
+	if([title isEqualToString:rule[@"name"] ?: @""] && (!scoped || [selector isEqualToString:rule[@"scope"]]))
 		return;
-	[alert.window makeFirstResponder:nil];
-	NSString* title = [name.stringValue stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
-	if([title isEqualToString:rule[@"name"] ?: @""])
-		return;
+	if(scoped)
+		rule[@"scope"] = selector;
 	if(title.length)
 		rule[@"name"] = title;
 	else

@@ -250,11 +250,12 @@ int main ()
 			NSPopUpButton* rules = [controller valueForKey:@"rules"];
 			[window layoutIfNeeded];
 			NSStackView* ruleSelector = (NSStackView*)rules.superview;
-			NSButton* renameRuleButton = (NSButton*)ruleSelector.arrangedSubviews.lastObject;
-			Require([renameRuleButton.accessibilityLabel isEqualToString:@"Rename rule"], "Rule selector has no rename button");
+			NSButton* editRuleButton = (NSButton*)ruleSelector.arrangedSubviews.lastObject;
+			Require([editRuleButton.accessibilityLabel isEqualToString:@"Edit style rule"], "Rule selector has no edit button");
+			Require(editRuleButton.menu == nil && editRuleButton.action == @selector(renameRule:) && editRuleButton.target == controller, "Edit button does not open the rule editor directly");
 			Require(fabs(NSWidth(ruleSelector.frame) - NSWidth(ruleSelector.superview.frame)) < 1, "Rule selector does not fill the inspector row");
-			Require(fabs(NSMaxX(renameRuleButton.frame) - NSWidth(ruleSelector.bounds)) < 1, "Rename button is not aligned to the right edge");
-			Require(fabs(NSMaxX(rules.frame) + ruleSelector.spacing - NSMinX(renameRuleButton.frame)) < 1, "Rule dropdown does not expand up to the rename button");
+			Require(fabs(NSMaxX(editRuleButton.frame) - NSWidth(ruleSelector.bounds)) < 1, "Edit button is not aligned to the right edge");
+			Require(fabs(NSMaxX(rules.frame) + ruleSelector.spacing - NSMinX(editRuleButton.frame)) < 1, "Rule dropdown does not expand up to the edit button");
 			NSView* ruleBox = ruleSelector.superview.superview.superview;
 			Require([ruleBox isKindOfClass:NSBox.class], "Style section has no box");
 			NSAppearance* originalAppearance = ruleBox.appearance;
@@ -274,7 +275,7 @@ int main ()
 			NSView* gutterControls = [controller valueForKey:@"gutterControls"];
 			[rules selectItemAtIndex:0];
 			[controller ruleSelected:nil];
-			Require(!removeRuleButton.enabled, "Global editor style can be removed through the minus button");
+			Require(!removeRuleButton.enabled, "Global editor style can be removed through the remove button");
 			Require(fontFamily.superview && !fontFamily.isHiddenOrHasHiddenAncestor, "Font settings should be visible for the global style");
 			Require(gutterControls.superview && !gutterControls.isHiddenOrHasHiddenAncestor, "Gutter colors should be visible for the global style");
 			NSDictionary* beforeGlobalRemoval = [[controller valueForKey:@"draft"] copy];
@@ -459,11 +460,13 @@ int main ()
 			};
 			checkSave(@"Middle");
 
-			auto renameRuleResponding = [&] (NSModalResponse response, NSString* title, NSString* expectedName) {
+			auto renameRuleResponding = [&] (NSModalResponse response, NSString* title, NSString* expectedName, NSString* newScope = nil) {
+				NSString* expectedScope = ((NSDictionary*)[controller valueForKey:@"draft"])[@"settings"][rules.indexOfSelectedItem][@"scope"] ?: @"";
 				NSTimer* timer = [NSTimer timerWithTimeInterval:0.01 repeats:YES block:^(NSTimer* timer) {
 					if(!NSApp.modalWindow)
 						return;
 					NSTextField* name = nil;
+					NSTextField* scope = nil;
 					NSMutableArray<NSView*>* pending = [NSMutableArray arrayWithObject:NSApp.modalWindow.contentView];
 					while(pending.count)
 					{
@@ -471,12 +474,17 @@ int main ()
 						[pending removeLastObject];
 						if([view.identifier isEqualToString:@"rename-rule-name"])
 							name = (NSTextField*)view;
+						if([view.identifier isEqualToString:@"edit-rule-scope"])
+							scope = (NSTextField*)view;
 						[pending addObjectsFromArray:view.subviews];
 					}
 					Require([name.identifier isEqualToString:@"rename-rule-name"], "Rename dialog has no name field");
 					Require([name.stringValue isEqualToString:expectedName], "Rename dialog did not prefill the selected rule name");
 					[NSApp.modalWindow makeFirstResponder:nil];
 					name.stringValue = title;
+					Require(scope && [scope.stringValue isEqualToString:expectedScope], "Edit dialog did not show the existing scope selector");
+					Require(scope.enabled == (expectedScope.length > 0), "Global scope protection is incorrect");
+					if(newScope) scope.stringValue = newScope;
 					[NSApp stopModalWithCode:response];
 					[timer invalidate];
 				}];
@@ -485,7 +493,8 @@ int main ()
 				[timer invalidate];
 			};
 			NSDictionary* originalRule = [((NSDictionary*)[controller valueForKey:@"draft"])[@"settings"][1] copy];
-			renameRuleResponding(NSAlertSecondButtonReturn, @"Canceled name", @"Comments");
+			renameRuleResponding(NSAlertSecondButtonReturn, @"Canceled name", @"Comments", @"string");
+			Require([((NSDictionary*)[controller valueForKey:@"draft"])[@"settings"][1][@"scope"] isEqualToString:@"comment"], "Canceling edit changed the scope");
 			Require([rules.titleOfSelectedItem isEqualToString:@"Comments"], "Canceling rename changed the rule name");
 			requireDirty(NO);
 			renameRuleResponding(NSAlertFirstButtonReturn, @"  Notes  ", @"Comments");
@@ -495,6 +504,12 @@ int main ()
 			NSDictionary* renamedRule = ((NSDictionary*)[controller valueForKey:@"draft"])[@"settings"][1];
 			Require([renamedRule[@"name"] isEqualToString:@"Notes"], "Saved rule name was not reloaded");
 			Require([renamedRule[@"scope"] isEqual:originalRule[@"scope"]] && [renamedRule[@"settings"] isEqual:originalRule[@"settings"]], "Renaming changed the rule scope or settings");
+			renameRuleResponding(NSAlertFirstButtonReturn, @"Notes", @"Notes", @"  comment.block  ");
+			Require([((NSDictionary*)[controller valueForKey:@"draft"])[@"settings"][1][@"scope"] isEqualToString:@"comment.block"], "Editing the scope did not update the draft");
+			Require(rules.indexOfSelectedItem == 1, "Editing the scope lost rule selection");
+			checkSave(@"Middle");
+			renameRuleResponding(NSAlertFirstButtonReturn, @"Notes", @"Notes", @"comment");
+			checkSave(@"Middle");
 			renameRuleResponding(NSAlertFirstButtonReturn, @"  ", @"Notes");
 			Require([rules.titleOfSelectedItem isEqualToString:@"comment"] && !((NSDictionary*)[controller valueForKey:@"draft"])[@"settings"][1][@"name"], "Clearing a rule name did not fall back to its scope");
 			[rules selectItemAtIndex:0];
