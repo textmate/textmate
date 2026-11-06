@@ -4,6 +4,8 @@
 #import "appearance.h"
 #import "bundle_index.h"
 #import "colors.h"
+#import "ase.h"
+#import "dtcg.h"
 #import "samples.h"
 #import "rule_matching.h"
 #import <theme/font_size.h>
@@ -76,6 +78,31 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 {
 	[super viewDidChangeEffectiveAppearance];
 	self.needsDisplay = YES;
+}
+@end
+
+// Draw section outlines without changing NSBox's content geometry.
+@interface ThemeSettingsBox : NSBox
+- (void)updateOutline;
+@end
+@implementation ThemeSettingsBox
+- (void)updateOutline
+{
+	[self.effectiveAppearance performAsCurrentDrawingAppearance:^{
+		self.layer.borderColor = NSColor.separatorColor.CGColor;
+	}];
+}
+
+- (void)viewDidMoveToWindow
+{
+	[super viewDidMoveToWindow];
+	[self updateOutline];
+}
+
+- (void)viewDidChangeEffectiveAppearance
+{
+	[super viewDidChangeEffectiveAppearance];
+	[self updateOutline];
 }
 @end
 
@@ -240,6 +267,10 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	NSTableView* _table;
 	NSStackView* _controls;
 	NSStackView* _gutterControls;
+	NSStackView* _paletteControls;
+	NSTextField* _paletteHeading;
+	NSPopUpButton* _paletteColors;
+	NSPopUpButton* _paletteTarget;
 	NSTextField* _gutterHeading;
 	OakDocumentView* _preview;
 	NSPopUpButton* _fontFamily;
@@ -331,9 +362,13 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	[_controls addArrangedSubview:heading];
 	if([title isEqualToString:@"Gutter colors"])
 		_gutterHeading = heading;
-	NSBox* panel = [NSBox new];
+	ThemeSettingsBox* panel = [ThemeSettingsBox new];
 	panel.boxType = NSBoxCustom;
 	panel.borderWidth = 0;
+	panel.wantsLayer = YES;
+	panel.layer.borderWidth = 1;
+	[panel updateOutline];
+	panel.layer.cornerRadius = 10;
 	panel.transparent = NO;
 	panel.titlePosition = NSNoTitle;
 	panel.fillColor = NSColor.controlBackgroundColor;
@@ -482,12 +517,38 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	_appearance.accessibilityLabel = @"Theme appearance";
 	[_appearance.widthAnchor constraintEqualToConstant:275].active = YES;
 	[appearanceControls addArrangedSubview:_appearance];
+	NSButton* invert = [self button:@"Invert" action:@selector(invertTheme:)];
+	invert.toolTip = @"Reverse lightness for all theme colors while preserving hues and opacity. Click again to invert back.";
+	[appearanceControls addArrangedSubview:invert];
+	_paletteControls = [self settingsGroup:@"Imported palette"];
+	_paletteHeading = (NSTextField*)_controls.arrangedSubviews[_controls.arrangedSubviews.count - 2];
+	_paletteColors = [[NSPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:NO];
+	_paletteColors.accessibilityLabel = @"Imported swatch";
+	[_paletteColors.widthAnchor constraintEqualToConstant:275].active = YES;
+	[_paletteControls addArrangedSubview:_paletteColors];
+	_paletteTarget = [[NSPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:NO];
+	[_paletteTarget addItemsWithTitles:@[ @"Foreground", @"Background", @"Caret", @"Selection", @"Invisibles" ]];
+	_paletteTarget.accessibilityLabel = @"Apply swatch to";
+	NSButton* applySwatch = [self button:@"Apply" action:@selector(applyPaletteColor:)];
+	NSStackView* paletteActions = [NSStackView stackViewWithViews:@[ _paletteTarget, applySwatch ]];
+	[_paletteControls addArrangedSubview:paletteActions];
 	NSStackView* ruleControls = [self settingsGroup:@"Style rule"];
 	_rules = [[NSPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:NO];
 	_rules.target = self;
 	_rules.action = @selector(ruleSelected:);
-	[_rules.widthAnchor constraintEqualToConstant:275].active = YES;
-	[ruleControls addArrangedSubview:_rules];
+	NSButton* renameRuleButton = [self button:@"" action:@selector(renameRule:)];
+	renameRuleButton.image = [NSImage imageWithSystemSymbolName:@"pencil" accessibilityDescription:nil];
+	renameRuleButton.accessibilityLabel = @"Rename rule";
+	renameRuleButton.toolTip = @"Rename the selected style rule";
+	[_rules setContentHuggingPriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
+	[_rules setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
+	[renameRuleButton setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
+	NSStackView* ruleSelector = [NSStackView stackViewWithViews:@[ _rules, renameRuleButton ]];
+	ruleSelector.spacing = 8;
+	ruleSelector.alignment = NSLayoutAttributeCenterY;
+	ruleSelector.distribution = NSStackViewDistributionFill;
+	[ruleControls addArrangedSubview:ruleSelector];
+	[ruleSelector.widthAnchor constraintEqualToAnchor:ruleControls.widthAnchor].active = YES;
 	ruleControls.spacing = 4;
 	NSButton* addRuleButton = [self button:@"" action:@selector(addRule:)];
 	addRuleButton.image = [NSImage imageWithSystemSymbolName:@"plus" accessibilityDescription:nil];
@@ -497,7 +558,7 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	_removeRuleButton.image = [NSImage imageWithSystemSymbolName:@"minus" accessibilityDescription:nil];
 	_removeRuleButton.accessibilityLabel = @"Remove rule";
 	_removeRuleButton.toolTip = @"Remove rule";
-	for(NSButton* button in @[ addRuleButton, _removeRuleButton ])
+	for(NSButton* button in @[ renameRuleButton, addRuleButton, _removeRuleButton ])
 	{
 		button.bordered = NO;
 		button.imagePosition = NSImageOnly;
@@ -852,7 +913,7 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	NSMenuItem* file = [NSMenuItem new];
 	file.title = @"File";
 	file.submenu = [[NSMenu alloc] initWithTitle:@"File"];
-	for(NSArray* entry in @[ @[ @"New Theme", NSStringFromSelector(@selector(newTheme:)), @"n" ], @[ @"Save Theme", NSStringFromSelector(@selector(saveTheme:)), @"s" ], @[ @"Export Theme…", NSStringFromSelector(@selector(exportTheme:)), @"" ] ])
+	for(NSArray* entry in @[ @[ @"New Theme", NSStringFromSelector(@selector(newTheme:)), @"n" ], @[ @"Import Colors…", NSStringFromSelector(@selector(importSwatches:)), @"" ], @[ @"Save Theme", NSStringFromSelector(@selector(saveTheme:)), @"s" ], @[ @"Export Theme…", NSStringFromSelector(@selector(exportTheme:)), @"" ] ])
 	{
 		NSMenuItem* item = [file.submenu addItemWithTitle:entry[0] action:NSSelectorFromString(entry[1]) keyEquivalent:entry[2]];
 		item.target = self;
@@ -935,6 +996,31 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	theme_editor::set_appearance(value, static_cast<theme_editor::appearance_t>(_appearance.selectedSegment));
 	_draft = MutableTheme(value);
 	[self changed:YES];
+	[self rebuildThemesSelecting:_source];
+}
+
+- (void)invertTheme:(id)sender
+{
+	[_window makeFirstResponder:nil];
+	if(_invalidFields.count)
+	{
+		NSBeep();
+		return;
+	}
+	auto const& style = _preview.textView.theme->styles_for_scope(scope::scope_t("theme-editor.default"));
+	NSColorSpace* space = theme_editor::color_space(_draft);
+	theme_editor::invert_theme_colors(_draft,
+		theme_editor::color_string([NSColor colorWithCGColor:style.foreground()], space),
+		theme_editor::color_string([NSColor colorWithCGColor:style.background()], space),
+		theme_editor::color_string([NSColor colorWithCGColor:style.caret()], space));
+	auto value = plist::convert((__bridge CFPropertyListRef)_draft);
+	auto appearance = theme_editor::appearance(value);
+	if(appearance != theme_editor::unspecified)
+		theme_editor::set_appearance(value, appearance == theme_editor::light ? theme_editor::dark : theme_editor::light);
+	_draft = MutableTheme(value);
+	_appearance.selectedSegment = theme_editor::appearance(value);
+	[self changed:YES];
+	[self reloadRules:_rules.indexOfSelectedItem];
 	[self rebuildThemesSelecting:_source];
 }
 
@@ -1100,6 +1186,7 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 - (void)loadSourceSelectingRule:(NSInteger)selectedRule
 {
 	_draft = MutableTheme(_source->plist());
+	[self reloadPalette];
 	_newTheme = _source->paths().empty();
 	_originalFiles = [NSMutableDictionary dictionary];
 	for(auto const& path : _source->paths())
@@ -1149,7 +1236,7 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	[_rules removeAllItems];
 	for(NSDictionary* rule in _draft[@"settings"])
 	{
-		NSString* title = [rule[@"scope"] length] ? (rule[@"name"] ?: rule[@"scope"]) : @"Global editor style";
+		NSString* title = [rule[@"name"] length] ? rule[@"name"] : ([rule[@"scope"] length] ? rule[@"scope"] : @"Global editor style");
 		// addItemWithTitle coalesces duplicate titles; preserve one entry per rule.
 		[_rules.menu addItem:[[NSMenuItem alloc] initWithTitle:title action:nil keyEquivalent:@""]];
 	}
@@ -1249,6 +1336,37 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 		[self updateThemeName:field.currentEditor.string ?: field.stringValue forField:field];
 	else
 		[self settingChanged:field];
+}
+
+- (void)renameRule:(id)sender
+{
+	if(![_window makeFirstResponder:nil] || _invalidFields.count) { NSBeep(); return; }
+	NSMutableDictionary* rule = [self currentRule];
+	NSAlert* alert = [self themeAlert];
+	alert.messageText = @"Rename style rule";
+	alert.informativeText = @"Enter a new name for the selected rule. Clear the name to use its scope selector, or Global editor style for a global rule.";
+	[alert addButtonWithTitle:@"Rename"];
+	[alert addButtonWithTitle:@"Cancel"];
+	NSTextField* name = [NSTextField textFieldWithString:rule[@"name"] ?: @""];
+	name.frame = NSMakeRect(0, 0, 300, 24);
+	name.identifier = @"rename-rule-name";
+	name.accessibilityLabel = @"Rule name";
+	name.placeholderString = [rule[@"scope"] length] ? rule[@"scope"] : @"Global editor style";
+	alert.accessoryView = name;
+	alert.window.initialFirstResponder = name;
+	[name selectText:nil];
+	if([alert runModal] != NSAlertFirstButtonReturn)
+		return;
+	[alert.window makeFirstResponder:nil];
+	NSString* title = [name.stringValue stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
+	if([title isEqualToString:rule[@"name"] ?: @""])
+		return;
+	if(title.length)
+		rule[@"name"] = title;
+	else
+		[rule removeObjectForKey:@"name"];
+	[self reloadRules:_rules.indexOfSelectedItem];
+	[self changed:YES];
 }
 
 - (void)nameChanged:(id)sender
@@ -1457,14 +1575,19 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 		value = _source->plist();
 	else
 		value = plist::dictionary_t{ { "settings", plist::array_t{ plist::dictionary_t{ { "settings", plist::dictionary_t{ { "foreground", "#202020" }, { "background", "#FFFFFF" }, { "caret", "#202020" }, { "selection", "#B5D5FF" } } } } } } };
-	oak::uuid_t uuid;
-	uuid.generate();
-	value["uuid"] = to_s(uuid);
 	if(!duplicate)
 		theme_editor::set_appearance(value, theme_editor::light);
 	std::string sourceName = "Untitled Theme";
 	plist::get_key_path(value, "name", sourceName);
 	value["name"] = duplicate ? sourceName + " Copy" : "Untitled Theme";
+	[self createThemeWithPropertyList:value];
+}
+
+- (void)createThemeWithPropertyList:(plist::dictionary_t)value
+{
+	oak::uuid_t uuid;
+	uuid.generate();
+	value["uuid"] = to_s(uuid);
 	// Keep one bundle object even before any of its themes has been saved.
 	if(!_themeEditorBundle)
 	{
@@ -1483,6 +1606,91 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	_source = item;
 	[self loadSource];
 	[self changed:YES];
+}
+
+- (void)reloadPalette
+{
+	[_paletteColors removeAllItems];
+	id palette = _draft[@"themeEditorPalette"];
+	if([palette isKindOfClass:NSArray.class])
+	{
+		for(id swatch in palette)
+		{
+			if(![swatch isKindOfClass:NSDictionary.class] || ![swatch[@"color"] isKindOfClass:NSString.class])
+				continue;
+			NSColor* color = theme_editor::parse_color(swatch[@"color"], NSColorSpace.sRGBColorSpace);
+			if(!color) continue;
+			NSString* name = [swatch[@"name"] isKindOfClass:NSString.class] ? swatch[@"name"] : @"Color";
+			// Add menu items directly to retain duplicate swatch names.
+			NSMenuItem* item = [[NSMenuItem alloc] initWithTitle:[NSString stringWithFormat:@"%@ — %@", name, swatch[@"color"]] action:nil keyEquivalent:@""];
+			item.representedObject = swatch[@"color"];
+			item.image = [NSImage imageWithSize:NSMakeSize(14, 14) flipped:NO drawingHandler:^BOOL(NSRect rect) {
+				[color setFill];
+				[[NSBezierPath bezierPathWithRoundedRect:NSInsetRect(rect, 1, 1) xRadius:3 yRadius:3] fill];
+				return YES;
+			}];
+			[_paletteColors.menu addItem:item];
+		}
+	}
+	_paletteControls.superview.superview.hidden = !_paletteColors.numberOfItems;
+	_paletteHeading.hidden = !_paletteColors.numberOfItems;
+	if(_paletteColors.numberOfItems) [_paletteColors selectItemAtIndex:0];
+}
+
+- (void)applyPaletteColor:(id)sender
+{
+	if(![_window makeFirstResponder:nil] || _invalidFields.count) { NSBeep(); return; }
+	NSString* hex = _paletteColors.selectedItem.representedObject;
+	NSColor* color = theme_editor::parse_color(hex, NSColorSpace.sRGBColorSpace);
+	if(!color) return;
+	NSArray* keys = @[ @"foreground", @"background", @"caret", @"selection", @"invisibles" ];
+	NSTextField* field = _fields[keys[_paletteTarget.indexOfSelectedItem]];
+	field.stringValue = theme_editor::color_string(color, theme_editor::color_space(_draft));
+	[self settingChanged:field];
+}
+
+- (BOOL)importSwatchesFromURL:(NSURL*)url
+{
+	NSError* error = nil;
+	NSData* data = [NSData dataWithContentsOfURL:url options:0 error:&error];
+	NSDictionary* theme = nil;
+	NSString* message = error.localizedDescription;
+	if(data)
+	{
+		try
+		{
+			bool dark = _appearance.selectedSegment == theme_editor::dark;
+			bool ase = data.length >= 4 && memcmp(data.bytes, "ASEF", 4) == 0;
+			NSDictionary* palette = ase || [url.pathExtension.lowercaseString isEqual:@"ase"] ? theme_editor::read_ase(data) : theme_editor::read_dtcg(data, dark);
+			NSString* name = url.lastPathComponent.stringByDeletingPathExtension;
+			if([name.pathExtension.lowercaseString isEqual:@"tokens"]) name = name.stringByDeletingPathExtension;
+			theme = theme_editor::theme_from_palette(palette, name, dark);
+		}
+		catch(std::exception const& exception) { message = to_ns(exception.what()); }
+	}
+	if(!theme)
+	{
+		NSAlert* alert = [self themeAlert];
+		alert.messageText = @"The colors could not be imported.";
+		alert.informativeText = message ?: @"Choose an Adobe Swatch Exchange (.ase) or DTCG (.tokens.json, .json, .tokens) file.";
+		[alert runModal];
+		return NO;
+	}
+	if(![self confirmDiscard]) return NO;
+	[self createThemeWithPropertyList:plist::convert((__bridge CFPropertyListRef)theme)];
+	return YES;
+}
+
+- (void)importSwatches:(id)sender
+{
+	NSOpenPanel* panel = [NSOpenPanel openPanel];
+	panel.title = @"Import Colors";
+	panel.prompt = @"Import";
+	panel.allowedContentTypes = @[ [UTType typeWithFilenameExtension:@"ase"] ?: UTTypeData, UTTypeJSON, [UTType typeWithFilenameExtension:@"tokens"] ?: UTTypeData ];
+	panel.allowsMultipleSelection = NO;
+	panel.canChooseDirectories = NO;
+	if([panel runModal] == NSModalResponseOK)
+		[self importSwatchesFromURL:panel.URL];
 }
 
 - (void)newTheme:(id)sender { [self createThemeDuplicating:NO]; }
@@ -1533,7 +1741,7 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 - (NSDictionary*)themeForSerialization
 {
 	// The inspector's empty global placeholder is not part of the source theme.
-	if(!_hasPlaceholderGlobalRule || [_draft[@"settings"][0][@"settings"] count])
+	if(!_hasPlaceholderGlobalRule || [_draft[@"settings"][0][@"settings"] count] || [_draft[@"settings"][0][@"name"] length])
 		return _draft;
 	NSMutableDictionary* theme = [_draft mutableCopy];
 	NSArray* rules = _draft[@"settings"];

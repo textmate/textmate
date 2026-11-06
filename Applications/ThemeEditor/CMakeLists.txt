@@ -51,12 +51,15 @@ if(BUILD_TESTING)
   add_custom_command(OUTPUT "${_runner}"
     COMMAND "${CMAKE_SOURCE_DIR}/bin/gen_test"
       "${CMAKE_CURRENT_SOURCE_DIR}/tests/t_theme_editor.cc"
-      "${CMAKE_CURRENT_SOURCE_DIR}/tests/t_theme_colors.mm" > "${_runner}"
-    DEPENDS tests/t_theme_editor.cc tests/t_theme_colors.mm src/appearance.h src/bundle_index.h src/colors.h src/samples.h src/rule_matching.h "${CMAKE_SOURCE_DIR}/bin/gen_test")
+      "${CMAKE_CURRENT_SOURCE_DIR}/tests/t_theme_colors.mm"
+      "${CMAKE_CURRENT_SOURCE_DIR}/tests/t_ase.mm"
+      "${CMAKE_CURRENT_SOURCE_DIR}/tests/t_dtcg.mm" > "${_runner}"
+    DEPENDS tests/t_theme_editor.cc tests/t_theme_colors.mm tests/t_ase.mm tests/t_dtcg.mm src/ase.h src/dtcg.h src/appearance.h src/bundle_index.h src/colors.h src/samples.h src/rule_matching.h "${CMAKE_SOURCE_DIR}/bin/gen_test")
   add_executable(theme_editor_tests "${_runner}")
   target_link_libraries(theme_editor_tests PRIVATE theme bundles ${TEXTMATE_DEBUG_LIBS} "-framework Cocoa")
   target_compile_definitions(theme_editor_tests PRIVATE
-    THEME_EDITOR_SAMPLE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/samples")
+    THEME_EDITOR_SAMPLE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/samples"
+    THEME_EDITOR_FIXTURE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures")
   add_test(NAME theme-editor COMMAND theme_editor_tests --no-parallel)
 
   add_executable(theme_editor_selection_tests MACOSX_BUNDLE
@@ -65,7 +68,8 @@ if(BUILD_TESTING)
     MACOSX_BUNDLE_GUI_IDENTIFIER "com.macromates.TextMate.ThemeEditor.Tests"
     MACOSX_BUNDLE_ICON_FILE "ThemeEditor.icns"
     BUILD_RPATH "${CMAKE_BINARY_DIR}/lib")
-  target_compile_definitions(theme_editor_selection_tests PRIVATE THEME_EDITOR_TESTING=1)
+  target_compile_definitions(theme_editor_selection_tests PRIVATE THEME_EDITOR_TESTING=1
+    THEME_EDITOR_FIXTURE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures")
   target_link_libraries(theme_editor_selection_tests PRIVATE
     OakTextView OakSystem Preferences bundles document ns plist settings theme
     ${TEXTMATE_DEBUG_LIBS} "-framework Cocoa" "-framework UniformTypeIdentifiers")

@@ -16,13 +16,17 @@
 - (NSAlert*)themeAlert;
 - (void)ruleSelected:(id)sender;
 - (void)nameChanged:(id)sender;
+- (void)renameRule:(id)sender;
 - (void)appearanceChanged:(id)sender;
+- (void)invertTheme:(id)sender;
 - (void)removeRule:(id)sender;
 - (void)addRule:(id)sender;
 - (void)settingChanged:(NSTextField*)field;
 - (void)colorChanged:(NSColorWell*)well;
 - (void)sampleLanguageChanged:(id)sender;
 - (void)newTheme:(id)sender;
+- (BOOL)importSwatchesFromURL:(NSURL*)url;
+- (void)applyPaletteColor:(id)sender;
 - (void)duplicateTheme:(id)sender;
 - (void)loadSource;
 - (void)duplicateThemeFromMenu:(NSMenuItem*)item;
@@ -244,6 +248,27 @@ int main ()
 			[themeClip scrollToPoint:NSZeroPoint];
 			Require(!table.floatsGroupRows, "Theme section headings remain pinned while scrolling");
 			NSPopUpButton* rules = [controller valueForKey:@"rules"];
+			[window layoutIfNeeded];
+			NSStackView* ruleSelector = (NSStackView*)rules.superview;
+			NSButton* renameRuleButton = (NSButton*)ruleSelector.arrangedSubviews.lastObject;
+			Require([renameRuleButton.accessibilityLabel isEqualToString:@"Rename rule"], "Rule selector has no rename button");
+			Require(fabs(NSWidth(ruleSelector.frame) - NSWidth(ruleSelector.superview.frame)) < 1, "Rule selector does not fill the inspector row");
+			Require(fabs(NSMaxX(renameRuleButton.frame) - NSWidth(ruleSelector.bounds)) < 1, "Rename button is not aligned to the right edge");
+			Require(fabs(NSMaxX(rules.frame) + ruleSelector.spacing - NSMinX(renameRuleButton.frame)) < 1, "Rule dropdown does not expand up to the rename button");
+			NSView* ruleBox = ruleSelector.superview.superview.superview;
+			Require([ruleBox isKindOfClass:NSBox.class], "Style section has no box");
+			NSAppearance* originalAppearance = ruleBox.appearance;
+			for(NSAppearanceName appearanceName in @[ NSAppearanceNameAqua, NSAppearanceNameDarkAqua ])
+			{
+				ruleBox.appearance = [NSAppearance appearanceNamed:appearanceName];
+				[ruleBox viewDidChangeEffectiveAppearance];
+				[ruleBox.effectiveAppearance performAsCurrentDrawingAppearance:^{
+					Require(ruleBox.layer.borderWidth == 1 && ruleBox.layer.cornerRadius == 10, "Section has no rounded outline");
+					Require(CGColorEqualToColor(ruleBox.layer.borderColor, NSColor.separatorColor.CGColor), "Section outline does not match its light or dark appearance");
+				}];
+			}
+			ruleBox.appearance = originalAppearance;
+			[ruleBox viewDidChangeEffectiveAppearance];
 			NSButton* removeRuleButton = [controller valueForKey:@"removeRuleButton"];
 			NSView* fontFamily = [controller valueForKey:@"fontFamily"];
 			NSView* gutterControls = [controller valueForKey:@"gutterControls"];
@@ -271,10 +296,27 @@ int main ()
 				Require([[controller valueForKey:@"dirty"] boolValue] == dirty, "Theme change state does not match the current edits");
 			};
 			requireDirty(NO);
+			[rules selectItemAtIndex:1];
+			[controller ruleSelected:nil];
+			[controller invertTheme:nil];
+			NSDictionary* invertedDraft = [controller valueForKey:@"draft"];
+			Require([invertedDraft[@"settings"][0][@"settings"][@"background"] isEqual:@"#000000"], "Invert did not darken the background");
+			Require([invertedDraft[@"settings"][1][@"settings"][@"foreground"] isEqual:@"#77FF77"], "Invert did not preserve the syntax hue");
+			Require(appearance.selectedSegment == 1 && rules.indexOfSelectedItem == 1, "Invert lost rule selection or did not swap appearance");
+			requireDirty(YES);
+			[controller invertTheme:nil];
+			Require(appearance.selectedSegment == 0, "Second inversion did not restore light appearance");
+			Require([((NSDictionary*)[controller valueForKey:@"draft"])[@"settings"][0][@"settings"][@"background"] isEqual:@"#FFFFFF"], "Second inversion did not restore the background");
+			[controller loadSource];
+			[rules selectItemAtIndex:0];
+			[controller ruleSelected:nil];
+			requireDirty(NO);
 			NSTextField* foreground = ((NSDictionary*)[controller valueForKey:@"fields"])[@"foreground"];
 			NSString* originalForeground = [foreground.stringValue copy];
 			foreground.stringValue = @"invalid color";
 			[controller settingChanged:foreground];
+			[controller invertTheme:nil];
+			Require(appearance.selectedSegment == 0 && [foreground.stringValue isEqual:@"invalid color"], "Invert did not retain invalid edits");
 			requireDirty(YES);
 			foreground.stringValue = originalForeground;
 			[controller settingChanged:foreground];
@@ -415,6 +457,55 @@ int main ()
 				Require(![[controller valueForKey:@"dirty"] boolValue], "Save left the draft dirty");
 				requireDirty(NO);
 			};
+			checkSave(@"Middle");
+
+			auto renameRuleResponding = [&] (NSModalResponse response, NSString* title, NSString* expectedName) {
+				NSTimer* timer = [NSTimer timerWithTimeInterval:0.01 repeats:YES block:^(NSTimer* timer) {
+					if(!NSApp.modalWindow)
+						return;
+					NSTextField* name = nil;
+					NSMutableArray<NSView*>* pending = [NSMutableArray arrayWithObject:NSApp.modalWindow.contentView];
+					while(pending.count)
+					{
+						NSView* view = pending.lastObject;
+						[pending removeLastObject];
+						if([view.identifier isEqualToString:@"rename-rule-name"])
+							name = (NSTextField*)view;
+						[pending addObjectsFromArray:view.subviews];
+					}
+					Require([name.identifier isEqualToString:@"rename-rule-name"], "Rename dialog has no name field");
+					Require([name.stringValue isEqualToString:expectedName], "Rename dialog did not prefill the selected rule name");
+					[NSApp.modalWindow makeFirstResponder:nil];
+					name.stringValue = title;
+					[NSApp stopModalWithCode:response];
+					[timer invalidate];
+				}];
+				[[NSRunLoop currentRunLoop] addTimer:timer forMode:NSModalPanelRunLoopMode];
+				[controller renameRule:nil];
+				[timer invalidate];
+			};
+			NSDictionary* originalRule = [((NSDictionary*)[controller valueForKey:@"draft"])[@"settings"][1] copy];
+			renameRuleResponding(NSAlertSecondButtonReturn, @"Canceled name", @"Comments");
+			Require([rules.titleOfSelectedItem isEqualToString:@"Comments"], "Canceling rename changed the rule name");
+			requireDirty(NO);
+			renameRuleResponding(NSAlertFirstButtonReturn, @"  Notes  ", @"Comments");
+			Require([rules.titleOfSelectedItem isEqualToString:@"Notes"] && rules.indexOfSelectedItem == 1, "Renaming lost selection or did not update the menu");
+			requireDirty(YES);
+			checkSave(@"Middle");
+			NSDictionary* renamedRule = ((NSDictionary*)[controller valueForKey:@"draft"])[@"settings"][1];
+			Require([renamedRule[@"name"] isEqualToString:@"Notes"], "Saved rule name was not reloaded");
+			Require([renamedRule[@"scope"] isEqual:originalRule[@"scope"]] && [renamedRule[@"settings"] isEqual:originalRule[@"settings"]], "Renaming changed the rule scope or settings");
+			renameRuleResponding(NSAlertFirstButtonReturn, @"  ", @"Notes");
+			Require([rules.titleOfSelectedItem isEqualToString:@"comment"] && !((NSDictionary*)[controller valueForKey:@"draft"])[@"settings"][1][@"name"], "Clearing a rule name did not fall back to its scope");
+			[rules selectItemAtIndex:0];
+			[controller ruleSelected:nil];
+			renameRuleResponding(NSAlertFirstButtonReturn, @"Editor defaults", @"");
+			Require([rules.titleOfSelectedItem isEqualToString:@"Editor defaults"], "Global rule name did not update");
+			[controller loadSource];
+			[rules selectItemAtIndex:1];
+			[controller ruleSelected:nil];
+			Require([rules.titleOfSelectedItem isEqualToString:@"Notes"], "Discarding changes did not restore the saved rule name");
+			renameRuleResponding(NSAlertFirstButtonReturn, @"Comments", @"Notes");
 			checkSave(@"Middle");
 
 			commandClick(table.selectedRow);
@@ -818,6 +909,75 @@ int main ()
 			Require([malformedController saveCurrentTheme], "Could not save an edited global rule");
 			NSDictionary* savedGlobal = [NSDictionary dictionaryWithContentsOfFile:malformedFiles[10]];
 			Require([savedGlobal[@"settings"] count] == 2 && [savedGlobal[@"settings"][0][@"settings"][@"foreground"] isEqual:@"#ABCDEF"], "Save omitted an edited global rule");
+			// Import creates a separate unsaved theme and retains its palette through save/reload.
+			NSDictionary* previousDraft = [[malformedController valueForKey:@"draft"] copy];
+			NSURL* aseURL = [NSURL fileURLWithPath:@THEME_EDITOR_FIXTURE_DIR "/adobe-color.ase"];
+			Require([malformedController importSwatchesFromURL:aseURL], "ASE import failed");
+			NSDictionary* imported = [malformedController valueForKey:@"draft"];
+			Require([imported[@"name"] isEqual:@"My Color Theme"], "ASE group name was lost");
+			Require([imported[@"settings"][0][@"settings"][@"background"] isEqual:@"#000000"], "ASE import did not use a black background for dark appearance");
+			Require([imported[@"settings"][4][@"settings"][@"foreground"] isEqual:@"#D4E1C8"], "ASE import altered the pale swatch");
+			Require(![imported[@"uuid"] isEqual:previousDraft[@"uuid"]], "ASE import reused the previous theme UUID");
+			Require([[malformedController valueForKey:@"dirty"] boolValue] && [[malformedController valueForKey:@"newTheme"] boolValue], "ASE import did not create an unsaved draft");
+			NSPopUpButton* paletteColors = [malformedController valueForKey:@"paletteColors"];
+			Require(paletteColors.numberOfItems == 5 && !paletteColors.superview.superview.superview.hidden, "Imported palette was not shown");
+			[paletteColors selectItemAtIndex:1];
+			NSPopUpButton* paletteTarget = [malformedController valueForKey:@"paletteTarget"];
+			[paletteTarget selectItemAtIndex:0];
+			[malformedController applyPaletteColor:nil];
+			Require([imported[@"settings"][0][@"settings"][@"foreground"] isEqual:@"#D46B2C"], "Palette swatch was not applied to foreground");
+			[paletteTarget selectItemAtIndex:3];
+			[malformedController applyPaletteColor:nil];
+			Require([imported[@"settings"][0][@"settings"][@"selection"] isEqual:@"#D46B2C"], "Palette swatch was not applied to selection");
+			NSPopUpButton* importedRules = [malformedController valueForKey:@"rules"];
+			[importedRules selectItemAtIndex:1];
+			[malformedController ruleSelected:nil];
+			[paletteTarget selectItemAtIndex:0];
+			[malformedController applyPaletteColor:nil];
+			Require([imported[@"settings"][1][@"settings"][@"foreground"] isEqual:@"#D46B2C"], "Palette swatch was not applied to the selected syntax rule");
+			NSDictionary* beforeCanceledImport = [NSPropertyListSerialization propertyListWithData:[NSPropertyListSerialization dataWithPropertyList:imported format:NSPropertyListBinaryFormat_v1_0 options:0 error:nil] options:0 format:nil error:nil];
+			auto importResponding = [&](NSURL* url, NSModalResponse response) {
+				NSTimer* answer = [NSTimer timerWithTimeInterval:0.01 repeats:YES block:^(NSTimer* timer) {
+					if(NSApp.modalWindow) { [NSApp stopModalWithCode:response]; [timer invalidate]; }
+				}];
+				[[NSRunLoop currentRunLoop] addTimer:answer forMode:NSModalPanelRunLoopMode];
+				BOOL result = [malformedController importSwatchesFromURL:url];
+				[answer invalidate];
+				return result;
+			};
+			Require(!importResponding(aseURL, NSAlertSecondButtonReturn), "Canceled import succeeded");
+			Require([[malformedController valueForKey:@"draft"] isEqual:beforeCanceledImport], "Canceling import changed the draft");
+			NSURL* brokenASE = [NSURL fileURLWithPath:to_ns(jail.path("broken.ase"))];
+			Require([[NSData dataWithBytes:"ASEF" length:4] writeToURL:brokenASE atomically:YES], "Could not create invalid ASE fixture");
+			Require(!importResponding(brokenASE, NSAlertFirstButtonReturn), "Invalid ASE import succeeded");
+			Require([[malformedController valueForKey:@"draft"] isEqual:beforeCanceledImport] && [[malformedController valueForKey:@"dirty"] boolValue], "Invalid import changed the draft");
+			Require([malformedController saveCurrentTheme], "Could not save imported theme");
+			[malformedController loadSource];
+			Require([((NSDictionary*)[malformedController valueForKey:@"draft"])[@"themeEditorPalette"] isEqual:imported[@"themeEditorPalette"]], "Saved theme lost imported swatches");
+			Require(![[malformedController valueForKey:@"dirty"] boolValue], "Reloaded import remains dirty");
+			[malformedController application:NSApp openURLs:@[ malformedURLs[10] ]];
+			Require(paletteColors.numberOfItems == 0 && paletteColors.superview.superview.superview.hidden, "Palette from another theme remained visible");
+			NSSegmentedControl* importAppearance = [malformedController valueForKey:@"appearance"];
+			importAppearance.selectedSegment = 0;
+			[malformedController appearanceChanged:importAppearance];
+			Require([malformedController saveCurrentTheme], "Could not prepare light import");
+			Require([malformedController importSwatchesFromURL:aseURL], "Light ASE import failed");
+			Require([((NSDictionary*)[malformedController valueForKey:@"draft"])[@"settings"][0][@"settings"][@"background"] isEqual:@"#FFFFFF"], "ASE import did not use a white background for light appearance");
+			Require([malformedController saveCurrentTheme], "Could not save before DTCG import");
+			NSURL* tokenURL = [NSURL fileURLWithPath:@THEME_EDITOR_FIXTURE_DIR "/project.tokens.json"];
+			Require([malformedController importSwatchesFromURL:tokenURL], "DTCG import failed");
+			NSDictionary* tokenDraft = [malformedController valueForKey:@"draft"];
+			Require([tokenDraft[@"name"] isEqual:@"project"], "DTCG filename suffix was not removed");
+			Require([tokenDraft[@"settings"][0][@"settings"][@"background"] isEqual:@"#FFFFFF"], "DTCG import did not preserve the neutral background");
+			Require([tokenDraft[@"settings"][1][@"settings"][@"foreground"] isEqual:@"#984236"], "DTCG import did not map the light primary token to strings");
+			Require(paletteColors.numberOfItems == 15, "DTCG import lost named swatches");
+			Require([malformedController saveCurrentTheme], "Could not save DTCG theme");
+			[malformedController loadSource];
+			Require([((NSDictionary*)[malformedController valueForKey:@"draft"])[@"themeEditorPalette"] isEqual:tokenDraft[@"themeEditorPalette"]], "Saving the DTCG theme lost its palette");
+			NSURL* brokenTokens = [NSURL fileURLWithPath:to_ns(jail.path("broken.tokens.json"))];
+			Require([[NSData dataWithBytes:"{" length:1] writeToURL:brokenTokens atomically:YES], "Could not create invalid DTCG fixture");
+			Require(!importResponding(brokenTokens, NSAlertFirstButtonReturn), "Invalid DTCG import succeeded");
+			Require([[malformedController valueForKey:@"draft"] isEqual:tokenDraft], "Invalid DTCG import changed the theme");
 			NSWindow* malformedWindow = [malformedController valueForKey:@"window"];
 			malformedWindow.releasedWhenClosed = NO;
 			malformedWindow.delegate = nil;

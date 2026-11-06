@@ -75,3 +75,46 @@ void test_shorthand_colors_match_expanded_values ()
 			OAK_ASSERT(theme_editor::parse_color(invalid, space) == nil);
 	}
 }
+
+void test_inversion_preserves_hue_opacity_and_round_trips ()
+{
+	for(NSColorSpace* space in @[ NSColorSpace.genericRGBColorSpace, NSColorSpace.sRGBColorSpace ])
+	{
+		for(NSArray<NSString*>* pair in @[ @[ @"#FFFFFF", @"#000000" ], @[ @"#123", @"#CCDDEE" ], @[ @"#00880080", @"#77FF7780" ], @[ @"#808080", @"#7F7F7F" ], @[ @"#0000FF", @"#0000FF" ] ])
+		{
+			NSString* inverted = theme_editor::inverted_color(pair[0], space);
+			OAK_ASSERT([inverted isEqualToString:pair[1]]);
+			OAK_ASSERT([theme_editor::inverted_color(inverted, space) isEqualToString:theme_editor::color_string(theme_editor::parse_color(pair[0], space), space)]);
+		}
+	}
+}
+
+void test_theme_inversion_includes_all_rules_and_gutter_but_preserves_metadata ()
+{
+	NSDictionary* original = @{
+		@"colorSpaceName": @"sRGB", @"uuid": @"unchanged", @"name": @"Test",
+		@"themeEditorPalette": @[ @{ @"name": @"Blue", @"color": @"#123456" } ],
+		@"settings": @[
+			@{ @"settings": @{ @"background": @"#FFFFFF", @"foreground": @"#000000", @"caret": @"#123456", @"selection": @"#12345680", @"invisibles": @"#777777", @"fontStyle": @"italic" } },
+			@{ @"scope": @"comment", @"name": @"Comments", @"settings": @{ @"foreground": @"#008800", @"fontName": @"Menlo", @"fontSize": @"12pt", @"custom": @"#123456" } }
+		],
+		@"gutterSettings": @{ @"background": @"#EEEEEE", @"iconsHover": @"#12345680", @"selectionBorder": @"#123456" }
+	};
+	NSMutableDictionary* draft = CFBridgingRelease(CFPropertyListCreateDeepCopy(kCFAllocatorDefault, (__bridge CFPropertyListRef)original, kCFPropertyListMutableContainersAndLeaves));
+	theme_editor::invert_theme_colors(draft, @"#000000", @"#FFFFFF");
+	OAK_ASSERT([draft[@"settings"][0][@"settings"][@"background"] isEqual:@"#000000"]);
+	OAK_ASSERT([draft[@"settings"][1][@"settings"][@"foreground"] isEqual:@"#77FF77"]);
+	OAK_ASSERT([draft[@"gutterSettings"][@"background"] isEqual:@"#111111"]);
+	OAK_ASSERT([draft[@"gutterSettings"][@"iconsHover"] isEqual:@"#A9CBED80"]);
+	OAK_ASSERT([draft[@"themeEditorPalette"] isEqual:original[@"themeEditorPalette"]]);
+	theme_editor::invert_theme_colors(draft, @"#FFFFFF", @"#000000");
+	OAK_ASSERT([draft isEqual:original]);
+}
+
+void test_inversion_materializes_only_missing_global_colors ()
+{
+	NSMutableDictionary* theme = [@{ @"settings": [NSMutableArray array] } mutableCopy];
+	theme_editor::invert_theme_colors(theme, @"#000000", @"#FFFFFF");
+	NSDictionary* settings = theme[@"settings"][0][@"settings"];
+	OAK_ASSERT(([settings isEqual:@{ @"foreground": @"#FFFFFF", @"background": @"#000000", @"caret": @"#FFFFFF" }]));
+}
