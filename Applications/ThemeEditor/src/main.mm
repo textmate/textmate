@@ -261,6 +261,7 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	NSString* _renameOriginalName;
 	BOOL _renameWasDirty;
 	BOOL _newTheme;
+	BOOL _hasPlaceholderGlobalRule;
 	NSInteger _activeRule;
 	NSMutableSet<NSString*>* _invalidFields;
 	NSInteger _selectedRow;
@@ -1112,7 +1113,8 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	BOOL hasGlobal = NO;
 	for(NSDictionary* rule in rules)
 		hasGlobal |= ![rule[@"scope"] length];
-	if(!hasGlobal)
+	_hasPlaceholderGlobalRule = !hasGlobal;
+	if(_hasPlaceholderGlobalRule)
 		[rules insertObject:[@{ @"settings": [NSMutableDictionary dictionary] } mutableCopy] atIndex:0];
 	_loadedTheme = plist::convert((__bridge CFPropertyListRef)_draft);
 	_appearance.selectedSegment = theme_editor::appearance(_source->plist());
@@ -1528,9 +1530,20 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	}
 }
 
+- (NSDictionary*)themeForSerialization
+{
+	// The inspector's empty global placeholder is not part of the source theme.
+	if(!_hasPlaceholderGlobalRule || [_draft[@"settings"][0][@"settings"] count])
+		return _draft;
+	NSMutableDictionary* theme = [_draft mutableCopy];
+	NSArray* rules = _draft[@"settings"];
+	theme[@"settings"] = [rules subarrayWithRange:NSMakeRange(1, rules.count - 1)];
+	return theme;
+}
+
 - (BOOL)writeThemeToURL:(NSURL*)url error:(NSError**)error
 {
-	return [self writeTheme:_draft toURL:url error:error];
+	return [self writeTheme:[self themeForSerialization] toURL:url error:error];
 }
 
 - (BOOL)writeTheme:(NSDictionary*)theme toURL:(NSURL*)url error:(NSError**)error
@@ -1551,7 +1564,7 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 		[alert runModal];
 		return;
 	}
-	[self exportThemeWithPropertyList:_draft];
+	[self exportThemeWithPropertyList:[self themeForSerialization]];
 }
 
 - (void)exportThemeWithPropertyList:(NSDictionary*)theme
@@ -1695,7 +1708,7 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	}
 	NSInteger const selectedRule = _rules.indexOfSelectedItem;
 	auto original = _source->plist();
-	_source->set_plist(plist::convert((__bridge CFPropertyListRef)_draft));
+	_source->set_plist(plist::convert((__bridge CFPropertyListRef)[self themeForSerialization]));
 	if(!_source->save())
 	{
 		_source->set_plist(original);

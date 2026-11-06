@@ -28,6 +28,7 @@
 - (void)duplicateThemeFromMenu:(NSMenuItem*)item;
 - (void)deleteThemeFromMenu:(NSMenuItem*)item;
 - (void)exportThemeFromMenu:(NSMenuItem*)item;
+- (void)exportTheme:(id)sender;
 - (void)exportThemeWithPropertyList:(NSDictionary*)theme;
 - (BOOL)writeThemeToURL:(NSURL*)url error:(NSError**)error;
 - (BOOL)saveCurrentTheme;
@@ -720,6 +721,9 @@ int main ()
 				@{ @"name": @42, @"settings": @[] },
 				@{ @"name": @[], @"settings": @[] },
 				@{ @"settings": @[ @{ @"settings": @{ @"fontName": @{}, @"fontStyle": @[], @"fontSize": @[] } } ], @"gutterSettings": @[], @"colorSpaceName": @42 },
+				@{ @"name": @"Scoped only", @"settings": @[ @{ @"scope": @"comment", @"settings": @{ @"foreground": @"#123456" } } ] },
+				@{ @"name": @"Explicit empty global", @"settings": @[ @{ @"settings": @{} }, @{ @"scope": @"comment", @"settings": @{ @"foreground": @"#123456" } } ] },
+				@{ @"name": @"Empty settings", @"settings": @[] },
 			];
 			NSMutableArray<NSURL*>* malformedURLs = [NSMutableArray array];
 			NSMutableArray<NSString*>* malformedFiles = [NSMutableArray array];
@@ -738,7 +742,7 @@ int main ()
 				[malformedOriginals addObject:[NSData dataWithContentsOfFile:file]];
 				[malformedURLs addObject:[NSURL URLWithString:[@"textmate-theme-editor://theme/" stringByAppendingString:to_ns(to_s(uuid))]]];
 			}
-			ThemeEditorController* malformedController = [ThemeEditorController new];
+			ExportTestThemeEditorController* malformedController = [ExportTestThemeEditorController new];
 			[malformedController application:NSApp openURLs:@[ malformedURLs.firstObject ]];
 			[malformedController applicationDidFinishLaunching:nil];
 			for(NSUInteger index = 0; index < malformedURLs.count; ++index)
@@ -764,6 +768,37 @@ int main ()
 				Require(![[malformedController valueForKey:@"dirty"] boolValue], "Loading a malformed theme marked it edited");
 				Require([[NSData dataWithContentsOfFile:malformedFiles[index]] isEqual:malformedOriginals[index]], "Loading a malformed theme modified its file");
 			}
+			NSURL* placeholderExportURL = [NSURL fileURLWithPath:to_ns(jail.path("GlobalPlaceholder.tmTheme"))];
+			for(NSUInteger index = 10; index < malformedURLs.count; ++index)
+			{
+				[malformedController application:NSApp openURLs:@[ malformedURLs[index] ]];
+				NSDictionary* original = [NSDictionary dictionaryWithContentsOfFile:malformedFiles[index]];
+				NSError* error = nil;
+				Require([malformedController writeThemeToURL:placeholderExportURL error:&error], "Could not export the global-rule fixture");
+				Require([[NSDictionary dictionaryWithContentsOfURL:placeholderExportURL] isEqual:original], "Export changed the source's global rules");
+				[malformedController exportTheme:nil];
+				Require([malformedController.exportedTheme isEqual:original], "Export action included a placeholder global rule");
+				Require([malformedController saveCurrentTheme], "Could not save the global-rule fixture");
+				Require([[NSDictionary dictionaryWithContentsOfFile:malformedFiles[index]] isEqual:original], "Save changed the source's global rules");
+			}
+			[malformedController application:NSApp openURLs:@[ malformedURLs[10] ]];
+			NSSegmentedControl* placeholderAppearance = [malformedController valueForKey:@"appearance"];
+			placeholderAppearance.selectedSegment = 1;
+			[malformedController appearanceChanged:placeholderAppearance];
+			NSTextField* globalForeground = ((NSDictionary*)[malformedController valueForKey:@"fields"])[@"foreground"];
+			globalForeground.stringValue = @"#ABCDEF";
+			[malformedController settingChanged:globalForeground];
+			[malformedController exportTheme:nil];
+			Require([malformedController.exportedTheme[@"settings"] count] == 2 && [malformedController.exportedTheme[@"settings"][0][@"settings"][@"foreground"] isEqual:@"#ABCDEF"], "Export omitted an edited global rule");
+			globalForeground.stringValue = @"";
+			[malformedController settingChanged:globalForeground];
+			Require([malformedController saveCurrentTheme], "Could not save after clearing the placeholder");
+			Require([[NSDictionary dictionaryWithContentsOfFile:malformedFiles[10]][@"settings"] count] == 1, "Regrouping or clearing a global edit persisted the placeholder");
+			globalForeground.stringValue = @"#ABCDEF";
+			[malformedController settingChanged:globalForeground];
+			Require([malformedController saveCurrentTheme], "Could not save an edited global rule");
+			NSDictionary* savedGlobal = [NSDictionary dictionaryWithContentsOfFile:malformedFiles[10]];
+			Require([savedGlobal[@"settings"] count] == 2 && [savedGlobal[@"settings"][0][@"settings"][@"foreground"] isEqual:@"#ABCDEF"], "Save omitted an edited global rule");
 			NSWindow* malformedWindow = [malformedController valueForKey:@"window"];
 			malformedWindow.releasedWhenClosed = NO;
 			malformedWindow.delegate = nil;
