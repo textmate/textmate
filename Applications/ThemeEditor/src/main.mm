@@ -59,30 +59,17 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	return draft;
 }
 
-static NSColor* ThemePanelBackgroundColor ()
-{
-	return [NSColor colorWithName:nil dynamicProvider:^NSColor*(NSAppearance* appearance) {
-		BOOL dark = [[appearance bestMatchFromAppearancesWithNames:@[ NSAppearanceNameAqua, NSAppearanceNameDarkAqua ]] isEqualToString:NSAppearanceNameDarkAqua];
-		return dark ? [NSColor colorWithSRGBRed:50 / 255.0 green:45 / 255.0 blue:44 / 255.0 alpha:1] : [NSColor colorWithWhite:0.965 alpha:1];
-	}];
-}
-
 @interface ThemeSidebarPanel : NSView
 @end
 @implementation ThemeSidebarPanel
 - (void)drawRect:(NSRect)dirtyRect
 {
-	BOOL dark = [[self.effectiveAppearance bestMatchFromAppearancesWithNames:@[ NSAppearanceNameAqua, NSAppearanceNameDarkAqua ]] isEqualToString:NSAppearanceNameDarkAqua];
-	NSColor* background = dark ? [NSColor colorWithSRGBRed:35 / 255.0 green:31 / 255.0 blue:30 / 255.0 alpha:1] : ThemePanelBackgroundColor();
-	[background setFill];
+	[NSColor.controlBackgroundColor setFill];
 	NSRectFill(self.bounds);
-	if(dark)
-	{
-		[[NSColor colorWithSRGBRed:70 / 255.0 green:60 / 255.0 blue:57 / 255.0 alpha:1] setStroke];
-		NSBezierPath* outline = [NSBezierPath bezierPathWithRoundedRect:NSInsetRect(self.bounds, 0.5, 0.5) xRadius:13.5 yRadius:13.5];
-		outline.lineWidth = 1;
-		[outline stroke];
-	}
+	[NSColor.separatorColor setStroke];
+	NSBezierPath* outline = [NSBezierPath bezierPathWithRoundedRect:NSInsetRect(self.bounds, 0.5, 0.5) xRadius:13.5 yRadius:13.5];
+	outline.lineWidth = 1;
+	[outline stroke];
 }
 
 - (void)viewDidChangeEffectiveAppearance
@@ -123,11 +110,7 @@ static NSColor* ThemePanelBackgroundColor ()
 @implementation ThemeActionsBar
 - (void)drawRect:(NSRect)dirtyRect
 {
-	BOOL dark = [[self.effectiveAppearance bestMatchFromAppearancesWithNames:@[ NSAppearanceNameAqua, NSAppearanceNameDarkAqua ]] isEqualToString:NSAppearanceNameDarkAqua];
-	NSColor* background = [NSColor colorWithWhite:0.94 alpha:1];
-	if(dark)
-		background = [self.superview isKindOfClass:ThemeSidebarPanel.class] ? [NSColor colorWithSRGBRed:35 / 255.0 green:31 / 255.0 blue:30 / 255.0 alpha:1] : ThemePanelBackgroundColor();
-	[background setFill];
+	[NSColor.controlBackgroundColor setFill];
 	[[NSBezierPath bezierPathWithRoundedRect:self.bounds xRadius:10 yRadius:10] fill];
 	// Square upper corners meet the group; lower corners follow its outline.
 	NSRectFill(NSMakeRect(0, NSHeight(self.bounds) / 2, NSWidth(self.bounds), NSHeight(self.bounds) / 2));
@@ -352,7 +335,7 @@ static NSColor* ThemePanelBackgroundColor ()
 	panel.borderWidth = 0;
 	panel.transparent = NO;
 	panel.titlePosition = NSNoTitle;
-	panel.fillColor = ThemePanelBackgroundColor();
+	panel.fillColor = NSColor.controlBackgroundColor;
 	panel.cornerRadius = 10;
 	panel.contentViewMargins = NSZeroSize;
 	panel.translatesAutoresizingMaskIntoConstraints = NO;
@@ -486,10 +469,7 @@ static NSColor* ThemePanelBackgroundColor ()
 	_controls.alignment = NSLayoutAttributeLeading;
 	_controls.spacing = 6;
 	_controls.detachesHiddenViews = YES;
-	inspector.backgroundColor = [NSColor colorWithName:nil dynamicProvider:^NSColor*(NSAppearance* appearance) {
-		BOOL dark = [[appearance bestMatchFromAppearancesWithNames:@[ NSAppearanceNameAqua, NSAppearanceNameDarkAqua ]] isEqualToString:NSAppearanceNameDarkAqua];
-		return dark ? NSColor.windowBackgroundColor : NSColor.controlBackgroundColor;
-	}];
+	inspector.backgroundColor = NSColor.windowBackgroundColor;
 	_controls.edgeInsets = NSEdgeInsetsMake(12, 12, 12, 12);
 	inspector.documentView = _controls;
 	_controls.translatesAutoresizingMaskIntoConstraints = NO;
