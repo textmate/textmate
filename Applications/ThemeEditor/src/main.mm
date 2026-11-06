@@ -1548,7 +1548,9 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 
 - (BOOL)writeTheme:(NSDictionary*)theme toURL:(NSURL*)url error:(NSError**)error
 {
-	NSData* data = [NSPropertyListSerialization dataWithPropertyList:theme format:NSPropertyListXMLFormat_v1_0 options:0 error:error];
+	NSMutableDictionary* exportedTheme = [theme mutableCopy];
+	exportedTheme[@"uuid"] = NSUUID.UUID.UUIDString;
+	NSData* data = [NSPropertyListSerialization dataWithPropertyList:exportedTheme format:NSPropertyListXMLFormat_v1_0 options:0 error:error];
 	return data && [data writeToURL:url options:NSDataWritingAtomic error:error];
 }
 

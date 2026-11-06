@@ -31,6 +31,7 @@
 - (void)exportTheme:(id)sender;
 - (void)exportThemeWithPropertyList:(NSDictionary*)theme;
 - (BOOL)writeThemeToURL:(NSURL*)url error:(NSError**)error;
+- (BOOL)writeTheme:(NSDictionary*)theme toURL:(NSURL*)url error:(NSError**)error;
 - (BOOL)saveCurrentTheme;
 - (BOOL)confirmDiscard;
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication*)sender;
@@ -48,6 +49,14 @@ static void Require (bool condition, char const* message)
 {
 	if(!condition)
 		throw std::runtime_error(message);
+}
+
+static void RequireExportCopy (NSDictionary* exported, NSDictionary* source)
+{
+	Require([[NSUUID alloc] initWithUUIDString:exported[@"uuid"]] != nil && ![exported[@"uuid"] isEqual:source[@"uuid"]], "Export did not generate a fresh UUID");
+	NSMutableDictionary* content = [exported mutableCopy];
+	content[@"uuid"] = source[@"uuid"];
+	Require([content isEqual:source], "Export changed theme content besides its UUID");
 }
 
 int main ()
@@ -518,10 +527,17 @@ int main ()
 			draft[@"customMetadata"] = @{ @"author": @"Theme export test" };
 			NSURL* exportURL = [NSURL fileURLWithPath:to_ns(jail.path("Exported.tmTheme"))];
 			NSError* exportError = nil;
+			NSDictionary* draftBeforeExport = [draft copy];
 			Require([controller writeThemeToURL:exportURL error:&exportError], "Could not export an unsaved theme");
 			NSPropertyListFormat format;
 			NSDictionary* exported = [NSPropertyListSerialization propertyListWithData:[NSData dataWithContentsOfURL:exportURL] options:0 format:&format error:&exportError];
-			Require(format == NSPropertyListXMLFormat_v1_0 && [exported isEqual:draft], "Export did not preserve the complete theme as XML");
+			Require(format == NSPropertyListXMLFormat_v1_0, "Export did not write XML");
+			RequireExportCopy(exported, draft);
+			Require([controller writeThemeToURL:exportURL error:&exportError], "Could not export the same theme again");
+			NSDictionary* exportedAgain = [NSDictionary dictionaryWithContentsOfURL:exportURL];
+			RequireExportCopy(exportedAgain, draft);
+			Require(![exportedAgain[@"uuid"] isEqual:exported[@"uuid"]], "Repeated exports reused a UUID");
+			Require([draft isEqual:draftBeforeExport], "Export mutated the source draft");
 			Require(table.selectedRow == [[controller valueForKey:@"selectedRow"] integerValue] && rules.indexOfSelectedItem == 0, "Export changed theme or rule selection");
 			Require([[controller valueForKey:@"newTheme"] boolValue] && [[controller valueForKey:@"dirty"] boolValue], "Export saved or cleared the unsaved draft");
 			requireDirty(YES);
@@ -542,6 +558,9 @@ int main ()
 			Require([controller.exportedTheme[@"uuid"] isEqual:themeURLs[@"Alpha"].lastPathComponent] && [controller.exportedTheme[@"name"] isEqualToString:@"Alpha"], "Context-menu export did not use the clicked theme's property list");
 			auto clickedTheme = bundles::lookup(oak::uuid_t(to_s(themeURLs[@"Alpha"].lastPathComponent)));
 			Require([controller.exportedTheme isEqual:ns::to_dictionary(clickedTheme->plist())], "Context-menu export did not preserve the clicked theme's complete property list");
+			Require([controller writeTheme:controller.exportedTheme toURL:exportURL error:&exportError], "Could not write the context-menu export");
+			RequireExportCopy([NSDictionary dictionaryWithContentsOfURL:exportURL], ns::to_dictionary(clickedTheme->plist()));
+			Require([to_ns(to_s(clickedTheme->uuid())) isEqual:themeURLs[@"Alpha"].lastPathComponent], "Export changed the clicked theme's UUID");
 			Require(table.selectedRow == selectionBeforeExport && [controller valueForKey:@"draft"] == draft, "Exporting another theme changed the selected draft");
 			Require([draft[@"customMetadata"] isEqual:@{ @"author": @"Theme export test" }] && [[controller valueForKey:@"dirty"] boolValue], "Exporting another theme lost unsaved edits");
 			NSMenuItem* deleteItem = contextMenu(table.selectedRow).itemArray[1];
@@ -775,7 +794,7 @@ int main ()
 				NSDictionary* original = [NSDictionary dictionaryWithContentsOfFile:malformedFiles[index]];
 				NSError* error = nil;
 				Require([malformedController writeThemeToURL:placeholderExportURL error:&error], "Could not export the global-rule fixture");
-				Require([[NSDictionary dictionaryWithContentsOfURL:placeholderExportURL] isEqual:original], "Export changed the source's global rules");
+				RequireExportCopy([NSDictionary dictionaryWithContentsOfURL:placeholderExportURL], original);
 				[malformedController exportTheme:nil];
 				Require([malformedController.exportedTheme isEqual:original], "Export action included a placeholder global rule");
 				Require([malformedController saveCurrentTheme], "Could not save the global-rule fixture");
