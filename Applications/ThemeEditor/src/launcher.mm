@@ -1,6 +1,5 @@
-#import <Foundation/Foundation.h>
+#import <AppKit/AppKit.h>
 #import <mach-o/dyld.h>
-#include <unistd.h>
 
 int main (int argc, char const* argv[])
 {
@@ -17,9 +16,26 @@ int main (int argc, char const* argv[])
 		_NSGetExecutablePath(buffer.data(), &length);
 		NSString* executable = [[NSString stringWithUTF8String:buffer.data()] stringByResolvingSymlinksInPath];
 		NSString* contents = executable.stringByDeletingLastPathComponent.stringByDeletingLastPathComponent;
-		NSString* editor = [contents stringByAppendingPathComponent:@"Helpers/ThemeEditor.app/Contents/MacOS/ThemeEditor"];
-		execl(editor.fileSystemRepresentation, editor.fileSystemRepresentation, nullptr);
-		fprintf(stderr, "tm-theme-editor: could not launch %s: %s\n", editor.fileSystemRepresentation, strerror(errno));
-		return 1;
+		NSURL* editor = [NSURL fileURLWithPath:[contents stringByAppendingPathComponent:@"Helpers/ThemeEditor.app"] isDirectory:YES];
+		NSWorkspaceOpenConfiguration* configuration = [NSWorkspaceOpenConfiguration configuration];
+		configuration.activates = YES;
+		configuration.createsNewApplicationInstance = NO;
+		dispatch_semaphore_t finished = dispatch_semaphore_create(0);
+		__block NSError* launchError = nil;
+		[NSWorkspace.sharedWorkspace openApplicationAtURL:editor configuration:configuration completionHandler:^(NSRunningApplication* app, NSError* error) {
+			launchError = error;
+			dispatch_semaphore_signal(finished);
+		}];
+		if(dispatch_semaphore_wait(finished, dispatch_time(DISPATCH_TIME_NOW, 30 * NSEC_PER_SEC)) != 0)
+		{
+			fprintf(stderr, "tm-theme-editor: timed out launching %s\n", editor.fileSystemRepresentation);
+			return 1;
+		}
+		if(launchError)
+		{
+			fprintf(stderr, "tm-theme-editor: could not launch %s: %s\n", editor.fileSystemRepresentation, launchError.localizedDescription.UTF8String);
+			return 1;
+		}
+		return 0;
 	}
 }

@@ -44,7 +44,7 @@ textmate_codesign(ThemeEditor "${CS_IDENTITY}"
   ENTITLEMENTS "${CMAKE_CURRENT_BINARY_DIR}/Entitlements.plist")
 
 add_executable(tm-theme-editor src/launcher.mm)
-target_link_libraries(tm-theme-editor PRIVATE "-framework Foundation")
+target_link_libraries(tm-theme-editor PRIVATE "-framework AppKit")
 
 if(BUILD_TESTING)
   set(_runner "${CMAKE_CURRENT_BINARY_DIR}/test_runner.mm")
