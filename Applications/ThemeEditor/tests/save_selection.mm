@@ -350,6 +350,18 @@ int main ()
 			[window makeFirstResponder:table];
 			Require(!name.editable, "Theme label remained editable after leaving rename");
 			Require(![[controller valueForKey:@"dirty"] boolValue], "Command-click modified the theme");
+			for(NSString* key in @[ @"\r", @"\x03" ])
+			{
+				NSEvent* event = [NSEvent keyEventWithType:NSEventTypeKeyDown location:NSZeroPoint modifierFlags:0 timestamp:0 windowNumber:window.windowNumber context:nil characters:key charactersIgnoringModifiers:key isARepeat:NO keyCode:[key isEqualToString:@"\r"] ? 36 : 76];
+				[table keyDown:event];
+				NSTextView* editor = (NSTextView*)selectedName().currentEditor;
+				Require(editor && NSEqualRanges(editor.selectedRange, NSMakeRange(0, name.stringValue.length)), "Return did not select the theme name for renaming");
+				[editor insertText:@"Keyboard rename" replacementRange:editor.selectedRange];
+				[editor didChangeText];
+				Require([[[controller valueForKey:@"draft"] objectForKey:@"name"] isEqualToString:@"Keyboard rename"], "Keyboard rename did not update the draft");
+				[editor doCommandBySelector:@selector(cancelOperation:)];
+				Require([selectedName().stringValue isEqualToString:@"Middle"] && ![[controller valueForKey:@"dirty"] boolValue], "Escape did not cancel the keyboard rename");
+			}
 			auto cancelRename = [&] {
 				NSInteger selectedRow = table.selectedRow;
 				commandClick(table.selectedRow);

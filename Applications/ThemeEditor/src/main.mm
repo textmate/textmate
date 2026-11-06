@@ -201,6 +201,17 @@ static NSColor* ThemePanelBackgroundColor ()
 	return [(id<ThemeListDelegate>)self.delegate themeMenuForRow:row];
 }
 
+- (void)keyDown:(NSEvent*)event
+{
+	NSEventModifierFlags modifiers = event.modifierFlags & (NSEventModifierFlagCommand|NSEventModifierFlagControl|NSEventModifierFlagOption|NSEventModifierFlagShift);
+	if(modifiers == 0 && ([event.charactersIgnoringModifiers isEqualToString:@"\r"] || [event.charactersIgnoringModifiers isEqualToString:@"\x03"]))
+	{
+		[(id<ThemeListDelegate>)self.delegate renameThemeAtRow:self.selectedRow];
+		return;
+	}
+	[super keyDown:event];
+}
+
 - (void)mouseDown:(NSEvent*)event
 {
 	if((event.modifierFlags & NSEventModifierFlagDeviceIndependentFlagsMask) == NSEventModifierFlagCommand)
@@ -920,7 +931,7 @@ static NSColor* ThemePanelBackgroundColor ()
 	if(_themeRows[row].item)
 	{
 		label.identifier = @"theme-name";
-		label.toolTip = @"Command-click to rename this theme.";
+		label.toolTip = @"Press Return or Command-click to rename this theme.";
 		label.delegate = self;
 		label.target = self;
 		label.action = @selector(finishRenamingTheme:);
