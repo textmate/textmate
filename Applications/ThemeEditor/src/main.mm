@@ -1493,7 +1493,7 @@ static NSMutableDictionary* MutableTheme (plist::dictionary_t const& value)
 	if(row < 0 || row >= (NSInteger)_themeRows.size() || !_themeRows[row].item)
 		return nil;
 	NSMenu* menu = [NSMenu new];
-	for(NSArray<NSString*>* entry in @[ @[ @"Duplicate", NSStringFromSelector(@selector(duplicateThemeFromMenu:)) ], @[ @"Delete", NSStringFromSelector(@selector(deleteThemeFromMenu:)) ], @[ @"Export Theme…", NSStringFromSelector(@selector(exportThemeFromMenu:)) ] ])
+	for(NSArray<NSString*>* entry in @[ @[ @"Duplicate", NSStringFromSelector(@selector(duplicateThemeFromMenu:)) ], @[ @"Delete", NSStringFromSelector(@selector(deleteThemeFromMenu:)) ], @[ @"Export…", NSStringFromSelector(@selector(exportThemeFromMenu:)) ] ])
 	{
 		NSMenuItem* item = [menu addItemWithTitle:entry[0] action:NSSelectorFromString(entry[1]) keyEquivalent:@""];
 		item.target = self;

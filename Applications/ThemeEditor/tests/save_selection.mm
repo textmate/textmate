@@ -513,7 +513,7 @@ int main ()
 			};
 			Require(contextMenu(0) == nil, "Section heading has theme actions");
 			NSMenu* menu = contextMenu(1); // Alpha is not the selected theme.
-			Require(menu.numberOfItems == 3 && [menu.itemArray[0].title isEqualToString:@"Duplicate"] && [menu.itemArray[1].title isEqualToString:@"Delete"] && [menu.itemArray[2].title isEqualToString:@"Export Theme…"], "Theme context menu has incorrect actions");
+			Require(menu.numberOfItems == 3 && [menu.itemArray[0].title isEqualToString:@"Duplicate"] && [menu.itemArray[1].title isEqualToString:@"Delete"] && [menu.itemArray[2].title isEqualToString:@"Export…"], "Theme context menu has incorrect actions");
 			Require(menu.itemArray[2].action == NSSelectorFromString(@"exportThemeFromMenu:") && [menu.itemArray[2].representedObject isEqual:menu.itemArray[0].representedObject], "Export does not target the clicked theme");
 			NSMenuItem* exportItem = [NSApp.mainMenu itemWithTitle:@"File"].submenu.itemArray.lastObject;
 			Require([exportItem.title isEqualToString:@"Export Theme…"] && exportItem.action == NSSelectorFromString(@"exportTheme:"), "File menu is missing Export Theme");
