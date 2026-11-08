@@ -1,11 +1,41 @@
-:root { --textColor:       #000000ff; }
-:root { --backgroundColor: #f1f1f1ff; }
-:root { --shadowColor:     #ffffffc0; }
+:root {
+  --textColor:       #000000;
+  --backgroundColor: #f1f1f1;
+  --shadowColor:     #ffffffc0;
+  --articleBg:       rgba(255, 255, 255, 0.8);
+  --articleColor:    #000;
+  --borderColor:     rgba(0, 0, 0, 0.5);
+  --linkColor:       #7f00a4;
+  --latestBorder:    rgba(127, 0, 164, 0.65);
+  --latestShadow:    rgba(127, 0, 164, 0.18);
+  --codeBg:          rgba(0, 0, 0, 0.1);
+  --kbdBg:           rgba(0, 0, 0, 0.1);
+  --kbdBorder:       rgba(0, 0, 0, 0.35);
+  --kbdShadow:       rgba(0, 0, 0, 0.35);
+  --kbdShadowInset:  rgba(255, 255, 255, 0.35);
+  --creditColor:     rgba(0, 0, 0, 0.5);
+  --hrColor:         rgba(0, 0, 0, 0.5);
+}
 
 @media (prefers-color-scheme: dark) {
-	:root { --textColor:       #ffffffff; }
-	:root { --backgroundColor: #1e1e1eff; }
-	:root { --shadowColor:     #1e1e1ec0; }
+  :root {
+    --textColor:       #ffffff;
+    --backgroundColor: #1e1e1e;
+    --shadowColor:     #1e1e1ec0;
+    --articleBg:       rgba(40, 40, 40, 0.8);
+    --articleColor:    #e0e0e0;
+    --borderColor:     rgba(255, 255, 255, 0.2);
+    --linkColor:       #c084fc;
+    --latestBorder:    rgba(192, 132, 252, 0.75);
+    --latestShadow:    rgba(192, 132, 252, 0.24);
+    --codeBg:          rgba(255, 255, 255, 0.08);
+    --kbdBg:           rgba(255, 255, 255, 0.1);
+    --kbdBorder:       rgba(255, 255, 255, 0.25);
+    --kbdShadow:       rgba(255, 255, 255, 0.2);
+    --kbdShadowInset:  rgba(0, 0, 0, 0.2);
+    --creditColor:     rgba(255, 255, 255, 0.5);
+    --hrColor:         rgba(255, 255, 255, 0.3);
+  }
 }
 
 html {
@@ -45,9 +75,9 @@ h2 {
   font-size: 1.6rem; }
 
 article {
-  color: #000;
-  background-color: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(0, 0, 0, 0.5);
+  color: var(--articleColor);
+  background-color: var(--articleBg);
+  border: 1px solid var(--borderColor);
   border-radius: 5px;
   margin-bottom: 2rem;
   padding: 1.15rem;
@@ -56,31 +86,35 @@ article {
 article:last-child {
   margin-bottom: 0; }
 
+article.latest {
+  border-color: var(--latestBorder);
+  box-shadow: 0 0 0 2px var(--latestShadow); }
+
 a, a:visited, a:hover {
-  color: #7f00a4;
+  color: var(--linkColor);
   font-weight: bold; }
 
 hr {
   display: block;
   height: 1px;
   border: 0;
-  border-top: 1px solid rgba(0, 0, 0, 0.5);
+  border-top: 1px solid var(--hrColor);
   margin: 1.6rem 0; }
 
 pre {
-  background-color: rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(0, 0, 0, 0.5);
+  background-color: var(--codeBg);
+  border: 1px solid var(--borderColor);
   padding: 0.8rem 1.6rem 0.8rem 1.6rem;
   overflow: auto; }
 
 kbd.keyEquivalent, kbd.tabTrigger {
   padding: 0 0.15em;
   margin: 0 0.15em;
-  background-color: rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(0, 0, 0, 0.35); }
+  background-color: var(--kbdBg);
+  border: 1px solid var(--kbdBorder); }
 
 kbd.keyEquivalent {
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.35), 0 1px 0 rgba(255, 255, 255, 0.35) inset;
+  box-shadow: 0 1px 0 var(--kbdShadow), 0 1px 0 var(--kbdShadowInset) inset;
   border-radius: 2px; }
 
 kbd.tabTrigger {
@@ -95,4 +129,4 @@ span.credit::after {
 
 span.credit {
   font-style: italic;
-  color: rgba(0, 0, 0, 0.5); }
+  color: var(--creditColor); }

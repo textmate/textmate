@@ -66,7 +66,7 @@
 - (void)setBackgroundStyle:(NSBackgroundStyle)backgroundStyle
 {
 	[super setBackgroundStyle:backgroundStyle];
-	if(backgroundStyle == NSBackgroundStyleDark)
+	if(backgroundStyle == NSBackgroundStyleEmphasized)
 	{
 		self.textField.objectValue       = [self selectedStringForString:[self valueForKeyPath:@"objectValue.name"]];
 		self.folderTextField.textColor   = [NSColor colorWithCalibratedWhite:0.9 alpha:1];
@@ -169,6 +169,9 @@ static void* kFirstResponderObserverContext = &kFirstResponderObserverContext;
 	titlebarView.translatesAutoresizingMaskIntoConstraints = NO;
 
 	_accessoryViewController = [[NSTitlebarAccessoryViewController alloc] init];
+	// AppKit otherwise forces the accessory to its standard 36pt height on macOS 26+,
+	// squashing the search field / scope bar layout.
+	_accessoryViewController.automaticallyAdjustsSize = NO;
 	_accessoryViewController.view = titlebarView;
 	[_accessoryViewController.view setFrameSize:titlebarView.fittingSize];
 	[self.window addTitlebarAccessoryViewController:_accessoryViewController];
@@ -286,9 +289,7 @@ static void* kFirstResponderObserverContext = &kFirstResponderObserverContext;
 	{
 		_footerView = [[NSVisualEffectView alloc] initWithFrame:NSZeroRect];
 		_footerView.blendingMode = NSVisualEffectBlendingModeWithinWindow;
-		_footerView.material     = NSVisualEffectMaterialTitlebar;
-		if(@available(macos 10.14, *))
-			_footerView.material = NSVisualEffectMaterialHeaderView;
+		_footerView.material = NSVisualEffectMaterialHeaderView;
 
 		NSView* contentView = self.window.contentView;
 		contentView.wantsLayer = YES;

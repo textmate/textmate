@@ -1,3 +1,5 @@
+@class WKWebView;
+
 @interface HOAutoScroll : NSObject
-@property (nonatomic) WebFrameView* webFrame;
+- (instancetype)initWithWebView:(WKWebView*)webView;
 @end

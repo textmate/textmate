@@ -69,11 +69,47 @@ extern NSString* const kUserDefaultsLicenseOwnerKey;
 
 extern NSString* const kUserDefaultsDisableAntiAliasKey;
 extern NSString* const kUserDefaultsLineNumbersKey;
+extern NSString* const kUserDefaultsLineNumberScaleFactorKey;
+extern NSString* const kUserDefaultsLineNumberFontNameKey;
+
+// =======
+// = LSP =
+// =======
+
+extern NSString* const kUserDefaultsLSPShowInlineDiagnosticsKey;
+
+// ==============
+// = Formatters =
+// ==============
+
+extern NSString* const kUserDefaultsFormatterConfigurationsKey;
 
 // =========
 // = Other =
 // =========
 
 extern NSString* const kUserDefaultsFolderSearchFollowLinksKey;
-extern NSString* const kUserDefaultsDisableCrashReportingKey;
-extern NSString* const kUserDefaultsCrashReportsContactInfoKey;
+
+// ============
+// = Advanced =
+// ============
+
+// Editor
+extern NSString* const kUserDefaultsDisableTypingPairsKey;
+extern NSString* const kUserDefaultsFontSmoothingKey;
+extern NSString* const kUserDefaultsHideStatusBarKey;
+
+// Tabs
+extern NSString* const kUserDefaultsTabItemMinWidthKey;
+extern NSString* const kUserDefaultsTabItemMaxWidthKey;
+
+// Find
+extern NSString* const kUserDefaultsKeepSearchResultsOnDoubleClick;
+extern NSString* const kUserDefaultsAlwaysFindInDocument;
+
+// File Browser
+extern NSString* const kUserDefaultsDisableFolderStateRestore;
+
+// Bundles
+extern NSString* const kUserDefaultsDisableBundleSuggestionsKey;
+extern NSString* const kUserDefaultsGrammarsToNeverSuggestKey;

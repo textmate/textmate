@@ -55,11 +55,21 @@ static int setup_socket ()
 	int fd = socket(AF_UNIX, SOCK_STREAM, 0);
 	struct sockaddr_un addr = { 0, AF_UNIX, kAuthSocketPath };
 	addr.sun_len = SUN_LEN(&addr);
-	int rc = bind(fd, (sockaddr*)&addr, sizeof(addr));
+	// Asserts compile out under NDEBUG, so check explicitly: a server left
+	// running on an unbound socket would silently accept no connections.
+	if(bind(fd, (sockaddr*)&addr, sizeof(addr)) == -1)
+	{
+		perror("PrivilegedTool: bind");
+		exit(EX_UNAVAILABLE);
+	}
+
 	chmod(kAuthSocketPath, S_IRWXU|S_IRWXG|S_IRWXO);
-	assert(rc != -1);
-	rc = listen(fd, SOMAXCONN);
-	assert(rc != -1);
+
+	if(listen(fd, SOMAXCONN) == -1)
+	{
+		perror("PrivilegedTool: listen");
+		exit(EX_UNAVAILABLE);
+	}
 
 	return fd;
 }

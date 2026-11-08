@@ -109,14 +109,12 @@ void benchmark_erase_and_insert_in_5_mb ()
 	ng::detail::storage_t storage;
 	storage.insert(0, buffer.data(), buffer.size());
 
-	size_t total = 0;
 	for(size_t i = 0; i < storage.size(); ++i)
 	{
 		if(storage[i] == '=')
 		{
 			storage.erase(i, i + 1);
 			storage.insert(i, " ", 1);
-			++total;
 		}
 	}
 }

@@ -101,10 +101,10 @@ static void load_bundle_index (bool verbose)
 {
 	oak::duration_t timer;
 
-	std::string const path = path::join(path::home(), "Library/Caches/com.macromates.TextMate/BundlesIndex.binary");
+	std::string const path = path::join(path::home(), "Library/Caches/com.macromates.TextMate/BundlesIndex.plist");
 
 	plist::cache_t cache;
-	cache.load_capnp(path);
+	cache.load(path);
 
 	std::vector<std::string> paths;
 	for(auto path : bundles::locations())
@@ -134,6 +134,7 @@ int main (int argc, char* const* argv)
 	};
 
 	bool verbose = false, trim = false, loadIndex = false;
+	(void)trim;
 	std::string grammar = NULL_STR, delimiters = NULL_STR;
 
 	int ch;

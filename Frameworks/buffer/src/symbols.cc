@@ -111,7 +111,7 @@ namespace ng
 			if(plist::is_true(bundles::value_for_setting("showInSymbolList", it)))
 			{
 				plist::any_t const& symbolTransformationValue = bundles::value_for_setting("symbolTransformation", it);
-				std::string const* symbolTransformation = boost::get<std::string>(&symbolTransformationValue);
+				std::string const* symbolTransformation = plist::get<std::string>(&symbolTransformationValue);
 				transforms.emplace(it, transform_t(symbolTransformation ? *symbolTransformation : ""));
 			}
 		}

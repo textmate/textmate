@@ -4,7 +4,7 @@
 static int32_t parse_int (std::string const& src)
 {
 	plist::any_t plist = plist::parse_ascii(src);
-	if(int32_t const* res = boost::get<int32_t>(&plist))
+	if(int32_t const* res = plist::get<int32_t>(&plist))
 		return *res;
 	return 0;
 }
@@ -12,7 +12,7 @@ static int32_t parse_int (std::string const& src)
 static std::string parse_str (std::string const& src)
 {
 	plist::any_t plist = plist::parse_ascii(src);
-	if(std::string const* res = boost::get<std::string>(&plist))
+	if(std::string const* res = plist::get<std::string>(&plist))
 		return *res;
 	return NULL_STR;
 }
@@ -20,13 +20,13 @@ static std::string parse_str (std::string const& src)
 static bool is_array (std::string const& src)
 {
 	plist::any_t plist = plist::parse_ascii(src);
-	return boost::get< std::vector<plist::any_t> >(&plist);
+	return plist::get< std::vector<plist::any_t> >(&plist);
 }
 
 static std::vector<plist::any_t> parse_array (std::string const& src)
 {
 	plist::any_t plist = plist::parse_ascii(src);
-	if(std::vector<plist::any_t> const* res = boost::get< std::vector<plist::any_t> >(&plist))
+	if(std::vector<plist::any_t> const* res = plist::get< std::vector<plist::any_t> >(&plist))
 		return *res;
 	return std::vector<plist::any_t>();
 }
@@ -34,13 +34,13 @@ static std::vector<plist::any_t> parse_array (std::string const& src)
 static bool is_dict (std::string const& src)
 {
 	plist::any_t plist = plist::parse_ascii(src);
-	return boost::get< std::map<std::string, plist::any_t> >(&plist);
+	return plist::get< std::map<std::string, plist::any_t> >(&plist);
 }
 
 static std::map<std::string, plist::any_t> parse_dict (std::string const& src)
 {
 	plist::any_t plist = plist::parse_ascii(src);
-	if(std::map<std::string, plist::any_t> const* res = boost::get< std::map<std::string, plist::any_t> >(&plist))
+	if(std::map<std::string, plist::any_t> const* res = plist::get< std::map<std::string, plist::any_t> >(&plist))
 		return *res;
 	return std::map<std::string, plist::any_t>();
 }
@@ -48,9 +48,9 @@ static std::map<std::string, plist::any_t> parse_dict (std::string const& src)
 void test_basic ()
 {
 	plist::any_t empty;
-	// OAK_ASSERT(boost::get<bool>(&empty)        == nullptr);
-	OAK_ASSERT(boost::get<int32_t>(&empty)     == nullptr);
-	OAK_ASSERT(boost::get<std::string>(&empty) == nullptr);
+	// OAK_ASSERT(plist::get<bool>(&empty)        == nullptr);
+	OAK_ASSERT(plist::get<int32_t>(&empty)     == nullptr);
+	OAK_ASSERT(plist::get<std::string>(&empty) == nullptr);
 }
 
 void test_true_test ()
@@ -79,21 +79,21 @@ void test_int ()
 void test_bool ()
 {
 	plist::any_t truePlist = plist::parse_ascii(":true");
-	OAK_ASSERT(boost::get<bool>(&truePlist));
-	OAK_ASSERT_EQ(boost::get<bool>(truePlist), true);
+	OAK_ASSERT(plist::get<bool>(&truePlist));
+	OAK_ASSERT_EQ(plist::get<bool>(truePlist), true);
 
 	plist::any_t falsePlist = plist::parse_ascii(":false");
-	OAK_ASSERT(boost::get<bool>(&falsePlist));
-	OAK_ASSERT_EQ(boost::get<bool>(falsePlist), false);
+	OAK_ASSERT(plist::get<bool>(&falsePlist));
+	OAK_ASSERT_EQ(plist::get<bool>(falsePlist), false);
 
 	plist::any_t mixedPlist = plist::parse_ascii("( :true, :false )");
-	OAK_ASSERT(boost::get< std::vector<plist::any_t> >(&mixedPlist));
-	std::vector<plist::any_t> const& v = boost::get< std::vector<plist::any_t> >(mixedPlist);
-	OAK_ASSERT_EQ(boost::get<bool>(v[0]), true);
-	OAK_ASSERT_EQ(boost::get<bool>(v[1]), false);
+	OAK_ASSERT(plist::get< std::vector<plist::any_t> >(&mixedPlist));
+	std::vector<plist::any_t> const& v = plist::get< std::vector<plist::any_t> >(mixedPlist);
+	OAK_ASSERT_EQ(plist::get<bool>(v[0]), true);
+	OAK_ASSERT_EQ(plist::get<bool>(v[1]), false);
 
 	// plist::any_t badPlist = plist::parse_ascii(":bad");
-	// OAK_ASSERT_EQ(boost::get<bool>(&badPlist), (bool*)nullptr);
+	// OAK_ASSERT_EQ(plist::get<bool>(&badPlist), (bool*)nullptr);
 }
 
 void test_double_strings ()
@@ -181,8 +181,9 @@ void test_single_line_comment ()
 	OAK_ASSERT_EQ(parse_dict("// …\n { key = // …\n value // …\n ; }").size(), 1);
 }
 
-struct actual_type_t : boost::static_visitor<char const*>
+struct actual_type_t
 {
+	char const* operator() (std::monostate) const                  { return "std::monostate";      }
 	char const* operator() (bool flag) const                       { return "bool";                }
 	char const* operator() (int32_t i) const                       { return "int32_t";             }
 	char const* operator() (uint64_t i) const                      { return "uint64_t";            }
@@ -196,7 +197,7 @@ struct actual_type_t : boost::static_visitor<char const*>
 static std::string plist_type (std::string const& plistString)
 {
 	plist::any_t plist = plist::parse_ascii(plistString);
-	return boost::apply_visitor(actual_type_t(), plist);
+	return std::visit(actual_type_t(), plist.data);
 }
 
 void test_number_type ()
@@ -233,7 +234,7 @@ void test_uint64_conversion ()
 {
 	OAK_ASSERT_EQ(plist::get<uint64_t>(plist::parse_ascii("8589934592")),     8589934592ULL);
 	OAK_ASSERT_EQ(plist::get<uint64_t>(plist::parse_ascii("0x812345678")),   0x812345678ULL);
-	OAK_ASSERT_EQ(plist::get<uint64_t>(plist::parse_ascii("'0x812345678'")), 0x812345678ULL);
+	OAK_ASSERT_EQ(plist::convert<uint64_t>(plist::parse_ascii("'0x812345678'")), 0x812345678ULL);
 }
 
 void test_dictionary_keys ()
@@ -241,12 +242,12 @@ void test_dictionary_keys ()
 	std::map<std::string, int32_t> integerMap;
 	integerMap["42"] = 1;
 	integerMap["80"] = 2;
-	OAK_ASSERT_EQ(to_s(plist::parse_ascii("{ 42 = 1; 80 = 2; }")), boost::to_s(plist::to_plist(integerMap)));
+	OAK_ASSERT_EQ(to_s(plist::parse_ascii("{ 42 = 1; 80 = 2; }")), to_s(plist::any_t(plist::to_plist(integerMap))));
 
 	std::map<std::string, std::string> booleanMap;
 	booleanMap["1"] = std::string("true");
 	booleanMap["0"] = std::string("false");
-	OAK_ASSERT_EQ(to_s(plist::parse_ascii("{ :true = true; :false = false; }")), boost::to_s(plist::to_plist(booleanMap)));
+	OAK_ASSERT_EQ(to_s(plist::parse_ascii("{ :true = true; :false = false; }")), to_s(plist::any_t(plist::to_plist(booleanMap))));
 
 	// OAK_ASSERT_EQ(to_s(plist::parse_ascii("{ ( bad ) = key; }")), to_s(plist::any_t(false)));
 }

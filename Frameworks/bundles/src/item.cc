@@ -82,12 +82,12 @@ namespace bundles
 
 			if(pair.first == kFieldScopeSelector)
 			{
-				if(std::string const* str = boost::get<std::string>(&pair.second))
+				if(std::string const* str = plist::get<std::string>(&pair.second))
 					_scope_selector = *str;
 			}
 			else if(stringKeys.find(pair.first) != stringKeys.end())
 			{
-				if(std::string const* str = boost::get<std::string>(&pair.second))
+				if(std::string const* str = plist::get<std::string>(&pair.second))
 				{
 					if(pair.first == kFieldSemanticClass)
 					{
@@ -102,11 +102,11 @@ namespace bundles
 			}
 			else if(arrayKeys.find(pair.first) != arrayKeys.end())
 			{
-				if(plist::array_t const* array = boost::get<plist::array_t>(&pair.second))
+				if(plist::array_t const* array = plist::get<plist::array_t>(&pair.second))
 				{
 					for(auto const& any : *array)
 					{
-						if(std::string const* str = boost::get<std::string>(&any))
+						if(std::string const* str = plist::get<std::string>(&any))
 							_fields.emplace(pair.first, *str);
 					}
 				}
@@ -114,16 +114,16 @@ namespace bundles
 			else if(pair.first == kFieldSettingName)
 			{
 				// initialize from a tmSettings file
-				if(plist::dictionary_t const* dictionary = boost::get<plist::dictionary_t>(&pair.second))
+				if(plist::dictionary_t const* dictionary = plist::get<plist::dictionary_t>(&pair.second))
 				{
 					for(auto const& dictPair : *dictionary)
 						_fields.emplace(pair.first, dictPair.first);
 				}
-				else if(plist::array_t const* array = boost::get<plist::array_t>(&pair.second))
+				else if(plist::array_t const* array = plist::get<plist::array_t>(&pair.second))
 				{
 					for(auto const& any : *array) // initialize from cache
 					{
-						if(std::string const* str = boost::get<std::string>(&any))
+						if(std::string const* str = plist::get<std::string>(&any))
 							_fields.emplace(pair.first, *str);
 					}
 				}
@@ -140,9 +140,9 @@ namespace bundles
 			{
 				_hidden_from_user = plist::is_true(pair.second);
 			}
-			else if(pair.first == kFieldRequiredItems && boost::get<plist::array_t>(&pair.second))
+			else if(pair.first == kFieldRequiredItems && plist::get<plist::array_t>(&pair.second))
 			{
-				for(auto const& dict : boost::get<plist::array_t>(pair.second))
+				for(auto const& dict : plist::get<plist::array_t>(pair.second))
 				{
 					std::string name;
 					oak::uuid_t uuid;
@@ -320,7 +320,7 @@ namespace bundles
 		plist::dictionary_t res;
 		for(auto const& pair : plist)
 		{
-			if(!boost::get<bool>(&pair.second) || boost::get<bool>(pair.second))
+			if(!plist::get<bool>(&pair.second) || plist::get<bool>(pair.second))
 				res.insert(res.end(), pair);
 		}
 		return res;

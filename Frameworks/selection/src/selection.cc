@@ -53,13 +53,13 @@ namespace ng
 		bundles::item_ptr match;
 		plist::any_t value = bundles::value_for_setting("characterClass", buffer.scope(index), &match);
 		if(match)
-			return boost::get<std::string>(value);
+			return plist::get<std::string>(value);
 		else if(text::is_word_char(buffer[index]))
 			return kCharacterClassWord;
 		else
 		{
 			value = bundles::value_for_setting("wordCharacters", buffer.scope(index), &match);
-			if(match && boost::get<std::string>(value).find(buffer[index]) != std::string::npos)
+			if(match && plist::get<std::string>(value).find(buffer[index]) != std::string::npos)
 				return kCharacterClassWord;
 			else if(text::is_whitespace(buffer[index]))
 				return kCharacterClassSpace;
@@ -237,14 +237,14 @@ namespace ng
 	{
 		std::vector<std::pair<pattern_t, pattern_t>> res;
 		plist::any_t value = bundles::value_for_setting(key, scope);
-		if(plist::array_t const* array = boost::get<plist::array_t>(&value))
+		if(plist::array_t const* array = plist::get<plist::array_t>(&value))
 		{
 			for(auto const& pair : *array)
 			{
-				if(plist::array_t const* value = boost::get<plist::array_t>(&pair))
+				if(plist::array_t const* value = plist::get<plist::array_t>(&pair))
 				{
-					std::string const* a1 = value->size() == 2 ? boost::get<std::string>(&(*value)[0]) : nullptr;
-					std::string const* a2 = value->size() == 2 ? boost::get<std::string>(&(*value)[1]) : nullptr;
+					std::string const* a1 = value->size() == 2 ? plist::get<std::string>(&(*value)[0]) : nullptr;
+					std::string const* a2 = value->size() == 2 ? plist::get<std::string>(&(*value)[1]) : nullptr;
 					if(a1 && a2 && *a1 != *a2)
 						res.emplace_back(*a1, *a2);
 				}
@@ -434,11 +434,12 @@ namespace ng
 		return isMultiline;
 	}
 
-	ranges_t dissect_columnar (buffer_api_t const& buffer, ranges_t const& selection)
+	ranges_t dissect_columnar (buffer_api_t const& buffer, ranges_t const& selection, size_t limit)
 	{
 		ranges_t res;
 		for(auto const& range : selection)
 		{
+            if(res.size() >= limit) return res;
 			if(range.columnar && !range.empty())
 			{
 				size_t colA = count_columns(buffer, range.first);
@@ -452,6 +453,7 @@ namespace ng
 
 				for(size_t n = fromLine; n <= toLine; ++n)
 				{
+                    if(res.size() >= limit) return res;
 					index_t from = at_column(buffer, n, fromCol), to = at_column(buffer, n, toCol);
 					res.push_back(range_t(from, to, false, from.carry || to.carry, range.unanchored, range.color));
 				}

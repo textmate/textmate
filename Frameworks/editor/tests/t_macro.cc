@@ -11,7 +11,7 @@ void test_insert ()
 
 	ng::buffer_t buf;
 	ng::editor_t editor(buf);
-	editor.macro_dispatch(boost::get<plist::dictionary_t>(plist::parse(plistSrc)), std::map<std::string, std::string>(), [](bundle_command_t const& cmd, ng::buffer_api_t const& buf, ng::ranges_t const& sel, std::map<std::string, std::string> const& env){
+	editor.macro_dispatch(plist::get<plist::dictionary_t>(plist::parse(plistSrc)), std::map<std::string, std::string>(), [](bundle_command_t const& cmd, ng::buffer_api_t const& buf, ng::ranges_t const& sel, std::map<std::string, std::string> const& env){
 		OAK_ASSERT(false); // Macro does not contain any commands
 	});
 	OAK_ASSERT_EQ(editor.as_string(), "Test");
@@ -36,7 +36,7 @@ void test_snippet ()
 
 	ng::buffer_t buf;
 	ng::editor_t editor(buf);
-	editor.macro_dispatch(boost::get<plist::dictionary_t>(plist::parse(plistSrc)), std::map<std::string, std::string>(), [](bundle_command_t const& cmd, ng::buffer_api_t const& buf, ng::ranges_t const& sel, std::map<std::string, std::string> const& env){
+	editor.macro_dispatch(plist::get<plist::dictionary_t>(plist::parse(plistSrc)), std::map<std::string, std::string>(), [](bundle_command_t const& cmd, ng::buffer_api_t const& buf, ng::ranges_t const& sel, std::map<std::string, std::string> const& env){
 		OAK_ASSERT(false); // Macro does not contain any commands
 	});
 	OAK_ASSERT_EQ(editor.as_string(), "2010-01-25");
@@ -77,7 +77,7 @@ void test_command ()
 	ng::buffer_t buf;
 	ng::editor_t editor(buf);
 	editor.insert("to be replaced");
-	editor.macro_dispatch(boost::get<plist::dictionary_t>(plist::parse(plistSrc)), std::map<std::string, std::string>(), [&editor](bundle_command_t const& cmd, ng::buffer_api_t const& buf, ng::ranges_t const& sel, std::map<std::string, std::string> const& env){
+	editor.macro_dispatch(plist::get<plist::dictionary_t>(plist::parse(plistSrc)), std::map<std::string, std::string>(), [&editor](bundle_command_t const& cmd, ng::buffer_api_t const& buf, ng::ranges_t const& sel, std::map<std::string, std::string> const& env){
 		command::runner_ptr runner = command::runner(cmd, buf, sel, env, std::make_shared<delegate_t>(editor));
 		runner->launch();
 		runner->wait_for_command();

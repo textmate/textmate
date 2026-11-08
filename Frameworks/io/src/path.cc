@@ -596,9 +596,9 @@ namespace path
 		if(size <= 0)
 			return NULL_STR;
 
-		char data[size];
-		getxattr(path.c_str(), attr.c_str(), data, size, 0, 0);
-		return std::string(data, data + size);
+		std::string data(size, '\0');
+		getxattr(path.c_str(), attr.c_str(), data.data(), size, 0, 0);
+		return data;
 	}
 
 	void set_attr (std::string const& path, std::string const& attr, std::string const& value)
@@ -618,26 +618,26 @@ namespace path
 			ssize_t listSize = flistxattr(fd, nullptr, 0, 0);
 			if(listSize > 0)
 			{
-				char mem[listSize];
-				if(flistxattr(fd, mem, listSize, 0) == listSize)
+				std::vector<char> mem(listSize);
+				if(flistxattr(fd, mem.data(), listSize, 0) == listSize)
 				{
 					size_t i = 0;
 					while(i < listSize)
 					{
-						ssize_t size = fgetxattr(fd, mem + i, nullptr, 0, 0, 0);
+						ssize_t size = fgetxattr(fd, mem.data() + i, nullptr, 0, 0, 0);
 						if(size > 0)
 						{
 							std::string value(size, '\0');
-							if(fgetxattr(fd, mem + i, &value.front(), value.size(), 0, 0) == size)
-								res.emplace(mem + i, value);
+							if(fgetxattr(fd, mem.data() + i, &value.front(), value.size(), 0, 0) == size)
+								res.emplace(mem.data() + i, value);
 							else
-								perrorf("path::attributes: fgetxattr(\"%s\", \"%s\")", path.c_str(), mem + i);
+								perrorf("path::attributes: fgetxattr(\"%s\", \"%s\")", path.c_str(), mem.data() + i);
 						}
 						else if(size == -1)
 						{
-							perrorf("path::attributes: fgetxattr(\"%s\", \"%s\")", path.c_str(), mem + i);
+							perrorf("path::attributes: fgetxattr(\"%s\", \"%s\")", path.c_str(), mem.data() + i);
 						}
-						i += strlen(mem + i) + 1;
+						i += strlen(mem.data() + i) + 1;
 					}
 				}
 			}
@@ -861,7 +861,12 @@ namespace path
 			}
 			else
 			{
-				mktemp(&str[0]);
+				int fd = mkstemp(&str[0]);
+			if(fd != -1)
+			{
+				close(fd);
+				unlink(str.c_str());
+			}
 			}
 		}
 		return str;

@@ -17,11 +17,8 @@ NSMenuItem* MBCreateMenuItem (MBMenuItem const& item)
 	menuItem.state                     = item.state;
 	menuItem.representedObject         = item.representedObject;
 
-	if(@available(macos 10.13, *))
-	{
-		if(item.hidden && (![item.keyEquivalent isEqualToString:@""] || item.key))
-			menuItem.allowsKeyEquivalentWhenHidden = YES;
-	}
+	if(item.hidden && (![item.keyEquivalent isEqualToString:@""] || item.key))
+		menuItem.allowsKeyEquivalentWhenHidden = YES;
 
 	if(item.key)
 		menuItem.keyEquivalent = [NSString stringWithFormat:@"%C", item.key];

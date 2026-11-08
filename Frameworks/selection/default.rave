@@ -1,6 +1,0 @@
-target "${dirname}" {
-	require text buffer bundles crash regexp
-	headers src/selection.h src/types.h
-	sources src/*.cc
-	tests tests/*.cc
-}

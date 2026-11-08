@@ -56,9 +56,9 @@ namespace plist
 
 			bool handle (plist::any_t const& value, OBJ_TYPE* obj) const
 			{
-				if(T const* typedValue = boost::get<T>(&value))
+				if(T const* typedValue = ::plist::get<T>(&value))
 						obj->*_field = *typedValue;
-				else	obj->*_field = plist::get<T>(value);
+				else	obj->*_field = ::plist::convert<T>(value);
 				return true;
 			}
 
@@ -78,9 +78,9 @@ namespace plist
 
 			bool handle (plist::any_t const& value, OBJ_TYPE* obj) const
 			{
-				if(SRC_T const* typedValue = boost::get<SRC_T>(&value))
+				if(SRC_T const* typedValue = ::plist::get<SRC_T>(&value))
 						return _converter(*typedValue, obj->*_field);
-				else	return _converter(plist::get<SRC_T>(value), obj->*_field);
+				else	return _converter(::plist::convert<SRC_T>(value), obj->*_field);
 			}
 
 			DST_T OBJ_TYPE::* _field;

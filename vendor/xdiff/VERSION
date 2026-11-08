@@ -1,0 +1,20 @@
+upstream:    https://github.com/git/git
+tag:         v2.54.0
+commit:      94f057755b7941b321fd11fec1b2e3ca5313a4e0
+date:        2026-04-19
+synced:      2026-04-25
+
+files (14, ~3624 LOC, byte-for-byte from upstream xdiff/):
+  xdiff.h xdiffi.c xdiffi.h xemit.c xemit.h xhistogram.c
+  xinclude.h xmacros.h xpatience.c xprepare.c xprepare.h
+  xtypes.h xutils.c xutils.h
+
+deliberately omitted:
+  xmerge.c (3-way merge; not used by gutter diff)
+
+local additions (not from upstream — replace git-compat-util.h dependency):
+  git-compat-util.h
+  git-compat-util.c
+
+To check for upstream changes since the pinned commit:
+  bin/check_xdiff_upstream.sh

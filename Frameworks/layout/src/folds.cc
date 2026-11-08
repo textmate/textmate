@@ -27,17 +27,17 @@ namespace ng
 	void folds_t::set_folded_as_string (std::string const& str)
 	{
 		plist::any_t value = plist::parse_ascii(str);
-		if(plist::array_t const* array = boost::get<plist::array_t>(&value))
+		if(plist::array_t const* array = plist::get<plist::array_t>(&value))
 		{
 			bool validRanges = true;
 
 			std::vector< std::pair<size_t, size_t> > newFoldings;
 			for(auto const& pair : *array)
 			{
-				if(plist::array_t const* value = boost::get<plist::array_t>(&pair))
+				if(plist::array_t const* value = plist::get<plist::array_t>(&pair))
 				{
-					int32_t const* from = value->size() == 2 ? boost::get<int32_t>(&(*value)[0]) : nullptr;
-					int32_t const* to   = value->size() == 2 ? boost::get<int32_t>(&(*value)[1]) : nullptr;
+					int32_t const* from = value->size() == 2 ? plist::get<int32_t>(&(*value)[0]) : nullptr;
+					int32_t const* to   = value->size() == 2 ? plist::get<int32_t>(&(*value)[1]) : nullptr;
 					if(from && *from < _buffer.size() && to && *to <= _buffer.size())
 							newFoldings.emplace_back(*from, *to);
 					else	validRanges = false;
@@ -357,7 +357,7 @@ namespace ng
 		for(auto info : mapping)
 		{
 			plist::any_t ptrn = bundles::value_for_setting(info.setting, scope);
-			if(std::string const* str = boost::get<std::string>(&ptrn))
+			if(std::string const* str = plist::get<std::string>(&ptrn))
 				info.regexp = *str;
 		}
 

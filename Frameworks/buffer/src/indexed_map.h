@@ -38,8 +38,14 @@ private:
 	}
 
 public:
-	struct iterator : public std::iterator< std::bidirectional_iterator_tag, std::pair<ssize_t, _ValT> >
+	struct iterator
 	{
+		using iterator_category = std::bidirectional_iterator_tag;
+		using value_type        = std::pair<ssize_t, _ValT>;
+		using difference_type   = std::ptrdiff_t;
+		using pointer           = std::pair<ssize_t, _ValT>*;
+		using reference         = std::pair<ssize_t, _ValT>&;
+
 		iterator (tree_t& tree, typename tree_t::iterator const& base) : _tree(tree), _base(base) { update_value(); }
 
 		bool operator== (iterator const& rhs) const { return _base == rhs._base; }

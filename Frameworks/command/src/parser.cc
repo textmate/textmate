@@ -120,7 +120,7 @@ static void setup_fields (plist::dictionary_t const& plist, bundle_command_t& re
 	{
 		for(auto const& any : autoRefreshArray)
 		{
-			if(std::string const* str = boost::get<std::string>(&any))
+			if(std::string const* str = plist::get<std::string>(&any))
 			{
 				if(text::lowercase(*str) == "documentchanged")
 					res.auto_refresh |= auto_refresh::on_document_change;

@@ -1,55 +1,40 @@
 #import "SCMManager.h"
-#import "FSEventsManager.h"
-#import "drivers/api.h"
-#import <scm/scm.h>
-#import <ns/ns.h>
 #import <TMFileReference/TMFileReference.h>
-
-namespace scm
-{
-	driver_t* git_driver ();
-	driver_t* hg_driver ();
-	driver_t* p4_driver ();
-	driver_t* svn_driver ();
-}
+#import <ns/ns.h>
+#import <scm/scm.h>
 
 @class SCMRepositoryObserver;
 
 @interface SCMRepository ()
 {
-	BOOL _needsUpdate;
-	BOOL _updating;
-	NSTimer* _updateTimer;
-	NSDate* _noUpdateBefore;
-	NSMutableSet<TMFileReference*>* _fileReferences;
+	NSMutableSet<TMFileReference *> *_fileReferences;
+	scm::info_ptr _info;
 }
 @property (nonatomic, readwrite) std::map<std::string, scm::status::type> status;
-@property (nonatomic, readwrite) NSDictionary<NSString*, NSString*>* variables;
-@property (nonatomic, readonly) scm::driver_t const* driver;
-@property (nonatomic, readonly) NSMutableArray<SCMRepositoryObserver*>* observers;
-@property (nonatomic) id fsEventsObserver;
-- (instancetype)initWithURL:(NSURL*)url driver:(scm::driver_t const*)driver;
-- (scm::status::type)SCMStatusForURL:(NSURL*)url;
-- (SCMRepositoryObserver*)addObserver:(void(^)(SCMRepository*))handler;
-- (void)removeObserver:(SCMRepositoryObserver*)observer;
+@property (nonatomic, readwrite) NSDictionary<NSString *, NSString *> *variables;
+@property (nonatomic, readonly) NSMutableArray<SCMRepositoryObserver *> *observers;
+- (instancetype)initWithURL:(NSURL *)url;
+- (scm::status::type)SCMStatusForURL:(NSURL *)url;
+- (SCMRepositoryObserver *)addObserver:(void (^)(SCMRepository *))handler;
+- (void)removeObserver:(SCMRepositoryObserver *)observer;
 @end
 
 @class SCMDirectoryObserver;
 
 @interface SCMDirectory : NSObject
-@property (nonatomic, readonly) NSURL* URL;
-@property (nonatomic, readonly) SCMRepository* repository;
-@property (nonatomic, readonly) SCMRepositoryObserver* repositoryObserver;
-@property (nonatomic, readonly) NSMutableArray<SCMDirectoryObserver*>* observers;
-- (instancetype)initWithURL:(NSURL*)url;
-- (SCMDirectoryObserver*)addObserver:(void(^)(SCMRepository*))handler;
-- (void)removeObserver:(SCMDirectoryObserver*)observer;
+@property (nonatomic, readonly) NSURL *URL;
+@property (nonatomic, readonly) SCMRepository *repository;
+@property (nonatomic, readonly) SCMRepositoryObserver *repositoryObserver;
+@property (nonatomic, readonly) NSMutableArray<SCMDirectoryObserver *> *observers;
+- (instancetype)initWithURL:(NSURL *)url;
+- (SCMDirectoryObserver *)addObserver:(void (^)(SCMRepository *))handler;
+- (void)removeObserver:(SCMDirectoryObserver *)observer;
 @end
 
 @interface SCMManager ()
-@property (nonatomic, readonly) NSMapTable<NSURL*, SCMRepository*>* repositories;
-@property (nonatomic, readonly) NSMapTable<NSURL*, SCMDirectory*>*  directories;
-- (SCMDirectory*)directoryAtURL:(NSURL*)url;
+@property (nonatomic, readonly) NSMapTable<NSURL *, SCMRepository *> *repositories;
+@property (nonatomic, readonly) NSMapTable<NSURL *, SCMDirectory *> *directories;
+- (SCMDirectory *)directoryAtURL:(NSURL *)url;
 @end
 
 // ===========================================
@@ -57,14 +42,14 @@ namespace scm
 // ===========================================
 
 @interface SCMRepositoryObserver : NSObject
-@property (nonatomic, readonly) void(^handler)(SCMRepository*);
-@property (nonatomic) SCMRepository* repository;
-- (instancetype)initWithBlock:(void(^)(SCMRepository*))handler;
+@property (nonatomic, readonly) void (^handler)(SCMRepository *);
+@property (nonatomic) SCMRepository *repository;
+- (instancetype)initWithBlock:(void (^)(SCMRepository *))handler;
 - (void)remove;
 @end
 
 @implementation SCMRepositoryObserver
-- (instancetype)initWithBlock:(void(^)(SCMRepository*))handler
+- (instancetype)initWithBlock:(void (^)(SCMRepository *))handler
 {
 	if(self = [super init])
 		_handler = handler;
@@ -78,14 +63,14 @@ namespace scm
 @end
 
 @interface SCMDirectoryObserver : NSObject
-@property (nonatomic, readonly) void(^handler)(SCMRepository*);
-@property (nonatomic) SCMDirectory* directory;
-- (instancetype)initWithBlock:(void(^)(SCMRepository*))handler;
+@property (nonatomic, readonly) void (^handler)(SCMRepository *);
+@property (nonatomic) SCMDirectory *directory;
+- (instancetype)initWithBlock:(void (^)(SCMRepository *))handler;
 - (void)remove;
 @end
 
 @implementation SCMDirectoryObserver
-- (instancetype)initWithBlock:(void(^)(SCMRepository*))handler
+- (instancetype)initWithBlock:(void (^)(SCMRepository *))handler
 {
 	if(self = [super init])
 		_handler = handler;
@@ -101,123 +86,66 @@ namespace scm
 // ===========================================
 
 @implementation SCMRepository
-- (instancetype)initWithURL:(NSURL*)url driver:(scm::driver_t const*)driver
+- (instancetype)initWithURL:(NSURL *)url
+
 {
 	if(self = [super init])
 	{
-		_URL               = url;
-		_driver            = driver;
-		_enabled           = scm::scm_enabled_for_path(url.fileSystemRepresentation);
-		_tracksDirectories = driver && driver->tracks_directories();
-		_noUpdateBefore    = [NSDate distantPast];
-		_observers         = [NSMutableArray array];
+		_URL		  = url;
+		_enabled	  = YES;
+		_observers = [NSMutableArray array];
+		_info		  = scm::info(url.fileSystemRepresentation);
 
-		if(_enabled == YES)
-		{
-			[self tryUpdateStatusInBackground];
+		__weak SCMRepository *weakSelf = self;
+		_info->push_callback(^(scm::info_t const &info) {
+		  NSMutableDictionary *variables = [NSMutableDictionary dictionary];
+		  for(auto const &pair : info.scm_variables())
+			  variables[to_ns(pair.first)] = to_ns(pair.second);
 
-			__weak SCMRepository* weakSelf = self;
-			_fsEventsObserver = [FSEventsManager.sharedInstance addObserverToDirectoryAtURL:url observeSubdirectories:YES usingBlock:^(NSURL* url){
-				_noUpdateBefore = [_noUpdateBefore laterDate:[NSDate dateWithTimeIntervalSinceNow:NSApp.isActive ? 0.5 : 3]];
-				[weakSelf tryUpdateStatusInBackground];
-			}];
-		}
-
-		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(applicationDidBecomeActive:) name:NSApplicationDidBecomeActiveNotification object:NSApp];
+		  if(SCMRepository *repository = weakSelf)
+		  {
+			  repository->_tracksDirectories = info.tracks_directories();
+			  [repository updateStatus:info.status() variables:variables];
+		  }
+		});
 	}
 	return self;
 }
 
 - (void)dealloc
 {
-	[NSNotificationCenter.defaultCenter removeObserver:self name:NSApplicationDidBecomeActiveNotification object:NSApp];
-	[FSEventsManager.sharedInstance removeObserver:_fsEventsObserver];
+	if(_info)
+		_info->pop_callback();
 }
 
-- (void)applicationDidBecomeActive:(NSNotification*)aNotification
+- (void)updateStatus:(std::map<std::string, scm::status::type> const &)status variables:(NSDictionary<NSString *, NSString *> *)variables
 {
-	if(_updateTimer)
-		[self updateStatusInBackground:nil];
-}
-
-- (void)tryUpdateStatusInBackground
-{
-	if(_updating)
-	{
-		_needsUpdate = YES;
-		return;
-	}
-
-	NSTimeInterval delayUpdate = [_noUpdateBefore timeIntervalSinceNow];
-	if(delayUpdate > 0)
-	{
-		[_updateTimer invalidate];
-		_updateTimer = [NSTimer scheduledTimerWithTimeInterval:delayUpdate target:self selector:@selector(updateStatusInBackground:) userInfo:nil repeats:NO];
-	}
-	else
-	{
-		[self updateStatusInBackground:nil];
-	}
-}
-
-- (void)updateStatusInBackground:(id)sender
-{
-	[_updateTimer invalidate];
-	_updateTimer = nil;
-	_needsUpdate = NO;
-	_updating    = YES;
-
-	__weak SCMRepository* weakSelf = self;
-
-	NSURL* url = _URL;
-	scm::driver_t const* driver = _driver;
-
-	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-		std::map<std::string, scm::status::type> const status = driver->status(url.fileSystemRepresentation);
-
-		NSMutableDictionary* variables = [NSMutableDictionary dictionary];
-		for(auto pair : driver->variables(url.fileSystemRepresentation))
-			variables[to_ns(pair.first)] = to_ns(pair.second);
-
-		dispatch_async(dispatch_get_main_queue(), ^{
-			[weakSelf updateStatus:status variables:variables];
-		});
-	});
-}
-
-- (void)updateStatus:(std::map<std::string, scm::status::type> const&)status variables:(NSDictionary<NSString*, NSString*>*)variables
-{
-	_status    = status;
+	_status	  = status;
 	_variables = variables;
 	_hasStatus = YES;
 
-	NSMutableSet<TMFileReference*>* fileReferences = [NSMutableSet set];
+	NSMutableSet<TMFileReference *> *fileReferences = [NSMutableSet set];
 	for(auto pair : _status)
 	{
 		if(pair.second != scm::status::none)
 		{
-			NSString* path = [NSFileManager.defaultManager stringWithFileSystemRepresentation:pair.first.data() length:pair.first.size()];
-			TMFileReference* fileReference = [TMFileReference fileReferenceWithURL:[NSURL fileURLWithPath:path]];
-			fileReference.SCMStatus = pair.second;
+			NSString *path						 = [NSFileManager.defaultManager stringWithFileSystemRepresentation:pair.first.data() length:pair.first.size()];
+			TMFileReference *fileReference = [TMFileReference fileReferenceWithURL:[NSURL fileURLWithPath:path]];
+			fileReference.SCMStatus			 = pair.second;
 			[fileReferences addObject:fileReference];
 			[_fileReferences removeObject:fileReference];
 		}
 	}
 
-	for(TMFileReference* fileReference in _fileReferences)
+	for(TMFileReference *fileReference in _fileReferences)
 		fileReference.SCMStatus = scm::status::none;
 	_fileReferences = fileReferences;
 
-	for(SCMRepositoryObserver* observer in [_observers copy])
+	for(SCMRepositoryObserver *observer in [_observers copy])
 		observer.handler(self);
-
-	_updating       = NO;
-	_noUpdateBefore = [_noUpdateBefore laterDate:[NSDate dateWithTimeIntervalSinceNow:1.5]];
-	if(_needsUpdate)
-		[self tryUpdateStatusInBackground];
 }
 
-- (scm::status::type)SCMStatusForURL:(NSURL*)url
+- (scm::status::type)SCMStatusForURL:(NSURL *)url
 {
 	if(_hasStatus)
 	{
@@ -228,10 +156,10 @@ namespace scm
 	return scm::status::unknown;
 }
 
-- (SCMRepositoryObserver*)addObserver:(void(^)(SCMRepository*))handler
+- (SCMRepositoryObserver *)addObserver:(void (^)(SCMRepository *))handler
 {
-	SCMRepositoryObserver* observer = [[SCMRepositoryObserver alloc] initWithBlock:handler];
-	observer.repository = self;
+	SCMRepositoryObserver *observer = [[SCMRepositoryObserver alloc] initWithBlock:handler];
+	observer.repository				  = self;
 	[_observers addObject:observer];
 
 	if(_hasStatus)
@@ -240,7 +168,7 @@ namespace scm
 	return observer;
 }
 
-- (void)removeObserver:(SCMRepositoryObserver*)observer
+- (void)removeObserver:(SCMRepositoryObserver *)observer
 {
 	[_observers removeObject:observer];
 	observer.repository = nil;
@@ -248,19 +176,19 @@ namespace scm
 @end
 
 @implementation SCMDirectory
-- (instancetype)initWithURL:(NSURL*)url
+- (instancetype)initWithURL:(NSURL *)url
 {
 	if(self = [self init])
 	{
-		_URL        = url;
+		_URL			= url;
 		_repository = [SCMManager.sharedInstance repositoryAtURL:url];
-		_observers  = [NSMutableArray array];
+		_observers	= [NSMutableArray array];
 
-		__weak SCMDirectory* weakSelf = self;
-		_repositoryObserver = [_repository addObserver:^(SCMRepository* repository){
-			for(SCMDirectoryObserver* observer in [weakSelf.observers copy])
+		__weak SCMDirectory *weakSelf = self;
+		_repositoryObserver				= [_repository addObserver:^(SCMRepository *repository) {
+			for(SCMDirectoryObserver *observer in [weakSelf.observers copy])
 				observer.handler(repository);
-		}];
+		 }];
 	}
 	return self;
 }
@@ -270,10 +198,10 @@ namespace scm
 	[_repository removeObserver:_repositoryObserver];
 }
 
-- (SCMDirectoryObserver*)addObserver:(void(^)(SCMRepository*))handler
+- (SCMDirectoryObserver *)addObserver:(void (^)(SCMRepository *))handler
 {
-	SCMDirectoryObserver* observer = [[SCMDirectoryObserver alloc] initWithBlock:handler];
-	observer.directory = self;
+	SCMDirectoryObserver *observer = [[SCMDirectoryObserver alloc] initWithBlock:handler];
+	observer.directory				 = self;
 	[_observers addObject:observer];
 
 	if(_repository.hasStatus)
@@ -282,7 +210,7 @@ namespace scm
 	return observer;
 }
 
-- (void)removeObserver:(SCMDirectoryObserver*)observer
+- (void)removeObserver:(SCMDirectoryObserver *)observer
 {
 	[_observers removeObject:observer];
 	observer.directory = nil;
@@ -292,7 +220,7 @@ namespace scm
 @implementation SCMManager
 + (instancetype)sharedInstance
 {
-	static SCMManager* sharedInstance = [self new];
+	static SCMManager *sharedInstance = [self new];
 	return sharedInstance;
 }
 
@@ -306,41 +234,24 @@ namespace scm
 	return self;
 }
 
-- (SCMRepository*)repositoryAtURL:(NSURL*)url
+- (SCMRepository *)repositoryAtURL:(NSURL *)url
 {
-	static scm::driver_t* const drivers[] = { scm::git_driver(), scm::hg_driver(), scm::p4_driver(), scm::svn_driver() };
+	std::string const root = scm::root_for_path(url.fileSystemRepresentation);
+	if(root == NULL_STR)
+		return nil;
 
-	while(url)
-	{
-		if(SCMRepository* repository = [_repositories objectForKey:url])
-			return repository;
+	NSURL *rootURL = [NSURL fileURLWithPath:to_ns(root)];
+	if(SCMRepository *repository = [_repositories objectForKey:rootURL])
+		return repository;
 
-		for(scm::driver_t* driver : drivers)
-		{
-			if(driver && driver->has_info_for_directory(url.fileSystemRepresentation))
-			{
-				SCMRepository* repository = [[SCMRepository alloc] initWithURL:url driver:driver];
-				[_repositories setObject:repository forKey:url];
-				return repository;
-			}
-		}
-
-		NSNumber* isVolume;
-		if([url getResourceValue:&isVolume forKey:NSURLIsVolumeKey error:nil] && isVolume.boolValue)
-			break;
-
-		NSURL* parentURL;
-		if(![url getResourceValue:&parentURL forKey:NSURLParentDirectoryURLKey error:nil] || [url isEqual:parentURL])
-			break;
-
-		url = parentURL;
-	}
-	return nil;
+	SCMRepository *repository = [[SCMRepository alloc] initWithURL:rootURL];
+	[_repositories setObject:repository forKey:rootURL];
+	return repository;
 }
 
-- (SCMDirectory*)directoryAtURL:(NSURL*)url
+- (SCMDirectory *)directoryAtURL:(NSURL *)url
 {
-	SCMDirectory* directory = [_directories objectForKey:url];
+	SCMDirectory *directory = [_directories objectForKey:url];
 	if(!directory)
 	{
 		directory = [[SCMDirectory alloc] initWithURL:url];
@@ -349,17 +260,17 @@ namespace scm
 	return directory;
 }
 
-- (id)addObserverToFileAtURL:(NSURL*)url usingBlock:(void(^)(scm::status::type))handler
+- (id)addObserverToFileAtURL:(NSURL *)url usingBlock:(void (^)(scm::status::type))handler
 {
 	__block scm::status::type oldStatus = scm::status::unknown;
-	return [[self directoryAtURL:url.URLByDeletingLastPathComponent] addObserver:^(SCMRepository* repository){
-		scm::status::type newStatus = [repository SCMStatusForURL:url];
-		if(oldStatus != newStatus)
-			handler(oldStatus = newStatus);
+	return [[self directoryAtURL:url.URLByDeletingLastPathComponent] addObserver:^(SCMRepository *repository) {
+	  scm::status::type newStatus = [repository SCMStatusForURL:url];
+	  if(oldStatus != newStatus)
+		  handler(oldStatus = newStatus);
 	}];
 }
 
-- (id)addObserverToRepositoryAtURL:(NSURL*)url usingBlock:(void(^)(SCMRepository*))handler
+- (id)addObserverToRepositoryAtURL:(NSURL *)url usingBlock:(void (^)(SCMRepository *))handler
 {
 	return [[self repositoryAtURL:url] addObserver:handler];
 }

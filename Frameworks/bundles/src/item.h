@@ -117,6 +117,9 @@ namespace bundles
 		oak::uuid_t _parent_menu;
 	};
 
+	// Match the representation written by item_t::save and save_to.
+	plist::dictionary_t erase_false_values (plist::dictionary_t const& plist);
+
 } /* bundles */
 
 #endif /* end of include guard: BUNDLES_ITEM_H_H2GEVOXK */

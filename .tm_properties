@@ -3,15 +3,15 @@ windowTitleProject   = '${projectDirectory:+ — ${projectDirectory/^.*\///}}'
 windowTitleFramework = '${TM_DIRECTORY/.*\/Frameworks\/([^\/]+)\/.*|.*/${1:+ ($1)}/}'
 windowTitle          = '$TM_DISPLAYNAME$windowTitleFramework$windowTitleProject$windowTitleSCM'
 
-excludeDirectoriesInFileChooser  = '{bin/CxxTest,build,SyntaxMate.tmBundle}'
-excludeDirectoriesInFolderSearch = '{bin/CxxTest,build,SyntaxMate.tmBundle}'
+excludeDirectoriesInFileChooser  = '{bin/CxxTest,build}'
+excludeDirectoriesInFolderSearch = '{bin/CxxTest,build}'
 
 # Variables
 TM_ORGANIZATION_NAME = 'MacroMates'
 
 TM_TODO_IGNORE       = '/(build|CxxTest|PlugIns|vendor)/|\.(md|html)$'
 TM_BUILD_DIR         = '${builddir:-$HOME/build/${CWD/.*\///}}'
-TM_FRAMEWORKS        = 'authorization buffer BundleEditor BundleEditor BundleMenu bundles BundlesManager cf command CommitWindow crash CrashReporter document DocumentWindow editor encoding file FileBrowser Find HTMLOutput HTMLOutputWindow io layout license MenuBuilder network ns OakAppKit OakCommand OakDebug OakFilterList OakFoundation OakSystem OakTabBarView OakTextView parse plist Preferences regexp scm scope selection settings SoftwareUpdate text theme undo updater version'
+TM_FRAMEWORKS        = 'authorization buffer BundleEditor BundleEditor BundleMenu bundles BundlesManager cf command CommitWindow crash CrashReporter document DocumentWindow editor encoding file FileBrowser Find HTMLOutput HTMLOutputWindow io layout license MenuBuilder ns OakAppKit OakCommand OakDebug OakFilterList OakFoundation OakSystem OakTabBarView OakTextView parse plist Preferences regexp scm scope selection settings text theme undo version'
 TM_FRAMEWORK_INCLUDE = '${TM_FRAMEWORKS/\w+/-I"${TM_BUILD_DIR}\/release\/_Include\/$0\/include"/g}'
 TM_CXX_FLAGS         = '$TM_CXX_FLAGS    -I"$CWD/Shared/include" ${TM_FRAMEWORK_INCLUDE}'
 TM_OBJCXX_FLAGS      = '$TM_OBJCXX_FLAGS -I"$CWD/Shared/include" ${TM_FRAMEWORK_INCLUDE}'

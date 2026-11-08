@@ -12,6 +12,6 @@
 @property (nonatomic) BOOL disableJavaScriptAPI;
 
 // Read-only access to the webview is given to allow reading page title, etc.
-@property (nonatomic, readonly) WebView* webView;
-@property (nonatomic, readonly) BOOL needsNewWebView;
+@property (nonatomic, readonly) WKWebView* webView;
+@property (nonatomic, readonly) BOOL needsNewWebView; // retained, always NO
 @end

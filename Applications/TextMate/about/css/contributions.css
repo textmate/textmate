@@ -181,3 +181,63 @@ h3.commit-group-heading {
 .mini-icon-clippy {
     display: none;
 }
+
+@media (prefers-color-scheme: dark) {
+    a {
+        color: #6db3f2;
+    }
+    .commit-group {
+        background: #1e2a30;
+        border-color: #3a4a52;
+    }
+    h3.commit-group-heading {
+        color: #b0c4cf;
+        text-shadow: none;
+        background: #253540;
+        border-color: #3a4a52;
+    }
+    .commit-group-item.navigation-focus {
+        background: #2a2a1e;
+    }
+    .commit-group-item .commit-title {
+        color: #e0e0e0;
+    }
+    .commit-group-item:nth-child(2n+1) {
+        background: #1a1a1a;
+    }
+    .commit-group-item:nth-child(2n+1) .gobutton {
+        border-color: #3a4a52;
+        background: #253540;
+    }
+    .commit-group-item .gobutton {
+        color: #b0c4cf;
+        text-shadow: none;
+        background: #253540;
+        border-color: #3a4a52;
+    }
+    .commit-group-item .commit-desc pre {
+        color: #a0a8ab;
+        border-left-color: #3a4a52;
+    }
+    .commit .commit-desc pre {
+        color: #a0a8ab;
+    }
+    .hidden-text-expander a {
+        background: #3a3a3a;
+        color: #aaa;
+    }
+    .hidden-text-expander a:hover {
+        background: #555;
+    }
+    .commit-group-item .browse-button {
+        color: #888;
+    }
+    .commit-group-item .authorship {
+        color: #999;
+    }
+    .commit-group-item .gobutton > .sha .mini-icon {
+        border-color: #3a4a52;
+        background-color: rgba(0, 0, 0, 0.3);
+        color: #7a9aab;
+    }
+}

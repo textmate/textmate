@@ -4,6 +4,7 @@
 #include "parser_fwd.h"
 #include "regexp.h"
 #include <oak/misc.h>
+#include <variant>
 
 namespace parser
 {
@@ -25,6 +26,28 @@ namespace parser
 
 	struct case_change_t               { case_change_t (case_change::type type) : type(type) { } case_change::type type; };
 	struct code_t                      { std::string code; };
+
+	struct node_t
+	{
+		using variant_type = std::variant<
+			text_t,
+			placeholder_t, placeholder_transform_t, placeholder_choice_t,
+			variable_t, variable_transform_t, variable_fallback_t, variable_condition_t, variable_change_t,
+			case_change_t,
+			code_t
+		>;
+
+		variant_type data;
+
+		node_t () : data(text_t{}) { }
+		node_t (node_t const&) = default;
+		node_t (node_t&&) = default;
+		node_t& operator= (node_t const&) = default;
+		node_t& operator= (node_t&&) = default;
+
+		template <typename T, typename = std::enable_if_t<!std::is_same_v<std::decay_t<T>, node_t>>>
+		node_t (T&& value) : data(std::forward<T>(value)) { }
+	};
 
 	OnigOptionType convert (regexp_options::type const& options);
 

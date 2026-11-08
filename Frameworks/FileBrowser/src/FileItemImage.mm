@@ -1,4 +1,5 @@
 #import "FileItemImage.h"
+#import <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
 #import <TMFileReference/TMFileReference.h>
 
 NSImage* CreateIconImageForURL (NSURL* url, BOOL isModified, BOOL isMissing, BOOL isDirectory, BOOL isSymbolicLink, scm::status::type scmStatus)
@@ -7,7 +8,7 @@ NSImage* CreateIconImageForURL (NSURL* url, BOOL isModified, BOOL isMissing, BOO
 
 	if(isMissing && (scmStatus == scm::status::none || scmStatus == scm::status::unknown))
 	{
-		res = [NSWorkspace.sharedWorkspace iconForFileType:NSFileTypeForHFSTypeCode(kUnknownFSObjectIcon)];
+		res = [NSWorkspace.sharedWorkspace iconForContentType:UTTypeData];
 	}
 	else
 	{

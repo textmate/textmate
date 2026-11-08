@@ -9,9 +9,7 @@ namespace plist
 	struct cache_t
 	{
 		void load (std::string const& path);
-		void load_capnp (std::string const& path);
 		void save (std::string const& path) const;
-		void save_capnp (std::string const& path) const;
 
 		bool dirty () const        { return _dirty; }
 		void set_dirty (bool flag) { _dirty = flag; }
@@ -39,7 +37,6 @@ namespace plist
 	private:
 		void real_load (std::string const& path);
 
-		static int32_t const kPropertyCacheFormatVersion;
 		enum class entry_type_t { file, directory, link, missing, unknown };
 
 		struct entry_t

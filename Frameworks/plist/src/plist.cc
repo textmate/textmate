@@ -49,7 +49,7 @@ namespace plist
 
 	static void convert_array (CFArrayRef array, any_t& res)
 	{
-		std::vector<any_t>& ref = boost::get< std::vector<any_t> >(res = std::vector<any_t>());
+		std::vector<any_t>& ref = ::plist::get< std::vector<any_t> >(res = std::vector<any_t>());
 		for(CFIndex i = 0; i < CFArrayGetCount(array); ++i)
 		{
 			ref.emplace_back();
@@ -59,12 +59,12 @@ namespace plist
 
 	static void convert_dictionary (CFDictionaryRef dict, any_t& res)
 	{
-		std::map<std::string, any_t>& ref = boost::get< std::map<std::string, any_t> >(res = std::map<std::string, any_t>());
+		std::map<std::string, any_t>& ref = ::plist::get< std::map<std::string, any_t> >(res = std::map<std::string, any_t>());
 
 		CFIndex len = CFDictionaryGetCount(dict);
-		CFPropertyListRef keys[len];
-		CFPropertyListRef values[len];
-		CFDictionaryGetKeysAndValues(dict, keys, values);
+		std::vector<CFPropertyListRef> keys(len);
+		std::vector<CFPropertyListRef> values(len);
+		CFDictionaryGetKeysAndValues(dict, keys.data(), values.data());
 		for(CFIndex i = 0; i < len; ++i)
 		{
 			std::map<std::string, any_t>::iterator it = ref.emplace(cf::to_s((CFStringRef)keys[i]), any_t()).first;
@@ -98,7 +98,7 @@ namespace plist
 		{
 			any_t res;
 			convert_dictionary((CFDictionaryRef)plist, res);
-			return boost::get<dictionary_t>(res);
+			return ::plist::get<dictionary_t>(res);
 		}
 		return dictionary_t();
 	}
@@ -144,7 +144,7 @@ namespace plist
 			}
 			else
 			{
-				os_log_error(OS_LOG_DEFAULT, "Error parsing plist: ‘%{public}s’", str.c_str());
+				os_log_error(OS_LOG_DEFAULT, "Error parsing plist: '%{public}s'", str.c_str());
 			}
 			CFRelease(data);
 		}
@@ -158,8 +158,9 @@ namespace plist
 
 	namespace
 	{
-		struct create_cf_property_list_t : boost::static_visitor<CFPropertyListRef>
+		struct create_cf_property_list_t
 		{
+			CFPropertyListRef operator() (std::monostate) const                { return CFRetain(kCFBooleanFalse); }
 			CFPropertyListRef operator() (bool flag) const                     { return CFRetain(flag ? kCFBooleanTrue : kCFBooleanFalse); }
 			CFPropertyListRef operator() (int32_t i) const                     { return CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &i); }
 			CFPropertyListRef operator() (uint64_t i) const                    { return CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt64Type, &i); }
@@ -172,7 +173,7 @@ namespace plist
 				CFMutableArrayRef res = CFArrayCreateMutable(kCFAllocatorDefault, 0, &kCFTypeArrayCallBacks);
 				for(auto const& it : array)
 				{
-					CFPropertyListRef value = boost::apply_visitor(*this, it);
+					CFPropertyListRef value = std::visit(*this, it.data);
 					CFArrayAppendValue(res, value);
 					CFRelease(value);
 				}
@@ -185,7 +186,7 @@ namespace plist
 				for(auto const& it : dict)
 				{
 					CFPropertyListRef key = (*this)(it.first);
-					CFPropertyListRef value = boost::apply_visitor(*this, it.second);
+					CFPropertyListRef value = std::visit(*this, it.second.data);
 					CFDictionarySetValue(res, key, value);
 					CFRelease(key);
 					CFRelease(value);
@@ -197,7 +198,7 @@ namespace plist
 
 	CFPropertyListRef create_cf_property_list (any_t const& plist)
 	{
-		return boost::apply_visitor(create_cf_property_list_t(), plist);
+		return std::visit(create_cf_property_list_t(), plist.data);
 	}
 
 	bool save (std::string const& path, any_t const& plist, plist_format_t format)
@@ -235,7 +236,7 @@ namespace plist
 
 	namespace
 	{
-		struct equal_helper_t : boost::static_visitor<bool>
+		struct equal_helper_t
 		{
 			template <typename T, typename U>
 			bool operator() (T const& lhs, U const& rhs) const      { return false; }
@@ -248,7 +249,7 @@ namespace plist
 				plist::array_t::const_iterator rhsIter = rhs.begin();
 				for(; lhsIter != lhs.end() && rhsIter != rhs.end(); ++lhsIter, ++rhsIter)
 				{
-					if(!boost::apply_visitor(*this, *lhsIter, *rhsIter))
+					if(!std::visit(*this, lhsIter->data, rhsIter->data))
 						break;
 				}
 				return lhsIter == lhs.end() && rhsIter == rhs.end();
@@ -260,7 +261,7 @@ namespace plist
 				plist::dictionary_t::const_iterator rhsIter = rhs.begin();
 				for(; lhsIter != lhs.end() && rhsIter != rhs.end(); ++lhsIter, ++rhsIter)
 				{
-					if(lhsIter->first != rhsIter->first || !boost::apply_visitor(*this, lhsIter->second, rhsIter->second))
+					if(lhsIter->first != rhsIter->first || !std::visit(*this, lhsIter->second.data, rhsIter->second.data))
 						break;
 				}
 				return lhsIter == lhs.end() && rhsIter == rhs.end();
@@ -270,7 +271,7 @@ namespace plist
 
 	bool equal (any_t const& lhs, any_t const& rhs)
 	{
-		return boost::apply_visitor(equal_helper_t(), lhs, rhs);
+		return std::visit(equal_helper_t(), lhs.data, rhs.data);
 	}
 
 	// ================
@@ -301,12 +302,13 @@ namespace plist
 	static bool convert_to (oak::date_t const& from, plist::any_t& to)         { to = from; return true; }
 	static bool convert_to (plist::array_t const& from, plist::any_t& to)      { to = from; return true; }
 	static bool convert_to (plist::dictionary_t const& from, plist::any_t& to) { to = from; return true; }
+	static bool convert_to (std::monostate, plist::any_t& to)                  { to = plist::any_t(); return true; }
 
 	template <typename T> bool convert_to (T const& from, T& to)             { to = from; return true;  }
 	template <typename T, typename U> bool convert_to (T const& from, U& to) {            return false; }
 
 	template <typename T>
-	struct convert_to_helper_t : boost::static_visitor<bool>
+	struct convert_to_helper_t
 	{
 		convert_to_helper_t (T& ref) : ref(ref) { }
 		T& ref;
@@ -319,12 +321,13 @@ namespace plist
 		bool operator() (oak::date_t const& date) const         { return convert_to(date,  ref); }
 		bool operator() (plist::array_t const& array) const     { return convert_to(array, ref); }
 		bool operator() (plist::dictionary_t const& dict) const { return convert_to(dict,  ref); }
+		bool operator() (std::monostate m) const                { return convert_to(m,     ref); }
 	};
 
 	template <typename T>
 	bool get_key_path (any_t const& plist, std::string const& keyPath, T& ref)
 	{
-		dictionary_t const* dict = boost::get<dictionary_t>(&plist);
+		dictionary_t const* dict = ::plist::get<dictionary_t>(&plist);
 		if(!dict)
 			return false;
 
@@ -337,7 +340,7 @@ namespace plist
 			return false;
 
 		if(sep == std::string::npos)
-				return boost::apply_visitor(convert_to_helper_t<T>(ref), it->second);
+				return std::visit(convert_to_helper_t<T>(ref), it->second.data);
 		else	return get_key_path(it->second, keyPath.substr(sep+1), ref);
 	}
 
@@ -361,22 +364,22 @@ namespace plist
 	bool is_true (any_t const& item)
 	{
 		bool flag;
-		return !item.empty() && boost::apply_visitor(convert_to_helper_t<bool>(flag), item) && flag;
+		return !item.empty() && std::visit(convert_to_helper_t<bool>(flag), item.data) && flag;
 	}
 
-	template <typename T> T get (plist::any_t const& from)
+	template <typename T> T convert (plist::any_t const& from)
 	{
 		T to;
-		bool res DB_VAR = boost::apply_visitor(convert_to_helper_t<T>(to), from);
+		bool res DB_VAR = std::visit(convert_to_helper_t<T>(to), from.data);
 		ASSERT(res);
 		return to;
 	}
 
-	template bool get (plist::any_t const& from);
-	template int32_t get (plist::any_t const& from);
-	template uint64_t get (plist::any_t const& from);
-	template std::string get (plist::any_t const& from);
-	template plist::array_t get (plist::any_t const& from);
-	template plist::dictionary_t get (plist::any_t const& from);
+	template bool convert (plist::any_t const& from);
+	template int32_t convert (plist::any_t const& from);
+	template uint64_t convert (plist::any_t const& from);
+	template std::string convert (plist::any_t const& from);
+	template plist::array_t convert (plist::any_t const& from);
+	template plist::dictionary_t convert (plist::any_t const& from);
 
 } /* plist */

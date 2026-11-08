@@ -1,4 +1,5 @@
 #include "api.h"
+#include "git_parse.h"
 #include <text/tokenize.h>
 #include <text/format.h>
 #include <io/io.h>
@@ -16,29 +17,18 @@ static scm::status::type parse_status_flag (std::string const& str)
 		{ "A", scm::status::added       },
 		{ "D", scm::status::deleted     },
 		{ "U", scm::status::conflicted  },
-		{ "T", scm::status::modified    }  // type change, e.g. symbolic link → regular file
+		{ "T", scm::status::modified    }, // type change, e.g. symbolic link → regular file
+		{ "S", scm::status::none        }, // submodule
+		{ "C", scm::status::added       }, // copied
+		{ "R", scm::status::modified    }  // renamed
 	};
 
 	auto it = StatusLetterConversionMap->find(str);
 	if(it != StatusLetterConversionMap->end())
 		return it->second;
 
-	ASSERT_EQ(str, NULL_STR); // we use ‘str’ in the assertion to output the unrecognized status flag
-	return scm::status::unknown;
-}
-
-static void parse_diff (std::map<std::string, scm::status::type>& entries, std::string const& output)
-{
-	if(output == NULL_STR)
-		return;
-
-	auto v = text::tokenize(output.begin(), output.end(), '\0');
-	for(auto it = v.begin(); it != v.end() && !(*it).empty(); ++it)
-	{
-		scm::status::type flag = parse_status_flag(*it);
-		if(++it != v.end())
-			entries[*it] = flag;
-	}
+	os_log_error(OS_LOG_DEFAULT, "Unrecognized git status flag: ‘%{public}s’", str.c_str());
+	return scm::status::none;
 }
 
 static void parse_ls (std::map<std::string, scm::status::type>& entries, std::string const& output, scm::status::type state = scm::status::unknown)
@@ -112,8 +102,6 @@ static void collect_all_paths (std::string const& git, std::map<std::string, scm
 	env["GIT_WORK_TREE"] = dir;
 	env["GIT_DIR"]       = path::join(dir, ".git");
 
-	bool haveHead = io::exec(env, git, "show-ref", "-qh", nullptr) != NULL_STR;
-
 	std::string const tmpIndex = copy_git_index(dir);
 	if(tmpIndex != NULL_STR)
 	{
@@ -121,20 +109,10 @@ static void collect_all_paths (std::string const& git, std::map<std::string, scm
 		io::exec(env, git, "update-index", "-q", "--unmerged", "--ignore-missing", "--refresh", nullptr);
 
 		// All files part of the repository (index)
-		if(haveHead)
-				parse_ls(entries, io::exec(env, git, "ls-files", "--exclude-standard", "-zt", nullptr));
-		else	parse_ls(entries, io::exec(env, git, "ls-files", "--exclude-standard", "-zt", nullptr), scm::status::added);
-
-		// Modified, Deleted (on disk, not staged)
-		parse_diff(entries, io::exec(env, git, "diff-files", "--name-status", "--ignore-submodules=dirty", "-z", nullptr));
-
-		// Added (to index), Deleted (from index)
-		if(haveHead)
-			parse_diff(entries, io::exec(env, git, "diff-index", "--name-status", "--ignore-submodules=dirty", "-z", "--cached", "HEAD", nullptr));
+		parse_ls(entries, io::exec(env, git, "ls-files", "--exclude-standard", "-zt", nullptr));
 	}
 
-	// All files with ‘other’ status
-	parse_ls(entries, io::exec(env, git, "ls-files", "--exclude-standard", "-zto", nullptr));
+	scm::git::parse_porcelain(entries, io::exec(env, git, "status", "--porcelain=v1", "-z", "--untracked-files=all", "--ignore-submodules=dirty", nullptr));
 
 	path::remove(tmpIndex);
 }

@@ -4,7 +4,7 @@
 #import <OakAppKit/NSAlert Additions.h>
 #import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
-#import <SoftwareUpdate/OakDownloadManager.h>
+#import "OakDownloadManager.h"
 #import <bundles/locations.h>
 #import <bundles/query.h> // set_index
 #import <regexp/format_string.h>
@@ -330,7 +330,7 @@ static NSString* SafeBasename (NSString* name)
 	cache.cleanup(bundlesPaths);
 	if(cache.dirty())
 	{
-		cache.save_capnp(bundlesIndexPath);
+		cache.save(bundlesIndexPath);
 		cache.set_dirty(false);
 	}
 	_needsSaveBundlesIndex = NO;
@@ -430,7 +430,7 @@ namespace
 
 			if(pair.first == bundles::kFieldSettingName)
 			{
-				if(plist::dictionary_t const* dictionary = boost::get<plist::dictionary_t>(&pair.second))
+				if(plist::dictionary_t const* dictionary = plist::get<plist::dictionary_t>(&pair.second))
 				{
 					plist::array_t settings;
 					for(auto const& settingsPair : *dictionary)
@@ -440,7 +440,7 @@ namespace
 			}
 			else if(pair.first == kFieldChangedItems)
 			{
-				if(plist::dictionary_t const* dictionary = boost::get<plist::dictionary_t>(&pair.second))
+				if(plist::dictionary_t const* dictionary = plist::get<plist::dictionary_t>(&pair.second))
 					res.emplace(pair.first, prune_dictionary(*dictionary));
 			}
 			else
@@ -517,24 +517,21 @@ namespace
 
 	for(auto path : bundles::locations())
 		bundlesPaths.push_back(path::join(path, "Bundles"));
-	bundlesIndexPath = path::join(path::home(), "Library/Caches/com.macromates.TextMate/BundlesIndex.binary");
+	bundlesIndexPath = path::join(path::home(), "Library/Caches/com.macromates.TextMate/BundlesIndex.plist");
 	cache.set_content_filter(&prune_dictionary);
-
-	// LEGACY bundle index used prior to 2.0-alpha.9467
-	std::string const oldPath = path::join(path::home(), "Library/Caches/com.macromates.TextMate/BundlesIndex.plist");
-	if(access(oldPath.c_str(), R_OK) == 0)
-	{
-		cache.load(oldPath);
-		cache.save_capnp(bundlesIndexPath);
-		unlink(oldPath.c_str());
-	}
-	else
-	{
-		cache.load_capnp(bundlesIndexPath);
-	}
+	cache.load(bundlesIndexPath);
 
 	_needsCreateBundlesIndex = YES;
 	[self createBundlesIndex:self];
+
+	if(![[NSFileManager defaultManager] fileExistsAtPath:_remoteIndexPath])
+	{
+		[[NSFileManager defaultManager] createDirectoryAtPath:[_remoteIndexPath stringByDeletingLastPathComponent] withIntermediateDirectories:YES attributes:nil error:nil];
+		[self tryUpdateBundleIndexAndCallback:^(BOOL wasUpdated){
+			if(wasUpdated)
+				os_log(OS_LOG_DEFAULT, "Initial bundle index downloaded");
+		}];
+	}
 }
 
 namespace

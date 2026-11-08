@@ -175,7 +175,7 @@ static CGFloat ParseFontSize (NSString* fontSizeString)
 {
 	bundles::item_ptr item;
 	plist::any_t const value = bundles::value_for_setting(to_s(key), scope, &item);
-	return item ? to_ns(plist::get<std::string>(value)) : nil;
+	return item ? to_ns(plist::convert<std::string>(value)) : nil;
 }
 
 - (NSString*)description

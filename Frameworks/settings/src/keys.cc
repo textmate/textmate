@@ -27,6 +27,9 @@ std::string const kSettingsScopeAttributesKey             = "scopeAttributes";
 
 std::string const kSettingsSaveOnBlurKey                  = "saveOnBlur";
 std::string const kSettingsAtomicSaveKey                  = "atomicSave";
+std::string const kSettingsFormatCommandKey               = "formatCommand";
+std::string const kSettingsFormatOnSaveKey                = "formatOnSave";
+std::string const kSettingsLSPDefinitionExcludePatternKey = "lspDefinitionExcludePattern";
 
 std::string const kSettingsBinaryKey                      = "binary";
 std::string const kSettingsEncodingKey                    = "encoding";

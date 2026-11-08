@@ -14,7 +14,7 @@
 @implementation FilesPreferences
 - (id)init
 {
-	if(self = [super initWithNibName:nil label:@"Files" image:[NSImage imageNamed:NSImageNameMultipleDocuments]])
+	if(self = [super initWithNibName:nil label:@"Files" image:PreferencesToolbarImage(@"doc.on.doc", @"Files", [NSImage imageNamed:NSImageNameMultipleDocuments])])
 	{
 		[OakStringListTransformer createTransformerWithName:@"OakLineEndingsSettingsTransformer" andObjectsArray:@[ @"\\n", @"\\r", @"\\r\\n" ]];
 

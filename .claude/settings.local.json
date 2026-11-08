@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(ls -la:*)",
+      "Bash(git add:*)",
+      "Bash(git checkout:*)",
+      "Bash(git:*)",
+      "Bash(ninja -C /Users/fenrir/code/textmate/build-debug 2>&1 | tail -80)",
+      "Bash(/Users/fenrir/code/textmate/build.sh 2>&1 | tail -80)",
+      "Bash(ls:*)",
+      "Bash(./build.sh 2>&1 | tail -100)",
+      "Bash(bash build.sh 2>&1 | tee build-output.log; echo \"EXIT_CODE: $?\")",
+      "Bash(bash build.sh 2>&1 | tee build-output.log)",
+      "Bash(bash build.sh)",
+      "Bash(gh pr:*)",
+      "Bash(gh search:*)",
+      "Bash(gh api:*)",
+      "Bash(make)"
+    ]
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "planPath": "docs/superpowers/plans/2026-03-20-projects-preferences-pane.md",
+  "tasks": [
+    {"id": 0, "subject": "Task 0: Migrate old ProjectsPreferences to Advanced pane", "status": "pending"},
+    {"id": 1, "subject": "Task 1: Create tm_properties_editor_t (C++ data layer)", "status": "pending"},
+    {"id": 2, "subject": "Task 2: Add LSPManager scope-based status query", "status": "pending"},
+    {"id": 3, "subject": "Task 3: Create OakSwiftUI bridge types", "status": "pending"},
+    {"id": 4, "subject": "Task 4: Create ProjectSettingsViewModel and property catalog", "status": "pending", "blockedBy": [3]},
+    {"id": 5, "subject": "Task 5: Create SwiftUI tab views", "status": "pending", "blockedBy": [4]},
+    {"id": 6, "subject": "Task 6: Create ProjectSettingsBridge and root view", "status": "pending", "blockedBy": [5]},
+    {"id": 7, "subject": "Task 7: Create ProjectsPreferencesV2 AppKit shell", "status": "pending", "blockedBy": [0, 1, 2, 6]},
+    {"id": 8, "subject": "Task 8: Integration testing and polish", "status": "pending", "blockedBy": [7]}
+  ],
+  "lastUpdated": "2026-03-20T00:00:00Z"
+}

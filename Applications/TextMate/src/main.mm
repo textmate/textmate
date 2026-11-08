@@ -77,6 +77,8 @@ int main (int argc, char const* argv[])
 		return NSApplicationMain(argc, argv);
 	}
 	catch(std::exception const& e) {
+		os_log_fault(OS_LOG_DEFAULT, "Uncaught C++ exception: %{public}s", e.what());
+		fprintf(stderr, "Uncaught C++ exception: %s\n", e.what());
 		crash_reporter_info_t info("C++ Exception: %s", e.what());
 		abort();
 	}

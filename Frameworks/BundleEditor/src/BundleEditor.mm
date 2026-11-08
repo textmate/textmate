@@ -2,6 +2,7 @@
 #import "PropertiesViewController.h"
 #import "OakRot13Transformer.h"
 #import "be_entry.h"
+#import <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakFoundation/OakStringListTransformer.h>
 #import <OakAppKit/NSAlert Additions.h>
@@ -112,18 +113,19 @@ static plist::array_t unwrap_array (NSArray* array, NSString* key)
 
 namespace
 {
-	struct expand_visitor_t : boost::static_visitor<void>
+	struct expand_visitor_t
 	{
 		expand_visitor_t (std::map<std::string, std::string> const& variables) : _variables(variables) { }
 
+		void operator() (std::monostate) const                 { }
 		void operator() (bool value) const                     { }
 		void operator() (int32_t value) const                  { }
 		void operator() (uint64_t value) const                 { }
 		void operator() (oak::date_t const& value) const       { }
 		void operator() (std::vector<char> const& value) const { }
 		void operator() (std::string& str) const               { str = format_string::expand(str, _variables); }
-		void operator() (plist::array_t& array) const          { for(auto& item : array) boost::apply_visitor(*this, item); }
-		void operator() (plist::dictionary_t& dict) const      { for(auto& pair : dict)  boost::apply_visitor(*this, pair.second); }
+		void operator() (plist::array_t& array) const          { for(auto& item : array) std::visit(*this, item.data); }
+		void operator() (plist::dictionary_t& dict) const      { for(auto& pair : dict)  std::visit(*this, pair.second.data); }
 
 	private:
 		std::map<std::string, std::string> const& _variables;
@@ -145,6 +147,8 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 	return entry;
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wincomplete-implementation"
 @implementation BundleEditor
 + (instancetype)sharedInstance
 {
@@ -525,7 +529,7 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 
 	if(info.plist_key == NULL_STR)
 	{
-		if(plist::dictionary_t const* plistSubset = boost::get<plist::dictionary_t>(&parsedContent))
+		if(plist::dictionary_t const* plistSubset = plist::get<plist::dictionary_t>(&parsedContent))
 		{
 			std::vector<std::string> keys;
 			if(info.kind == bundles::kItemTypeGrammar)
@@ -921,7 +925,7 @@ static NSMutableDictionary* DictionaryForPropertyList (plist::dictionary_t const
 	else
 	{
 		self.window.representedFilename = NSHomeDirectory();
-		[self.window standardWindowButton:NSWindowDocumentIconButton].image = [NSWorkspace.sharedWorkspace iconForFileType:[NSString stringWithCxxString:info.file_type]];
+		[self.window standardWindowButton:NSWindowDocumentIconButton].image = [NSWorkspace.sharedWorkspace iconForContentType:[UTType typeWithFilenameExtension:[NSString stringWithCxxString:info.file_type]]];
 	}
 
 	plist::dictionary_t const& plist = it != changes.end() ? it->second : bundleItem->plist();
@@ -1060,3 +1064,4 @@ static NSString* DescriptionForChanges (std::map<bundles::item_ptr, plist::dicti
 	[documentView.textView updateEnvironment:res];
 }
 @end
+#pragma clang diagnostic pop

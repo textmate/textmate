@@ -8,7 +8,7 @@ static NSString* const kVariableKeyEnabled = @"enabled";
 static NSString* const kVariableKeyName    = @"name";
 static NSString* const kVariableKeyValue   = @"value";
 
-@interface VariablesPreferences () <NSTableViewDelegate, NSTableViewDataSource>
+@interface VariablesPreferences () <NSTableViewDelegate, NSTableViewDataSource, NSEditor>
 {
 	NSTableView* variablesTableView;
 }
@@ -17,7 +17,7 @@ static NSString* const kVariableKeyValue   = @"value";
 @end
 
 @implementation VariablesPreferences
-- (NSImage*)toolbarItemImage { return [NSImage imageNamed:@"Variables" inSameBundleAsClass:[self class]]; }
+- (NSImage*)toolbarItemImage { return PreferencesToolbarImage(@"dollarsign.circle", @"Variables", [NSImage imageNamed:@"Variables" inSameBundleAsClass:[self class]]); }
 
 - (id)init
 {

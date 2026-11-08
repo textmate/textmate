@@ -44,7 +44,7 @@ namespace ng
 	range_t word_at (buffer_api_t const& buffer, range_t const& range);
 	ranges_t all_words (buffer_api_t const& buffer);
 
-	ranges_t dissect_columnar (buffer_api_t const& buffer, ranges_t const& selection);
+	ranges_t dissect_columnar (buffer_api_t const& buffer, ranges_t const& selection, size_t limit = SIZE_T_MAX);
 
 	extern std::string const kCharacterClassWord;
 	extern std::string const kCharacterClassSpace;

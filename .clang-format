@@ -1,0 +1,41 @@
+IndentWidth: 3
+TabWidth: 3
+UseTab: ForIndentation
+ColumnLimit: 0
+ContinuationIndentWidth: 3
+
+ObjCSpaceAfterProperty: true
+ObjCSpaceBeforeProtocolList: true
+# Brace style
+BreakBeforeBraces: Allman              # { on new line for methods
+
+# ObjC specific
+ObjCBinPackProtocolList: Never
+ObjCBreakBeforeNestedBlockParam: false
+ObjCBlockIndentWidth: 3
+BinPackParameters: true                # don't break long param lists unnaturally
+BinPackArguments: false
+
+# Line breaking
+BreakBeforeBinaryOperators: None
+AlwaysBreakBeforeMultilineStrings: false
+PenaltyBreakBeforeFirstCallParameter: 1000000   # discourage breaking method calls
+
+# if( without space
+SpaceBeforeParens: Custom
+SpaceBeforeParensOptions:
+  AfterControlStatements: false
+  AfterFunctionDeclarationName: true
+  AfterFunctionDefinitionName: true
+
+# Alignment
+AlignAfterOpenBracket: DontAlign
+AlignConsecutiveAssignments:
+  Enabled: false
+  AcrossEmptyLines: false
+  AcrossComments: false
+
+PointerAlignment: Left
+ReferenceAlignment: Left
+SortIncludes: Never
+AllowShortFunctionsOnASingleLine: None

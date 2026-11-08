@@ -1,12 +1,13 @@
 #include <authorization/constants.h>
 #include <authorization/authorization.h>
 #include <oak/oak.h>
+#include <oak/compat.h>
 #include <text/format.h>
 #include <text/parse.h>
 #include <io/path.h>
 #include <plist/uuid.h>
 
-static char const* const AppVersion = "2.13.3";
+static char const* const AppVersion = TEXTMATE_VERSION_STRING;
 
 static char const* socket_path ()
 {
@@ -67,10 +68,23 @@ static void launch_app (bool disableUntitled)
 {
 	disable_sudo_helper_t helper;
 
-	NSError* error;
-	if(![NSWorkspace.sharedWorkspace launchApplicationAtURL:find_app() options:NSWorkspaceLaunchWithoutActivation|NSWorkspaceLaunchWithoutAddingToRecents configuration:(disableUntitled ? @{ NSWorkspaceLaunchConfigurationArguments: @[ @"-disableNewDocumentAtStartup", @"1" ] } : nil) error:&error])
+	NSWorkspaceOpenConfiguration* config = [NSWorkspaceOpenConfiguration configuration];
+	config.activates = NO;
+	config.addsToRecentItems = NO;
+	if(disableUntitled)
+		config.arguments = @[ @"-disableNewDocumentAtStartup", @"1" ];
+
+	dispatch_semaphore_t sem = dispatch_semaphore_create(0);
+	__block NSError* launchError = nil;
+	[NSWorkspace.sharedWorkspace openApplicationAtURL:find_app() configuration:config completionHandler:^(NSRunningApplication* app, NSError* error) {
+		launchError = error;
+		dispatch_semaphore_signal(sem);
+	}];
+	dispatch_semaphore_wait(sem, dispatch_time(DISPATCH_TIME_NOW, 10 * NSEC_PER_SEC));
+
+	if(launchError)
 	{
-		fprintf(stderr, "Can’t launch TextMate.app: %s\n", error.localizedDescription.UTF8String);
+		fprintf(stderr, "Can’t launch TextMate.app: %s\n", launchError.localizedDescription.UTF8String);
 		exit(EX_UNAVAILABLE);
 	}
 }
@@ -88,7 +102,7 @@ static void install_auth_tool ()
 			exit(EX_UNAVAILABLE);
 		}
 
-		pid_t pid = vfork();
+		pid_t pid = oak::vfork();
 		if(pid == 0)
 		{
 			execl(arg0, arg0, "--install", nullptr);

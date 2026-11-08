@@ -228,6 +228,9 @@ static NSMutableDictionary* SharedChoosers;
 	titlebarView.translatesAutoresizingMaskIntoConstraints = NO;
 
 	_accessoryViewController = [[NSTitlebarAccessoryViewController alloc] init];
+	// AppKit otherwise forces the accessory to its standard 36pt height on macOS 26+,
+	// squashing the search field / scope bar layout.
+	_accessoryViewController.automaticallyAdjustsSize = NO;
 	_accessoryViewController.view = titlebarView;
 	[_accessoryViewController.view setFrameSize:titlebarView.fittingSize];
 	[self.window addTitlebarAccessoryViewController:_accessoryViewController];
@@ -445,7 +448,7 @@ static NSMutableDictionary* SharedChoosers;
 
 - (void)tableView:(NSTableView*)aTableView willDisplayCell:(id)aCell forTableColumn:(NSTableColumn*)aTableColumn row:(NSInteger)rowIndex
 {
-	if([aCell backgroundStyle] == NSBackgroundStyleDark && [aTableColumn.identifier isEqualToString:kTableColumnIdentifierMain])
+	if([aCell backgroundStyle] == NSBackgroundStyleEmphasized && [aTableColumn.identifier isEqualToString:kTableColumnIdentifierMain])
 	{
 		id obj = [aCell objectValue];
 		if([obj isKindOfClass:[NSAttributedString class]])

@@ -1,5 +1,6 @@
 #include "scm.h"
 #include "drivers/api.h"
+#include "gutter_diff.h"
 #include "snapshot.h"
 #include "fs_events.h"
 #include <io/path.h>
@@ -49,6 +50,7 @@ namespace scm
 		std::map<std::string, scm::status::type> _status;
 		fs::snapshot_t _fs_snapshot;
 
+		dispatch_queue_t _queue;
 		bool _pending_update = false;
 		dispatch_time_t _no_check_before = DISPATCH_TIME_NOW;
 		std::shared_ptr<watcher_t> _watcher;
@@ -140,10 +142,12 @@ namespace scm
 
 	shared_info_t::shared_info_t (std::string const& rootPath, scm::driver_t const* driver) : _root_path(rootPath), _driver(driver)
 	{
+		_queue = dispatch_queue_create("org.textmate.scm.status", DISPATCH_QUEUE_SERIAL);
 	}
 
 	shared_info_t::~shared_info_t ()
 	{
+		dispatch_release(_queue);
 	}
 
 	void shared_info_t::add_client (info_t* client)
@@ -227,11 +231,10 @@ namespace scm
 
 		if(CFRunLoopRef currentRunLoop = CFRunLoopGetCurrent())
 		{
-			static dispatch_queue_t queue = dispatch_queue_create("org.textmate.scm.status", DISPATCH_QUEUE_SERIAL);
 			shared_info_weak_ptr weakThis = shared_from_this();
 
 			CFRetain(currentRunLoop);
-			dispatch_after(_no_check_before, queue, ^{
+			dispatch_after(_no_check_before, _queue, ^{
 				async_update(weakThis, currentRunLoop);
 				CFRelease(currentRunLoop);
 			});
@@ -240,6 +243,33 @@ namespace scm
 
 	void shared_info_t::fs_did_change (std::set<std::string> const& changedPaths)
 	{
+		auto const is_repo_meta_change = [](std::string const& path) -> bool {
+			auto const pos = path.find("/.git");
+			if(pos == std::string::npos)
+				return false;
+
+			auto const rel_pos = pos + 5;
+			if(path.size() == rel_pos)
+				return true;
+			if(path[rel_pos] != '/')
+				return false;
+
+			std::string const rel = path.substr(rel_pos + 1);
+			return rel == "HEAD"
+			    || rel == "index"
+			    || rel == "packed-refs"
+			    || rel.compare(0, 11, "refs/heads/") == 0;
+		};
+
+		for(auto const& path : changedPaths)
+		{
+			if(is_repo_meta_change(path))
+			{
+				gutter_diff::invalidate_repo(_root_path);
+				break;
+			}
+		}
+
 		schedule_update();
 	}
 
@@ -363,30 +393,38 @@ namespace scm
 			return info_ptr();
 
 		auto res = std::make_shared<info_t>(path);
+		CFRunLoopRef currentRunLoop = CFRunLoopGetCurrent();
+		weak_info_ptr weakInfo = res;
 
-		__block bool performBackgroundDriverSearch = true;
-		dispatch_sync(cache_access_queue(), ^{
+		// Cache lookup + driver search both run async to avoid blocking main thread.
+		// The caller gets an info_ptr immediately; shared_info is attached via
+		// CFRunLoop callback once the cache/driver lookup completes.
+		dispatch_async(cache_access_queue(), ^{
+			// Check cache first
+			shared_info_ptr cachedInfo;
+			bool needDriverSearch = true;
 			for(std::string cwd = path; cwd != "/"; cwd = path::parent(cwd))
 			{
 				auto it = cache().find(cwd);
 				if(it != cache().end())
 				{
-					if(shared_info_ptr sharedInfo = it->second.lock())
-					{
-						res->set_shared_info(sharedInfo);
-						performBackgroundDriverSearch = cwd != path;
-					}
+					if((cachedInfo = it->second.lock()))
+						needDriverSearch = cwd != path;
 					break;
 				}
 			}
-		});
 
-		if(performBackgroundDriverSearch)
-		{
-			CFRunLoopRef currentRunLoop = CFRunLoopGetCurrent();
+			if(cachedInfo)
+			{
+				CFRunLoopPerformBlock(currentRunLoop, kCFRunLoopCommonModes, ^{
+					if(info_ptr info = weakInfo.lock())
+						info->set_shared_info(cachedInfo);
+				});
+				CFRunLoopWakeUp(currentRunLoop);
+			}
 
-			weak_info_ptr weakInfo = res;
-			dispatch_async(cache_access_queue(), ^{
+			if(needDriverSearch)
+			{
 				if(shared_info_ptr sharedInfo = find_shared_info_for(path))
 				{
 					CFRunLoopPerformBlock(currentRunLoop, kCFRunLoopCommonModes, ^{
@@ -395,8 +433,8 @@ namespace scm
 					});
 					CFRunLoopWakeUp(currentRunLoop);
 				}
-			});
-		}
+			}
+		});
 
 		return res;
 	}

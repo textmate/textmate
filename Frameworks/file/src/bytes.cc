@@ -1,4 +1,5 @@
 #include "bytes.h"
+#include <zlib.h>
 
 namespace io
 {
@@ -35,9 +36,7 @@ namespace io
 
 	uint32_t bytes_t::crc32 () const
 	{
-		boost::crc_32_type result;
-		result.process_bytes(_bytes, _size);
-		return result.checksum();
+		return static_cast<uint32_t>(::crc32(0, reinterpret_cast<Bytef const*>(_bytes), _size));
 	}
 
 } /* io */

@@ -26,6 +26,7 @@
 	"^~\U007F"  = "deleteSubWordLeft:";
 	"^~\UF728"  = "deleteSubWordRight:";
 
+	"\033"     = "complete:";
 	"$\033"    = "previousCompletion:";
 	"@\UF728"  = "deleteToEndOfLine:";
 	"~\UF705"  = "showContextMenu:";
@@ -47,7 +48,10 @@
 	"^~u"      = "capitalizeWord:";
 
 	"~$\t"     = "shiftLeft:";
-	"~\t"      = "shiftRight:";
+	"~\t"      = "lspComplete:";
+	"~\033"    = "lspCopilotComplete:";
+	"^\033"    = "lspShowHoverInfo:";
+	"@D"       = "lspGoToDefinition:";
 	"~@["      = "indent:";
 
 	"^q"       = "reformatText:";

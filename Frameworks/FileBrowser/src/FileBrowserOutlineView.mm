@@ -92,10 +92,8 @@
 {
 	if(operation == NSDragOperationDelete && [self.delegate respondsToSelector:@selector(outlineView:didTrashURLs:)])
 	{
-		NSMutableArray* urls = [NSMutableArray array];
 		NSPasteboard* pboard = session.draggingPasteboard;
-		for(NSString* path in [pboard availableTypeFromArray:@[ NSFilenamesPboardType ]] ? [pboard propertyListForType:NSFilenamesPboardType] : @[ ])
-			[urls addObject:[NSURL fileURLWithPath:path]];
+		NSArray<NSURL*>* urls = [pboard readObjectsForClasses:@[ [NSURL class] ] options:@{ NSPasteboardURLReadingFileURLsOnlyKey: @YES }] ?: @[];
 		[(id <FileBrowserOutlineViewDelegate>)self.delegate outlineView:self didTrashURLs:urls];
 	}
 	[super draggingSession:session endedAtPoint:screenPoint operation:operation];

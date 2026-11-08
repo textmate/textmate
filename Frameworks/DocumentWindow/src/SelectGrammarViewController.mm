@@ -72,7 +72,6 @@ static NSButton* OakSmallButton (NSString* title, SEL action, id target, NSInteg
 	_progressIndicator.maxValue             = 1;
 	_progressIndicator.indeterminate        = YES;
 	_progressIndicator.displayedWhenStopped = NO;
-	_progressIndicator.bezeled              = NO;
 
 	NSDictionary* views = @{
 		@"divider":  self.divider,

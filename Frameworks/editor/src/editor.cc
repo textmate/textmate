@@ -538,7 +538,7 @@ namespace ng
 				}
 
 				plist::any_t pasteBehaviorValue = bundles::value_for_setting("indentOnPaste", buffer.scope(index));
-				std::string const* pasteBehavior = boost::get<std::string>(&pasteBehaviorValue);
+				std::string const* pasteBehavior = plist::get<std::string>(&pasteBehaviorValue);
 				if(pasteBehavior && *pasteBehavior == "simple")
 				{
 					int currentIndent = indent::leading_whitespace(leftOfCaret.data(), leftOfCaret.data() + leftOfCaret.size(), tabSize);
@@ -659,16 +659,16 @@ namespace ng
 	static std::string find_paired (std::string const& str, scope::context_t const& scope)
 	{
 		plist::any_t typingPairs = bundles::value_for_setting("smartTypingPairs", scope);
-		if(plist::array_t const* typingPairsArray = boost::get<plist::array_t>(&typingPairs))
+		if(plist::array_t const* typingPairsArray = plist::get<plist::array_t>(&typingPairs))
 		{
 			for(auto const& pair : *typingPairsArray)
 			{
-				if(plist::array_t const* pairArray = boost::get<plist::array_t>(&pair))
+				if(plist::array_t const* pairArray = plist::get<plist::array_t>(&pair))
 				{
 					if(pairArray->size() == 2)
 					{
-						std::string const* left  = boost::get<std::string>(&(*pairArray)[0]);
-						std::string const* right = boost::get<std::string>(&(*pairArray)[1]);
+						std::string const* left  = plist::get<std::string>(&(*pairArray)[0]);
+						std::string const* right = plist::get<std::string>(&(*pairArray)[1]);
 						if(left && *left == str && right)
 							return *right;
 					}

@@ -1,6 +1,0 @@
-target "${dirname}" {
-	require OakAppKit OakFoundation bundles text cf ns
-	headers src/BundleMenu.h
-	sources src/*.mm
-	frameworks AppKit
-}

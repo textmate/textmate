@@ -29,11 +29,11 @@ namespace io
 					{
 						if(posix_spawnattr_setflags(&flags, POSIX_SPAWN_SETSIGDEF|POSIX_SPAWN_CLOEXEC_DEFAULT) == 0)
 						{
-							char* argv[args.size() + 1];
-							std::transform(args.begin(), args.end(), &argv[0], [](std::string const& str){ return (char*)str.c_str(); });
+							std::vector<char*> argv(args.size() + 1);
+							std::transform(args.begin(), args.end(), argv.begin(), [](std::string const& str){ return (char*)str.c_str(); });
 							argv[args.size()] = nullptr;
 
-							rc = posix_spawn(&res.pid, argv[0], &fileActions, &flags, argv, oak::c_array(environment));
+							rc = posix_spawn(&res.pid, argv[0], &fileActions, &flags, argv.data(), oak::c_array(environment));
 							if(rc != 0)
 								perrorf("io::spawn: posix_spawn(\"%s\")", argv[0]);
 						}
@@ -132,7 +132,15 @@ namespace io
 				success = true;
 		});
 
-		dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
+		static int64_t const kTimeoutNs = 10LL * NSEC_PER_SEC;
+		if(dispatch_group_wait(group, dispatch_time(DISPATCH_TIME_NOW, kTimeoutNs)))
+		{
+			os_log_error(OS_LOG_DEFAULT, "io::exec timed out after 10s: '%{public}s'", text::join(command, " ").c_str());
+			kill(process.pid, SIGTERM);
+			dispatch_group_wait(group, dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC));
+			kill(process.pid, SIGKILL);
+			dispatch_group_wait(group, dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC));
+		}
 		dispatch_release(group);
 		return success ? output : NULL_STR;
 	}

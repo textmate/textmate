@@ -4,6 +4,18 @@
 
 namespace scm
 {
+	bool is_transient_git_path (std::string const& path)
+	{
+		std::string::size_type git = path.find("/.git/");
+		if(git == std::string::npos)
+			return false;
+
+		std::string const rel = path.substr(git + 6);
+		std::string const name = path::name(rel);
+
+		return path::extension(rel) == ".lock" || name.compare(0, 18, "fsmonitor--daemon.") == 0;
+	}
+
 	// =============
 	// = watcher_t =
 	// =============
@@ -23,7 +35,6 @@ namespace scm
 		{
 			FSEventStreamScheduleWithRunLoop(stream, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
 			FSEventStreamStart(stream);
-			FSEventStreamFlushSync(stream);
 		}
 		else
 		{
@@ -56,8 +67,10 @@ namespace scm
 		{
 			std::string const& file = ((char const* const*)eventPaths)[i];
 			std::string const& path = path::join(watcher.mount_point, "./" + file);
-			changedPaths.insert(path);
+			if(!is_transient_git_path(path))
+				changedPaths.insert(path);
 		}
-		watcher.invoke_callback(changedPaths);
+		if(!changedPaths.empty())
+			watcher.invoke_callback(changedPaths);
 	}
 }

@@ -1,0 +1,14 @@
+{
+  "planPath": "docs/superpowers/plans/2026-03-21-command-palette.md",
+  "tasks": [
+    {"id": 0, "subject": "Task 0: Item Model + Delegate Protocol", "status": "pending"},
+    {"id": 1, "subject": "Task 1: ViewModel with prefix mode parsing and fuzzy filtering", "status": "pending", "blockedBy": [0]},
+    {"id": 2, "subject": "Task 2: SwiftUI Views (Row + List + Root)", "status": "pending", "blockedBy": [1]},
+    {"id": 3, "subject": "Task 3: Bridge Class (OakCommandPalette)", "status": "pending", "blockedBy": [2]},
+    {"id": 4, "subject": "Task 4: AppController Integration", "status": "pending", "blockedBy": [3]},
+    {"id": 5, "subject": "Task 5: Mode-Specific Providers", "status": "pending", "blockedBy": [4]},
+    {"id": 6, "subject": "Task 6: Frecency Ranking", "status": "pending", "blockedBy": [5]},
+    {"id": 7, "subject": "Task 7: Polish and Manual Testing", "status": "pending", "blockedBy": [6]}
+  ],
+  "lastUpdated": "2026-03-21T00:00:00Z"
+}

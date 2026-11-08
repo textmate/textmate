@@ -1,4 +1,5 @@
 #import "BundlesPreferences.h"
+#import <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
 #import <BundlesManager/BundlesManager.h>
 #import <OakFoundation/OakFoundation.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
@@ -141,7 +142,7 @@ static NSUserInterfaceItemIdentifier const kTableColumnIdentifierDescription = @
 @end
 
 @implementation BundlesPreferences
-- (NSImage*)toolbarItemImage { return [NSWorkspace.sharedWorkspace iconForFileType:@"tmbundle"]; }
+- (NSImage*)toolbarItemImage { return PreferencesToolbarImage(@"puzzlepiece.extension", @"Bundles", [NSWorkspace.sharedWorkspace iconForContentType:[UTType typeWithFilenameExtension:@"tmbundle"]]); }
 
 - (id)init
 {

@@ -11,7 +11,7 @@ static std::vector<oak::uuid_t> to_menu (plist::array_t const& uuids, std::strin
 	std::vector<oak::uuid_t> res;
 	for(auto uuid : uuids)
 	{
-		std::string const* str = boost::get<std::string>(&uuid);
+		std::string const* str = plist::get<std::string>(&uuid);
 		if(str && oak::uuid_t::is_valid(*str))
 				res.push_back(*str == kSeparatorString ? bundles::kSeparatorUUID : oak::uuid_t(*str));
 		else	os_log_error(OS_LOG_DEFAULT, "Invalid uuid (%{public}s) in ‘%{public}s’", to_s(uuid).c_str(), path.c_str());
@@ -139,7 +139,7 @@ std::pair<std::vector<bundles::item_ptr>, std::map< oak::uuid_t, std::vector<oak
 				plist::get_key_path(plist, "mainMenu.excludedItems", uuids);
 				for(auto const& uuid : uuids)
 				{
-					std::string const* str = boost::get<std::string>(&uuid);
+					std::string const* str = plist::get<std::string>(&uuid);
 					if(str && oak::uuid_t::is_valid(*str))
 						hiddenItems.insert(*str);
 				}

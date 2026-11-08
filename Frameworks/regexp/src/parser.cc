@@ -82,9 +82,9 @@ struct parse_context_t : parser_base_t
 
 	std::string& text_node (nodes_t& nodes)
 	{
-		if(nodes.empty() || !boost::get<text_t>(&nodes.back()))
+		if(nodes.empty() || !std::get_if<text_t>(&nodes.back().data))
 			nodes.emplace_back();
-		return boost::get<text_t>(nodes.back()).text;
+		return std::get<text_t>(nodes.back().data).text;
 	}
 };
 

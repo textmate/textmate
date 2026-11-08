@@ -7,7 +7,7 @@ void test_repopulating_mirrors ()
 	ng::buffer_t buf;
 	ng::editor_t editor(buf);
 
-	editor.snippet_dispatch(boost::get<plist::dictionary_t>(plist::parse(plistSrc)), std::map<std::string, std::string>());
+	editor.snippet_dispatch(plist::get<plist::dictionary_t>(plist::parse(plistSrc)), std::map<std::string, std::string>());
 	OAK_ASSERT_EQ(editor.as_string(), "-x-");
 	OAK_ASSERT_EQ(to_s(editor.ranges()), "[1-2]");
 

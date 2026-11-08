@@ -3,6 +3,7 @@
 #import <OakFoundation/OakFoundation.h>
 #import <Preferences/Keys.h>
 #import <ns/ns.h>
+#import <OakSystem/application.h>
 
 NSURL* const kURLLocationComputer  = [[NSURL alloc] initWithString:@"computer:///"];
 NSURL* const kURLLocationFavorites = [[NSURL alloc] initFileURLWithPath:[NSHomeDirectory() stringByAppendingPathComponent:@"Library/Application Support/TextMate/Favorites"] isDirectory:YES];

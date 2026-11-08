@@ -26,6 +26,7 @@ NSString* const kUserDefaultsClipboardHistoryKeepAtLeast       = @"clipboardHist
 NSString* const kUserDefaultsClipboardHistoryKeepAtMost        = @"clipboardHistoryKeepAtMost";
 NSString* const kUserDefaultsClipboardHistoryDaysToKeep        = @"clipboardHistoryDaysToKeep";
 
+
 // ===========
 // = SQLite3 =
 // ===========
@@ -285,12 +286,6 @@ namespace
 {
 	static dispatch_once_t onceToken = 0;
 	dispatch_once(&onceToken, ^{
-		[NSUserDefaults.standardUserDefaults registerDefaults:@{
-			kUserDefaultsClipboardHistoryKeepAtLeast:  @25,
-			kUserDefaultsClipboardHistoryKeepAtMost:  @500,
-			kUserDefaultsClipboardHistoryDaysToKeep:   @30,
-		}];
-
 		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(applicationDidBecomeActiveNotification:) name:NSApplicationDidBecomeActiveNotification object:NSApp];
 		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(applicationDidResignActiveNotification:) name:NSApplicationDidResignActiveNotification object:NSApp];
 	});
@@ -404,6 +399,10 @@ namespace
 				"   'value'            TEXT NOT NULL,"
 				"   UNIQUE (key)"
 				");"
+				"CREATE INDEX IF NOT EXISTS 'idx_flags_id' ON 'flags' ('id');"
+				"CREATE INDEX IF NOT EXISTS 'idx_groups_history_id' ON 'groups' ('history_id');"
+				"CREATE INDEX IF NOT EXISTS 'idx_groups_string_id' ON 'groups' ('string_id');"
+				"CREATE INDEX IF NOT EXISTS 'idx_history_clipboard_id' ON 'history' ('clipboard_id');"
 				"INSERT OR IGNORE INTO meta ('key', 'value') VALUES ('version', '1'),('uuid', :uuid)";
 
 			// Remove superfluous whitespace to improve output of sqlite3’s ‘.schema’ command
@@ -429,8 +428,8 @@ namespace
 	return sharedInstances[aName];
 }
 
-+ (OakPasteboard*)generalPasteboard  { return [OakPasteboard pasteboardWithName:@"General" systemPasteboard:[NSPasteboard pasteboardWithName:NSGeneralPboard]  avoidsDuplicates:NO];  }
-+ (OakPasteboard*)findPasteboard     { return [OakPasteboard pasteboardWithName:@"Find"    systemPasteboard:[NSPasteboard pasteboardWithName:NSFindPboard]     avoidsDuplicates:YES]; }
++ (OakPasteboard*)generalPasteboard  { return [OakPasteboard pasteboardWithName:@"General" systemPasteboard:[NSPasteboard pasteboardWithName:NSPasteboardNameGeneral] avoidsDuplicates:NO];  }
++ (OakPasteboard*)findPasteboard     { return [OakPasteboard pasteboardWithName:@"Find"    systemPasteboard:[NSPasteboard pasteboardWithName:NSPasteboardNameFind]    avoidsDuplicates:YES]; }
 + (OakPasteboard*)replacePasteboard  { return [OakPasteboard pasteboardWithName:@"Replace" systemPasteboard:[NSPasteboard pasteboardWithName:OakReplacePboard] avoidsDuplicates:YES]; }
 
 - (instancetype)initWithName:(NSString*)aName systemPasteboard:(NSPasteboard*)pboard avoidsDuplicates:(BOOL)flag
@@ -453,7 +452,7 @@ namespace
 		if(NSNumber* historyId = options[@"historyId"])
 		{
 			char const* query = "SELECT id FROM history WHERE id = :history_id";
-			if(NSDictionary* row = RunSQLStatement(OakPasteboard.SQLDatabase, query, { { ":history_id", historyId } }).firstObject)
+			if(RunSQLStatement(OakPasteboard.SQLDatabase, query, { { ":history_id", historyId } }).firstObject)
 				return;
 		}
 	}

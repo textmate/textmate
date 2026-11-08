@@ -45,7 +45,7 @@
 
 - (NSBackgroundStyle)interiorBackgroundStyle
 {
-	return _effectiveDrawAsHighlighted ? NSBackgroundStyleDark : [super interiorBackgroundStyle];
+	return _effectiveDrawAsHighlighted ? NSBackgroundStyleEmphasized : [super interiorBackgroundStyle];
 }
 
 - (void)drawSelectionInRect:(NSRect)dirtyRect

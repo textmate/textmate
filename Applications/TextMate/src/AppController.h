@@ -23,8 +23,8 @@
 - (IBAction)performGoToLine:(id)sender;
 
 - (IBAction)showBundleItemChooser:(id)sender;
+- (IBAction)showCommandPalette:(id)sender;
 
-- (IBAction)performSoftwareUpdateCheck:(id)sender;
 - (IBAction)showPreferences:(id)sender;
 - (IBAction)showBundleEditor:(id)sender;
 
@@ -43,6 +43,7 @@
 
 @interface AppController (BundlesMenu)
 - (BOOL)validateThemeMenuItem:(NSMenuItem*)item;
+- (IBAction)openThemeEditor:(id)sender;
 @end
 
 void OakOpenDocuments (NSArray* paths, BOOL treatFilePackageAsFolder = NO);

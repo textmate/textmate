@@ -1,6 +1,6 @@
 #import "Bundle.h"
 #import "BundlesManager.h"
-#import <SoftwareUpdate/SoftwareUpdate.h> // OakCompareVersionStrings()
+#import <OakFoundation/OakCompareVersionStrings.h>
 #import <ns/ns.h>
 #import <text/decode.h>
 #import <regexp/format_string.h>

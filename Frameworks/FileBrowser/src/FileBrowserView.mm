@@ -34,7 +34,7 @@
 
 		[_outlineView setDraggingSourceOperationMask:NSDragOperationLink|NSDragOperationMove|NSDragOperationCopy forLocal:YES];
 		[_outlineView setDraggingSourceOperationMask:NSDragOperationEvery forLocal:NO];
-		[_outlineView registerForDraggedTypes:@[ NSFilenamesPboardType ]];
+		[_outlineView registerForDraggedTypes:@[ NSPasteboardTypeFileURL ]];
 
 		NSTableColumn* tableColumn = [[NSTableColumn alloc] init];
 		[_outlineView addTableColumn:tableColumn];
@@ -69,8 +69,8 @@
 		_scrollView.automaticallyAdjustsContentInsets = NO;
 		_scrollView.contentInsets = insets;
 
-		_outlineView.backgroundColor = NSColor.clearColor;
-		_scrollView.drawsBackground  = NO;
+		_outlineView.backgroundColor = NSColor.controlBackgroundColor; // dynamic (adapts to Light/Dark)
+		_scrollView.drawsBackground  = YES; // ensure adaptive system color is actually drawn
 	}
 	return self;
 }

@@ -1,7 +1,0 @@
-target "${dirname}" {
-	require OakSystem io plist regexp scope text
-	headers src/*.h
-	sources src/*.cc
-	tests tests/*.cc
-	frameworks CoreFoundation
-}

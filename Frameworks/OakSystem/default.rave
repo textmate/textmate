@@ -1,5 +1,0 @@
-target "${dirname}" {
-	require cf io text
-	headers src/*.h
-	sources src/*.cc
-}

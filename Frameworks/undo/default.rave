@@ -1,5 +1,0 @@
-target "${dirname}" {
-	require buffer selection
-	headers src/undo.h
-	sources src/*.cc
-}

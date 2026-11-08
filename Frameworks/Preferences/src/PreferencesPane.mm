@@ -85,3 +85,15 @@ NSView* OakSetupGridViewWithSeparators (NSGridView* gridView, std::vector<NSUInt
 		[NSHelpManager.sharedHelpManager openHelpAnchor:anchor inBook:[[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleHelpBookName"]];
 }
 @end
+
+NSImage* PreferencesToolbarImage (NSString* symbolName, NSString* description, NSImage* fallbackImage)
+{
+	if(NSImage* image = [NSImage imageWithSystemSymbolName:symbolName accessibilityDescription:description])
+	{
+		if(NSImageSymbolConfiguration* configuration = [NSImageSymbolConfiguration configurationWithScale:NSImageSymbolScaleLarge])
+			image = [image imageWithSymbolConfiguration:configuration] ?: image;
+		[image setTemplate:YES];
+		return image;
+	}
+	return fallbackImage;
+}

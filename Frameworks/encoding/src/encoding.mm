@@ -1,9 +1,4 @@
 #include "encoding.h"
-#include "frequencies.capnp.h"
-#include <capnp/message.h>
-#include <capnp/serialize-packed.h>
-
-static uint32_t const kCapnpClassifierFormatVersion = 1;
 
 namespace encoding
 {
@@ -163,84 +158,84 @@ namespace encoding
 
 	void classifier_t::real_load (std::string const& path)
 	{
-		int fd = open(path.c_str(), O_RDONLY|O_CLOEXEC);
-		if(fd != -1)
+		NSData* data = [NSData dataWithContentsOfFile:@(path.c_str())];
+		if(!data)
+			return;
+
+		NSError* error = nil;
+		NSSet* classes = [NSSet setWithObjects:NSDictionary.class, NSString.class, NSNumber.class, nil];
+		NSDictionary* root = [NSKeyedUnarchiver unarchivedObjectOfClasses:classes fromData:data error:&error];
+		if(!root)
 		{
-			capnp::PackedFdMessageReader message(kj::AutoCloseFd{fd});
-			auto freq = message.getRoot<Frequencies>();
-			if(freq.getVersion() != kCapnpClassifierFormatVersion)
+			os_log_error(OS_LOG_DEFAULT, "Failed to load ‘%{public}s’: %{public}@", path.c_str(), error);
+			return;
+		}
+		if([root[@"version"] unsignedIntegerValue] != 1)
+			return;
+
+		NSDictionary* charsets = root[@"charsets"];
+		for(NSString* charset in charsets)
+		{
+			NSDictionary* rec = charsets[charset];
+			record_t r;
+			NSDictionary* words = rec[@"words"];
+			for(NSString* word in words)
+				r.words.emplace(word.UTF8String, [words[word] unsignedLongLongValue]);
+			NSDictionary* bytes = rec[@"bytes"];
+			for(NSNumber* byte in bytes)
+				r.bytes.emplace(byte.unsignedCharValue, [bytes[byte] unsignedLongLongValue]);
+			_charsets.emplace(charset.UTF8String, r);
+		}
+
+		for(auto& pair : _charsets)
+		{
+			for(auto const& word : pair.second.words)
 			{
-				os_log_info(OS_LOG_DEFAULT, "Skip ‘%{public}s’ version %u (expected %u)", path.c_str(), freq.getVersion(), kCapnpClassifierFormatVersion);
-				return;
+				_combined.words[word.first] += word.second;
+				_combined.total_words += word.second;
+				pair.second.total_words += word.second;
 			}
-
-			for(auto src : freq.getCharsets())
+			for(auto const& byte : pair.second.bytes)
 			{
-				record_t r;
-				for(auto word : src.getWords())
-					r.words.emplace(word.getType().getWord(), word.getCount());
-				for(auto byte : src.getBytes())
-					r.bytes.emplace(byte.getType().getByte(), byte.getCount());
-				_charsets.emplace(src.getCharset(), r);
-			}
-
-			for(auto& pair : _charsets)
-			{
-				for(auto const& word : pair.second.words)
-				{
-					_combined.words[word.first] += word.second;
-					_combined.total_words += word.second;
-					pair.second.total_words += word.second;
-				}
-
-				for(auto const& byte : pair.second.bytes)
-				{
-					_combined.bytes[byte.first] += byte.second;
-					_combined.total_bytes += byte.second;
-					pair.second.total_bytes += byte.second;
-				}
+				_combined.bytes[byte.first] += byte.second;
+				_combined.total_bytes += byte.second;
+				pair.second.total_bytes += byte.second;
 			}
 		}
 	}
 
 	void classifier_t::save (std::string const& path) const
 	{
-		capnp::MallocMessageBuilder message;
-		auto freq = message.initRoot<Frequencies>();
-		freq.setVersion(kCapnpClassifierFormatVersion);
-		auto charsets = freq.initCharsets(_charsets.size());
-		size_t i = 0;
-
+		NSMutableDictionary* charsets = [NSMutableDictionary dictionary];
 		for(auto const& pair : _charsets)
 		{
-			auto entry = charsets[i++];
-			entry.setCharset(pair.first);
+			NSString* charsetKey = @(pair.first.c_str());
+			if(!charsetKey)
+				continue;
 
-			auto words = entry.initWords(pair.second.words.size());
-			size_t j = 0;
+			NSMutableDictionary* words = [NSMutableDictionary dictionary];
 			for(auto const& word : pair.second.words)
 			{
-				auto tmp = words[j++];
-				tmp.getType().setWord(word.first);
-				tmp.setCount(word.second);
+				if(NSString* key = @(word.first.c_str()))
+					words[key] = @(word.second);
 			}
 
-			auto bytes = entry.initBytes(pair.second.bytes.size());
-			j = 0;
+			NSMutableDictionary* bytes = [NSMutableDictionary dictionary];
 			for(auto const& byte : pair.second.bytes)
-			{
-				auto tmp = bytes[j++];
-				tmp.getType().setByte(byte.first);
-				tmp.setCount(byte.second);
-			}
+				bytes[@(byte.first)] = @(byte.second);
+
+			charsets[charsetKey] = @{ @"words": words, @"bytes": bytes };
 		}
 
-		int fd = open(path.c_str(), O_CREAT|O_TRUNC|O_WRONLY|O_CLOEXEC, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH);
-		if(fd != -1)
+		NSDictionary* root = @{ @"version": @1, @"charsets": charsets };
+		NSError* error = nil;
+		NSData* data = [NSKeyedArchiver archivedDataWithRootObject:root requiringSecureCoding:YES error:&error];
+		if(!data)
 		{
-			writePackedMessageToFd(fd, message);
-			close(fd);
+			os_log_error(OS_LOG_DEFAULT, "Failed to save '%{public}s': %{public}@", path.c_str(), error);
+			return;
 		}
+		[data writeToFile:@(path.c_str()) atomically:YES];
 	}
 
 } /* encoding */
@@ -267,7 +262,7 @@ namespace encoding
 {
 	if(self = [super init])
 	{
-		_path = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES).firstObject stringByAppendingPathComponent:@"com.macromates.TextMate/EncodingFrequencies.binary"];
+		_path = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES).firstObject stringByAppendingPathComponent:@"com.macromates.TextMate/EncodingFrequencies.plist"];
 		_database.load(_path.fileSystemRepresentation);
 
 		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(applicationWillTerminate:) name:NSApplicationWillTerminateNotification object:NSApp];

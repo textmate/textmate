@@ -55,6 +55,7 @@ namespace parse
 		regexp::pattern_t while_pattern;
 		regexp::pattern_t end_pattern;
 		bool match_pattern_is_anchored = false;
+		bool patterns_compiled = false;
 
 		// =================
 		// = Mutable State =
@@ -63,6 +64,8 @@ namespace parse
 		bool included = false;
 		bool is_root = false;
 	};
+
+	void compile_patterns (rule_t* rule);
 
 	struct stack_t
 	{

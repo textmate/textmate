@@ -1,5 +1,20 @@
+#include <cmath>
+#include <sys/stat.h>
+#import "EditorContextService.h"
+#import "EditorContextBuffer.h"
+#import "EditorContextDiagnostics.h"
+#import "EditorLanguageIntelligence.h"
+#import "EditorContextChanges.h"
+#import "BufferEditProposal.h"
+#import "ProjectChangesWindowController.h"
+#import <selection/selection.h>
+#import <EditorContextProtocol.h>
+#import <document/OakDocument Private.h>
+#import <lsp/LSPManager.h>
 #import "DocumentWindowController.h"
 #import "ProjectLayoutView.h"
+#import "TerminalPanelViewController.h"
+#import "TerminalEnvironment.h"
 #import "SelectGrammarViewController.h"
 #import "OakRunCommandWindowController.h"
 #import <document/OakDocument.h>
@@ -26,6 +41,7 @@
 #import <BundleEditor/BundleEditor.h>
 #import <file/path_info.h>
 #import <io/entries.h>
+#import <io/environment.h>
 #import <scm/scm.h>
 #import <text/parse.h>
 #import <text/tokenize.h>
@@ -36,11 +52,6 @@
 #import <kvdb/kvdb.h>
 #import <crash/info.h>
 
-static NSString* const kUserDefaultsAlwaysFindInDocument = @"alwaysFindInDocument";
-static NSString* const kUserDefaultsDisableFolderStateRestore = @"disableFolderStateRestore";
-static NSString* const kUserDefaultsHideStatusBarKey = @"hideStatusBar";
-static NSString* const kUserDefaultsDisableBundleSuggestionsKey = @"disableBundleSuggestions";
-static NSString* const kUserDefaultsGrammarsToNeverSuggestKey = @"grammarsToNeverSuggest";
 
 static bool can_reach_host (char const* host)
 {
@@ -93,6 +104,17 @@ static void show_command_error (std::string const& message, oak::uuid_t const& u
 }
 @property (nonatomic) NSTitlebarAccessoryViewController* titlebarViewController;
 @property (nonatomic) ProjectLayoutView*          layoutView;
+@property (nonatomic) TerminalPanelViewController* terminalPanelController;
+@property (nonatomic, copy) NSString*              terminalSubtitle; // the subtitle text this window last wrote for terminal attention, nil when none
+@property (nonatomic) BOOL                         terminalCloseConfirmed; // set once the user approved ending running shells, so the re-issued close does not ask again
+@property (nonatomic) BOOL                         terminalOnlyWindow; // created by detaching a terminal tab; closes with its last session while the placeholder document is untouched
+@property (nonatomic) EditReviewWindowController* editReviewController;
+@property (nonatomic) NSMutableDictionary<NSString*, BufferEditProposal*>* editProposals;
+@property (nonatomic) NSMutableArray<NSString*>* editProposalOrder;
+@property (nonatomic) ProjectChangesWindowController* projectChangesController;
+@property (nonatomic) NSUInteger editorNavigationGeneration;
+@property (nonatomic) EditorContextChanges* editorChanges;
+@property (nonatomic) EditorLanguageIntelligence* languageIntelligence;
 @property (nonatomic) OakTabBarView*              tabBarView;
 @property (nonatomic) OakDocumentView*            documentView;
 @property (nonatomic) OakTextView*                textView;
@@ -119,6 +141,10 @@ static void show_command_error (std::string const& message, oak::uuid_t const& u
 @property (nonatomic, readwrite) OakDocument*           selectedDocument;
 @property (nonatomic) NSArrayController*                arrayController;
 
+- (EditorContextSnapshot*)editorContextForMethod:(NSString*)method arguments:(NSDictionary*)arguments;
+- (EditorContextSnapshot*)editorNavigation:(NSDictionary*)arguments;
+- (EditorContextSnapshot*)editorDocumentEdits:(NSString*)method arguments:(NSDictionary*)arguments;
+- (void)loadNavigationDocument:(OakDocument*)document arguments:(NSDictionary*)arguments deadline:(double)deadline canCommit:(BOOL(^)(void))canCommit completion:(void(^)(NSDictionary*))completion;
 + (void)scheduleSessionBackup:(id)sender;
 
 - (void)makeTextViewFirstResponder:(id)sender;
@@ -170,9 +196,272 @@ namespace
 	}
 }
 
-static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.path", @"arrayController.arrangedObjects.displayName", @"arrayController.arrangedObjects.documentEdited", @"selectedDocument.path", @"selectedDocument.displayName", @"selectedDocument.icon", @"selectedDocument.onDisk" , @"selectedDocument.documentEdited" ];
+static NSArray* const kObservedKeyPaths = @[ @"textView.selectionString", @"textView.font", @"textView.fontScaleFactor", @"textView.themeUUID", @"selectedDocument.fileType", @"selectedDocument", @"arrayController.arrangedObjects.path", @"arrayController.arrangedObjects.displayName", @"arrayController.arrangedObjects.documentEdited", @"selectedDocument.path", @"selectedDocument.displayName", @"selectedDocument.icon", @"selectedDocument.onDisk" , @"selectedDocument.documentEdited" ];
 
 @implementation DocumentWindowController
+
+static NSDictionary* ContextDocument(OakDocument* document)
+{
+    return @{ @"documentId": document.identifier.UUIDString,
+              @"path": document.path ?: (id)NSNull.null,
+              @"name": document.displayName ?: @"Untitled",
+              @"language": document.fileType ?: @"",
+              @"modified": @(document.isDocumentEdited),
+              @"loaded": @(document.isLoaded),
+              @"revision": document.isLoaded ? [EditorContextService.sharedService revisionForDocument:document] : (id)NSNull.null };
+}
+
+- (EditorContextSnapshot*)editorContextForMethod:(NSString*)method arguments:(NSDictionary*)arguments
+{
+    if(NSString* error = editor_context::validate_arguments(method, arguments))
+        return [EditorContextSnapshot response:editor_context::failure(error, @"invalid_arguments")];
+    if(editor_context::is_language_query(method)) {
+        if(!self.languageIntelligence) self.languageIntelligence = [[EditorLanguageIntelligence alloc] init];
+        __weak DocumentWindowController* owner = self;
+        return [self.languageIntelligence snapshotForMethod:method arguments:arguments documents:^NSArray*{ return owner.documents; }
+            current:self.selectedDocument caret:[self.textView editorContextCaretByteOffset] windowId:self.identifier.UUIDString];
+    }
+    if([method isEqual:@"propose_document_edits"] || [method isEqual:@"get_edit_proposal_status"]) return [self editorDocumentEdits:method arguments:arguments];
+    if([method isEqual:@"navigate_editor"]) return [self editorNavigation:arguments];
+    if([method isEqual:@"get_editor_change_token"])
+        return [EditorContextSnapshot response:@{ @"cursor": self.editorChanges.cursor, @"windowId": self.identifier.UUIDString }];
+    if([method isEqual:@"get_editor_changes"]) {
+        NSMutableDictionary* changes = [[self.editorChanges changesAfter:arguments[@"cursor"]] mutableCopy];
+        changes[@"windowId"] = self.identifier.UUIDString;
+        if(![changes[@"changed"] boolValue]) return [EditorContextSnapshot response:changes];
+        EditorContextSnapshot* context = [self editorContextForMethod:@"get_editor_context" arguments:@{}];
+        return [EditorContextSnapshot renderer:^NSDictionary*(double deadline){
+            NSDictionary* rendered = [context renderBefore:deadline];
+            if(rendered[@"error"]) return rendered;
+            NSMutableDictionary* result = [changes mutableCopy];
+            result[@"context"] = rendered;
+            return result;
+        }];
+    }
+    NSDictionary* base = @{ @"windowId": self.identifier.UUIDString,
+                            @"changeCursor": self.editorChanges.cursor,
+                            @"projectPath": self.projectPath ?: (id)NSNull.null,
+                            @"coordinateEncoding": @"utf-16",
+                            @"offsetBase": @0, @"lineBase": @1, @"columnBase": @1 };
+    if([method isEqual:@"get_connection_status"])
+        return [EditorContextSnapshot response:@{ @"windowId": self.identifier.UUIDString,
+                    @"documentName": self.selectedDocument.displayName ?: @"none", @"status": @"connected" }];
+    if([method isEqual:@"list_open_documents"]) {
+        NSMutableArray* documents = [NSMutableArray array];
+        for(OakDocument* document in self.documents) {
+            if(documents.count == 256) break;
+            [documents addObject:ContextDocument(document)];
+        }
+        NSMutableDictionary* result = [base mutableCopy];
+        result[@"documents"] = documents;
+        result[@"truncated"] = @(self.documents.count > documents.count);
+        return [EditorContextSnapshot response:result];
+    }
+    OakDocument* document = self.selectedDocument;
+    if([method isEqual:@"read_document"] || ([method isEqual:@"get_diagnostics"] && arguments[@"documentId"])) {
+        document = nil;
+        for(OakDocument* candidate in self.documents)
+            if([candidate.identifier.UUIDString isEqual:arguments[@"documentId"]]) { document = candidate; break; }
+        if(!document || !document.isLoaded)
+            return [EditorContextSnapshot response:editor_context::failure(@"Document is not loaded in this window", @"document_unavailable")];
+    }
+    if([method isEqual:@"get_diagnostics"]) {
+        if(!document || !document.isLoaded)
+            return [EditorContextSnapshot response:editor_context::failure(@"Document is not loaded in this window", @"document_unavailable")];
+        NSDictionary* metadata = ContextDocument(document);
+        NSDictionary* report = [LSPManager.sharedManager diagnosticReportForDocument:document];
+        return [EditorContextSnapshot renderer:^NSDictionary*(double deadline){
+            return EditorContextDiagnostics(report, base, metadata, arguments, deadline);
+        }];
+    }
+    if(!document || !document.isLoaded) {
+        NSMutableDictionary* result = [base mutableCopy];
+        result[@"document"] = document ? ContextDocument(document) : (id)NSNull.null;
+        return [EditorContextSnapshot response:result];
+    }
+    NSDictionary* metadata = ContextDocument(document);
+    EditorContextBuffer* buffer = [EditorContextBuffer bufferForDocument:document revision:metadata[@"revision"]];
+    ng::ranges_t ranges = [method isEqual:@"get_editor_context"] ? [self.textView editorContextByteRanges] : ng::ranges_t();
+    NSUInteger caret = [self.textView editorContextCaretByteOffset];
+    return [EditorContextSnapshot renderer:^NSDictionary*(double deadline){
+        return [buffer responseForMethod:method arguments:arguments base:base document:metadata ranges:ranges caret:caret deadline:deadline];
+    }];
+}
+
+- (EditorContextSnapshot*)editorDocumentEdits:(NSString*)method arguments:(NSDictionary*)arguments
+{
+	if([method isEqual:@"get_edit_proposal_status"]) {
+		BufferEditProposal* proposal = self.editProposals[arguments[@"proposalId"]];
+		if(!proposal) return [EditorContextSnapshot response:editor_context::failure(@"This edit proposal is no longer available in this window.", @"proposal_unavailable")];
+		OakDocument* target = nil;
+		for(OakDocument* candidate in self.documents)
+			if([candidate.identifier.UUIDString isEqual:proposal.documentId]) { target = candidate; break; }
+		if([proposal.status isEqual:@"pending_review"] && ![proposal matchesDocument:target]) [proposal markStale];
+		return [EditorContextSnapshot response:@{ @"proposalId": proposal.identifier, @"status": proposal.status,
+			@"document": target ? ContextDocument(target) : (id)NSNull.null }];
+	}
+	OakDocument* document = nil;
+	for(OakDocument* candidate in self.documents)
+		if([candidate.identifier.UUIDString isEqual:arguments[@"documentId"]]) { document = candidate; break; }
+	if(!document.isLoaded) return [EditorContextSnapshot response:editor_context::failure(@"The target buffer is not loaded in this terminal's window.", @"document_unavailable")];
+	NSDictionary* metadata = ContextDocument(document);
+	if(![metadata[@"revision"] isEqual:arguments[@"revision"]]) return [EditorContextSnapshot response:editor_context::failure(@"The buffer changed. Read its current text and revision before proposing edits.", @"document_changed")];
+	if(self.editReviewController || self.window.attachedSheet || !self.window.isVisible) return [EditorContextSnapshot response:editor_context::failure(@"Close the editor's current review or dialog and show its window before proposing edits.", @"review_unavailable")];
+	EditorContextBuffer* buffer = [EditorContextBuffer bufferForDocument:document revision:metadata[@"revision"]];
+	__weak DocumentWindowController* weakSelf = self;
+	NSUUID* ownerId = self.identifier;
+	return [EditorContextSnapshot action:^(double deadline, BOOL (^canCommit)(void), void (^completion)(NSDictionary*)){
+		dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
+			NSDictionary* plan = [buffer editPlanForArguments:arguments document:metadata deadline:deadline];
+			NSString* error = nil;
+			BufferEditProposal* proposal = plan[@"error"] ? nil : [[BufferEditProposal alloc] initWithEditPlan:plan summary:arguments[@"summary"] error:&error];
+			dispatch_async(dispatch_get_main_queue(), ^{
+				DocumentWindowController* controller = weakSelf;
+				if(!canCommit() || ![controller.identifier isEqual:ownerId]) { completion(editor_context::failure(@"The proposal expired or its terminal session changed.", @"proposal_cancelled")); return; }
+				if(![controller.documents containsObject:document] || !document.isLoaded || ![metadata isEqual:ContextDocument(document)]) { completion(editor_context::failure(@"The buffer changed or closed while preparing the proposal. Read it again.", @"document_changed")); return; }
+				if(plan[@"error"]) { completion(plan); return; }
+				if(!proposal) { completion(editor_context::failure(error ?: @"The edit proposal could not be prepared.", @"invalid_proposal")); return; }
+				if(controller.editReviewController || controller.window.attachedSheet || !controller.window.isVisible) { completion(editor_context::failure(@"The editor cannot show a review now. Try again after closing its current review or dialog.", @"review_unavailable")); return; }
+				if(!canCommit()) { completion(editor_context::failure(@"The proposal expired before review.", @"proposal_cancelled")); return; }
+				if(!controller.editProposals) { controller.editProposals = [NSMutableDictionary dictionary]; controller.editProposalOrder = [NSMutableArray array]; }
+				// Evict the oldest: its outcome has been seen longest, whereas an arbitrary victim could be
+				// the decision the agent is about to poll for. Only one review is open at a time, so it is never pending.
+				if(controller.editProposals.count >= 8) { [controller.editProposals removeObjectForKey:controller.editProposalOrder.firstObject]; [controller.editProposalOrder removeObjectAtIndex:0]; }
+				controller.editProposals[proposal.identifier] = proposal;
+				[controller.editProposalOrder addObject:proposal.identifier];
+				controller.editReviewController = [proposal reviewControllerWithCompletion:^(NSModalResponse response){
+					DocumentWindowController* owner = weakSelf;
+					owner.editReviewController = nil;
+					if(response != NSAlertFirstButtonReturn) { [proposal discard]; return; }
+					BOOL available = [owner.identifier isEqual:ownerId] && owner.editProposals[proposal.identifier] == proposal && [owner.documents containsObject:document];
+					if(!available || ![proposal applyToDocument:document]) {
+						[proposal markStale];
+						if(owner.window.isVisible)
+							[[NSAlert tmAlertWithMessageText:@"Edits Could Not Be Applied" informativeText:@"The buffer changed or closed after the proposal was prepared. Ask the agent to read the current buffer and propose the changes again." buttons:@"OK", nil] beginSheetModalForWindow:owner.window completionHandler:nil];
+					}
+				}];
+				[controller.editReviewController.window center];
+				[controller.editReviewController showWindow:nil];
+				completion(@{ @"proposalId": proposal.identifier, @"status": @"pending_review", @"applied": @NO, @"document": metadata });
+			});
+		});
+	}];
+}
+
+- (BOOL)navigationPathIsInsideProject:(NSString*)path
+{
+	NSString* root = [self.projectPath stringByResolvingSymlinksInPath];
+	if(!root)
+		return NO;
+	// A trailing slash would let the prefix test accept a sibling such as
+	// "/project2" once the remainder "/2" is joined back on, so normalise first.
+	if(root.length > 1 && [root hasSuffix:@"/"])
+		root = [root substringToIndex:root.length - 1];
+	NSString* candidate = [path stringByResolvingSymlinksInPath];
+	if(![candidate hasPrefix:root])
+		return NO;
+	return candidate.length == root.length || [[candidate substringFromIndex:root.length] hasPrefix:@"/"];
+}
+
+- (EditorContextSnapshot*)editorNavigation:(NSDictionary*)arguments
+{
+    __weak DocumentWindowController* weakSelf = self;
+    NSUUID* owner = self.identifier;
+    return [EditorContextSnapshot action:^(double deadline, BOOL (^authorized)(void), void (^completion)(NSDictionary*)){
+        DocumentWindowController* controller = weakSelf;
+        if(!controller || ![controller.identifier isEqual:owner]) { completion(editor_context::failure(@"The editor window has closed.", @"window_closed")); return; }
+        NSUInteger generation = ++controller.editorNavigationGeneration;
+        BOOL (^canCommit)(void) = ^{ return authorized() && [weakSelf.identifier isEqual:owner] && weakSelf.editorNavigationGeneration == generation; };
+        NSString* path = [arguments[@"path"] stringByStandardizingPath];
+        // Check, stat and open the same resolved path so a symlink swapped in afterwards cannot redirect the open.
+        NSString* resolvedPath = [path stringByResolvingSymlinksInPath];
+        OakDocument* target = nil;
+        for(OakDocument* candidate in controller.documents) {
+            if((arguments[@"documentId"] && [candidate.identifier.UUIDString isEqual:arguments[@"documentId"]]) ||
+               (path && [[candidate.path stringByStandardizingPath] isEqual:path])) { target = candidate; break; }
+        }
+        if(arguments[@"documentId"] && !target) { completion(editor_context::failure(@"Document is not open in this window.", @"document_unavailable")); return; }
+        // Opening a tab makes the buffer readable through the context tools, so the
+        // agent cannot widen its own reach beyond the window's project. Documents
+        // the user already opened stay navigable wherever they live.
+        if(path && !target && ![controller navigationPathIsInsideProject:resolvedPath]) {
+            NSString* message = controller.projectPath ? @"The path is outside this window's project directory." : @"The path is not open in this window, which has no project directory.";
+            completion(editor_context::failure(message, @"path_outside_project"));
+            return;
+        }
+        if(target.isLoaded) {
+            [controller loadNavigationDocument:target arguments:arguments deadline:deadline canCommit:canCommit completion:completion];
+            return;
+        }
+        NSString* file = target.path ?: resolvedPath;
+        if(!file) { completion(editor_context::failure(@"The document cannot be loaded.", @"document_unavailable")); return; }
+        // File metadata and buffer indexing stay off the UI thread. Never create
+        // a missing file or interpret a directory, device, or FIFO as a document.
+        dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
+            struct stat info;
+            BOOL regular = stat(file.fileSystemRepresentation, &info) == 0 && S_ISREG(info.st_mode);
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if(!canCommit()) { completion(editor_context::failure(@"Navigation expired or its terminal session changed.", @"navigation_cancelled")); return; }
+                if(!regular) { completion(editor_context::failure(@"path must name an existing regular local file.", @"file_unavailable")); return; }
+                OakDocument* document = target ?: [OakDocumentController.sharedInstance documentWithPath:file];
+                [weakSelf loadNavigationDocument:document arguments:arguments deadline:deadline canCommit:canCommit completion:completion];
+            });
+        });
+    }];
+}
+
+- (void)loadNavigationDocument:(OakDocument*)document arguments:(NSDictionary*)arguments deadline:(double)deadline canCommit:(BOOL(^)(void))canCommit completion:(void(^)(NSDictionary*))completion
+{
+    if(!canCommit()) { completion(editor_context::failure(@"Navigation expired or its terminal session changed.", @"navigation_cancelled")); return; }
+    BOOL alreadyLoaded = document.isLoaded;
+    [document loadWithoutUIWithCompletionHandler:^(OakDocumentIOResult status, NSString* error, oak::uuid_t const&){
+        if(status != OakDocumentIOResultSuccess) {
+            completion(editor_context::failure(error.length ? error : @"The file could not be opened without a dialog. Open it manually in TextMate first.", @"file_unavailable"));
+            return;
+        }
+        if(!alreadyLoaded && !document.isOnDisk) {
+            [document close]; completion(editor_context::failure(@"The file disappeared while opening it.", @"file_unavailable")); return;
+        }
+        // Each successful load owns one temporary open reference. Release it on
+        // every completion path; adding a tab supplies its own reference.
+        if(!canCommit()) { [document close]; completion(editor_context::failure(@"Navigation expired or its terminal session changed.", @"navigation_cancelled")); return; }
+        NSDictionary* metadata = ContextDocument(document);
+        if(arguments[@"revision"] && ![arguments[@"revision"] isEqual:metadata[@"revision"]]) {
+            [document close]; completion(editor_context::failure(@"The document changed. Read its current context before navigating.", @"document_changed")); return;
+        }
+        EditorContextBuffer* buffer = arguments[@"line"] ? [EditorContextBuffer bufferForDocument:document revision:metadata[@"revision"]] : nil;
+        dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
+            NSDictionary* plan = buffer ? [buffer navigationForArguments:arguments deadline:deadline] : @{};
+            dispatch_async(dispatch_get_main_queue(), ^{
+                NSDictionary* failure = nil;
+                if(!canCommit()) failure = editor_context::failure(@"Navigation expired or its terminal session changed.", @"navigation_cancelled");
+                else if(plan[@"error"]) failure = plan;
+                else if(![metadata[@"revision"] isEqual:ContextDocument(document)[@"revision"]]) failure = editor_context::failure(@"The document changed while locating the range. Try again with its current revision.", @"document_changed");
+                else if(arguments[@"documentId"] && ![self.documents containsObject:document]) failure = editor_context::failure(@"Document is no longer open in this window.", @"document_unavailable");
+                if(failure) { [document close]; completion(failure); return; }
+                BOOL opened = ![self.documents containsObject:document];
+                if(opened) self.documents = [(self.documents ?: @[]) arrayByAddingObject:document];
+                self.selectedTabIndex = [self.documents indexOfObject:document];
+                self.selectedDocument = document;
+                if(plan[@"selectionString"]) {
+                    self.textView.selectionString = plan[@"selectionString"];
+                    [self.textView ensureSelectionIsInVisibleArea:nil];
+                }
+                if([arguments[@"focus"] boolValue]) {
+                    [self.window makeKeyAndOrderFront:nil];
+                    [self.window makeFirstResponder:self.textView];
+                }
+                NSDictionary* response = @{ @"status": @"navigated", @"windowId": self.identifier.UUIDString,
+                    @"document": metadata, @"opened": @(opened), @"focused": @([arguments[@"focus"] boolValue]),
+                    @"coordinateEncoding": @"utf-16", @"lineBase": @1, @"columnBase": @1,
+                    @"range": plan[@"range"] ?: (id)NSNull.null };
+                [document close];
+                completion(response);
+            });
+        });
+    }];
+}
+
 + (KVDB*)sharedProjectStateDB
 {
 	NSString* appSupport = [[NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES) objectAtIndex:0] stringByAppendingPathComponent:@"TextMate"];
@@ -183,6 +472,9 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 {
 	if((self = [super init]))
 	{
+		self.editorChanges = [[EditorContextChanges alloc] init];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(editorContextDocumentChanged:) name:OakDocumentContentDidChangeNotification object:nil];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(editorContextDiagnosticsChanged:) name:LSPDiagnosticsDidChangeNotification object:nil];
 		self.identifier = [NSUUID UUID];
 
 		self.tabBarView = [[OakTabBarView alloc] initWithFrame:NSZeroRect];
@@ -204,16 +496,64 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		self.window.releasedWhenClosed = NO;
 
 		_titlebarViewController = [[NSTitlebarAccessoryViewController alloc] init];
+		// AppKit otherwise forces the accessory to its standard 36pt height on macOS 26+
+		// instead of the tab bar's 23pt intrinsic height.
+		_titlebarViewController.automaticallyAdjustsSize = NO;
 		self.tabBarView.frameSize = self.tabBarView.intrinsicContentSize;
 		_titlebarViewController.view = self.tabBarView;
 		_titlebarViewController.fullScreenMinHeight = NSHeight(self.tabBarView.frame);
 		[self.window addTitlebarAccessoryViewController:_titlebarViewController];
 
-		OakAddAutoLayoutViewsToSuperview(@[ self.layoutView ], self.window.contentView);
+		self.terminalPanelController = [[TerminalPanelViewController alloc] initWithContentView:self.layoutView];
+		__weak DocumentWindowController* terminalOwner = self;
+		self.terminalPanelController.terminalDirectoryProvider = ^{
+			return terminalOwner.terminalStartDirectory ?: NSHomeDirectory();
+		};
+		self.terminalPanelController.lastSessionClosedHandler = ^{
+			// Deferred: this fires from inside the session teardown.
+			dispatch_async(dispatch_get_main_queue(), ^{
+				if(terminalOwner.terminalOnlyWindow && terminalOwner.documents.count == 1 && is_disposable(terminalOwner.selectedDocument))
+					[terminalOwner.window performClose:nil];
+			});
+		};
+		self.terminalPanelController.terminalEnvironmentProvider = ^(NSString* directory){ return TerminalEnvironmentForDirectory(directory); };
+		self.terminalPanelController.contextEnvironmentProvider = ^(NSUUID* session){
+            return [EditorContextService.sharedService environmentForSession:session provider:^EditorContextSnapshot*(NSString* method, NSDictionary* arguments){
+                return [terminalOwner editorContextForMethod:method arguments:arguments];
+            }];
+        };
+        self.terminalPanelController.contextSessionClosed = ^(NSUUID* session){
+            [EditorContextService.sharedService revokeSession:session];
+        };
+        self.terminalPanelController.openTerminalFile = ^(NSURL* url, NSInteger line, NSInteger column){
+			NSMutableDictionary* item = [@{ @"path": url.path } mutableCopy];
+			if(line > 0) item[@"selectionString"] = [NSString stringWithFormat:@"%ld:%ld", (long)line, (long)MAX(1, column)];
+			[terminalOwner openItems:@[ item ] closingOtherTabs:NO activate:YES];
+		};
+		self.terminalPanelController.terminalAttentionDidChange = ^{
+			[terminalOwner updateTerminalAttentionSubtitle];
+		};
+		self.terminalPanelController.detachSessionHandler = ^(NSUUID* identifier){
+			DocumentWindowController* source = terminalOwner;
+			if(!source) return;
+			DocumentWindowController* destination = [[DocumentWindowController alloc] init];
+			destination.defaultProjectPath = source.terminalStartDirectory;
+			destination.terminalOnlyWindow = YES;
+			destination.documents = @[ [OakDocumentController.sharedInstance untitledDocument] ];
+			[destination openAndSelectDocument:destination.documents.firstObject activate:YES];
+			[destination.terminalPanelController takePlacementFromPanel:source.terminalPanelController];
+			destination.terminalPanelController.panelVisible = YES;
+			[destination.terminalPanelController takeTerminalSession:identifier fromPanel:source.terminalPanelController];
+			[destination updateTerminalTheme];
+			[destination showWindow:nil];
+			[destination.terminalPanelController focusTerminal];
+		};
+
+		OakAddAutoLayoutViewsToSuperview(@[ self.terminalPanelController.view ], self.window.contentView);
 		self.window.initialFirstResponder = self.textView;
 
-		[self.window.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[view]|" options:0 metrics:nil views:@{ @"view": self.layoutView }]];
-		[self.window.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[view]|" options:0 metrics:nil views:@{ @"view": self.layoutView }]];
+		[self.window.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[view]|" options:0 metrics:nil views:@{ @"view": self.terminalPanelController.view }]];
+		[self.window.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[view]|" options:0 metrics:nil views:@{ @"view": self.terminalPanelController.view }]];
 
 		_arrayController = [[NSArrayController alloc] init];
 		[_arrayController bind:NSContentBinding toObject:self withKeyPath:@"documents" options:nil];
@@ -317,8 +657,17 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 
 - (void)windowWillClose:(NSNotification*)aNotification
 {
+	[self.editReviewController close];
+	self.editReviewController = nil;
+	[self.projectChangesController close];
+	self.projectChangesController = nil;
+	[self.terminalPanelController stopTerminal];
 	if((([self.window styleMask] & NSWindowStyleMaskFullScreen) != NSWindowStyleMaskFullScreen) && !self.window.isZoomed)
 		[NSUserDefaults.standardUserDefaults setObject:NSStringFromRect([self windowFrame]) forKey:@"DocumentControllerWindowFrame"];
+
+	// Resign first responder before teardown to let TextInputUI disconnect cleanly
+	if([self.window.firstResponder isKindOfClass:[NSView class]])
+		[self.window makeFirstResponder:nil];
 
 	[_arrayController unbind:NSContentBinding];
 
@@ -490,6 +839,12 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	}];
 }
 
+// Closing the window outright would end its running shells without asking.
+- (BOOL)keepsWindowWithoutDocuments
+{
+	return self.fileBrowserVisible || self.terminalPanelController.terminalSessionIdentifiers.count;
+}
+
 - (void)closeTabsAtIndexes:(NSIndexSet*)anIndexSet askToSaveChanges:(BOOL)askToSaveFlag createDocumentIfEmpty:(BOOL)createIfEmptyFlag activate:(BOOL)activateFlag
 {
 	NSArray<OakDocument*>* documentsToClose = [_documents objectsAtIndexes:anIndexSet];
@@ -610,11 +965,28 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 
 - (BOOL)windowShouldClose:(id)sender
 {
+	BOOL terminalConfirmed = self.terminalCloseConfirmed;
+	self.terminalCloseConfirmed = NO;
+	if(!terminalConfirmed && self.terminalPanelController.terminalHasRunningWork)
+	{
+		[self.terminalPanelController confirmTerminalCloseInWindow:self.window completionHandler:^(BOOL canClose){
+			if(canClose)
+			{
+				self.terminalCloseConfirmed = YES;
+				[self.window performClose:nil];
+			}
+		}];
+		return NO;
+	}
+
 	if(!self.htmlOutputInWindow && _htmlOutputView.isRunningCommand)
 	{
 		[_htmlOutputView stopLoadingWithUserInteraction:YES completionHandler:^(BOOL didStop){
 			if(didStop)
+			{
+				self.terminalCloseConfirmed = YES; // already asked above
 				[sender performSelector:@selector(performClose:) withObject:self afterDelay:0];
+			}
 		}];
 		return NO;
 	}
@@ -712,7 +1084,44 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	}
 }
 
++ (void)confirmTerminalCloseForControllers:(NSArray<DocumentWindowController*>*)controllers completionHandler:(void(^)(BOOL canClose))callback
+{
+	if(controllers.count == 0)
+		return callback(YES);
+
+	DocumentWindowController* controller = controllers.firstObject;
+	[controller.window makeKeyAndOrderFront:nil]; // the sheet needs to say which window it belongs to
+	[controller.terminalPanelController confirmTerminalCloseInWindow:controller.window completionHandler:^(BOOL canClose){
+		if(canClose)
+				[self confirmTerminalCloseForControllers:[controllers subarrayWithRange:NSMakeRange(1, controllers.count-1)] completionHandler:callback];
+		else	callback(NO);
+	}];
+}
+
 + (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication*)sender
+{
+	NSMutableArray<DocumentWindowController*>* busy = [NSMutableArray array];
+	for(DocumentWindowController* controller in SortedControllers())
+	{
+		if(controller.terminalPanelController.terminalHasRunningWork)
+			[busy addObject:controller];
+	}
+
+	if(busy.count == 0)
+		return [self applicationShouldTerminateAfterTerminalCheck];
+
+	[self confirmTerminalCloseForControllers:busy completionHandler:^(BOOL canClose){
+		if(!canClose)
+			return [NSApp replyToApplicationShouldTerminate:NO];
+
+		NSApplicationTerminateReply reply = [self applicationShouldTerminateAfterTerminalCheck];
+		if(reply != NSTerminateLater) // otherwise the unsaved-documents flow replies itself
+			[NSApp replyToApplicationShouldTerminate:reply == NSTerminateNow];
+	}];
+	return NSTerminateLater;
+}
+
++ (NSApplicationTerminateReply)applicationShouldTerminateAfterTerminalCheck
 {
 	NSMutableArray<DocumentWindowController*>* controllers = [NSMutableArray array];
 	NSMutableArray<OakDocument*>* documents = [NSMutableArray array];
@@ -769,6 +1178,21 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 
 - (void)observeValueForKeyPath:(NSString*)keyPath ofObject:(id)anObject change:(NSDictionary*)change context:(void*)context
 {
+	if([keyPath isEqual:@"textView.selectionString"])
+	{
+		[self.editorChanges record:@"selection" documentId:self.selectedDocument.identifier.UUIDString];
+		return;
+	}
+	if([keyPath isEqual:@"selectedDocument"])
+		[self.editorChanges record:@"document" documentId:self.selectedDocument.identifier.UUIDString];
+	else if([keyPath hasPrefix:@"selectedDocument."] || [keyPath hasPrefix:@"arrayController.arrangedObjects."])
+		[self.editorChanges record:@"metadata" documentId:nil];
+	if(self.terminalPanelController.hasTerminal && ([keyPath isEqualToString:@"textView.font"] || [keyPath isEqualToString:@"textView.fontScaleFactor"] || [keyPath isEqualToString:@"textView.themeUUID"] || [keyPath isEqualToString:@"selectedDocument.fileType"] || [keyPath isEqualToString:@"selectedDocument"]))
+	{
+		// Theme notifications can arrive while OakTextView is replacing its document view.
+		dispatch_async(dispatch_get_main_queue(), ^{ [self updateTerminalTheme]; });
+	}
+
 	OakDocument* document = self.selectedDocument;
 	if([keyPath isEqualToString:@"selectedDocument.path"] || [keyPath isEqualToString:@"selectedDocument.displayName"])
 	{
@@ -791,6 +1215,21 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 		[self.tabBarView reloadData];
 		[[self class] scheduleSessionBackup:self];
 	}
+}
+
+- (void)editorContextDocumentChanged:(NSNotification*)notification
+{
+	OakDocument* document = notification.object;
+	if([self.documents containsObject:document])
+		[self.editorChanges record:@"content" documentId:document.identifier.UUIDString];
+}
+
+- (void)editorContextDiagnosticsChanged:(NSNotification*)notification
+{
+	NSString* uri = notification.userInfo[@"uri"];
+	for(OakDocument* document in self.documents)
+		if(document.path && [[NSURL fileURLWithPath:document.path].absoluteString isEqual:uri])
+			[self.editorChanges record:@"diagnostics" documentId:document.identifier.UUIDString];
 }
 
 - (BOOL)isDocumentSticky:(OakDocument*)aDocument
@@ -850,7 +1289,18 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	for(DocumentWindowController* delegate in SortedControllers())
 	{
 		if(delegate != self && !delegate.window.isMiniaturized)
+		{
+			// -close skips windowShouldClose:, so move the shells over instead of letting windowWillClose: end them.
+			NSArray<NSUUID*>* sessions = delegate.terminalPanelController.terminalSessionIdentifiers;
+			for(NSUUID* identifier in sessions)
+				[self.terminalPanelController takeTerminalSession:identifier fromPanel:delegate.terminalPanelController];
+			if(sessions.count)
+			{
+				self.terminalPanelController.panelVisible = YES;
+				[self updateTerminalTheme];
+			}
 			[delegate.window close];
+		}
 	}
 }
 
@@ -1065,7 +1515,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 			// Close the tab that failed to open
 			NSUInteger i = [_documents indexOfObject:document];
 			if(i != NSNotFound)
-				[self closeTabsAtIndexes:[NSIndexSet indexSetWithIndex:i] askToSaveChanges:NO createDocumentIfEmpty:self.fileBrowserVisible activate:activateFlag];
+				[self closeTabsAtIndexes:[NSIndexSet indexSetWithIndex:i] askToSaveChanges:NO createDocumentIfEmpty:self.keepsWindowWithoutDocuments activate:activateFlag];
 
 			if(_documents.count == 0)
 				[self close];
@@ -1291,6 +1741,22 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	}
 }
 
+// The terminal's unseen state is the only thing this window puts in the subtitle; the title and the
+// document tab bar's `documentEdited` flag stay the document's business. `subtitle` (unlike `title`)
+// is invisible in fullscreen and while minimized, so this only helps a window the user can see.
+- (void)updateTerminalAttentionSubtitle
+{
+	NSString* subtitle = self.terminalPanelController.terminalAttentionSubtitle;
+	if(subtitle.length == 0)
+		subtitle = nil;
+	if(self.terminalSubtitle == subtitle || [self.terminalSubtitle isEqualToString:subtitle])
+		return;
+	// Remembered only to skip redundant writes; the terminal is the sole writer of this subtitle.
+	self.terminalSubtitle = subtitle;
+	// AppKit rejects nil here even though the getter starts out empty; "" is the cleared state.
+	self.window.subtitle = subtitle ?: @"";
+}
+
 - (void)updateExternalAttributes
 {
 	struct attribute_rule_t { std::string attribute; path::glob_t glob; std::string group; };
@@ -1483,6 +1949,15 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	attributes.insert(_projectScopeAttributes.begin(), _projectScopeAttributes.end());
 	attributes.insert(_externalScopeAttributes.begin(), _externalScopeAttributes.end());
 
+	if (self.fileBrowserVisible) {
+		NSResponder *first = [self.window firstResponder];
+		if ([first isKindOfClass:[NSView class]] &&
+			[(NSView *)first isDescendantOf:self.fileBrowser.view])
+		{
+			attributes.insert("attr.filebrowser");
+		}
+	}
+
 	return [NSString stringWithCxxString:text::join(attributes, " ")];
 }
 
@@ -1492,6 +1967,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 
 - (void)setDocuments:(NSArray<OakDocument*>*)newDocuments
 {
+	if(![_documents isEqualToArray:newDocuments]) [self.editorChanges record:@"documents" documentId:nil];
 	for(OakDocument* document in newDocuments)
 	{
 		document.keepBackupFile = YES;
@@ -1740,7 +2216,7 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 			{
 				BOOL wasSelected = dragIndex == sourceTabBar.selectedTabIndex;
 
-				if(delegate.fileBrowserVisible || delegate.documents.count > 1)
+				if(delegate.keepsWindowWithoutDocuments || delegate.documents.count > 1)
 						[delegate closeTabsAtIndexes:[NSIndexSet indexSetWithIndex:dragIndex] askToSaveChanges:NO createDocumentIfEmpty:YES activate:YES];
 				else	[delegate close];
 
@@ -1859,6 +2335,83 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 			self.newWindowFrame = self.window.frame;
 		}
 	}
+	[[self class] scheduleSessionBackup:self];
+}
+
+- (void)updateTerminalTheme
+{
+	if(!self.terminalPanelController.hasTerminal) // nothing to theme until the shell has been started once
+		return;
+	NSFont* font = self.textView.font;
+	// fontWithDescriptor:size: is nullable, and the Swift side takes a non-optional font.
+	if(NSFont* terminalFont = font ? [NSFont fontWithDescriptor:font.fontDescriptor size:font.pointSize * self.textView.fontScaleFactor] : nil)
+		[self.terminalPanelController applyTerminalFont:terminalFont];
+	if(!self.selectedDocument.fileType) // styles_for_scope ASSERTs on an empty scope
+		return;
+	if(theme_ptr theme = self.textView.theme)
+	{
+		auto const& styles = theme->styles_for_scope(scope::scope_t(to_s(self.selectedDocument.fileType)));
+		NSColor* foreground = [NSColor colorWithCGColor:styles.foreground() ?: theme->foreground()];
+		// ANSI red, green, yellow, blue, magenta, cyan borrow common syntax roles.
+		NSMutableArray<NSColor*>* syntaxColors = [NSMutableArray array];
+		for(char const* syntaxScope : { "invalid", "string", "constant.numeric", "entity.name.function", "keyword", "support.type" })
+		{
+			auto const& syntax = theme->styles_for_scope(scope::scope_t(to_s(self.selectedDocument.fileType) + " " + syntaxScope));
+			[syntaxColors addObject:syntax.foreground() ? [NSColor colorWithCGColor:syntax.foreground()] : foreground];
+		}
+		[self.terminalPanelController applyTerminalBackground:[NSColor colorWithCGColor:theme->background(to_s(self.selectedDocument.fileType))]
+			foreground:foreground
+			caret:styles.caret() ? [NSColor colorWithCGColor:styles.caret()] : foreground
+			selection:styles.selection() ? [NSColor colorWithCGColor:styles.selection()] : NSColor.selectedTextBackgroundColor
+			syntaxColors:syntaxColors];
+	}
+}
+
+- (NSString*)terminalStartDirectory
+{
+	// An explicitly opened project takes precedence over an older inferred document/startup folder.
+	return self.defaultProjectPath ?: self.projectPath ?: self.fileBrowser.path ?: [self.selectedDocument.path stringByDeletingLastPathComponent];
+}
+
+- (IBAction)toggleTerminalPanel:(id)sender
+{
+	NSResponder* responder = self.window.firstResponder;
+	if(self.terminalPanelController.panelVisible && [responder isKindOfClass:NSView.class] &&
+	   [(NSView*)responder isDescendantOf:self.terminalPanelController.view] &&
+	   ![(NSView*)responder isDescendantOf:self.layoutView])
+		[self.window makeFirstResponder:self.textView];
+	self.terminalPanelController.panelVisible = !self.terminalPanelController.panelVisible;
+	if(self.terminalPanelController.panelVisible)
+	{
+		[self.terminalPanelController startTerminal];
+		[self updateTerminalTheme];
+		[self.terminalPanelController focusTerminal];
+	}
+	[[self class] scheduleSessionBackup:self];
+}
+
+- (IBAction)showProjectChanges:(id)sender
+{
+	if(!self.projectChangesController) {
+		__weak DocumentWindowController* weakSelf = self;
+		self.projectChangesController = [[ProjectChangesWindowController alloc] initWithDirectory:self.projectPath ?: self.terminalStartDirectory buffers:^NSDictionary*{
+			NSMutableDictionary* buffers = [NSMutableDictionary dictionary];
+			for(OakDocument* document in weakSelf.documents)
+				if(document.path && document.isLoaded && document.isDocumentEdited)
+					buffers[document.path.stringByStandardizingPath] = [ProjectChangesBuffer captureDocument:document];
+			return buffers;
+		} openFile:^(NSString* path, NSUInteger line){
+			[weakSelf openItems:@[@{ @"path": path, @"selectionString": [NSString stringWithFormat:@"%lu:1", (unsigned long)line] }] closingOtherTabs:NO activate:YES];
+		}];
+	}
+	self.projectChangesController.directory = self.projectPath ?: self.terminalStartDirectory;
+	[self.projectChangesController showWindow:sender];
+}
+
+- (IBAction)takeTerminalPanelPositionFrom:(NSMenuItem*)sender
+{
+	self.terminalPanelController.panelPosition = sender.representedObject;
+	[NSUserDefaults.standardUserDefaults setObject:self.terminalPanelController.panelPosition forKey:kUserDefaultsTerminalPanelPlacementKey];
 	[[self class] scheduleSessionBackup:self];
 }
 
@@ -2258,7 +2811,21 @@ static NSArray* const kObservedKeyPaths = @[ @"arrayController.arrangedObjects.p
 	};
 
 	BOOL active = YES;
-	if([menuItem action] == @selector(toggleFileBrowser:))
+	if([menuItem action] == @selector(toggleTerminalPanel:))
+	{
+		[menuItem setTitle:self.terminalPanelController.panelVisible ? @"Hide Terminal Panel" : @"Show Terminal Panel"];
+#if !HAVE_OAK_SWIFTUI
+		active = NO; // built without the Swift terminal component
+#endif
+	}
+	else if([menuItem action] == @selector(takeTerminalPanelPositionFrom:))
+	{
+		menuItem.state = [self.terminalPanelController.panelPosition isEqual:menuItem.representedObject] ? NSControlStateValueOn : NSControlStateValueOff;
+#if !HAVE_OAK_SWIFTUI
+		active = NO;
+#endif
+	}
+	else if([menuItem action] == @selector(toggleFileBrowser:))
 		[menuItem setTitle:self.fileBrowserVisible ? @"Hide File Browser" : @"Show File Browser"];
 	else if([menuItem action] == @selector(toggleHTMLOutput:))
 	{
@@ -2460,6 +3027,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 	++DisableSessionSavingCount;
 
 	NSWindow* keyWindow;
+	NSMutableArray<NSWindow*>* fullScreenWindows = [NSMutableArray array];
 
 	NSDictionary* session = [NSDictionary dictionaryWithContentsOfFile:[self sessionPath]];
 	for(NSDictionary* project in session[@"projects"])
@@ -2478,13 +3046,16 @@ static NSUInteger DisableSessionSavingCount = 0;
 
 		if([project[@"miniaturized"] boolValue])
 		{
+			[controller.window orderBack:self];
 			[controller.window miniaturize:nil];
+		}
+		else if([project[@"fullScreen"] boolValue])
+		{
+			[fullScreenWindows addObject:controller.window];
 		}
 		else
 		{
-			if([project[@"fullScreen"] boolValue])
-				[controller.window toggleFullScreen:self];
-			else if([project[@"zoomed"] boolValue])
+			if([project[@"zoomed"] boolValue])
 				[controller.window zoom:self];
 
 			[controller.window orderFront:self];
@@ -2496,6 +3067,15 @@ static NSUInteger DisableSessionSavingCount = 0;
 
 	[keyWindow makeKeyWindow];
 
+	// Defer fullscreen transitions until regular windows are fully ordered
+	if(fullScreenWindows.count)
+	{
+		dispatch_async(dispatch_get_main_queue(), ^{
+			for(NSWindow* window in fullScreenWindows)
+				[window toggleFullScreen:self];
+		});
+	}
+
 	--DisableSessionSavingCount;
 	return res;
 }
@@ -2506,6 +3086,14 @@ static NSUInteger DisableSessionSavingCount = 0;
 		self.fileBrowserWidth = [fileBrowserWidth floatValue];
 	if(NSString* htmlOutputSize = project[@"htmlOutputSize"])
 		self.htmlOutputSize = NSSizeFromString(htmlOutputSize);
+
+	if(NSString* position = project[@"terminalPanelPosition"])
+		self.terminalPanelController.panelPosition = position;
+	if(NSNumber* width = project[@"terminalPanelWidth"])
+		self.terminalPanelController.panelWidth = width.doubleValue;
+	if(NSNumber* height = project[@"terminalPanelHeight"])
+		self.terminalPanelController.panelHeight = height.doubleValue;
+	self.terminalPanelController.panelVisible = [project[@"terminalPanelVisible"] boolValue];
 
 	self.defaultProjectPath = project[@"projectPath"];
 	self.projectPath        = project[@"projectPath"];
@@ -2551,6 +3139,13 @@ static NSUInteger DisableSessionSavingCount = 0;
 	self.selectedTabIndex = selectedTabIndex;
 
 	[self openAndSelectDocument:documents[selectedTabIndex] activate:YES];
+
+	// Start the shell once the project/document context exists, so it opens in the window's folder.
+	if(self.terminalPanelController.panelVisible)
+	{
+		[self.terminalPanelController startTerminal];
+		[self updateTerminalTheme];
+	}
 }
 
 - (NSDictionary*)sessionInfoIncludingUntitledDocuments:(BOOL)includeUntitled
@@ -2570,6 +3165,10 @@ static NSUInteger DisableSessionSavingCount = 0;
 		res[@"windowFrame"] = [self.window stringWithSavedFrame];
 
 	res[@"miniaturized"]       = @([self.window isMiniaturized]);
+	res[@"terminalPanelVisible"] = @(self.terminalPanelController.panelVisible);
+	res[@"terminalPanelPosition"] = self.terminalPanelController.panelPosition;
+	res[@"terminalPanelWidth"] = @(self.terminalPanelController.panelWidth);
+	res[@"terminalPanelHeight"] = @(self.terminalPanelController.panelHeight);
 	res[@"htmlOutputSize"]     = NSStringFromSize(self.htmlOutputSize);
 	res[@"fileBrowserVisible"] = @(self.fileBrowserVisible);
 	res[@"fileBrowserWidth"]   = @(self.fileBrowserWidth);
@@ -2613,7 +3212,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 	if(controllers.count == 1)
 	{
 		DocumentWindowController* controller = controllers.firstObject;
-		if(!controller.projectPath && !controller.fileBrowserVisible && controller.documents.count == 1 && is_disposable(controller.selectedDocument))
+		if(!controller.projectPath && !controller.fileBrowserVisible && !controller.terminalPanelController.panelVisible && controller.documents.count == 1 && is_disposable(controller.selectedDocument))
 			controllers = nil;
 	}
 
@@ -2657,8 +3256,14 @@ static NSUInteger DisableSessionSavingCount = 0;
 
 	if(NSString* projectDir = self.projectPath)
 	{
-		res["TM_PROJECT_DIRECTORY"] = [projectDir fileSystemRepresentation];
-		res["TM_PROJECT_UUID"]      = to_s(self.identifier);
+		// The project path is seeded once (session restore, first pathed document,
+		// project folder menu) and never re-validated, so it can outlive the folder
+		// it names. Skip the variable rather than clear the path: consumers fall back
+		// to TM_DIRECTORY, and an offline volume recovers when it is mounted again.
+		BOOL isDirectory = NO;
+		if([NSFileManager.defaultManager fileExistsAtPath:projectDir isDirectory:&isDirectory] && isDirectory)
+			res["TM_PROJECT_DIRECTORY"] = [projectDir fileSystemRepresentation];
+		res["TM_PROJECT_UUID"] = to_s(self.identifier);
 	}
 
 	return res;

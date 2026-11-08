@@ -11,7 +11,7 @@
 #include <text/format.h>
 #include <cf/cf.h>
 
-struct expand_visitor : boost::static_visitor<void>
+struct expand_visitor
 {
 	std::function<std::optional<std::string>(std::string const&)> variable;
 	snippet::run_command_callback_t* callback;
@@ -31,7 +31,7 @@ struct expand_visitor : boost::static_visitor<void>
 	void traverse (parser::nodes_t const& nodes)
 	{
 		for(auto const& it : nodes)
-			boost::apply_visitor(*this, it);
+			std::visit(*this, it.data);
 	}
 
 	void handle_case_changes ()
@@ -217,7 +217,7 @@ struct expand_visitor : boost::static_visitor<void>
 				else if(duration < 90)       asprintf(&tmp, "a minute ago");
 				else if(duration < 3570)     asprintf(&tmp, "%.0f minutes ago", duration/60);
 				else if(duration < 5400)     asprintf(&tmp, "an hour ago");
-				else if(duration < 84600)    asprintf(&tmp, "%.0f hours ago", duration/(60*60));
+				else if(duration < 86400)    asprintf(&tmp, "%.0f hours ago", duration/(60*60));
 				else if(duration < 129600)   asprintf(&tmp, "a day ago");
 				else if(duration < 561600)   asprintf(&tmp, "%.0f days ago", duration/(24*60*60));
 				else if(duration < 1036800)  asprintf(&tmp, "a week ago");

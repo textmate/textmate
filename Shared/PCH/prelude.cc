@@ -21,8 +21,7 @@
 #include <numeric>
 #include <random>
 #include <thread>
-#include <boost/crc.hpp>
-#include <boost/variant.hpp>
-#include <sparsehash/dense_hash_map>
+#include <unordered_map>
+#include <variant>
 
 #endif /* end of include guard: PRELUDE_CC_PCH_U5CKEP2N */

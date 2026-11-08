@@ -1,7 +1,9 @@
 #import <OSAKit/OSAKit.h>
+#import <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
 #import "plugin.h"
 #import <buffer/buffer.h>
 #import <bundles/bundles.h>
+#import <OakSystem/application.h>
 #import <file/bytes.h>
 #import <file/type.h>
 #import <file/reader.h>
@@ -27,7 +29,7 @@ static void initialize (CFBundleRef generatorBundle)
 		NSBundle* parentBundle = [NSBundle bundleWithPath:parentBundlePath];
 
 		settings_t::set_default_settings_path([[parentBundle pathForResource:@"Default" ofType:@"tmProperties"] fileSystemRepresentation]);
-		settings_t::set_global_settings_path(path::join(path::home(), "Library/Application Support/TextMate/Global.tmProperties"));
+		settings_t::set_global_settings_path(oak::application_t::support("Global.tmProperties"));
 
 		// Load bundle index
 		std::vector<std::string> paths;
@@ -35,7 +37,7 @@ static void initialize (CFBundleRef generatorBundle)
 			paths.push_back(path::join(path, "Bundles"));
 
 		plist::cache_t cache;
-		cache.load_capnp(path::join(path::home(), "Library/Caches/com.macromates.TextMate/BundlesIndex.binary"));
+		cache.load(path::join(path::home(), "Library/Caches/com.macromates.TextMate/BundlesIndex.plist"));
 
 		auto index = create_bundle_index(paths, cache);
 		bundles::set_index(index.first, index.second);
@@ -198,7 +200,7 @@ OSStatus TextMateQuickLookPlugIn_GeneratePreviewForURL (void* instance, QLPrevie
 	{
 		// We don't know the type, let the system handle it
 		NSData* data = [NSData dataWithContentsOfURL:(__bridge NSURL*)url];
-		QLPreviewRequestSetDataRepresentation(request, (__bridge CFDataRef)data, kUTTypePlainText, nil);
+		QLPreviewRequestSetDataRepresentation(request, (__bridge CFDataRef)data, (__bridge CFStringRef)UTTypePlainText.identifier, nil);
 		return noErr;
 	}
 
@@ -209,11 +211,9 @@ OSStatus TextMateQuickLookPlugIn_GeneratePreviewForURL (void* instance, QLPrevie
 	NSUserDefaults* userDefaults = [[NSUserDefaults alloc] initWithSuiteName:@"com.macromates.TextMate"];
 	NSString* appearance = [userDefaults stringForKey:@"themeAppearance"];
 	BOOL darkMode = [appearance isEqualToString:@"dark"];
-	if(@available(macos 10.14, *))
-	{
-		if(!darkMode && ![appearance isEqualToString:@"light"]) // If it is not ‘light’ then assume ‘auto’
-			darkMode = [[NSAppearance.currentAppearance bestMatchFromAppearancesWithNames:@[ NSAppearanceNameAqua, NSAppearanceNameDarkAqua ]] isEqualToString:NSAppearanceNameDarkAqua];
-	}
+	// Appearance detection is always available on macOS 14.0+
+	if(!darkMode && ![appearance isEqualToString:@"light"]) // If it is not 'light' then assume 'auto'
+		darkMode = [[NSAppearance.currentAppearance bestMatchFromAppearancesWithNames:@[ NSAppearanceNameAqua, NSAppearanceNameDarkAqua ]] isEqualToString:NSAppearanceNameDarkAqua];
 	NSString* themeUUID = [userDefaults stringForKey:darkMode ? @"darkModeThemeUUID" : @"universalThemeUUID"];
 
 	settings_t const settings = settings_for_path(URLtoString(url), fileType);
@@ -223,7 +223,7 @@ OSStatus TextMateQuickLookPlugIn_GeneratePreviewForURL (void* instance, QLPrevie
 	if(!output)
 	{
 		NSData* data = [NSData dataWithContentsOfURL:(__bridge NSURL*)url];
-		QLPreviewRequestSetDataRepresentation(request, (__bridge CFDataRef)data, kUTTypePlainText, nil);
+		QLPreviewRequestSetDataRepresentation(request, (__bridge CFDataRef)data, (__bridge CFStringRef)UTTypePlainText.identifier, nil);
 		return noErr;
 	}
 
@@ -236,7 +236,7 @@ OSStatus TextMateQuickLookPlugIn_GeneratePreviewForURL (void* instance, QLPrevie
 		NSBackgroundColorDocumentAttribute: theme ? [NSColor colorWithCGColor:theme->background(fileType)] : [NSColor whiteColor],
 	}];
 
-	QLPreviewRequestSetDataRepresentation(request, (__bridge CFDataRef)outputData, kUTTypeRTF, nil);
+	QLPreviewRequestSetDataRepresentation(request, (__bridge CFDataRef)outputData, (__bridge CFStringRef)UTTypeRTF.identifier, nil);
 	return noErr;
 }
 

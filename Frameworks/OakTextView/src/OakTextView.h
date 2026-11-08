@@ -1,14 +1,18 @@
 #import "GutterView.h"
+#import <selection/types.h>
 #import <OakAppKit/OakView.h>
 #import <theme/theme.h>
 #import <command/parser.h>
 #import <oak/debug.h>
+
+extern NSNotificationName const OakTextViewThemeDidChangeNotification;
 
 extern int32_t const NSWrapColumnWindowWidth;
 extern int32_t const NSWrapColumnAskUser;
 extern NSString* const kUserDefaultsWrapColumnPresetsKey;
 
 @class OakDocument;
+@class OakTextView;
 
 namespace bundles { struct item_t; typedef std::shared_ptr<item_t> item_ptr; }
 
@@ -24,6 +28,8 @@ enum OTVFontSmoothing : NSUInteger
 
 @protocol OakTextViewDelegate <NSObject>
 @optional
+// Return YES to consume a Command-click for scope inspection.
+- (BOOL)textView:(OakTextView*)textView inspectScope:(NSString*)scope;
 - (NSString*)scopeAttributes;
 - (std::map<std::string, std::string>)variables;
 @end
@@ -48,6 +54,7 @@ enum OTVFontSmoothing : NSUInteger
 @property (nonatomic, readonly) BOOL                        hasMultiLineSelection;
 @property (nonatomic, readonly) BOOL                        hasSelection;
 @property (nonatomic) NSString*                             selectionString;
+- (void)ensureSelectionIsInVisibleArea:(id)sender;
 @property (nonatomic, readonly) NSString*                   symbol;
 
 @property (nonatomic, getter = isRecordingMacro) BOOL       recordingMacro;
@@ -61,6 +68,10 @@ enum OTVFontSmoothing : NSUInteger
 - (scope::context_t)scopeContext;
 - (folding_state_t)foldingStateForLine:(NSUInteger)lineNumber;
 
+// Raw byte coordinates in editor order, capped at 129 (128 plus truncation sentinel).
+- (ng::ranges_t)editorContextByteRanges;
+- (NSUInteger)editorContextCaretByteOffset;
+
 - (void)updateDocumentMetadata;
 
 - (IBAction)toggleColumnSelection:(id)sender;
@@ -68,9 +79,11 @@ enum OTVFontSmoothing : NSUInteger
 - (IBAction)toggleFoldingAtLine:(NSUInteger)lineNumber recursive:(BOOL)flag;
 - (IBAction)toggleShowInvisibles:(id)sender;
 - (IBAction)toggleScrollPastEnd:(id)sender;
+- (IBAction)toggleInlineDiagnostics:(id)sender;
 
 - (IBAction)saveScratchMacro:(id)sender;
 
 - (void)performBundleItem:(bundles::item_ptr)anItem;
 - (void)updateEnvironment:(std::map<std::string, std::string>&)res;
+
 @end

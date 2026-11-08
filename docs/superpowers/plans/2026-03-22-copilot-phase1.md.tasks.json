@@ -1,0 +1,14 @@
+{
+  "planPath": "docs/superpowers/plans/2026-03-22-copilot-phase1.md",
+  "tasks": [
+    {"id": 1, "subject": "Task 1: LSPClient Delegate Extensions", "status": "pending"},
+    {"id": 2, "subject": "Task 2: CopilotManager — Binary Detection & Lifecycle", "status": "pending", "blockedBy": [1]},
+    {"id": 3, "subject": "Task 3: CopilotManager — Init Protocol & Auth", "status": "pending", "blockedBy": [2]},
+    {"id": 4, "subject": "Task 4: CopilotManager — Document Sync", "status": "pending", "blockedBy": [3]},
+    {"id": 5, "subject": "Task 5: CopilotManager — Inline Completion Request", "status": "pending", "blockedBy": [3]},
+    {"id": 6, "subject": "Task 6: OakTextView — lspCopilotComplete: Action", "status": "pending", "blockedBy": [4, 5]},
+    {"id": 7, "subject": "Task 7: Status Bar — Copilot Icon", "status": "pending", "blockedBy": [4]},
+    {"id": 8, "subject": "Task 8: Integration Test — End-to-End", "status": "pending", "blockedBy": [6, 7]}
+  ],
+  "lastUpdated": "2026-03-22T09:45:00Z"
+}

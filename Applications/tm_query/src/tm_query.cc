@@ -1,4 +1,5 @@
 #include <settings/settings.h>
+#include <OakSystem/application.h>
 
 extern char** environ;
 
@@ -29,7 +30,7 @@ static void initialize_environment () {
 		settings_t::set_default_settings_path(defaultSettings);
 	}
 
-	settings_t::set_global_settings_path(path::join(path::home(), "Library/Application Support/TextMate/Global.tmProperties"));
+	settings_t::set_global_settings_path(oak::application_t::support("Global.tmProperties"));
 
 	std::map<std::string, std::string> env;
 	for(char** pair = environ; *pair; ++pair)

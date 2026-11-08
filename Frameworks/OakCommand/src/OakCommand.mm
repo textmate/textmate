@@ -1,7 +1,9 @@
 #import "OakCommand.h"
+#import <HTMLOutput/helpers/OakHTMLOutputRequestMetadata.h>
 #import <document/OakDocument.h>
 #import <document/OakDocumentController.h>
 #import <oak/datatypes.h>
+#import <oak/compat.h>
 #import <cf/cf.h>
 #import <ns/ns.h>
 #import <io/environment.h>
@@ -68,7 +70,7 @@ static std::tuple<pid_t, int, int> my_fork (char const* cmd, int inputRead, std:
 
 	oak::c_array env(environment);
 
-	pid_t pid = vfork();
+	pid_t pid = oak::vfork();
 	if(pid == 0)
 	{
 		int const signals[] = { SIGINT, SIGTERM, SIGPIPE, SIGUSR1 };
@@ -229,11 +231,15 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 			static NSInteger UniqueKey = 0; // Make each URL unique to avoid caching
 
 			_urlRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@://job/%@/%ld", kOakFileHandleURLScheme, to_ns(encode::url_part(_bundleCommand.name)), ++UniqueKey]] cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:FLT_MAX];
-			[NSURLProtocol setProperty:self.identifier forKey:@"commandIdentifier" inRequest:_urlRequest];
-			[NSURLProtocol setProperty:pipe.fileHandleForReading forKey:@"fileHandle" inRequest:_urlRequest];
-			[NSURLProtocol setProperty:@(_processIdentifier) forKey:@"processIdentifier" inRequest:_urlRequest];
-			[NSURLProtocol setProperty:to_ns(_bundleCommand.name) forKey:@"processName" inRequest:_urlRequest];
-			[NSURLProtocol setProperty:self forKey:@"command" inRequest:_urlRequest];
+
+			// Store metadata in the shared registry instead of NSURLProtocol properties
+			OakHTMLOutputRequestMetadata* metadata = [OakHTMLOutputRequestMetadata new];
+			metadata.fileHandle = pipe.fileHandleForReading;
+			metadata.commandIdentifier = self.identifier;
+			metadata.processIdentifier = @(_processIdentifier);
+			metadata.processName = to_ns(_bundleCommand.name);
+			metadata.command = self;
+			[OakHTMLOutputRequestMetadata setMetadata:metadata forURLString:_urlRequest.URL.absoluteString];
 
 			_htmlOutputView.disableJavaScriptAPI = _bundleCommand.disable_javascript_api;
 			[_htmlOutputView loadRequest:_urlRequest environment:_environment autoScrolls:_bundleCommand.auto_scroll_output];
@@ -257,12 +263,10 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 			_queueForWritingHTML = nil;
 		}
 
-		if(NSMutableURLRequest* request = std::exchange(_urlRequest, nil))
-		{
-			[NSURLProtocol removePropertyForKey:@"command" inRequest:request];
-			[NSURLProtocol removePropertyForKey:@"fileHandle" inRequest:request];
-			[NSURLProtocol removePropertyForKey:@"processIdentifier" inRequest:request];
-		}
+		// Don't remove metadata here -- the WKURLSchemeHandler fires asynchronously
+		// and needs the metadata to still be present when it starts reading.
+		// The scheme handler will clean up after it finishes streaming.
+		std::exchange(_urlRequest, nil);
 	}
 }
 
@@ -297,18 +301,18 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 
 			std::string message;
 			if(failedRequirement.variable != NULL_STR)
-					message = text::format("This command requires ‘%1$s’ which wasn’t found on your system.\n\nThe following locations were searched:%2$s\n\nIf ‘%1$s’ is installed elsewhere then you need to set %3$s in Preferences → Variables to the full path of where you installed it.", failedRequirement.command.c_str(), ("\n\u2003• " + text::join(paths, "\n\u2003• ")).c_str(), failedRequirement.variable.c_str());
-			else	message = text::format("This command requires ‘%1$s’ which wasn’t found on your system.\n\nThe following locations were searched:%2$s\n\nIf ‘%1$s’ is installed elsewhere then you need to set PATH in Preferences → Variables to include the folder in which it can be found.", failedRequirement.command.c_str(), ("\n\u2003• " + text::join(paths, "\n\u2003• ")).c_str());
+					message = text::format("This command requires '%1$s' which wasn't found on your system.\n\nThe following locations were searched:%2$s\n\nIf '%1$s' is installed elsewhere then you need to set %3$s in Preferences \u2192 Variables to the full path of where you installed it.", failedRequirement.command.c_str(), ("\n\u2003\u2022 " + text::join(paths, "\n\u2003\u2022 ")).c_str(), failedRequirement.variable.c_str());
+			else	message = text::format("This command requires '%1$s' which wasn't found on your system.\n\nThe following locations were searched:%2$s\n\nIf '%1$s' is installed elsewhere then you need to set PATH in Preferences \u2192 Variables to include the folder in which it can be found.", failedRequirement.command.c_str(), ("\n\u2003\u2022 " + text::join(paths, "\n\u2003\u2022 ")).c_str());
 
 			NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithDictionary:@{
-				NSLocalizedDescriptionKey:             [NSString stringWithFormat:@"Unable to run “%.*s”.", (int)_bundleCommand.name.size(), _bundleCommand.name.data()],
+				NSLocalizedDescriptionKey:             [NSString stringWithFormat:@"Unable to run \u201C%.*s\u201D.", (int)_bundleCommand.name.size(), _bundleCommand.name.data()],
 				NSLocalizedRecoverySuggestionErrorKey: to_ns(message),
 			}];
 
 			if(failedRequirement.more_info_url != NULL_STR)
 			{
 				dict[@"moreInfoURL"] = [NSURL URLWithString:to_ns(failedRequirement.more_info_url)];
-				dict[NSLocalizedRecoveryOptionsErrorKey] = @[ @"OK", @"More Info…" ];
+				dict[NSLocalizedRecoveryOptionsErrorKey] = @[ @"OK", @"More Info\u2026" ];
 				dict[NSRecoveryAttempterErrorKey] = self;
 			}
 
@@ -414,7 +418,7 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 		if(normalExit == NO && _userDidAbort == NO)
 		{
 			NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithDictionary:@{
-				NSLocalizedDescriptionKey: [NSString stringWithFormat:@"Failure running “%@”.", to_ns(_bundleCommand.name)],
+				NSLocalizedDescriptionKey: [NSString stringWithFormat:@"Failure running \u201C%@\u201D.", to_ns(_bundleCommand.name)],
 			}];
 
 			NSMutableArray* buttonLabels = [NSMutableArray arrayWithObject:@"OK"];
@@ -429,7 +433,7 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 
 				std::vector<std::string> lines = text::split(output, "\n");
 				lines.erase(lines.begin() + 4, lines.begin() + lines.size() - 3);
-				lines[3] = "⋮";
+				lines[3] = "\u22EE";
 				output = text::join(lines, "\n");
 			}
 
@@ -636,8 +640,10 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 {
 	if(id target = [self targetForAction:_cmd])
 		[target discardHTMLOutputView:htmlOutputView];
-	else if(id delegate = htmlOutputView.webView.UIDelegate)
-		[delegate performSelector:@selector(webViewClose:) withObject:htmlOutputView.webView];
+	else if([htmlOutputView tryToPerform:@selector(toggleHTMLOutput:) with:self])
+		; // handled
+	else
+		[htmlOutputView tryToPerform:@selector(performClose:) with:self];
 }
 
 - (void)showToolTip:(NSString*)aToolTip
@@ -659,83 +665,5 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 	if(id target = [self targetForAction:_cmd])
 		return [target presentError:anError];
 	return NO;
-}
-@end
-
-// =====================
-// = Custom URL Scheme =
-// =====================
-
-@interface OakFileHandleURLProtocol : NSURLProtocol
-{
-	BOOL _stop;
-}
-@end
-
-@implementation OakFileHandleURLProtocol
-+ (void)load
-{
-	[self registerClass:self];
-	[WebView registerURLSchemeAsLocal:kOakFileHandleURLScheme];
-}
-
-+ (BOOL)canInitWithRequest:(NSURLRequest*)request                            { return [request.URL.scheme isEqualToString:kOakFileHandleURLScheme]; }
-+ (NSURLRequest*)canonicalRequestForRequest:(NSURLRequest*)request           { return request; }
-+ (BOOL)requestIsCacheEquivalent:(NSURLRequest*)a toRequest:(NSURLRequest*)b { return NO; }
-
-// =============================================
-// = These methods might be called in a thread =
-// =============================================
-
-- (void)startLoading
-{
-	NSFileHandle* fileHandle = [NSURLProtocol propertyForKey:@"fileHandle" inRequest:self.request];
-	if(!fileHandle)
-	{
-		NSURLResponse* response = [[NSHTTPURLResponse alloc] initWithURL:self.request.URL statusCode:404 HTTPVersion:@"HTTP/1.1" headerFields:nil];
-		[self.client URLProtocol:self didReceiveResponse:response cacheStoragePolicy:NSURLCacheStorageNotAllowed];
-		[self.client URLProtocolDidFinishLoading:self];
-		NSLog(@"No command output for ‘%@’", self.request.URL);
-		return;
-	}
-
-	NSURLResponse* response = [[NSURLResponse alloc] initWithURL:self.request.URL MIMEType:@"text/html" expectedContentLength:-1 textEncodingName:@"utf-8"];
-	[self.client URLProtocol:self didReceiveResponse:response cacheStoragePolicy:NSURLCacheStorageNotAllowed];
-
-	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-		int len;
-		char buf[8192];
-		__block BOOL keepRunning = YES;
-		@try {
-			while(keepRunning && (len = read(fileHandle.fileDescriptor, buf, sizeof(buf))) > 0)
-			{
-				NSData* data = [NSData dataWithBytes:buf length:len];
-				dispatch_sync(dispatch_get_main_queue(), ^{
-					if(keepRunning = !_stop)
-						[self.client URLProtocol:self didLoadData:data];
-				});
-			}
-		}
-		@catch(NSException* e) {
-			NSData* data = [[NSString stringWithFormat:@"<p>Exception thrown while reading data: %@.</p>", e.reason] dataUsingEncoding:NSUTF8StringEncoding];
-			dispatch_sync(dispatch_get_main_queue(), ^{
-				if(!_stop)
-					[self.client URLProtocol:self didLoadData:data];
-			});
-		}
-
-		if(len == -1)
-			perror("HTMLOutput: read");
-
-		[fileHandle closeFile];
-		[self.client URLProtocolDidFinishLoading:self];
-	});
-}
-
-- (void)stopLoading
-{
-	_stop = YES;
-	if(pid_t pid = [[NSURLProtocol propertyForKey:@"processIdentifier" inRequest:self.request] intValue])
-		oak::kill_process_group_in_background(pid);
 }
 @end

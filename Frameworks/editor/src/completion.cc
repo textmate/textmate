@@ -66,7 +66,7 @@ namespace ng
 
 		bundles::item_ptr item;
 		plist::any_t value = bundles::value_for_setting("completionCommand", scope, &item);
-		if(std::string const* str = boost::get<std::string>(&value))
+		if(std::string const* str = plist::get<std::string>(&value))
 		{
 			bundle_command_t cmd;
 			cmd.command       = *str;
@@ -137,11 +137,11 @@ namespace ng
 		// ===============================================
 
 		plist::any_t completionsValue = bundles::value_for_setting("completions", scope, &item);
-		if(plist::array_t const* completions = boost::get<plist::array_t>(&completionsValue))
+		if(plist::array_t const* completions = plist::get<plist::array_t>(&completionsValue))
 		{
 			for(size_t i = 0; i < completions->size(); ++i)
 			{
-				if(std::string const* word = boost::get<std::string>(&(*completions)[i]))
+				if(std::string const* word = plist::get<std::string>(&(*completions)[i]))
 					tmp.emplace_back(SSIZE_MAX - completions->size() + i, *word);
 			}
 		}

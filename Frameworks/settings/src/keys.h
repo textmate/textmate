@@ -28,6 +28,9 @@ extern std::string const kSettingsScopeAttributesKey;
 
 extern std::string const kSettingsSaveOnBlurKey;
 extern std::string const kSettingsAtomicSaveKey;
+extern std::string const kSettingsFormatCommandKey;
+extern std::string const kSettingsFormatOnSaveKey;
+extern std::string const kSettingsLSPDefinitionExcludePatternKey;
 
 extern std::string const kSettingsBinaryKey;
 extern std::string const kSettingsEncodingKey;

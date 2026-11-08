@@ -2,7 +2,9 @@
 @property (nonatomic) NSString* statusText;
 @end
 
-@interface HOWebViewDelegateHelper : NSObject <WebResourceLoadDelegate, WebUIDelegate>
+// HOWebViewDelegateHelper is retained for compatibility but its responsibilities
+// (resource interception, UI delegate methods) have moved to HOBrowserView and
+// the WKURLSchemeHandler implementations.
+@interface HOWebViewDelegateHelper : NSObject
 @property (nonatomic, weak) id /*<HOWebViewDelegateHelperProtocol>*/ delegate;
-@property (nonatomic) BOOL needsNewWebView;
 @end

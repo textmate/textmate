@@ -53,6 +53,36 @@ namespace oak
 
 		res.emplace("HOME",    entry->pw_dir);
 		res.emplace("PATH",    path);
+
+		// Apply user-configured Variables (Preferences → Variables pane)
+		// This lets users extend PATH with their package manager paths (Nix, Homebrew, etc.)
+		if(CFPropertyListRef cfPlist = CFPreferencesCopyAppValue(CFSTR("environmentVariables"), kCFPreferencesCurrentApplication))
+		{
+			if(CFGetTypeID(cfPlist) == CFArrayGetTypeID())
+			{
+				CFArrayRef cfArray = (CFArrayRef)cfPlist;
+				for(CFIndex i = 0; i < CFArrayGetCount(cfArray); ++i)
+				{
+					CFDictionaryRef dict = (CFDictionaryRef)CFArrayGetValueAtIndex(cfArray, i);
+					if(!dict || CFGetTypeID(dict) != CFDictionaryGetTypeID())
+						continue;
+
+					CFBooleanRef cfEnabled = (CFBooleanRef)CFDictionaryGetValue(dict, CFSTR("enabled"));
+					if(cfEnabled && CFGetTypeID(cfEnabled) == CFBooleanGetTypeID() && !CFBooleanGetValue(cfEnabled))
+						continue;
+
+					CFStringRef cfName  = (CFStringRef)CFDictionaryGetValue(dict, CFSTR("name"));
+					CFStringRef cfValue = (CFStringRef)CFDictionaryGetValue(dict, CFSTR("value"));
+					if(cfName && cfValue && CFGetTypeID(cfName) == CFStringGetTypeID() && CFGetTypeID(cfValue) == CFStringGetTypeID())
+					{
+						std::string name  = cf::to_s(cfName);
+						std::string value = format_string::expand(cf::to_s(cfValue), res);
+						res[name] = value;
+					}
+				}
+			}
+			CFRelease(cfPlist);
+		}
 		res.emplace("TMPDIR",  path::temp());
 		res.emplace("LOGNAME", entry->pw_name);
 		res.emplace("USER",    entry->pw_name);

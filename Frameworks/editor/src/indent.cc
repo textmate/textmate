@@ -19,7 +19,7 @@ namespace indent
 		for(auto pair : map)
 		{
 			plist::any_t const& plist = bundles::value_for_setting(pair.first, scope);
-			if(std::string const* value = boost::get<std::string>(&plist))
+			if(std::string const* value = plist::get<std::string>(&plist))
 			{
 				res.emplace(pair.second, *value);
 			}

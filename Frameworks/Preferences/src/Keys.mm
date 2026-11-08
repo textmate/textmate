@@ -1,4 +1,5 @@
 #import "Keys.h"
+#import <OakAppKit/OakPasteboard.h>
 #import <OakTabBarView/OakTabBarView.h>
 #import <BundlesManager/BundlesManager.h>
 
@@ -30,7 +31,14 @@ static NSDictionary* default_settings ()
 		kUserDefaultsRMateServerPortKey:         @"52698",
 		kUserDefaultsLicenseOwnerKey:            NSFullUserName(),
 		kUserDefaultsLineNumbersKey:             @YES,
-		kUserDefaultsCrashReportsContactInfoKey: NSFullUserName() ?: @"Anonymous",
+		kUserDefaultsFontSmoothingKey:            @(3),
+		kUserDefaultsLineNumberScaleFactorKey:    @(0.8),
+		kUserDefaultsTabItemMinWidthKey:          @(120),
+		kUserDefaultsTabItemMaxWidthKey:          @(250),
+		kUserDefaultsClipboardHistoryKeepAtLeast: @(25),
+		kUserDefaultsClipboardHistoryKeepAtMost:  @(500),
+		kUserDefaultsClipboardHistoryDaysToKeep:  @(30),
+		kUserDefaultsLSPShowInlineDiagnosticsKey:    @YES,
 	};
 }
 
@@ -110,11 +118,38 @@ NSString* const kUserDefaultsLicenseOwnerKey            = @"licenseOwnerName";
 
 NSString* const kUserDefaultsDisableAntiAliasKey        = @"disableAntiAlias";
 NSString* const kUserDefaultsLineNumbersKey             = @"lineNumbers";
+NSString* const kUserDefaultsLineNumberScaleFactorKey   = @"lineNumberScaleFactor";
+NSString* const kUserDefaultsLineNumberFontNameKey      = @"lineNumberFontName";
+
+// =======
+// = LSP =
+// =======
+
+NSString* const kUserDefaultsLSPShowInlineDiagnosticsKey = @"lspShowInlineDiagnostics";
+
+// ==============
+// = Formatters =
+// ==============
+
+NSString* const kUserDefaultsFormatterConfigurationsKey = @"formatters";
 
 // =========
 // = Other =
 // =========
 
 NSString* const kUserDefaultsFolderSearchFollowLinksKey = @"folderSearchFollowLinks";
-NSString* const kUserDefaultsDisableCrashReportingKey   = @"DisableCrashReports";
-NSString* const kUserDefaultsCrashReportsContactInfoKey = @"CrashReportsContactInfo";
+
+// ============
+// = Advanced =
+// ============
+
+NSString* const kUserDefaultsDisableTypingPairsKey            = @"disableTypingPairs";
+NSString* const kUserDefaultsFontSmoothingKey                 = @"fontSmoothing";
+NSString* const kUserDefaultsHideStatusBarKey                 = @"hideStatusBar";
+NSString* const kUserDefaultsTabItemMinWidthKey               = @"tabItemMinWidth";
+NSString* const kUserDefaultsTabItemMaxWidthKey               = @"tabItemMaxWidth";
+NSString* const kUserDefaultsKeepSearchResultsOnDoubleClick   = @"keepSearchResultsOnDoubleClick";
+NSString* const kUserDefaultsAlwaysFindInDocument             = @"alwaysFindInDocument";
+NSString* const kUserDefaultsDisableFolderStateRestore        = @"disableFolderStateRestore";
+NSString* const kUserDefaultsDisableBundleSuggestionsKey      = @"disableBundleSuggestions";
+NSString* const kUserDefaultsGrammarsToNeverSuggestKey        = @"grammarsToNeverSuggest";

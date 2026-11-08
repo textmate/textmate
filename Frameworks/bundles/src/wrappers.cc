@@ -21,7 +21,7 @@ namespace bundles
 		std::vector<std::string> res;
 		for(auto const& it : array)
 		{
-			if(std::string const* str = boost::get<std::string>(&it))
+			if(std::string const* str = plist::get<std::string>(&it))
 				res.push_back(*str);
 		}
 		return res;

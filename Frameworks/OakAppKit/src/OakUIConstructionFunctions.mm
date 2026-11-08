@@ -14,46 +14,19 @@ NSFont* OakControlFont ()
 
 NSTextField* OakCreateLabel (NSString* label, NSFont* font, NSTextAlignment alignment, NSLineBreakMode lineBreakMode)
 {
-	// This was introduced in 10.12 but does not appear to use controlTextColor until 10.14, which is required for proper highlight when used in a table view
-	if(@available(macos 10.14, *))
-	{
-		NSTextField* res = [NSTextField labelWithString:label];
-		[[res cell] setLineBreakMode:lineBreakMode];
-		res.alignment = alignment;
-		if(font)
-			res.font = font;
-		return res;
-	}
-
-	NSTextField* res = [[NSTextField alloc] initWithFrame:NSZeroRect];
-	[[res cell] setWraps:NO];
+	NSTextField* res = [NSTextField labelWithString:label];
 	[[res cell] setLineBreakMode:lineBreakMode];
-	res.alignment       = alignment;
-	res.bezeled         = NO;
-	res.bordered        = NO;
-	res.drawsBackground = NO;
-	res.editable        = NO;
-	res.font            = font ?: OakControlFont();
-	res.selectable      = NO;
-	res.stringValue     = label;
+	res.alignment = alignment;
+	if(font)
+		res.font = font;
 	return res;
 }
 
 NSButton* OakCreateCheckBox (NSString* label)
 {
-	if(@available(macos 10.14, *))
-	{
-		NSButton* res = [NSButton checkboxWithTitle:(label ?: @"") target:nil action:nil];
-		// When we have a row that only contains checkboxes (e.g. Find options), nothing restrains the height of that row
-		[res setContentHuggingPriority:NSLayoutPriorityDefaultHigh forOrientation:NSLayoutConstraintOrientationVertical];
-		return res;
-	}
-
-	NSButton* res = [[NSButton alloc] initWithFrame:NSZeroRect];
+	NSButton* res = [NSButton checkboxWithTitle:(label ?: @"") target:nil action:nil];
+	// When we have a row that only contains checkboxes (e.g. Find options), nothing restrains the height of that row
 	[res setContentHuggingPriority:NSLayoutPriorityDefaultHigh forOrientation:NSLayoutConstraintOrientationVertical];
-	res.buttonType = NSButtonTypeSwitch;
-	res.font       = OakControlFont();
-	res.title      = label;
 	return res;
 }
 
@@ -220,20 +193,12 @@ OakRolloverButton* OakCreateCloseButton (NSString* accessibilityLabel)
 
 	if(self.style == OakBackgroundFillViewStyleHeader)
 	{
-		if(@available(macos 10.14, *))
-		{
-			NSVisualEffectView* effectView = [[NSVisualEffectView alloc] initWithFrame:[self bounds]];
-			effectView.material     = NSVisualEffectMaterialHeaderView; // MAC_OS_X_VERSION_10_14
-			effectView.blendingMode = NSVisualEffectBlendingModeBehindWindow;
-			_visualEffectBackgroundView = effectView;
-			[_visualEffectBackgroundView setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
-			[self addSubview:_visualEffectBackgroundView positioned:NSWindowBelow relativeTo:nil];
-		}
-		else
-		{
-			self.activeBackgroundGradient   = [[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.915 alpha:1] endingColor:[NSColor colorWithCalibratedWhite:0.760 alpha:1]];
-			self.inactiveBackgroundGradient = [[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.915 alpha:1] endingColor:[NSColor colorWithCalibratedWhite:0.915 alpha:1]];
-		}
+		NSVisualEffectView* effectView = [[NSVisualEffectView alloc] initWithFrame:[self bounds]];
+		effectView.material     = NSVisualEffectMaterialHeaderView;
+		effectView.blendingMode = NSVisualEffectBlendingModeBehindWindow;
+		_visualEffectBackgroundView = effectView;
+		[_visualEffectBackgroundView setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
+		[self addSubview:_visualEffectBackgroundView positioned:NSWindowBelow relativeTo:nil];
 	}
 }
 
@@ -255,7 +220,7 @@ OakRolloverButton* OakCreateCloseButton (NSString* accessibilityLabel)
 	{
 		NSColor* color = value;
 		[color set];
-		NSRectFill(aRect);
+		NSRectFill(self.bounds);
 	}
 }
 @end

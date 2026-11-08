@@ -332,11 +332,10 @@ namespace // wrap in anonymous namespace to avoid clashing with other callbacks 
 
 	struct reactivate_callback_t
 	{
-		reactivate_callback_t () : _shared_count(std::make_shared<size_t>(0))
+		reactivate_callback_t () : _shared_count(std::make_shared<size_t>(0)), _terminal(std::make_shared<NSRunningApplication*>([[NSWorkspace sharedWorkspace] frontmostApplication]))
 		{
-			_terminal = std::make_shared<NSRunningApplication*>([NSWorkspace.sharedWorkspace frontmostApplication]);
-
 			auto terminal = _terminal;
+
 			if([*terminal isEqual:NSRunningApplication.currentApplication])
 			{
 				// If we call ‘mate -w’ in quick succession there is a chance that we have not yet re-activated the terminal app when we are asked to open a new document. For this reason, we monitor the NSApplicationDidResignActiveNotification for 200 ms to see if the “real” frontmost application becomes active.
@@ -360,7 +359,7 @@ namespace // wrap in anonymous namespace to avoid clashing with other callbacks 
 			++*counter;
 			__weak __block id token = [NSNotificationCenter.defaultCenter addObserverForName:OakDocumentWillCloseNotification object:document queue:nil usingBlock:^(NSNotification*){
 				if(--*counter == 0)
-					[*terminal activateWithOptions:NSApplicationActivateIgnoringOtherApps];
+					[*terminal activateWithOptions:0];
 				[NSNotificationCenter.defaultCenter removeObserver:token];
 			}];
 		}
@@ -625,9 +624,9 @@ struct socket_observer_t
 
 static bool rmate_connection_handler_t (socket_t const& socket)
 {
-	socklen_t dummyLen = std::max(sizeof(sockaddr_un), sizeof(sockaddr_in));
-	char dummy[dummyLen];
-	int newFd = accept(socket, (sockaddr*)&dummy[0], &dummyLen);
+	union { sockaddr_un un; sockaddr_in in; } addr;
+	socklen_t addrLen = sizeof(addr);
+	int newFd = accept(socket, (sockaddr*)&addr, &addrLen);
 
 	std::string welcome = "220 " + sys_info(KERN_HOSTNAME) + " RMATE TextMate (" + sys_info(KERN_OSTYPE) + " " + sys_info(KERN_OSRELEASE) + ")\n";
 	ssize_t len = write(newFd, welcome.data(), welcome.size());

@@ -58,7 +58,8 @@ static size_t kParseSizeLimit = 1024;
 				break;
 		}
 
-		_theme = [OakTheme theme];
+		if(!_theme)
+			_theme = [OakTheme theme];
 
 		if(!_grammar)
 			NSLog(@"Failed to load grammar: %@", _grammarName);

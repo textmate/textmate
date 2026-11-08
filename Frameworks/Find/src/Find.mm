@@ -31,7 +31,7 @@
 static NSString* const kUserDefaultsFolderOptionsKey               = @"Folder Search Options";
 static NSString* const kUserDefaultsFindResultsHeightKey           = @"findResultsHeight";
 static NSString* const kUserDefaultsDefaultFindGlobsKey            = @"defaultFindInFolderGlobs";
-static NSString* const kUserDefaultsKeepSearchResultsOnDoubleClick = @"keepSearchResultsOnDoubleClick";
+
 static NSString* const kSearchMarkIdentifier                       = @"search";
 static NSString* const FFFindWasTriggeredByEnter                   = @"FFFindWasTriggeredByEnter";
 
@@ -142,6 +142,8 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 - (void)didReplace:(NSUInteger)aNumber occurrencesOf:(NSString*)aFindString with:(NSString*)aReplacementString;
 @end
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wincomplete-implementation"
 @implementation Find
 + (NSSet*)keyPathsForValuesAffectingCanIgnoreWhitespace  { return [NSSet setWithObject:@"regularExpression"]; }
 + (NSSet*)keyPathsForValuesAffectingIgnoreWhitespace     { return [NSSet setWithObject:@"regularExpression"]; }
@@ -1017,7 +1019,7 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 
 - (void)didFind:(NSUInteger)aNumber occurrencesOf:(NSString*)aFindString atPosition:(text::pos_t const&)aPosition wrapped:(BOOL)didWrap
 {
-	static std::string const formatStrings[4][3] = {
+	static std::string const formatStrings[2][3] = {
 		{ "No more occurrences of “${found}”.", "Found “${found}”${line:+ at line ${line}, column ${column}}.",               "${count} occurrences of “${found}”." },
 		{ "No more matches for “${found}”.",    "Found one match for “${found}”${line:+ at line ${line}, column ${column}}.", "${count} matches for “${found}”."    },
 	};
@@ -1400,3 +1402,4 @@ static NSButton* OakCreateHistoryButton (NSString* toolTip)
 	return res;
 }
 @end
+#pragma clang diagnostic pop

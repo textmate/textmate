@@ -4,7 +4,7 @@
 #import <OakAppKit/NSImage Additions.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakFoundation/OakStringListTransformer.h>
-#import <SoftwareUpdate/SoftwareUpdate.h> // OakCompareVersionStrings()
+#import <OakFoundation/OakCompareVersionStrings.h>
 #import <io/path.h>
 #import <io/exec.h>
 #import <ns/ns.h>
@@ -153,7 +153,7 @@ static bool uninstall_mate (std::string const& path)
 @implementation TerminalPreferences
 - (id)init
 {
-	if(self = [super initWithNibName:@"TerminalPreferences" label:@"Terminal" image:[NSImage imageNamed:@"Terminal" inSameBundleAsClass:[self class]]])
+	if(self = [super initWithNibName:@"TerminalPreferences" label:@"Terminal" image:PreferencesToolbarImage(@"terminal", @"Terminal", [NSImage imageNamed:@"Terminal" inSameBundleAsClass:[self class]])])
 	{
 		[OakStringListTransformer createTransformerWithName:@"OakRMateInterfaceTransformer" andObjectsArray:@[ kRMateServerListenLocalhost, kRMateServerListenRemote ]];
 

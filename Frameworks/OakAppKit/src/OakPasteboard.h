@@ -10,6 +10,11 @@ extern NSString* const OakFindIgnoreWhitespaceOption;
 extern NSString* const OakFindFullWordsOption;
 extern NSString* const OakFindRegularExpressionOption;
 
+extern NSString* const kUserDefaultsDisablePersistentClipboardHistory;
+extern NSString* const kUserDefaultsClipboardHistoryKeepAtLeast;
+extern NSString* const kUserDefaultsClipboardHistoryKeepAtMost;
+extern NSString* const kUserDefaultsClipboardHistoryDaysToKeep;
+
 @interface OakPasteboardEntry : NSObject
 @property (nonatomic, readonly) NSString* string;
 @property (nonatomic, readonly) NSArray<NSString*>* strings;

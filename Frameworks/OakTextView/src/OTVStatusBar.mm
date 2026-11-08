@@ -23,8 +23,7 @@ static NSTextField* OakCreateTextField (NSString* label)
 	[[res cell] setLineBreakMode:NSLineBreakByTruncatingMiddle];
 
 	// This is to match the other controls in the status bar
-	if(@available(macos 10.14, *))
-		res.textColor = NSColor.secondaryLabelColor;
+	res.textColor = NSColor.secondaryLabelColor;
 
 	return res;
 }
@@ -58,7 +57,15 @@ static NSButton* OakCreateImageToggleButton (NSImage* image, NSString* accessibi
 @property (nonatomic) NSPopUpButton* tabSizePopUp;
 @property (nonatomic) NSPopUpButton* bundleItemsPopUp;
 @property (nonatomic) NSPopUpButton* symbolPopUp;
+@property (nonatomic) NSPopUpButton* lspPopUp;
+@property (nonatomic) NSView*        lspDivider;
+@property (nonatomic) NSPopUpButton* copilotPopUp;
 @property (nonatomic) NSButton*      macroRecordingButton;
+@property (nonatomic) NSArray<NSLayoutConstraint*>* lspVisibleConstraints;
+@property (nonatomic) NSArray<NSLayoutConstraint*>* lspHiddenConstraints;
+@property (nonatomic) BOOL lspVisible;
+@property (nonatomic) BOOL lspErrorFlash;
+@property (nonatomic) NSTimer* lspErrorFlashTimer;
 @end
 
 @implementation OTVStatusBar
@@ -86,6 +93,10 @@ static NSButton* OakCreateImageToggleButton (NSImage* image, NSString* accessibi
 		self.macroRecordingButton         = OakCreateImageToggleButton(recordMacroImage, @"Record a macro");
 		self.macroRecordingButton.action  = @selector(toggleMacroRecording:);
 		self.macroRecordingButton.toolTip = @"Click to start recording a macro";
+
+		self.lspPopUp = OakCreateStatusBarPopUpButton(nil, @"LSP Status");
+		[[self.lspPopUp cell] setUsesItemFromMenu:NO];
+		self.lspPopUp.hidden = YES;
 
 		NSFontDescriptor* descriptor = [self.selectionField.font.fontDescriptor fontDescriptorByAddingAttributes:@{
 			NSFontFeatureSettingsAttribute: @[ @{ NSFontFeatureTypeIdentifierKey: @(kNumberSpacingType), NSFontFeatureSelectorIdentifierKey: @(kMonospacedNumbersSelector) } ]
@@ -115,6 +126,13 @@ static NSButton* OakCreateImageToggleButton (NSImage* image, NSString* accessibi
 		NSView* dividerThree = OakCreateNSBoxSeparator();
 		NSView* dividerFour  = OakCreateNSBoxSeparator();
 		NSView* dividerFive  = OakCreateNSBoxSeparator();
+		NSView* dividerSix   = OakCreateNSBoxSeparator();
+		self.lspDivider = dividerSix;
+		self.lspDivider.hidden = YES;
+
+		self.copilotPopUp = OakCreateStatusBarPopUpButton(nil, @"Copilot Status");
+		[[self.copilotPopUp cell] setUsesItemFromMenu:NO];
+		[self updateCopilotDisplayItem:0];
 
 		NSDictionary* views = @{
 			@"topDivider":   topDivider,
@@ -129,6 +147,9 @@ static NSButton* OakCreateImageToggleButton (NSImage* image, NSString* accessibi
 			@"dividerFour":  dividerFour,
 			@"symbol":       self.symbolPopUp,
 			@"dividerFive":  dividerFive,
+			@"dividerSix":   dividerSix,
+			@"lsp":          self.lspPopUp,
+			@"copilot":       self.copilotPopUp,
 			@"recording":    self.macroRecordingButton,
 		};
 
@@ -144,20 +165,48 @@ static NSButton* OakCreateImageToggleButton (NSImage* image, NSString* accessibi
 		[self.symbolPopUp setContentHuggingPriority:NSLayoutPriorityDefaultLow-1 forOrientation:NSLayoutConstraintOrientationHorizontal];
 		[self.symbolPopUp setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow-1 forOrientation:NSLayoutConstraintOrientationHorizontal];
 
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-10-[line]-[selection(>=50,<=225)]-8-[dividerOne(==1)]-2-[grammar(>=125@400,>=50,<=225)]-5-[dividerTwo(==1)]-2-[tabSize]-4-[dividerThree(==1)]-5-[items(==31)]-4-[dividerFour(==1)]-2-[symbol(>=125@450,>=50)]-5-[dividerFive(==1)]-6-[recording]-7-|" options:0 metrics:nil views:views]];
+		// Shared constraints (everything up to symbol)
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-10-[line]-[selection(>=50,<=225)]-8-[dividerOne(==1)]-2-[grammar(>=125@400,>=50,<=225)]-5-[dividerTwo(==1)]-2-[tabSize]-4-[dividerThree(==1)]-5-[items(==31)]-4-[dividerFour(==1)]-2-[symbol(>=125@450,>=50)]" options:0 metrics:nil views:views]];
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[topDivider]|" options:0 metrics:nil views:views]];
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[topDivider(==1)]" options:0 metrics:nil views:views]];
 
-		// Baseline align text-controls
+		// Baseline align text-controls (without lsp — added dynamically)
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[line]-[selection]-(>=1)-[grammar]-(>=1)-[tabSize]-(>=1)-[symbol]" options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
 
-		// Center non-text control
+		// Center non-text control (without dividerSix — added dynamically)
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[selection]-(>=1)-[dividerOne]-(>=1)-[dividerTwo]-(>=1)-[dividerThree]-(>=1)-[items]-(>=1)-[dividerFour]-(>=1)-[dividerFive]-(>=1)-[recording]" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-5-[dividerOne(==15,==dividerTwo,==dividerThree,==dividerFour,==dividerFive)]-5-|" options:0 metrics:nil views:views]];
+
+		// LSP visible: symbol → copilot → dividerSix → lsp → dividerFive
+		self.lspVisibleConstraints = ({
+			NSMutableArray* c = [NSMutableArray new];
+			[c addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[symbol]-4-[copilot]-4-[dividerSix(==1)]-2-[lsp]-5-[dividerFive]" options:0 metrics:nil views:views]];
+			[c addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-5-[dividerOne(==15,==dividerTwo,==dividerThree,==dividerFour,==dividerFive,==dividerSix)]-5-|" options:0 metrics:nil views:views]];
+			[c addObject:[NSLayoutConstraint constraintWithItem:self.lspPopUp attribute:NSLayoutAttributeBaseline relatedBy:NSLayoutRelationEqual toItem:self.symbolPopUp attribute:NSLayoutAttributeBaseline multiplier:1 constant:0]];
+			[c addObject:[NSLayoutConstraint constraintWithItem:dividerSix attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:dividerOne attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
+			[c addObject:[NSLayoutConstraint constraintWithItem:self.copilotPopUp attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:self.macroRecordingButton attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
+			[c copy];
+		});
+
+		// LSP hidden: symbol → copilot → dividerFive directly
+		self.lspHiddenConstraints = ({
+			NSMutableArray* c = [NSMutableArray new];
+			[c addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[symbol]-4-[copilot]-4-[dividerFive]" options:0 metrics:nil views:views]];
+			[c addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-5-[dividerOne(==15,==dividerTwo,==dividerThree,==dividerFour,==dividerFive)]-5-|" options:0 metrics:nil views:views]];
+			[c addObject:[NSLayoutConstraint constraintWithItem:self.copilotPopUp attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:self.macroRecordingButton attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
+			[c copy];
+		});
+
+		// Shared trailing: dividerFive → recording
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[dividerFive(==1)]-6-[recording]-7-|" options:0 metrics:nil views:views]];
+
+		// Start hidden
+		[self addConstraints:self.lspHiddenConstraints];
 
 		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(grammarPopUpButtonWillPopUp:) name:NSPopUpButtonWillPopUpNotification object:self.grammarPopUp];
 		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(bundleItemsPopUpButtonWillPopUp:) name:NSPopUpButtonWillPopUpNotification object:self.bundleItemsPopUp];
 		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(symbolPopUpButtonWillPopUp:) name:NSPopUpButtonWillPopUpNotification object:self.symbolPopUp];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(lspPopUpButtonWillPopUp:) name:NSPopUpButtonWillPopUpNotification object:self.lspPopUp];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(copilotPopUpButtonWillPopUp:) name:NSPopUpButtonWillPopUpNotification object:self.copilotPopUp];
 	}
 	return self;
 }
@@ -205,7 +254,7 @@ static NSButton* OakCreateImageToggleButton (NSImage* image, NSString* accessibi
 			grammars.emplace(item->name(), item);
 	}
 
-	for(auto pair : grammars)
+	for(auto const& pair : grammars)
 	{
 		if(!pair.second->hidden_from_user())
 		{
@@ -331,9 +380,171 @@ static NSButton* OakCreateImageToggleButton (NSImage* image, NSString* accessibi
 	[self updateTabSettings];
 }
 
+// ========
+// = LSP  =
+// ========
+
+- (void)lspPopUpButtonWillPopUp:(NSNotification*)aNotification
+{
+	if([self.delegate respondsToSelector:@selector(showLSPStatusMenu:)])
+		[self.delegate showLSPStatusMenu:self.lspPopUp];
+}
+
+- (void)setLspStatus:(NSString*)status errors:(NSUInteger)errors warnings:(NSUInteger)warnings info:(NSUInteger)info
+{
+	BOOL visible = status != nil;
+
+	if(visible != _lspVisible)
+	{
+		_lspVisible = visible;
+		self.lspPopUp.hidden = !visible;
+		self.lspDivider.hidden = !visible;
+
+		if(visible)
+		{
+			[self removeConstraints:self.lspHiddenConstraints];
+			[self addConstraints:self.lspVisibleConstraints];
+		}
+		else
+		{
+			[self removeConstraints:self.lspVisibleConstraints];
+			[self addConstraints:self.lspHiddenConstraints];
+		}
+	}
+
+	if(!visible)
+		return;
+
+	NSFont* font = OakStatusBarFont();
+	NSMutableAttributedString* attrTitle = [NSMutableAttributedString new];
+
+	if([status isEqualToString:@"starting"])
+	{
+		[attrTitle appendAttributedString:[[NSAttributedString alloc] initWithString:@"◉ " attributes:@{
+			NSFontAttributeName: font,
+			NSForegroundColorAttributeName: [NSColor systemYellowColor],
+		}]];
+		[attrTitle appendAttributedString:[[NSAttributedString alloc] initWithString:@"LSP" attributes:@{
+			NSFontAttributeName: font,
+			NSForegroundColorAttributeName: NSColor.secondaryLabelColor,
+		}]];
+	}
+	else if([status isEqualToString:@"indexing"])
+	{
+		[attrTitle appendAttributedString:[[NSAttributedString alloc] initWithString:@"◉ " attributes:@{
+			NSFontAttributeName: font,
+			NSForegroundColorAttributeName: [NSColor systemOrangeColor],
+		}]];
+		[attrTitle appendAttributedString:[[NSAttributedString alloc] initWithString:@"indexing" attributes:@{
+			NSFontAttributeName: font,
+			NSForegroundColorAttributeName: NSColor.secondaryLabelColor,
+		}]];
+	}
+	else
+	{
+		// Semaphore: always show all three categories with colored dots
+		NSDictionary* countAttrs = @{ NSFontAttributeName: font, NSForegroundColorAttributeName: NSColor.secondaryLabelColor };
+
+		// Errors — red dot
+		[attrTitle appendAttributedString:[[NSAttributedString alloc] initWithString:@"● " attributes:@{
+			NSFontAttributeName: font,
+			NSForegroundColorAttributeName: errors > 0 ? [NSColor systemRedColor] : NSColor.tertiaryLabelColor,
+		}]];
+		[attrTitle appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%lu", (unsigned long)errors] attributes:countAttrs]];
+
+		// Warnings — yellow dot
+		[attrTitle appendAttributedString:[[NSAttributedString alloc] initWithString:@"  ● " attributes:@{
+			NSFontAttributeName: font,
+			NSForegroundColorAttributeName: warnings > 0 ? [NSColor systemYellowColor] : NSColor.tertiaryLabelColor,
+		}]];
+		[attrTitle appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%lu", (unsigned long)warnings] attributes:countAttrs]];
+
+		// Info — blue dot
+		[attrTitle appendAttributedString:[[NSAttributedString alloc] initWithString:@"  ● " attributes:@{
+			NSFontAttributeName: font,
+			NSForegroundColorAttributeName: info > 0 ? [NSColor systemCyanColor] : NSColor.tertiaryLabelColor,
+		}]];
+		[attrTitle appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%lu", (unsigned long)info] attributes:countAttrs]];
+	}
+
+	if(_lspErrorFlash)
+	{
+		attrTitle = [NSMutableAttributedString new];
+		[attrTitle appendAttributedString:[[NSAttributedString alloc] initWithString:@"◉ " attributes:@{
+			NSFontAttributeName: font,
+			NSForegroundColorAttributeName: [NSColor systemRedColor],
+		}]];
+		[attrTitle appendAttributedString:[[NSAttributedString alloc] initWithString:@"error" attributes:@{
+			NSFontAttributeName: font,
+			NSForegroundColorAttributeName: NSColor.secondaryLabelColor,
+		}]];
+	}
+
+	NSMenuItem* displayItem = [[NSMenuItem alloc] initWithTitle:@"" action:NULL keyEquivalent:@""];
+	displayItem.attributedTitle = attrTitle;
+	[[self.lspPopUp cell] setMenuItem:displayItem];
+}
+
+- (void)flashLspError
+{
+	_lspErrorFlash = YES;
+	[_lspErrorFlashTimer invalidate];
+	__weak typeof(self) weakSelf = self;
+	_lspErrorFlashTimer = [NSTimer scheduledTimerWithTimeInterval:3.0 repeats:NO block:^(NSTimer* timer){
+		__strong typeof(weakSelf) strongSelf = weakSelf;
+		if(!strongSelf)
+			return;
+		strongSelf->_lspErrorFlash = NO;
+		strongSelf->_lspErrorFlashTimer = nil;
+		[NSNotificationCenter.defaultCenter postNotificationName:@"LSPServerStatusDidChange" object:nil];
+	}];
+	[NSNotificationCenter.defaultCenter postNotificationName:@"LSPServerStatusDidChange" object:nil];
+}
+
+- (void)updateCopilotDisplayItem:(NSInteger)status
+{
+	NSColor* color;
+	NSString* tooltip;
+
+	switch(status)
+	{
+		case 0: color = NSColor.tertiaryLabelColor;   tooltip = @"Copilot: Disabled";          break;
+		case 1: color = NSColor.systemYellowColor;    tooltip = @"Copilot: Connecting…";       break;
+		case 2: color = NSColor.labelColor;           tooltip = @"Copilot: Ready";             break;
+		case 3: color = NSColor.systemOrangeColor;    tooltip = @"Copilot: Sign-in required";  break;
+		case 4: color = NSColor.systemRedColor;       tooltip = @"Copilot: Error";             break;
+		default: color = NSColor.tertiaryLabelColor;  tooltip = @"Copilot";                    break;
+	}
+
+	NSImageSymbolConfiguration* symCfg = [NSImageSymbolConfiguration configurationWithPointSize:11 weight:NSFontWeightRegular];
+	NSImage* sparkle = [[NSImage imageWithSystemSymbolName:@"sparkle" accessibilityDescription:@"Copilot"] imageWithSymbolConfiguration:symCfg];
+	[sparkle setTemplate:YES];
+
+	NSMenuItem* displayItem = [[NSMenuItem alloc] initWithTitle:@"" action:NULL keyEquivalent:@""];
+	displayItem.image = sparkle;
+
+	// Tint by wrapping in an attributed string attachment wouldn't work; use contentTintColor on the popup
+	self.copilotPopUp.contentTintColor = color;
+	[[self.copilotPopUp cell] setMenuItem:displayItem];
+	self.copilotPopUp.toolTip = tooltip;
+}
+
+- (void)setCopilotStatus:(NSInteger)status
+{
+	[self updateCopilotDisplayItem:status];
+}
+
+- (void)copilotPopUpButtonWillPopUp:(NSNotification*)aNotification
+{
+	if([self.delegate respondsToSelector:@selector(showCopilotStatusMenu:)])
+		[self.delegate showCopilotStatusMenu:self.copilotPopUp];
+}
+
 - (void)dealloc
 {
 	[NSNotificationCenter.defaultCenter removeObserver:self];
 	self.recordingTimer = nil;
+	[_lspErrorFlashTimer invalidate];
+	_lspErrorFlashTimer = nil;
 }
 @end

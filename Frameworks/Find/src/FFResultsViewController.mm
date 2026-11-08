@@ -143,7 +143,7 @@ static FFResultNode* PreviousNode (FFResultNode* node)
 {
 	FFResultNode* item = self.objectValue;
 	NSAttributedString* res = [item excerptWithReplacement:(item.isReadOnly || item.excluded || !_showReplacementPreviews ? item.replaceString : (self.replaceString ?: @"")) font:self.textField.font];
-	if(self.backgroundStyle == NSBackgroundStyleDark)
+	if(self.backgroundStyle == NSBackgroundStyleEmphasized)
 	{
 		NSMutableAttributedString* str = [res mutableCopy];
 		[str enumerateAttributesInRange:NSMakeRange(0, str.length) options:NSAttributedStringEnumerationLongestEffectiveRangeNotRequired usingBlock:^(NSDictionary* attrs, NSRange range, BOOL* stop){

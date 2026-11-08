@@ -65,9 +65,9 @@ void test_delta ()
 		"	isDelta = :true;\n"
 		"}";
 
-	plist::dictionary_t const oldPlist   = boost::get<plist::dictionary_t>(plist::parse_ascii(oldPlistString));
-	plist::dictionary_t const newPlist   = boost::get<plist::dictionary_t>(plist::parse_ascii(newPlistString));
-	plist::dictionary_t const deltaPlist = boost::get<plist::dictionary_t>(plist::parse_ascii(deltaPlistString));
+	plist::dictionary_t const oldPlist   = plist::get<plist::dictionary_t>(plist::parse_ascii(oldPlistString));
+	plist::dictionary_t const newPlist   = plist::get<plist::dictionary_t>(plist::parse_ascii(newPlistString));
+	plist::dictionary_t const deltaPlist = plist::get<plist::dictionary_t>(plist::parse_ascii(deltaPlistString));
 
 	OAK_ASSERT_EQ(to_s(plist::create_delta(oldPlist, newPlist)), to_s(deltaPlist));
 
@@ -111,9 +111,9 @@ void test_delta_settings_changed ()
 		"	uuid = '73251DBE-EBD2-470F-8148-E6F2EC1A9641';\n"
 		"}\n";
 
-	plist::dictionary_t const oldPlist   = boost::get<plist::dictionary_t>(plist::parse_ascii(oldPlistString));
-	plist::dictionary_t const newPlist   = boost::get<plist::dictionary_t>(plist::parse_ascii(newPlistString));
-	plist::dictionary_t const deltaPlist = boost::get<plist::dictionary_t>(plist::parse_ascii(deltaPlistString));
+	plist::dictionary_t const oldPlist   = plist::get<plist::dictionary_t>(plist::parse_ascii(oldPlistString));
+	plist::dictionary_t const newPlist   = plist::get<plist::dictionary_t>(plist::parse_ascii(newPlistString));
+	plist::dictionary_t const deltaPlist = plist::get<plist::dictionary_t>(plist::parse_ascii(deltaPlistString));
 
 	std::vector<plist::dictionary_t> plists{ deltaPlist, oldPlist };
 	OAK_ASSERT_EQ(to_s(plist::merge_delta(plists)), to_s(newPlist));
@@ -141,9 +141,9 @@ void test_delta_settings_deleted ()
 		"	uuid = '20881CB9-5D12-4D74-8EE6-9ABAA7B408D3';\n"
 		"}\n";
 
-	plist::dictionary_t const oldPlist   = boost::get<plist::dictionary_t>(plist::parse_ascii(oldPlistString));
-	plist::dictionary_t const newPlist   = boost::get<plist::dictionary_t>(plist::parse_ascii(newPlistString));
-	plist::dictionary_t const deltaPlist = boost::get<plist::dictionary_t>(plist::parse_ascii(deltaPlistString));
+	plist::dictionary_t const oldPlist   = plist::get<plist::dictionary_t>(plist::parse_ascii(oldPlistString));
+	plist::dictionary_t const newPlist   = plist::get<plist::dictionary_t>(plist::parse_ascii(newPlistString));
+	plist::dictionary_t const deltaPlist = plist::get<plist::dictionary_t>(plist::parse_ascii(deltaPlistString));
 
 	std::vector<plist::dictionary_t> plists{ deltaPlist, oldPlist };
 	OAK_ASSERT_EQ(to_s(plist::merge_delta(plists)), to_s(newPlist));
@@ -178,9 +178,9 @@ void test_delta_keys_with_dots ()
 		"	};\n"
 		"}\n";
 
-	plist::dictionary_t const oldPlist   = boost::get<plist::dictionary_t>(plist::parse_ascii(oldPlistString));
-	plist::dictionary_t const newPlist   = boost::get<plist::dictionary_t>(plist::parse_ascii(newPlistString));
-	plist::dictionary_t const deltaPlist = boost::get<plist::dictionary_t>(plist::parse_ascii(deltaPlistString));
+	plist::dictionary_t const oldPlist   = plist::get<plist::dictionary_t>(plist::parse_ascii(oldPlistString));
+	plist::dictionary_t const newPlist   = plist::get<plist::dictionary_t>(plist::parse_ascii(newPlistString));
+	plist::dictionary_t const deltaPlist = plist::get<plist::dictionary_t>(plist::parse_ascii(deltaPlistString));
 
 	OAK_ASSERT_EQ(to_s(plist::create_delta(oldPlist, newPlist)), to_s(deltaPlist));
 

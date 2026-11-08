@@ -1,6 +1,0 @@
-target "${dirname}" {
-	require io text regexp OakSystem
-	headers src/*.h
-	sources src/*.cc
-	tests tests/t_*.cc
-}

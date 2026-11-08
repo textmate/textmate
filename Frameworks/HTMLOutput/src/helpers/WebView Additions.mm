@@ -6,7 +6,7 @@
 #import <document/OakDocumentController.h>
 #import <ns/ns.h>
 
-@interface WebView (OakFindNextPrevious)
+@interface WKWebView (OakFindNextPrevious)
 - (void)performFindOperation:(id <OakFindServerProtocol>)aFindServer;
 
 - (IBAction)findNext:(id)sender;
@@ -16,31 +16,33 @@
 - (IBAction)copySelectionToReplacePboard:(id)sender;
 @end
 
-@implementation WebView (OakFindNextPrevious)
-- (NSString*)selection
+@implementation WKWebView (OakFindNextPrevious)
+
+- (void)selection:(void(^)(NSString*))callback
 {
-	DOMDocumentFragment* selection = [[self selectedDOMRange] cloneContents];
-	DOMNodeIterator* iter = selection ? [[[self selectedFrame] DOMDocument] createNodeIterator:selection whatToShow:DOM_SHOW_TEXT filter:nil expandEntityReferences:YES] : nil;
-
-	NSMutableString* str = [NSMutableString string];
-	while(DOMNode* node = [iter nextNode])
-		[str appendString:[node nodeValue]];
-
-	return OakIsEmptyString(str) ? nil : str;
+	[self evaluateJavaScript:@"window.getSelection().toString()" completionHandler:^(id result, NSError* error){
+		callback([result isKindOfClass:[NSString class]] && [(NSString*)result length] > 0 ? result : nil);
+	}];
 }
 
 - (IBAction)copySelectionToFindPboard:(id)sender
 {
-	if(NSString* str = [self selection])
+	[self selection:^(NSString* str) {
+		if(str)
 			[OakPasteboard.findPasteboard addEntryWithString:str];
-	else	NSBeep();
+		else
+			NSBeep();
+	}];
 }
 
 - (IBAction)copySelectionToReplacePboard:(id)sender
 {
-	if(NSString* str = [self selection])
+	[self selection:^(NSString* str) {
+		if(str)
 			[OakPasteboard.replacePasteboard addEntryWithString:str];
-	else	NSBeep();
+		else
+			NSBeep();
+	}];
 }
 
 - (void)performFindOperation:(id <OakFindServerProtocol>)aFindServer
@@ -50,13 +52,17 @@
 		case kFindOperationFind:
 		case kFindOperationFindInSelection:
 		{
-			BOOL backwards  = aFindServer.findOptions & find::backwards;
-			BOOL ignoreCase = aFindServer.findOptions & find::ignore_case;
-			BOOL wrapAround = aFindServer.findOptions & find::wrap_around;
+			WKFindConfiguration* config = [WKFindConfiguration new];
+			config.backwards = aFindServer.findOptions & find::backwards;
+			config.caseSensitive = !(aFindServer.findOptions & find::ignore_case);
+			config.wraps = aFindServer.findOptions & find::wrap_around;
 
-			if([self searchFor:aFindServer.findString direction:!backwards caseSensitive:!ignoreCase wrap:wrapAround])
-					[aFindServer didFind:1 occurrencesOf:[self selection] atPosition:text::pos_t::undefined wrapped:NO];
-			else	[aFindServer didFind:0 occurrencesOf:aFindServer.findString atPosition:text::pos_t::undefined wrapped:NO];
+			[self findString:aFindServer.findString withConfiguration:config completionHandler:^(WKFindResult* result){
+				if(result.matchFound)
+					[aFindServer didFind:1 occurrencesOf:aFindServer.findString atPosition:text::pos_t::undefined wrapped:NO];
+				else
+					[aFindServer didFind:0 occurrencesOf:aFindServer.findString atPosition:text::pos_t::undefined wrapped:NO];
+			}];
 		}
 		break;
 	}
@@ -66,49 +72,37 @@
 {
 	OakPasteboardEntry* entry = [OakPasteboard.findPasteboard current];
 	if(OakNotEmptyString(entry.string))
-		[self searchFor:entry.string direction:YES caseSensitive:![NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsFindIgnoreCase] wrap:[NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsFindWrapAround]];
+	{
+		WKFindConfiguration* config = [WKFindConfiguration new];
+		config.backwards = NO;
+		config.caseSensitive = ![NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsFindIgnoreCase];
+		config.wraps = [NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsFindWrapAround];
+		[self findString:entry.string withConfiguration:config completionHandler:^(WKFindResult* result){ }];
+	}
 }
 
 - (IBAction)findPrevious:(id)sender
 {
 	OakPasteboardEntry* entry = [OakPasteboard.findPasteboard current];
 	if(OakNotEmptyString(entry.string))
-		[self searchFor:entry.string direction:NO caseSensitive:![NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsFindIgnoreCase] wrap:[NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsFindWrapAround]];
+	{
+		WKFindConfiguration* config = [WKFindConfiguration new];
+		config.backwards = YES;
+		config.caseSensitive = ![NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsFindIgnoreCase];
+		config.wraps = [NSUserDefaults.standardUserDefaults boolForKey:kUserDefaultsFindWrapAround];
+		[self findString:entry.string withConfiguration:config completionHandler:^(WKFindResult* result){ }];
+	}
 }
 
 - (void)viewSource:(id)sender
 {
-	WebDataSource* dataSource = [[self mainFrame] dataSource];
-
-	NSString* encoding = [[dataSource textEncodingName] lowercaseString];
-	if(OakIsEmptyString(encoding))
-		encoding = @"utf-8";
-
-	NSString* str;
-	if([encoding isEqualToString:@"utf-8"])
-	{
-		str = [[NSString alloc] initWithData:[dataSource data] encoding:NSUTF8StringEncoding];
-	}
-	else if([encoding isEqualToString:@"utf-16"] || [encoding isEqualToString:@"utf16"])
-	{
-		str = [[NSString alloc] initWithData:[dataSource data] encoding:NSUnicodeStringEncoding];
-	}
-	else if([encoding isEqualToString:@"macintosh"])
-	{
-		str = [[NSString alloc] initWithData:[dataSource data] encoding:NSMacOSRomanStringEncoding];
-	}
-	else
-	{
-		NSAlert* alert        = [[NSAlert alloc] init];
-		alert.messageText     = @"Unknown Encoding";
-		alert.informativeText = [NSString stringWithFormat:@"The encoding used for this HTML buffer (“%@”) is unsupported.\nPlease file a bug report stating the encoding name and how you got to it.", [dataSource textEncodingName]];
-		[alert addButtonWithTitle:@"Continue"];
-		[alert runModal];
-		return;
-	}
-
-	NSString* name = OakNotEmptyString(self.mainFrameTitle) ? self.mainFrameTitle : nil;
-	OakDocument* doc = [OakDocument documentWithString:str fileType:@"text.html.basic" customName:name];
-	[OakDocumentController.sharedInstance showDocument:doc inProject:nil bringToFront:YES];
+	[self evaluateJavaScript:@"document.documentElement.outerHTML" completionHandler:^(id result, NSError* error){
+		if([result isKindOfClass:[NSString class]])
+		{
+			NSString* name = self.title.length > 0 ? self.title : nil;
+			OakDocument* doc = [OakDocument documentWithString:result fileType:@"text.html.basic" customName:name];
+			[OakDocumentController.sharedInstance showDocument:doc inProject:nil bringToFront:YES];
+		}
+	}];
 }
 @end

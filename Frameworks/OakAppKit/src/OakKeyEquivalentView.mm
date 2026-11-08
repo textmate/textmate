@@ -224,7 +224,7 @@ static NSString* const kRecordingPlaceholderString = @"…";
 	};
 
 	NSSize size = [self.displayString sizeWithAttributes:stringAttributes];
-	[self.displayString drawAtPoint:NSMakePoint(NSMidX([self visibleRect]) - size.width / 2, NSMidY([self visibleRect]) - size.height / 2) withAttributes:stringAttributes];
+	[self.displayString drawAtPoint:NSMakePoint(NSMidX([self bounds]) - size.width / 2, NSMidY([self bounds]) - size.height / 2) withAttributes:stringAttributes];
 }
 
 - (void)drawFocusRingMask

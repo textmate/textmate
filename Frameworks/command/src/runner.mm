@@ -5,6 +5,7 @@
 #include <io/path.h>
 #include <io/pipe.h>
 #include <regexp/format_string.h>
+#include <oak/compat.h>
 #include <oak/datatypes.h>
 
 static std::string trim_right (std::string const& str, std::string const& trimChars = " \t\n")
@@ -42,7 +43,7 @@ static std::tuple<pid_t, int, int> my_fork (char const* cmd, int inputRead, std:
 
 	oak::c_array env(environment);
 
-	pid_t pid = vfork();
+	pid_t pid = oak::vfork();
 	if(pid == 0)
 	{
 		int const signals[] = { SIGINT, SIGTERM, SIGPIPE, SIGUSR1 };
@@ -107,18 +108,25 @@ static pid_t run_command (dispatch_group_t rootGroup, std::string const& cmd, in
 	int outputFd, errorFd;
 	std::tie(pid, outputFd, errorFd) = my_fork(cmd.c_str(), inputFd, env, cwd.c_str());
 
-	dispatch_group_t group = dispatch_group_create();
-	exhaust_fd_in_queue(group, outputFd, runLoop, stdoutHandler);
-	exhaust_fd_in_queue(group, errorFd, runLoop, stderrHandler);
+	// Pipe readers in their own group so we can timeout independently of process exit
+	dispatch_group_t pipeGroup = dispatch_group_create();
+	exhaust_fd_in_queue(pipeGroup, outputFd, runLoop, stdoutHandler);
+	exhaust_fd_in_queue(pipeGroup, errorFd, runLoop, stderrHandler);
 
 	__block int status = 0;
-	dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-		if(waitpid(pid, &status, 0) != pid)
-			perror("runner_t: waitpid");
-	});
 
 	dispatch_group_enter(rootGroup);
-	dispatch_group_notify(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+		if(waitpid(pid, &status, 0) != pid)
+			perror("runner_t: waitpid");
+
+		// After process exits, give pipes a grace period to drain remaining output.
+		// Grandchild processes (e.g. mate) can inherit pipe FDs and hold them open
+		// indefinitely, which would block the completion handler forever.
+		long rc = dispatch_group_wait(pipeGroup, dispatch_time(DISPATCH_TIME_NOW, 500 * NSEC_PER_MSEC));
+		if(rc != 0)
+			os_log(OS_LOG_DEFAULT, "Command pipes still open 500ms after process exit (likely inherited by child process), proceeding with available output");
+
 		CFRunLoopPerformBlock(runLoop, kCFRunLoopCommonModes, ^{
 			completionHandler(status);
 		});

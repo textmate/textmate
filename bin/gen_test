@@ -1,4 +1,4 @@
-#!/System/Library/Frameworks/Ruby.framework/Versions/Current/usr/bin/ruby -w
+#!/usr/bin/env ruby -w
 require 'pathname'
 require 'erb'
 
@@ -10,7 +10,7 @@ ARGV.each do |file|
     ns = p.basename.sub(/\.[^.]+$/, '')
     lineno, includes, body = 1, [ ], [ ]
 
-    p.each_line do |line|
+    p.each_line(encoding: "UTF-8") do |line|
       if line =~ /^\s*#(include|import)\b/
         includes << "#line #{lineno} \"#{p.realpath}\"\n"
         includes << line.sub(/"(.*?)"/) { '"' + File.expand_path($1, p.parent) + '"' }
@@ -30,7 +30,7 @@ ARGV.each do |file|
   end
 end
 
-STDOUT << ERB.new(DATA.read, 0, '-<>').result(binding)
+STDOUT << ERB.new(DATA.read, trim_mode: '-<>').result(binding)
 
 __END__
 #line 37 "<%= $PROGRAM_NAME %>"

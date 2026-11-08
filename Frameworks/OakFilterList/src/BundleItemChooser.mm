@@ -384,7 +384,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 - (void)setBackgroundStyle:(NSBackgroundStyle)backgroundStyle
 {
 	[super setBackgroundStyle:backgroundStyle];
-	if(backgroundStyle == NSBackgroundStyleDark)
+	if(backgroundStyle == NSBackgroundStyleEmphasized)
 	{
 		self.textField.objectValue        = [self selectedStringForString:[self valueForKeyPath:@"objectValue.name"]];
 		self.contextTextField.textColor   = [NSColor colorWithCalibratedWhite:0.9 alpha:1];
@@ -884,7 +884,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (scope::context_t 
 				{
 					std::string key = ns::normalize_event_string(pair.first);
 					std::string name, action;
-					if(std::string const* sel = boost::get<std::string>(&pair.second))
+					if(std::string const* sel = plist::get<std::string>(&pair.second))
 					{
 						if(*sel == "noop:" || !seen.emplace(key, *sel).second)
 							continue;

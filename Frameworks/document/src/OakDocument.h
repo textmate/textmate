@@ -56,6 +56,8 @@ typedef NS_ENUM(NSInteger, OakDocumentIOResult) {
 @property (nonatomic, readonly) NSImage* icon;
 @property (nonatomic) NSString* backupPath;
 
+// Auxiliary previews can opt out of language servers and completion services.
+@property (nonatomic) BOOL disableLanguageServices;
 @property (nonatomic) NSString* fileType;     // Lazy: Depends on path and firstLine
 @property (nonatomic) NSString* diskEncoding;
 @property (nonatomic) NSString* diskNewlines;
@@ -64,6 +66,8 @@ typedef NS_ENUM(NSInteger, OakDocumentIOResult) {
 - (NSString*)displayNameWithExtension:(BOOL)flag;
 
 - (void)loadModalForWindow:(NSWindow*)aWindow completionHandler:(void(^)(OakDocumentIOResult result, NSString* errorMessage, oak::uuid_t const& filterUUID))block;
+// Like loadModalForWindow:, but reports failure instead of requesting encoding or authorization UI.
+- (void)loadWithoutUIWithCompletionHandler:(void(^)(OakDocumentIOResult result, NSString* errorMessage, oak::uuid_t const& filterUUID))block;
 - (void)saveModalForWindow:(NSWindow*)aWindow completionHandler:(void(^)(OakDocumentIOResult result, NSString* errorMessage, oak::uuid_t const& filterUUID))block;
 
 - (void)open; // This is currently implicit in loadModalForWindow:completionHandler:
@@ -98,6 +102,8 @@ typedef NS_ENUM(NSInteger, OakDocumentIOResult) {
 - (void)enumerateSymbolsUsingBlock:(void(^)(text::pos_t const& pos, NSString* symbol))block;
 - (void)enumerateBookmarksUsingBlock:(void(^)(text::pos_t const& pos, NSString* excerpt))block;
 - (void)enumerateBookmarksAtLine:(NSUInteger)line block:(void(^)(text::pos_t const& pos, NSString* type, NSString* payload))block;
+- (text::pos_t)nextMarkOfTypes:(NSArray<NSString*>*)types fromPosition:(text::pos_t const&)pos;
+- (text::pos_t)prevMarkOfTypes:(NSArray<NSString*>*)types fromPosition:(text::pos_t const&)pos;
 - (void)enumerateByteRangesUsingBlock:(void(^)(char const* bytes, NSRange byteRange, BOOL* stop))block;
 - (NSArray<OakDocumentMatch*>*)matchesForString:(NSString*)searchString options:(find::options_t)options;
 - (NSArray<OakDocumentMatch*>*)matchesForString:(NSString*)searchString options:(find::options_t)options bufferSize:(NSUInteger*)bufferSize;

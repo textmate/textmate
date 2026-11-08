@@ -118,8 +118,9 @@ namespace file
 		{
 			for(auto const& pattern : item->values_for_field(bundles::kFieldGrammarFirstLineMatch))
 			{
-				char const* first = bytes->begin();
-				char const* last  = bytes->end();
+				std::string content(bytes->begin(), bytes->end());
+				char const* first = content.data();
+				char const* last  = first + content.size();
 				if(pattern.find("(?m)") == std::string::npos)
 					last = first_n_lines(first, last, lines_matched_by_regexp(pattern));
 

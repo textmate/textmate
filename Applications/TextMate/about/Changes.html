@@ -1,0 +1,849 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+    "http://www.w3.org/TR/html4/strict.dtd">
+
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link href="css/stylesheet.css" rel="stylesheet" type="text/css" />
+    <title>Release Notes</title>
+</head>
+
+<body>
+<h1 id="changes">Changes</h1>
+
+<article class="latest">
+<h2 id="2026-11-08v2.24.0">2026-11-08 (v2.24.0)</h2>
+
+<ul>
+<li>Add external theme editor</li>
+<li>Add download function</li>
+<li>Fix downlaod text and icon</li>
+<li>Extensive tweeks to app appearance</li>
+<li>Theme preselection, appearance tweeks</li>
+<li>Pass selected filetype to theme editor</li>
+<li>Fixes for low risk review findings</li>
+<li>Move scoped colours in scope section</li>
+<li>Improvements to font selection appearance</li>
+<li>theme-editor-selection aborts at tests/save_selection.mm:280 (reproduced). valueForKey:@fontControls raises NSUnknownKeyException because ae8d177 removed _fontControls.</li>
+<li>Add rule always creates a comment rule</li>
+<li>Wrong row selected after a rename-on-save</li>
+<li>- New themes reuse one retained Theme Editor bundle object. - Reverting an unsaved theme removes its row and selects a remaining theme.</li>
+<li>Malformed themes crash the editor (reproduced).</li>
+<li>Second save refused (reproduced): a theme with a top-level false value cannot be saved twice</li>
+<li>Launch arguments (reproduced): any argument, e.g. -NSDocumentRevisionsDebugMode YES, prints the usage text and exits 1</li>
+<li>Double prompt (reproduced): closing a dirty window and choosing Revert asks twice.</li>
+<li>Export forces Save/Revert (reproduced): exporting a non-selected theme selects it first</li>
+<li>Duplicate after Revert (reproduced): the copy takes the discarded draft name</li>
+<li>Colours (reproduced in a throwaway test): parse_color rejects #RGB and #RGBA, which read_color accepts</li>
+<li>Missing preview resources</li>
+<li>Dead code and docs</li>
+<li>Move unrelated terminal and gutter test fixes out of theme editor PR</li>
+<li>Update default gutter background test expectation (#24)</li>
+<li>Merge pull request #25 from alistair-king/codex/terminal-test-fixes</li>
+<li>Bundle index setup: it is duplicated. Consolidated both paths into a [shared loader](/Users/alistairk/Development/textmate/Applications/ThemeEditor/src/bundle_index.h) that loads BundlesIndex and refreshes folders to detect external overrides.</li>
+<li>Double restyle: Removed the redundant themeUUID observer in OakDocumentView.mm</li>
+<li>Selection after delete: it indexes the name-sorted _themes (main.mm:1550), not the displayed order.</li>
+<li>Rename: it is mouse-only - Added Return and keypad Enter to rename the selected theme when the list has focus. The tooltip now mentions the shortcut.</li>
+<li>Colours: the panel colours in main.mm are hard-coded - Replaced the hard-coded panel, sidebar, action-bar, and border colours with macOS system colours</li>
+<li>loadSource inserts an empty global rule at index 0 that later saves and exports include. - Saves and exports now omit the editor’s global placeholder while it’s empty</li>
+<li>Replaced execl with LaunchServices, configured to reuse the running app.</li>
+<li>Exports now receive a fresh UUID each time, preserving all other content and leaving the source unchanged</li>
+<li>Change menu text</li>
+<li>A few last things, fix border. Add ASE and DTCG imports, add rename scope</li>
+<li>Merge branch &#39;develop&#39; into ak/theme-editor</li>
+<li>Add ability to edit scope selector</li>
+<li>Merge branch &#39;ak/theme-editor&#39; of https://github.com/alistair-king/textmate into ak/theme-editor</li>
+<li>Compare alignment rects in rule selector layout test</li>
+<li>Fixed the resolver to memoise results by source identity and share resolved containers, preventing exponential alias and JSON-pointer expansion.</li>
+<li>Updated docs/theme-editor.md and README.md to match the code</li>
+<li>Confirmed and fixed: the default Core Graphics Lab range distorted chroma. The L × 100 scaling was correct</li>
+<li>Theme editor (#22)</li>
+<li>Swallow AppKit-internal exceptions instead of aborting</li>
+<li>Force UTF-8 on git output parsed by changelog generators</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.23.2...v2.24.0">all changes since v2.23.2</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-11-02v2.23.2">2026-11-02 (v2.23.2)</h2>
+
+<ul>
+<li>Compile grammar patterns lazily</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.23.1...v2.23.2">all changes since v2.23.1</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-10-31v2.23.1">2026-10-31 (v2.23.1)</h2>
+
+<ul>
+<li>Restore the bundle directory on PATH in login fish shells</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.23.0...v2.23.1">all changes since v2.23.0</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-10-31v2.23.0">2026-10-31 (v2.23.0)</h2>
+
+<ul>
+<li>Fix Ctrl+K going to the editor instead of the terminal</li>
+<li>Initial implementation of MCP</li>
+<li>Add support for claude</li>
+<li>Add Opencode wrapper</li>
+<li>Add explain code feature</li>
+<li>Diagnostics access</li>
+<li>Add diagnostics access</li>
+<li>Allow the AI to navigate the editor</li>
+<li>Implements follow editor changes</li>
+<li>Fix project restoration with the terminal panel</li>
+<li>Tweek to terminal colors</li>
+<li>Implement fix this, and approve change</li>
+<li>Expose LSP functions to MCP</li>
+<li>Allow agents to propse changes to files</li>
+<li>Display agent status in tab title</li>
+<li>Tweaks to tab appearance</li>
+<li>Reimplement renameSession change from other commit</li>
+<li>Remove Explain Selection and Fix Selection workflows</li>
+<li>Keep terminal panel toggle available from terminal focus</li>
+<li>Fix the default build: context tests call a committed terminal API</li>
+<li>Make the new MCP and terminal-panel tests runnable and honest</li>
+<li>Make the context buffer&#39;s byte and UTF-16 walks agree</li>
+<li>Constrain navigate_editor to the window&#39;s project root</li>
+<li>Close the gaps the branch turned up: version, waits, snapshot identity, encoding</li>
+<li>Pin context snapshots against later edits</li>
+<li>Pin the editor change journal to its window</li>
+<li>Fix the editor-context defects the review found</li>
+<li>Pin the MCP tool surface against silent drift</li>
+<li>Merge pull request #21 from alistair-king/ak/terminal-2</li>
+<li>Address review findings on the terminal/MCP merge</li>
+<li>Add tm-pi launcher for the pi coding agent</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.22.2...v2.23.0">all changes since v2.22.2</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-10-30v2.22.2">2026-10-30 (v2.22.2)</h2>
+
+<ul>
+<li>Document the terminal panel</li>
+<li>Flag unseen terminal completions on the tab bar</li>
+<li>Show terminal attention in the window subtitle</li>
+<li>Explain the terminal attention dot on hover</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.22.1...v2.22.2">all changes since v2.22.1</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-10-29v2.22.1">2026-10-29 (v2.22.1)</h2>
+
+<ul>
+<li>Replace NSSplitView with Auto Layout-based terminal panel layout</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.22.0...v2.22.1">all changes since v2.22.0</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-10-29v2.22.0">2026-10-29 (v2.22.0)</h2>
+
+<ul>
+<li>Add SwiftTerm dependency to the OakSwiftUI package</li>
+<li>Add SwiftTerm-based terminal panel controller</li>
+<li>Dock the terminal panel in document windows</li>
+<li>Detached terminal windows inherit placement and close with last session</li>
+<li>Define the OakSwiftUI include directory once</li>
+<li>Require Swift tools 6.2 in the OakSwiftUI package</li>
+<li>Avoid blocking and repeated work in terminal file links</li>
+<li>Start terminal shells from TextMate&#39;s base environment</li>
+<li>Keep editor bundle key bindings away from a focused terminal</li>
+<li>Ask before closing only for foreground terminal work</li>
+<li>Tidy terminal panel theming, persistence and menu state</li>
+<li>Make terminal tests independent of the user&#39;s shell and build</li>
+<li>Document the SwiftTerm build plugin in the build notes</li>
+<li>Keep running shells when a window is closed programmatically</li>
+<li>Confirm ending terminal work with a window sheet</li>
+<li>Give the terminal bridge a delegate protocol and a typed theme</li>
+<li>Track directory changes instead of snapshotting output rows</li>
+<li>Merge pull request #20 from tectiv3/feature/terminal-panel</li>
+<li>Fix terminal panel environment, window close and file links</li>
+<li>Tidy terminal output handling and shared panel constants</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.21.1...v2.22.0">all changes since v2.21.1</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-10-27v2.21.1">2026-10-27 (v2.21.1)</h2>
+
+<ul>
+<li>Split release packaging from publishing</li>
+<li>Add make ship target for already-tagged releases</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.21.0...v2.21.1">all changes since v2.21.0</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-10-17v2.21.0">2026-10-17 (v2.21.0)</h2>
+
+<ul>
+<li>Fix usage with tsc as an LSP</li>
+<li>Harden TypeScript LSP pull diagnostics</li>
+<li>Add headless LSP pull-diagnostics integration test</li>
+<li>Merge branch &#39;tsc-lsp-fixes&#39; into develop</li>
+<li>Update changelog</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.20.1...v2.21.0">all changes since v2.20.1</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-10-15v2.20.1">2026-10-15 (v2.20.1)</h2>
+
+<ul>
+<li>Remove exception throwing on unsupported accessibility queries</li>
+<li>Create embed destination directory before rsync/copy</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.20.0...v2.20.1">all changes since v2.20.0</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-09-15v2.20.0">2026-09-15 (v2.20.0)</h2>
+
+<ul>
+<li>Remove unused var</li>
+<li>Fix double-height tab bar on macOS 26+</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.19.0...v2.20.0">all changes since v2.19.0</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-08-18v2.19.0">2026-08-18 (v2.19.0)</h2>
+
+<ul>
+<li>Suppress accessibility exceptions in exception handler</li>
+<li>Don&#39;t abort when the formatter&#39;s working directory is gone</li>
+<li>Don&#39;t export a project directory that no longer exists</li>
+<li>Add inline LSP diagnostics</li>
+<li>Optimize the README screenshots</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.18.3...v2.19.0">all changes since v2.18.3</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-07-19v2.18.3">2026-07-19 (v2.18.3)</h2>
+
+<ul>
+<li>Fetch bundle index immediately on first launch</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.18.2...v2.18.3">all changes since v2.18.2</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-06-30v2.18.2">2026-06-30 (v2.18.2)</h2>
+
+<ul>
+<li>Add support of installing via homebrew cask</li>
+<li>Drop NSURLEffectiveIconKey from directory listing prefetch</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.18.1...v2.18.2">all changes since v2.18.1</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-06-10v2.18.1">2026-06-10 (v2.18.1)</h2>
+
+<ul>
+<li>Fix multiline tool tip rendering</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.18.0...v2.18.1">all changes since v2.18.0</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-06-10v2.18.0">2026-06-10 (v2.18.0)</h2>
+
+<ul>
+<li>Migrate HTML output window from legacy WebView to WKWebView</li>
+<li>Fix file:// URL rewriting to preserve txmt:// links</li>
+<li>Apply file:// URL rewriting to setContent: refresh path</li>
+<li>Migrate tooltip from legacy WebView to WKWebView</li>
+<li>Fix compilation warning</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.17.1...v2.18.0">all changes since v2.17.1</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-06-09v2.17.1">2026-06-09 (v2.17.1)</h2>
+
+<ul>
+<li>Fix SCM gutter diff refresh</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.17.0...v2.17.1">all changes since v2.17.0</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-06-08v2.17.0">2026-06-08 (v2.17.0)</h2>
+
+<ul>
+<li>Disable Copilot by default</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.16.1...v2.17.0">all changes since v2.16.1</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-06-08v2.16.1">2026-06-08 (v2.16.1)</h2>
+
+<ul>
+<li>Add generate changes and update package script</li>
+<li>Generate contributions during release prep</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.16.0...v2.16.1">all changes since v2.16.0</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-06-08v2.16.0">2026-06-08 (v2.16.0)</h2>
+
+<ul>
+<li>Improve SCM status performance</li>
+<li>Remove synchronous FSEvents flushes</li>
+<li>Add in-process SCM gutter diff</li>
+<li>Fix defaults observer deadlock risk</li>
+<li>Replace preference pane icons with SF Symbols</li>
+<li>Remove license check and keychain access</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.15.12...v2.16.0">all changes since v2.15.12</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-06-08v2.15.12">2026-06-08 (v2.15.12)</h2>
+
+<ul>
+<li>Fix cmake css bundling and dark mode</li>
+<li>Fix crash in Advanced prefs with legacy scrollbars</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.15.11...v2.15.12">all changes since v2.15.11</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-06-08v2.15.11">2026-06-08 (v2.15.11)</h2>
+
+<ul>
+<li>Remove bundles and registration tabs and add formatter rules</li>
+<li>Add package target and codesign helpers</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.15.10...v2.15.11">all changes since v2.15.10</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-06-08v2.15.10">2026-06-08 (v2.15.10)</h2>
+
+<ul>
+<li>Add CFBundleSupportedPlatforms to Info.plist</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.15.9...v2.15.10">all changes since v2.15.9</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-06-05v2.15.9">2026-06-05 (v2.15.9)</h2>
+
+<ul>
+<li>Add readme note about disabling copilot</li>
+<li>Fix ESC override</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.15.8...v2.15.9">all changes since v2.15.8</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-04-09v2.15.8">2026-04-09 (v2.15.8)</h2>
+
+<ul>
+<li>Fix crash in encoding classifier when saving non-UTF-8 words</li>
+<li>Fix restored windows appearing on top of fullscreen window</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.15.7...v2.15.8">all changes since v2.15.7</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-03-31v2.15.7">2026-03-31 (v2.15.7)</h2>
+
+<ul>
+<li>Add return of lspInitOptions as workspace/configuration and exclude .direnv</li>
+<li>Fix minimized windows disappearing on restart</li>
+<li>Fix hand cursor getting stuck sometimes</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.15.6...v2.15.7">all changes since v2.15.6</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-03-28v2.15.6">2026-03-28 (v2.15.6)</h2>
+
+<ul>
+<li>Improve formatter handling and timeout logic in OakTextView</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.15.5...v2.15.6">all changes since v2.15.5</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-03-28v2.15.5">2026-03-28 (v2.15.5)</h2>
+
+<ul>
+<li>Fix Copilot to use copilot-language-server, unify language ID mapping</li>
+<li>Fix main thread deadlocks and blocking across four subsystems</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.15.4...v2.15.5">all changes since v2.15.4</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-03-28v2.15.4">2026-03-28 (v2.15.4)</h2>
+
+<ul>
+<li>Add formatting command option and improve handling of format on save</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.15.3...v2.15.4">all changes since v2.15.3</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-03-27v2.15.3">2026-03-27 (v2.15.3)</h2>
+
+<ul>
+<li>Replace hover tooltip with sticky NSPopover and tabbed content</li>
+<li>Disable docs lazy loading</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.15.2...v2.15.3">all changes since v2.15.2</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-03-26v2.15.2">2026-03-26 (v2.15.2)</h2>
+
+<ul>
+<li>Fix warnings and code review issues from category extraction</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.15.1...v2.15.2">all changes since v2.15.1</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-03-26v2.15.1">2026-03-26 (v2.15.1)</h2>
+
+<ul>
+<li>Extract OakTextView.mm into categories with review bug fixes</li>
+<li>Add LSP submenu to Text menu and show TextMate-dev in menu bar for debug builds</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.15.0...v2.15.1">all changes since v2.15.0</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-03-26v2.15.0">2026-03-26 (v2.15.0)</h2>
+
+<ul>
+<li>Code cleanup after review</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.14.7...v2.15.0">all changes since v2.14.7</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-03-26v2.14.7">2026-03-26 (v2.14.7)</h2>
+
+<ul>
+<li>Add ghost text extra height feature and adjust drawing logic for multiline ghost text</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.14.6...v2.14.7">all changes since v2.14.6</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-03-26v2.14.6">2026-03-26 (v2.14.6)</h2>
+
+<ul>
+<li>Surface LSP errors to users and improve server compatibility</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.14.5...v2.14.6">all changes since v2.14.5</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-03-26v2.14.5">2026-03-26 (v2.14.5)</h2>
+
+<ul>
+<li>Unify LSP logging and update README server examples</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.12.4...v2.14.5">all changes since v2.12.4</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-03-26v2.12.4">2026-03-26 (v2.12.4)</h2>
+
+<ul>
+<li>Harden LSP client for Python language server compatibility</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.12.3...v2.12.4">all changes since v2.12.3</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-03-25v2.12.3">2026-03-25 (v2.12.3)</h2>
+
+<ul>
+<li>Add indexing status and reindex workspace feature</li>
+<li>Fix file browser session state restoration</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.12.2...v2.12.3">all changes since v2.12.2</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-03-25v2.12.2">2026-03-25 (v2.12.2)</h2>
+
+<ul>
+<li>Use Preferences Variables pane for PATH in all subsystems</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.12.1...v2.12.2">all changes since v2.12.1</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-03-24v2.12.1">2026-03-24 (v2.12.1)</h2>
+
+<ul>
+<li>Fix hover crash at end-of-buffer and widen interactive toast</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.12.0...v2.12.1">all changes since v2.12.0</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-03-24v2.12.0">2026-03-24 (v2.12.0)</h2>
+
+<ul>
+<li>Add workspace/didChangeWatchedFiles support for LSP file watching</li>
+<li>Fix LSP workspace capabilities compliance gaps</li>
+<li>Add LSP server request UI (showMessageRequest, showDocument)</li>
+<li>Fix crash on repos with submodules in git status parser</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.11.3...v2.12.0">all changes since v2.11.3</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-03-23v2.11.3">2026-03-23 (v2.11.3)</h2>
+
+<ul>
+<li>Add syntax highlighting to hover tooltip and fix LSP doc rendering</li>
+<li>Add lsp file watching design doc</li>
+<li>Deduplicate Intelephense repeated markdown sections in hover and completion docs</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.11.2...v2.11.3">all changes since v2.11.2</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-03-22v2.11.2">2026-03-22 (v2.11.2)</h2>
+
+<ul>
+<li>Add copilot ghost text support</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.11.1...v2.11.2">all changes since v2.11.1</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-03-22v2.11.1">2026-03-22 (v2.11.1)</h2>
+
+<ul>
+<li>Subscribe to server statusNotification for reactive auth status updates</li>
+<li>Add transparency to command palette and completions</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.11.0...v2.11.1">all changes since v2.11.0</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-03-22v2.11.0">2026-03-22 (v2.11.0)</h2>
+
+<ul>
+<li>Add Copilot integration design spec and implementation plan</li>
+<li>Extend LSPClient with generic request/notification methods and delegate hooks</li>
+<li>Add CopilotManager: native Copilot integration via copilot-language-server</li>
+<li>Integrate Copilot into OakTextView, status bar, and keybindings</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.10.0...v2.11.0">all changes since v2.10.0</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-03-22v2.10.0">2026-03-22 (v2.10.0)</h2>
+
+<ul>
+<li>Add command palette design spec</li>
+<li>Add OakCommandPaletteItem model and delegate protocol</li>
+<li>Integrate command palette into AppController with menu entry and data collection</li>
+<li>Add mode-specific providers for GoToLine, FindInProject, and Settings</li>
+<li>Add frecency ranking with KVDB persistence</li>
+<li>Fix command palette review issues and document it in readme</li>
+<li>Show bundle name in subtitle for bundle editor items (Kind · Bundle Name)</li>
+<li>Add screenshots to readme</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.9.1...v2.10.0">all changes since v2.9.1</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-03-20v2.9.1">2026-03-20 (v2.9.1)</h2>
+
+<ul>
+<li>Add Projects preferences pane spec</li>
+<li>Fix UI deadlock when bundle commands spawn processes that inherit pipes</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.9.0...v2.9.1">all changes since v2.9.0</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-03-19v2.9.0">2026-03-19 (v2.9.0)</h2>
+
+<ul>
+<li>Move hidden user defaults keys to centralized Keys.h/Keys.mm</li>
+<li>Add Advanced preferences pane with hidden settings and hints</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.8.0...v2.9.0">all changes since v2.8.0</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-03-16v2.8.0">2026-03-16 (v2.8.0)</h2>
+
+<ul>
+<li>Add first responder resignation in DocumentWindowController and update NSKeyedArchiver initialization in FileBrowserViewController</li>
+<li>Fix retain cycles and observer cleanup in log panel, notifications, and document view</li>
+<li>Disable LSP menu items when no language server is available</li>
+<li>Change Rename Symbol shortcut to Cmd+Shift+R and unbind F2 from Jump to Next Bookmark</li>
+<li>Add formatters pref pane with known formatters table</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.7.0...v2.8.0">all changes since v2.7.0</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-03-16v2.7.0">2026-03-16 (v2.7.0)</h2>
+
+<ul>
+<li>Add LSP diagnostic counts, server status API, and restart to LSPManager</li>
+<li>Fix restart race, VFL gap when LSP hidden, and navigation off-by-one</li>
+<li>Merge branch &#39;feature/lsp-status-bar&#39; into develop</li>
+<li>Add formatCommand and formatOnSave settings keys</li>
+<li>Set working directory to project root for formatter config resolution</li>
+<li>Document custom formatter in README with examples</li>
+<li>Merge branch &#39;feature/custom-formatter&#39; into develop</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.6.0...v2.7.0">all changes since v2.6.0</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-03-15v2.6.0">2026-03-15 (v2.6.0)</h2>
+
+<ul>
+<li>Add codeAction capabilities, parsing, and request methods</li>
+<li>Add lightbulb gutter icon on cursor line with diagnostics</li>
+<li>Use replace_input for cursor interpolation, fix stale lightbulb with invalidateCodeActionProbe</li>
+<li>Add perform_replacements method and use correct view</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.5.6...v2.6.0">all changes since v2.5.6</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-03-15v2.5.6">2026-03-15 (v2.5.6)</h2>
+
+<ul>
+<li>Add LSP rename design spec</li>
+<li>Add LSP rename and prepareRename request methods</li>
+<li>Add OakRenameField inline input component</li>
+<li>Add lspRename: action with inline field and preview panel</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.5.5...v2.5.6">all changes since v2.5.5</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-03-15v2.5.5">2026-03-15 (v2.5.5)</h2>
+
+<ul>
+<li>Dismiss LSP popups on tab switch and hide toasts when app inactive</li>
+<li>Auto-resize toast and fix empty toast on repeated trigger</li>
+<li>Invalidate LSP hover cache on buffer edits and auto-resize toasts</li>
+<li>Fix empty toast flash, hover cache staleness, and log panel UX</li>
+<li>Add lspHover setting and fix log window frame persistence</li>
+<li>Auto-insert single completion and dynamic popup height for docs</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.5.4...v2.5.5">all changes since v2.5.4</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-03-15v2.5.4">2026-03-15 (v2.5.4)</h2>
+
+<ul>
+<li>Fix empty toast on second LSP server and Sendable warning</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.5.3...v2.5.4">all changes since v2.5.3</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-03-15v2.5.3">2026-03-15 (v2.5.3)</h2>
+
+<ul>
+<li>Fix log text selection, window persistence, and empty toast</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.5.2...v2.5.3">all changes since v2.5.2</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-03-15v2.5.2">2026-03-15 (v2.5.2)</h2>
+
+<ul>
+<li>Add completionItem/resolve implementation plan</li>
+<li>Add completionItem/resolve with documentation side panel</li>
+<li>Fix resolve panel: no resize jump, unified style, no seam</li>
+<li>Trim whitespace from LSP messages and add notifications for completions</li>
+<li>Add horizontal padding to doc panel, strip FQN symbol names</li>
+<li>Reuse existing parseMarkdownToAttributedString for resolve docs</li>
+<li>Add horizontal padding to completion list rows</li>
+<li>Extract code blocks from resolve docs before markdown parsing</li>
+<li>Refactor logging system and improve log message format in LSP communication</li>
+<li>Merge branch &#39;feature/completion-item-resolve&#39; into develop</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.5.1...v2.5.2">all changes since v2.5.1</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-03-14v2.5.1">2026-03-14 (v2.5.1)</h2>
+
+<ul>
+<li>Filter empty toasts and suppress LSP Log-level showMessage</li>
+<li>Refactor version handling and bundle identifier in CMake files</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.5...v2.5.1">all changes since v2.5</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-03-14v2.5">2026-03-14 (v2.5)</h2>
+
+<ul>
+<li>Add CLAUDE.md with project analysis and development guide (#1)</li>
+<li>Init serena</li>
+<li>Add CMake migration design spec (rev 2)</li>
+<li>Update CMake migration spec to minimal-first approach (rev 3)</li>
+<li>Add CMake migration implementation plan</li>
+<li>Add root CMakeLists.txt, CMake helpers, presets, and update .gitignore</li>
+<li>Add CMakeLists.txt for vendor libraries</li>
+<li>Add CMakeLists.txt for leaf frameworks</li>
+<li>Add CMakeLists.txt for low-level frameworks</li>
+<li>Add CMakeLists.txt for core engine frameworks</li>
+<li>Add CMakeLists.txt for service frameworks</li>
+<li>Add CMakeLists.txt for GUI frameworks</li>
+<li>Add CMakeLists.txt for top-level frameworks, CLI apps, and special bundles</li>
+<li>Add CMakeLists.txt for plugins and TextMate main app</li>
+<li>Fix build errors from initial CMake migration</li>
+<li>Bump macOS target to 14.0, use -dev bundle ID and app support path, fix YEAR in copyright</li>
+<li>Compile xib files to nib and embed in app bundle</li>
+<li>Revert app support path to shared TextMate dir (bundle ID is sufficient for coexistence)</li>
+<li>Refactor hardcoded app support paths to use oak::application_t::support()</li>
+<li>Add ad-hoc codesigning for embedded plugins</li>
+<li>Add OakSystem dependency to tm_query for application support path API</li>
+<li>Fix plugin Info.plist variable expansion for unique bundle identifiers</li>
+<li>Add -ObjC linker flag to force-load ObjC categories from static libraries</li>
+<li>Bundle framework resources (icons, images, plists) into app</li>
+<li>Add missing framework resources: tab bar images, DocumentTypes subdirectory</li>
+<li>Update upstream status in CLAUDE.md</li>
+<li>Fix cast of non Objective-C pointer in shared_ptr</li>
+<li>Silence vfork deprecated on macOS Monterey until migration to posix_spawn</li>
+<li>Fix Ruby scripts</li>
+<li>Fix broken hyperlink to Ragel</li>
+<li>Fix &quot;toggleing&quot; typo in Preferences</li>
+<li>Avoid clang 15 crash by using correct array size</li>
+<li>Fix incorrect number of seconds in a day</li>
+<li>Add attr.filebrowser when file browser pane has focus</li>
+<li>Fix file browser and document view backgrounds (#9)</li>
+<li>Drop macOS &lt; 14 compatibility (#12)</li>
+<li>Modernize ERB usage to eliminate Ruby 3.x deprecation warnings (#13)</li>
+<li>Fix gutter color (#14)</li>
+<li>Center tabs (#18)</li>
+<li>Update CMakeLists globs for .cc-to-.mm renames from tagliala cherry-picks</li>
+<li>Revert &quot;Center tabs (#18)&quot;</li>
+<li>Add Makefile</li>
+<li>Merge branch &#39;feature/cmake-migration&#39; into develop</li>
+<li>Incorporate dialog plugins into repo (no longer submodules)</li>
+<li>Remove old rave build system, gen_html, and multimarkdown dependency</li>
+<li>Replace google-sparsehash with std::unordered_map</li>
+<li>Replace ragel with hand-written ASCII plist parser</li>
+<li>Remove boost dependency, replace with std::variant and zlib crc32</li>
+<li>Update README with current build instructions and removed dependencies</li>
+<li>Remove unused SyntaxMate application</li>
+<li>Fix build warnings</li>
+<li>Clean up more warnings</li>
+<li>Log uncaught C++ exceptions and update plist conversion functions</li>
+<li>Remove self-update system, network framework, and related dead code</li>
+<li>vendor: add nlohmann/json 3.11.3 single header for LSP support</li>
+<li>lsp: add LSPClient interface for PoC</li>
+<li>lsp: implement LSPClient with JSON-RPC framing and intelephense lifecycle</li>
+<li>lsp: hook LSPClient into OakDocumentView, triggered by TM_ENABLE_IS</li>
+<li>lsp: add homebrew to NSTask PATH so node-based servers work</li>
+<li>docs: add LSP Phase 1 design spec</li>
+<li>docs: update LSP Phase 1 spec with critic feedback and mark system findings</li>
+<li>lsp: create Frameworks/lsp/ framework, move LSPClient from OakTextView</li>
+<li>lsp: refactor LSPClient with delegate pattern, server request handling, document sync</li>
+<li>lsp: wire LSPManager into OakDocumentView with document sync notifications</li>
+<li>lsp: shutdown all LSP servers on app termination</li>
+<li>lsp: fix languageId detection and diagnostic dict key mismatch</li>
+<li>docs: add LSP Phase 2 completion design spec with three strategies</li>
+<li>docs: add implementation plans for three LSP completion strategies</li>
+<li>Fix crash in bundle editor</li>
+<li>Fix regex buffer overread and key equivalent display in split view</li>
+<li>Update memory</li>
+<li>Add LSP completion support to OakTextView and editor classes</li>
+<li>Add LSP completion request/response with rich suggestion dicts and client-side filtering</li>
+<li>Add Opt+Tab LSP completion UI with NSMenu popup</li>
+<li>Fix completion insertion race and remove dead LSP code from editor</li>
+<li>Revert &quot;Fix completion insertion race and remove dead LSP code from editor&quot;</li>
+<li>Remove unused LSP completion code from editor layer</li>
+<li>Merge feature/lsp-client: native LSP support with diagnostics and Opt+Tab completions</li>
+<li>Add LSP setup examples to README for PHP, Go, C++, and Vue</li>
+<li>Remove crash reporter</li>
+<li>feat: add OakSwiftUI SPM package with minimal framework</li>
+<li>chore: add .gitignore for OakSwiftUI, remove build artifacts</li>
+<li>feat: add OakSwiftUI build script</li>
+<li>feat: add swift-build targets to Makefile for OakSwiftUI</li>
+<li>feat: integrate OakSwiftUI as optional dependency in CMake build</li>
+<li>docs: note optional Swift dependency for OakSwiftUI</li>
+<li>feat: add OakHostingView and OakThemeEnvironment</li>
+<li>feat: add FuzzyMatcher for completion filtering</li>
+<li>feat: add OakCompletionItem bridge class</li>
+<li>feat: add CompletionViewModel with filtering and navigation</li>
+<li>feat: add CompletionListView and CompletionRowView SwiftUI views</li>
+<li>feat: add OakCompletionPopup bridge class with keyboard handling</li>
+<li>feat: add OakInfoTooltip with popover-based rich content display</li>
+<li>feat: add OakFloatingPanel with child window management</li>
+<li>Add LSP Go to Definition via Cmd+Opt+D</li>
+<li>test: add bridge class initialization and property tests</li>
+<li>fix: address code review issues in OakSwiftUI</li>
+<li>Add Cmd+Click go to definition with pointing hand cursor</li>
+<li>Merge branch &#39;feature/add-ui-swiftui-framework&#39; into develop</li>
+<li>Add oakswiftui usage guide</li>
+<li>Wire OakSwiftUI CompletionPopup into LSP completion flow</li>
+<li>Remove conditional guards, drop old NSMenu completion, link OakSwiftUI directly</li>
+<li>Improve completion popup: add background, kind icons, and pass detail from LSP</li>
+<li>Enable LSP snippet completions with tab-stop parameter navigation</li>
+<li>Add LSP hover (textDocument/hover) with mouse and keyboard triggers</li>
+<li>Update LSPClient to accept initialization options and modify client creation logic</li>
+<li>Add LSP Find References design spec</li>
+<li>Add LSP Find References (textDocument/references) with SwiftUI panel</li>
+<li>Fix hover tooltip showing tall empty space above content</li>
+<li>Add formatting design doc</li>
+<li>Implement LSP Notifications and Debug Panel</li>
+<li>Enhance LSP UI: Auto-scroll Log Panel and Initialized Toast</li>
+<li>Add formatting capabilities and request methods to LSPClient</li>
+<li>Add formatting routing and capability queries to LSPManager</li>
+<li>Add LSP formatting with manual trigger and format-on-save</li>
+<li>Merge branch &#39;feature/lsp-formatting&#39; into develop</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.1.1-undead...v2.5">all changes since v2.1.1-undead</a></li>
+</ul>
+</article>
+
+<article>
+<h2 id="2026-05-28v2.1.1-undead">2026-05-28 (v2.1.1-undead)</h2>
+
+<ul>
+<li>Software Update: feed from GitHub Releases, verify via Apple signature</li>
+<li>Software Update: drop the Prereleases channel until a beta stream exists</li>
+<li>Eliminate api.textmate.org: neutralize crash upload, remove bl/updater</li>
+<li>Merge pull request #9 from textmatelives/software-update-option-b</li>
+<li>Info.plist: declare CFBundleSupportedPlatforms = [MacOSX]</li>
+<li>Merge pull request #10 from textmatelives/fix/issue-8-supported-platforms</li>
+<li>configure: derive dependency prefix from Homebrew instead of hardcoding /usr/local</li>
+<li>Merge pull request #11 from textmatelives/fix/configure-homebrew-prefix</li>
+<li>docs: add RELEASING.md describing how releases are cut</li>
+<li>README: use screenshot_undead.png; retain the original as a historical artifact</li>
+<li>CHANGELOG: add v2.1.1-undead release notes</li>
+<li>Merge pull request #12 from textmatelives/release-prep</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.1.0-undead...v2.1.1-undead">all changes since v2.1.0-undead</a></li>
+</ul>
+</article>
+
+</body>
+</html>

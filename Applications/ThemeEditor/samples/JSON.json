@@ -1,0 +1,52 @@
+{
+  "name": "TextMate theme preview",
+  "version": "2.4.0",
+  "description": "JSON keys, strings, numbers, booleans, null, and punctuation",
+  "appearance": "light",
+  "enabled": true,
+  "temporary": false,
+  "fallback": null,
+  "colors": {
+    "background": "#ffffff",
+    "foreground": "#202020",
+    "accent": "#58a6ff",
+    "selection": "#b5d5ff88",
+    "caret": "#202020"
+  },
+  "numbers": {
+    "integer": 42,
+    "negative": -17,
+    "decimal": 3.14159,
+    "exponent": 6.02e23,
+    "small": 1.25e-8,
+    "zero": 0
+  },
+  "strings": {
+    "plain": "Hello, world!",
+    "quotes": "A string with \"quoted text\"",
+    "slashes": "C:\\Themes\\Preview.json",
+    "whitespace": "Tab:\t newline:\n carriage return:\r",
+    "unicodeEscape": "Stars: \u2605 \u2606",
+    "unicodeText": "Café — 日本語 — 🌈"
+  },
+  "rules": [
+    {
+      "name": "Comments",
+      "scope": "comment",
+      "settings": { "foreground": "#808080", "fontStyle": "italic" }
+    },
+    {
+      "name": "Strings",
+      "scope": "string",
+      "settings": { "foreground": "#228833" }
+    },
+    {
+      "name": "Keywords",
+      "scope": "keyword.control",
+      "settings": { "foreground": "#9933aa", "fontStyle": "bold" }
+    }
+  ],
+  "tags": ["editor", "preview", "theme"],
+  "emptyObject": {},
+  "emptyArray": []
+}

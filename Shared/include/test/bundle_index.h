@@ -28,7 +28,7 @@ namespace test
 
 		bundles::item_ptr add (bundles::kind_t itemKind, std::string const& plistString)
 		{
-			return add(itemKind, boost::get<plist::dictionary_t>(plist::parse_ascii(plistString)));
+			return add(itemKind, plist::get<plist::dictionary_t>(plist::parse_ascii(plistString)));
 		}
 
 		bool commit () const

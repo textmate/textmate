@@ -1,5 +1,10 @@
 #import "OakDocumentView.h"
+#import "OakTextView_Private.h"
 #import "GutterView.h"
+#import "OakSwiftUI-Swift.h"
+#import <lsp/LSPClient.h>
+#import <lsp/LSPManager.h>
+#import <lsp/CopilotManager.h>
 #import "OTVStatusBar.h"
 #import <document/OakDocument.h>
 #import <file/type.h>
@@ -19,9 +24,7 @@
 #import <OakAppKit/OakUIConstructionFunctions.h>
 #import <OakAppKit/NSMenuItem Additions.h>
 #import <BundleMenu/BundleMenu.h>
-
-static NSString* const kUserDefaultsLineNumberScaleFactorKey = @"lineNumberScaleFactor";
-static NSString* const kUserDefaultsLineNumberFontNameKey    = @"lineNumberFontName";
+#import <Preferences/Keys.h>
 
 static NSString* const kBookmarksColumnIdentifier = @"bookmarks";
 static NSString* const kFoldingsColumnIdentifier  = @"foldings";
@@ -40,6 +43,10 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 	NSMutableArray* bottomAuxiliaryViews;
 
 	IBOutlet NSPanel* tabSizeSelectorPanel;
+
+	NSUInteger _cursorLine;
+	BOOL _cursorLineHasActions;
+	NSUInteger _probeGeneration;
 }
 @property (nonatomic, readonly) OTVStatusBar* statusBar;
 @property (nonatomic) SymbolChooser* symbolChooser;
@@ -54,6 +61,8 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 	{
 		self.accessibilityRole  = NSAccessibilityGroupRole;
 		self.accessibilityLabel = @"Editor";
+
+		_cursorLine = NSNotFound;
 
 		_textView = [[OakTextView alloc] initWithFrame:NSZeroRect];
 		_textView.autoresizingMask = NSViewWidthSizable|NSViewHeightSizable;
@@ -95,9 +104,15 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 
 		self.document = [OakDocument documentWithString:@"" fileType:@"text.plain" customName:@"placeholder"];
 
-		self.observedKeys = @[ @"selectionString", @"symbol", @"recordingMacro", @"themeUUID" ];
+		self.observedKeys = @[ @"selectionString", @"symbol", @"recordingMacro" ];
 		for(NSString* keyPath in self.observedKeys)
 			[_textView addObserver:self forKeyPath:keyPath options:NSKeyValueObservingOptionInitial context:NULL];
+
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(themeDidChange:) name:OakTextViewThemeDidChangeNotification object:_textView];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(lspDiagnosticsDidChange:) name:LSPDiagnosticsDidChangeNotification object:nil];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(lspServerStatusDidChange:) name:LSPServerStatusDidChangeNotification object:nil];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(lspShowMessage:) name:LSPShowMessageNotification object:nil];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(copilotStatusDidChange:) name:CopilotStatusDidChangeNotification object:nil];
 	}
 	return self;
 }
@@ -274,10 +289,6 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 	{
 		_statusBar.softTabs = self.document.softTabs;
 	}
-	else if([aKeyPath isEqualToString:@"themeUUID"])
-	{
-		[self updateStyle];
-	}
 }
 
 - (void)dealloc
@@ -300,6 +311,9 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 		for(NSString* key in documentKeys)
 			[oldDocument removeObserver:self forKeyPath:key];
 		[NSNotificationCenter.defaultCenter removeObserver:self name:OakDocumentMarksDidChangeNotification object:oldDocument];
+		[NSNotificationCenter.defaultCenter removeObserver:self name:OakDocumentContentDidChangeNotification object:oldDocument];
+		[NSNotificationCenter.defaultCenter removeObserver:self name:OakDocumentDidSaveNotification object:oldDocument];
+		[NSNotificationCenter.defaultCenter removeObserver:self name:OakDocumentWillCloseNotification object:oldDocument];
 	}
 
 	if(aDocument)
@@ -308,11 +322,17 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 	if(_document = aDocument)
 	{
 		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(documentMarksDidChange:) name:OakDocumentMarksDidChangeNotification object:self.document];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(documentContentDidChange:) name:OakDocumentContentDidChangeNotification object:self.document];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(documentDidSave:) name:OakDocumentDidSaveNotification object:self.document];
+		[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(documentWillClose:) name:OakDocumentWillCloseNotification object:self.document];
 		for(NSString* key in documentKeys)
 			[self.document addObserver:self forKeyPath:key options:NSKeyValueObservingOptionInitial context:nullptr];
 	}
 
 	[_textView setDocument:self.document];
+	[LSPManager.sharedManager documentDidOpen:aDocument];
+	[[CopilotManager sharedManager] documentDidOpen:aDocument];
+	[[CopilotManager sharedManager] documentDidFocus:aDocument];
 	[gutterView reloadData:self];
 	[self updateStyle];
 
@@ -324,6 +344,19 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 
 	if(oldDocument)
 		[oldDocument close];
+
+	if(aDocument)
+	{
+		__weak OakDocumentView* weakSelf = self;
+		dispatch_async(dispatch_get_main_queue(), ^{
+			[weakSelf updateLSPStatusBar];
+		});
+	}
+}
+
+- (void)themeDidChange:(NSNotification*)notification
+{
+	[self updateStyle];
 }
 
 - (void)updateStyle
@@ -333,23 +366,7 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 		[textScrollView setBackgroundColor:[NSColor colorWithCGColor:theme->background(to_s(self.document.fileType))]];
 		[textScrollView setScrollerKnobStyle:theme->is_dark() ? NSScrollerKnobStyleLight : NSScrollerKnobStyleDark];
 
-		if(@available(macOS 10.14, *))
-		{
-			[_textView setIbeamCursor:NSCursor.IBeamCursor];
-		}
-		else
-		{
-			if(theme->is_dark())
-			{
-				NSImage* whiteIBeamImage = [NSImage imageNamed:@"IBeam white" inSameBundleAsClass:[self class]];		
-				[whiteIBeamImage setSize:NSCursor.IBeamCursor.image.size];
-				[_textView setIbeamCursor:[[NSCursor alloc] initWithImage:whiteIBeamImage hotSpot:NSMakePoint(4, 9)]];
-			}
-			else
-			{
-				[_textView setIbeamCursor:NSCursor.IBeamCursor];
-			}
-		}
+		[_textView setIbeamCursor:NSCursor.IBeamCursor];
 
 		[self updateGutterViewFont:self]; // trigger update of gutter view’s line number font
 		auto const& styles = theme->gutter_styles();
@@ -366,16 +383,27 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 		gutterView.selectionIconPressedColor = [NSColor colorWithCGColor:styles.selectionIconsPressed];
 		gutterView.selectionBorderColor      = [NSColor colorWithCGColor:styles.selectionBorder];
 		gutterScrollView.backgroundColor     = gutterView.backgroundColor;
-		gutterDividerView.activeBackgroundColor = [NSColor colorWithCGColor:styles.divider];
+
+		gutterDividerView.activeBackgroundColor = [NSColor separatorColor];
 
 		[gutterView setNeedsDisplay:YES];
 	}
 }
 
+- (BOOL)showsLineNumbers
+{
+	return [gutterView visibilityForColumnWithIdentifier:GVLineNumbersColumnIdentifier];
+}
+
+- (void)setShowsLineNumbers:(BOOL)flag
+{
+	[gutterView setVisibility:flag forColumnWithIdentifier:GVLineNumbersColumnIdentifier];
+}
+
 - (IBAction)toggleLineNumbers:(id)sender
 {
-	BOOL isVisibleFlag = ![gutterView visibilityForColumnWithIdentifier:GVLineNumbersColumnIdentifier];
-	[gutterView setVisibility:isVisibleFlag forColumnWithIdentifier:GVLineNumbersColumnIdentifier];
+	BOOL isVisibleFlag = !self.showsLineNumbers;
+	self.showsLineNumbers = isVisibleFlag;
 	if(isVisibleFlag)
 			[NSUserDefaults.standardUserDefaults removeObjectForKey:@"DocumentView Disable Line Numbers"];
 	else	[NSUserDefaults.standardUserDefaults setObject:@YES forKey:@"DocumentView Disable Line Numbers"];
@@ -657,6 +685,74 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 - (GVLineRecord)lineFragmentForLine:(NSUInteger)aLine column:(NSUInteger)aColumn { return [_textView lineFragmentForLine:aLine column:aColumn]; }
 
 // =========================
+// = Cursor Line Tracking  =
+// =========================
+
+- (void)invalidateCodeActionProbe
+{
+	_cursorLineHasActions = NO;
+	++_probeGeneration;
+	[NSNotificationCenter.defaultCenter postNotificationName:GVColumnDataSourceDidChange object:self];
+}
+
+- (void)updateCursorLine:(NSUInteger)line
+{
+	if(_cursorLine == line)
+		return;
+
+	NSUInteger oldLine = _cursorLine;
+	_cursorLine = line;
+	_cursorLineHasActions = NO;
+	++_probeGeneration;
+
+	// Redraw gutter for old line (remove lightbulb) and new line
+	if(oldLine != NSNotFound || line != NSNotFound)
+		[NSNotificationCenter.defaultCenter postNotificationName:GVColumnDataSourceDidChange object:self];
+
+	// Check if new cursor line has diagnostics — if so, probe server for actions
+	if(line == NSNotFound)
+		return;
+
+	OakDocument* doc = self.document;
+	if(!doc)
+		return;
+
+	auto const settings = settings_for_path(doc.virtualPath ? to_s(doc.virtualPath) : to_s(doc.path), to_s(doc.fileType), to_s(doc.directory ?: @""));
+	if(!settings.get("lspCodeActions", true))
+		return;
+
+	LSPManager* lsp = [LSPManager sharedManager];
+	if(![lsp serverSupportsCodeActionsForDocument:doc])
+		return;
+
+	__block BOOL hasDiagnostic = NO;
+	[doc enumerateBookmarksAtLine:line block:^(text::pos_t const& pos, NSString* type, NSString* payload){
+		if([type isEqualToString:@"error"] || [type isEqualToString:@"warning"] || [type isEqualToString:@"note"])
+			hasDiagnostic = YES;
+	}];
+
+	if(!hasDiagnostic)
+		return;
+
+	// Probe server for available actions on this line
+	NSUInteger generation = _probeGeneration;
+	__weak OakDocumentView* weakSelf = self;
+	[lsp requestCodeActionsForDocument:doc
+		line:line character:0
+		endLine:line endCharacter:0
+		completion:^(NSArray<NSDictionary*>* actions) {
+			dispatch_async(dispatch_get_main_queue(), ^{
+				OakDocumentView* strongSelf = weakSelf;
+				if(!strongSelf || strongSelf->_probeGeneration != generation)
+					return;
+				strongSelf->_cursorLineHasActions = actions.count > 0;
+				if(strongSelf->_cursorLineHasActions)
+					[NSNotificationCenter.defaultCenter postNotificationName:GVColumnDataSourceDidChange object:strongSelf];
+			});
+		}];
+}
+
+// =========================
 // = GutterView DataSource =
 // =========================
 
@@ -669,6 +765,18 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 {
 	if([columnIdentifier isEqualToString:kBookmarksColumnIdentifier])
 	{
+		// Show lightbulb only when server confirmed actions are available for this line
+		if(lineNumber == _cursorLine && _cursorLineHasActions)
+		{
+			NSImage* img = [NSImage imageWithSystemSymbolName:@"lightbulb.fill" accessibilityDescription:@"Code Actions"];
+			if(img)
+			{
+				CGFloat size = floor((self.lineHeight - 1) / 2) * 2 + 1;
+				NSImageSymbolConfiguration* config = [NSImageSymbolConfiguration configurationWithPointSize:size * 0.5 weight:NSFontWeightRegular];
+				return [img imageWithSymbolConfiguration:config];
+			}
+		}
+
 		__block std::map<size_t, NSString*> gutterImageName;
 
 		[self.document enumerateBookmarksAtLine:lineNumber block:^(text::pos_t const& pos, NSString* type, NSString* payload){
@@ -730,6 +838,13 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 {
 	if([columnIdentifier isEqualToString:kBookmarksColumnIdentifier])
 	{
+		// Lightbulb click triggers code actions
+		if(lineNumber == _cursorLine && _cursorLineHasActions)
+		{
+			[_textView lspCodeActions:self];
+			return;
+		}
+
 		__block std::vector<text::pos_t> bookmarks;
 		__block NSMutableArray* content = [NSMutableArray array];
 
@@ -784,6 +899,290 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 - (void)documentMarksDidChange:(NSNotification*)aNotification
 {
 	[NSNotificationCenter.defaultCenter postNotificationName:GVColumnDataSourceDidChange object:self];
+}
+
+- (void)documentContentDidChange:(NSNotification*)notification
+{
+	[LSPManager.sharedManager documentDidChange:notification.object];
+	[[CopilotManager sharedManager] documentDidChange:notification.object];
+}
+
+- (void)documentDidSave:(NSNotification*)notification
+{
+	[LSPManager.sharedManager documentDidSave:notification.object];
+	[[CopilotManager sharedManager] documentDidSave:notification.object];
+}
+
+- (void)documentWillClose:(NSNotification*)notification
+{
+	[LSPManager.sharedManager documentWillClose:notification.object];
+	[[CopilotManager sharedManager] documentWillClose:notification.object];
+}
+
+// =======================
+// = LSP Status Bar      =
+// =======================
+
+- (void)updateLSPStatusBar
+{
+	if(!_statusBar)
+		return;
+
+	LSPManager* lsp = [LSPManager sharedManager];
+	OakDocument* doc = self.document;
+
+	NSString* status = [lsp serverStatusForDocument:doc];
+	NSDictionary<NSString*, NSNumber*>* counts = [lsp diagnosticCountsForDocument:doc];
+
+	[_statusBar setLspStatus:status
+	                  errors:[counts[@"errors"] unsignedIntegerValue]
+	                warnings:[counts[@"warnings"] unsignedIntegerValue]
+	                    info:[counts[@"info"] unsignedIntegerValue]];
+
+	[_statusBar setCopilotStatus:[CopilotManager sharedManager].status];
+}
+
+- (void)lspDiagnosticsDidChange:(NSNotification*)notification
+{
+	if(!_statusBar || !self.document)
+		return;
+
+	NSString* uri = notification.userInfo[@"uri"];
+	if(uri)
+	{
+		NSURL* fileURL = self.document.path ? [NSURL fileURLWithPath:self.document.path] : nil;
+		if(fileURL && ![uri isEqualToString:fileURL.absoluteString])
+			return;
+	}
+
+	[self updateLSPStatusBar];
+}
+
+- (void)lspServerStatusDidChange:(NSNotification*)notification
+{
+	[self updateLSPStatusBar];
+}
+
+- (void)lspShowMessage:(NSNotification*)notification
+{
+	NSNumber* type = notification.userInfo[@"type"];
+	if(type && type.intValue == 1 && _statusBar)
+		[_statusBar flashLspError];
+}
+
+- (void)copilotStatusDidChange:(NSNotification*)notification
+{
+	CopilotManager* copilot = [CopilotManager sharedManager];
+	[_statusBar setCopilotStatus:copilot.status];
+
+	switch(copilot.status)
+	{
+		case CopilotStatusReady:
+			[OakNotificationManager.shared showWithMessage:
+				[NSString stringWithFormat:@"Copilot: Connected as %@", copilot.username ?: @"unknown"] type:4];
+			break;
+		case CopilotStatusAuthRequired:
+			[OakNotificationManager.shared showWithMessage:@"Copilot: Authentication required" type:2];
+			break;
+		case CopilotStatusError:
+			[OakNotificationManager.shared showWithMessage:@"Copilot: Server error" type:1];
+			break;
+		default:
+			break;
+	}
+}
+
+- (void)showCopilotStatusMenu:(NSPopUpButton*)popUpButton
+{
+	CopilotManager* copilot = [CopilotManager sharedManager];
+	NSMenu* menu = popUpButton.menu;
+	[menu removeAllItems];
+
+	// Status header
+	NSString* headerText;
+	switch(copilot.status)
+	{
+		case CopilotStatusReady:
+			headerText = [NSString stringWithFormat:@"Copilot — %@", copilot.username ?: @"ready"];
+			break;
+		case CopilotStatusConnecting:
+			headerText = @"Copilot — connecting…";
+			break;
+		case CopilotStatusAuthRequired:
+			headerText = @"Copilot — sign-in required";
+			break;
+		case CopilotStatusError:
+			headerText = @"Copilot — error";
+			break;
+		default:
+			headerText = @"Copilot — disabled";
+			break;
+	}
+	NSMenuItem* header = [[NSMenuItem alloc] initWithTitle:headerText action:nil keyEquivalent:@""];
+	if(copilot.status == CopilotStatusReady)
+		header.state = NSControlStateValueOn;
+	header.enabled = NO;
+	[menu addItem:header];
+
+	[menu addItem:[NSMenuItem separatorItem]];
+
+	if(copilot.status == CopilotStatusAuthRequired)
+	{
+		NSMenuItem* signIn = [[NSMenuItem alloc] initWithTitle:@"Sign In" action:@selector(copilotSignIn:) keyEquivalent:@""];
+		signIn.target = self;
+		[menu addItem:signIn];
+	}
+
+	if(copilot.status == CopilotStatusReady || copilot.status == CopilotStatusError)
+	{
+		NSMenuItem* restart = [[NSMenuItem alloc] initWithTitle:@"Restart Server" action:@selector(copilotRestart:) keyEquivalent:@""];
+		restart.target = self;
+		[menu addItem:restart];
+	}
+
+	if(copilot.status == CopilotStatusReady)
+	{
+		[menu addItem:[NSMenuItem separatorItem]];
+
+		BOOL popupSuppressed = [[NSUserDefaults standardUserDefaults] boolForKey:@"CopilotSuppressAutoPopup"];
+		NSMenuItem* suppressItem = [[NSMenuItem alloc] initWithTitle:@"Ghost Text Only (No Popup)"
+		                                                      action:@selector(copilotToggleSuppressPopup:)
+		                                               keyEquivalent:@""];
+		suppressItem.target = self;
+		suppressItem.state = popupSuppressed ? NSControlStateValueOn : NSControlStateValueOff;
+		[menu addItem:suppressItem];
+	}
+
+	[menu addItem:[NSMenuItem separatorItem]];
+
+	NSMenuItem* disable = [[NSMenuItem alloc] initWithTitle:
+		copilot.status == CopilotStatusDisabled ? @"Enable Copilot" : @"Disable Copilot"
+		action:@selector(copilotToggle:) keyEquivalent:@""];
+	disable.target = self;
+	[menu addItem:disable];
+}
+
+- (void)copilotSignIn:(id)sender
+{
+	[[CopilotManager sharedManager] signIn];
+}
+
+- (void)copilotRestart:(id)sender
+{
+	CopilotManager* copilot = [CopilotManager sharedManager];
+	[copilot shutdown];
+	if(self.document)
+		[copilot documentDidOpen:self.document];
+}
+
+- (void)copilotToggle:(id)sender
+{
+	CopilotManager* copilot = [CopilotManager sharedManager];
+	if(copilot.status == CopilotStatusDisabled)
+	{
+		settings_t::set("copilotEnabled", true);
+		if(self.document)
+			[copilot documentDidOpen:self.document];
+	}
+	else
+	{
+		settings_t::set("copilotEnabled", false);
+		[copilot shutdown];
+	}
+}
+
+- (void)copilotToggleSuppressPopup:(id)sender
+{
+	NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+	BOOL current = [defaults boolForKey:@"CopilotSuppressAutoPopup"];
+	[defaults setBool:!current forKey:@"CopilotSuppressAutoPopup"];
+}
+
+- (void)showLSPStatusMenu:(NSPopUpButton*)popUpButton
+{
+	LSPManager* lsp = [LSPManager sharedManager];
+	OakDocument* doc = self.document;
+	NSMenu* menu = popUpButton.menu;
+	[menu removeAllItems];
+
+	NSString* serverName = [lsp serverNameForDocument:doc];
+	NSString* status = [lsp serverStatusForDocument:doc];
+
+	NSString* headerText;
+	if(serverName && status)
+		headerText = [NSString stringWithFormat:@"%@ — %@", serverName, status];
+	else
+		headerText = @"No LSP Server";
+
+	NSMenuItem* header = [[NSMenuItem alloc] initWithTitle:headerText action:nil keyEquivalent:@""];
+	header.enabled = NO;
+	[menu addItem:header];
+
+	if(status)
+	{
+		[menu addItem:[NSMenuItem separatorItem]];
+		NSMenuItem* restart = [[NSMenuItem alloc] initWithTitle:@"Restart Server" action:@selector(lspRestartServer:) keyEquivalent:@""];
+		restart.target = self;
+		[menu addItem:restart];
+
+		NSMenuItem* reindex = [[NSMenuItem alloc] initWithTitle:@"Re-index Workspace" action:@selector(lspReindexWorkspace:) keyEquivalent:@""];
+		reindex.target = self;
+		[menu addItem:reindex];
+	}
+
+	NSDictionary* counts = [lsp diagnosticCountsForDocument:doc];
+	NSUInteger errors   = [counts[@"errors"] unsignedIntegerValue];
+	NSUInteger warnings = [counts[@"warnings"] unsignedIntegerValue];
+	NSUInteger info     = [counts[@"info"] unsignedIntegerValue];
+
+	if(errors + warnings + info > 0)
+	{
+		[menu addItem:[NSMenuItem separatorItem]];
+
+		NSMenuItem* next = [[NSMenuItem alloc] initWithTitle:@"Next Diagnostic" action:@selector(lspNextDiagnostic:) keyEquivalent:@""];
+		next.target = self;
+		[menu addItem:next];
+
+		NSMenuItem* prev = [[NSMenuItem alloc] initWithTitle:@"Previous Diagnostic" action:@selector(lspPrevDiagnostic:) keyEquivalent:@""];
+		prev.target = self;
+		[menu addItem:prev];
+	}
+}
+
+- (void)lspRestartServer:(id)sender
+{
+	[[LSPManager sharedManager] restartServerForDocument:self.document];
+}
+
+- (void)lspReindexWorkspace:(id)sender
+{
+	[[LSPManager sharedManager] reindexWorkspaceForDocument:self.document];
+}
+
+- (void)lspNextDiagnostic:(id)sender
+{
+	NSArray<NSString*>* types = @[ @"error", @"warning", @"note" ];
+	text::selection_t sel(to_s(_textView.selectionString));
+	text::pos_t caret = sel.last().max();
+	text::pos_t next = [self.document nextMarkOfTypes:types fromPosition:caret];
+	if(next != text::pos_t::undefined)
+	{
+		_textView.selectionString = to_ns(next);
+		[_textView centerSelectionInVisibleArea:self];
+	}
+}
+
+- (void)lspPrevDiagnostic:(id)sender
+{
+	NSArray<NSString*>* types = @[ @"error", @"warning", @"note" ];
+	text::selection_t sel(to_s(_textView.selectionString));
+	text::pos_t caret = sel.last().max();
+	text::pos_t prev = [self.document prevMarkOfTypes:types fromPosition:caret];
+	if(prev != text::pos_t::undefined)
+	{
+		_textView.selectionString = to_ns(prev);
+		[_textView centerSelectionInVisibleArea:self];
+	}
 }
 
 // ============

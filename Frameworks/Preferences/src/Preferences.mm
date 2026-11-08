@@ -3,8 +3,9 @@
 #import "ProjectsPreferences.h"
 #import "BundlesPreferences.h"
 #import "VariablesPreferences.h"
-#import "SoftwareUpdatePreferences.h"
 #import "TerminalPreferences.h"
+#import "FormattersPreferences.h"
+#import "AdvancedPreferences.h"
 #import "Keys.h"
 #import <OakAppKit/OakTransitionViewController.h>
 
@@ -23,6 +24,8 @@ static NSString* const kMASPreferencesSelectedViewKey = @"MASPreferences Selecte
 - (void)viewWillAppear
 {
 	NSString* viewIdentifier = [NSUserDefaults.standardUserDefaults stringForKey:kMASPreferencesSelectedViewKey];
+	if(viewIdentifier && ![self viewControllerForIdentifier:viewIdentifier])
+		viewIdentifier = nil;
 	self.selectedViewIdentifier = viewIdentifier ?: self.childViewControllers.firstObject.identifier;
 }
 
@@ -97,8 +100,9 @@ static NSString* const kMASPreferencesSelectedViewKey = @"MASPreferences Selecte
 			[[ProjectsPreferences alloc] init],
 			[[BundlesPreferences alloc] init],
 			[[VariablesPreferences alloc] init],
-			[[SoftwareUpdatePreferences alloc] init],
-			[[TerminalPreferences alloc] init]
+			[[FormattersPreferences alloc] init],
+			[[TerminalPreferences alloc] init],
+			[[AdvancedPreferences alloc] init]
 		];
 
 		for(NSViewController* viewController in viewControllers)

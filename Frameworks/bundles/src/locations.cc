@@ -10,11 +10,11 @@ namespace bundles
 	{
 		static std::string const BundleLocations[] =
 		{
-			path::join(path::home(), "Library/Application Support/TextMate"),
-			path::join(path::home(), "Library/Application Support/TextMate/Pristine Copy"),
-			path::join(path::home(), "Library/Application Support/TextMate/Managed"),
-			path::join("/",          "Library/Application Support/TextMate"),
-			path::join("/",          "Library/Application Support/TextMate/Pristine Copy"),
+			oak::application_t::support(),
+			oak::application_t::support("Pristine Copy"),
+			oak::application_t::support("Managed"),
+			path::join("/", "Library/Application Support/TextMate"),
+			path::join("/", "Library/Application Support/TextMate/Pristine Copy"),
 			oak::application_t::path("Contents/SharedSupport"),
 		};
 		static std::vector<std::string> res(std::begin(BundleLocations), std::end(BundleLocations));
