@@ -284,7 +284,7 @@ Press **Opt+Tab** to trigger LSP completions. Diagnostics (errors, warnings) app
 
 ### Debugging
 
-Open the LSP log panel via **View → LSP Log** (or click the LSP status indicator in the bottom bar). Shows all JSON-RPC traffic, server stderr, errors, and lifecycle events. Use the filter field to narrow by server name or message content.
+Open the LSP debug panel via **Text → LSP → Debug Panel**. Shows all JSON-RPC traffic, server stderr, errors, and lifecycle events. Use the filter field to narrow by server name or message content.
 
 ## GitHub Copilot
 
