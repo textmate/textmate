@@ -1,4 +1,8 @@
 #include "theme.h"
+#include "font_size.h"
+#include <cmath>
+#include <locale>
+#include <sstream>
 #include <cf/cf.h>
 
 char const* kMacClassicThemeUUID = "71D40D9D-AE48-11D9-920A-000D93589AF6";
@@ -173,14 +177,20 @@ bool gutter_styles_t::is_transparent () const
 
 theme_ptr theme_t::copy_with_font_name_and_size (std::string const& fontName, CGFloat fontSize)
 {
-	if(_font_name == fontName && _font_size == fontSize)
-		return std::make_shared<theme_t>(*this);
-	return std::make_shared<theme_t>(this->_item, fontName, fontSize);
+	auto copy = std::make_shared<theme_t>(*this);
+	if(_font_name != fontName || _font_size != fontSize)
+	{
+		copy->_font_name = fontName;
+		copy->_font_size = fontSize;
+		copy->_cache.clear();
+	}
+	return copy;
 }
 
-theme_t::theme_t (bundles::item_ptr const& themeItem, std::string const& fontName, CGFloat fontSize) :_item(themeItem), _font_name(fontName), _font_size(fontSize)
+theme_t::theme_t (bundles::item_ptr const& themeItem, std::string const& fontName, CGFloat fontSize, bool shareStyles) :_item(themeItem), _font_name(fontName), _font_size(fontSize)
 {
-	_styles = find_shared_styles(themeItem);
+	// Draft previews must not reuse or replace the installed theme’s cached styles.
+	_styles = shareStyles ? find_shared_styles(themeItem) : std::make_shared<shared_styles_t>(themeItem);
 }
 
 static CGColorRef OakColorCreateCopySoften (CGColorPtr cgColor, CGFloat factor)
@@ -443,47 +453,34 @@ static theme_t::color_info_t blend (theme_t::color_info_t const& lhs, theme_t::c
 	return lhs.is_blank() ? rhs : theme_t::color_info_t(ia * lhs.red + a * rhs.red, ia * lhs.green + a * rhs.green, ia * lhs.blue + a * rhs.blue, lhs.alpha);
 }
 
-static double my_strtod (char const* str, char const** last) // problem with strtod() is that it uses LC_NUMERIC for point separator.
+std::optional<double> theme::parse_font_size (std::string const& value)
 {
-	double res = atof(str);
-	if(last)
-	{
-		while(*str && (isdigit(*str) || *str == '.'))
-			++str;
-		*last = str;
-	}
-	return res;
+	auto first = value.find_first_not_of(' ');
+	if(first == std::string::npos)
+		return std::nullopt;
+	auto end = value.find_first_not_of("0123456789.", first);
+	std::istringstream input(value.substr(first, end - first));
+	input.imbue(std::locale::classic());
+	double size;
+	if(!(input >> size) || !input.eof() || !std::isfinite(size) || size <= 0)
+		return std::nullopt;
+	std::string unit = end == std::string::npos ? "" : value.substr(end);
+	unit.erase(0, unit.find_first_not_of(' '));
+	if(unit.empty() || unit == "pt")
+		return size;
+	if(unit == "em")
+		return -size;
+	if(unit == "%")
+		return -size / 100;
+	return std::nullopt;
 }
 
-static CGFloat read_font_size (std::string const& str_font_size)
+static CGFloat read_font_size (std::string const& value)
 {
-	// Treat positive values as absolute font
-	// and negative as relative, that way we don't have to use a bool as a flag :)
-	if(str_font_size != NULL_STR)
-	{
-		char const* first = str_font_size.c_str();
-		char const* last;
-		double size = my_strtod(first, &last);
-		if(first != last)
-		{
-			while(*last == ' ')
-				++last;
-
-			if(strcmp(last, "pt") == 0 || *last == '\0')
-				return size;
-			else if(strcmp(last, "em") == 0)
-				return -size;
-			else if(strcmp(last, "%") == 0)
-				return -size / 100;
-			else
-				os_log_error(OS_LOG_DEFAULT, "Unsupported font size unit: %{public}s (%{public}s)", last, str_font_size.c_str());
-		}
-		else
-		{
-			os_log_error(OS_LOG_DEFAULT, "Unsupported font size format: %{public}s", str_font_size.c_str());
-		}
-	}
-	return -1;
+	auto size = theme::parse_font_size(value);
+	if(!size && value != NULL_STR)
+		os_log_error(OS_LOG_DEFAULT, "Unsupported font size: %{public}s", value.c_str());
+	return size.value_or(-1);
 }
 
 theme_t::decomposed_style_t& theme_t::decomposed_style_t::operator+= (theme_t::decomposed_style_t const& rhs)

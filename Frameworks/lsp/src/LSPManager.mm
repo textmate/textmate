@@ -154,7 +154,7 @@ static std::string detectWorkspaceRoot (std::string const& filePath)
 
 - (LSPClient*)clientForDocument:(OakDocument*)document
 {
-	if(!document.path)
+	if(document.disableLanguageServices || !document.path)
 		return nil;
 
 	std::string filePath  = to_s(document.path);

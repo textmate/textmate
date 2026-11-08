@@ -291,6 +291,7 @@ struct diagnostic_banner_t
 
 	BOOL ignoreMouseDown;
 	BOOL delayMouseDown;
+	BOOL scopeInspectionMouseDown;
 
 	// ===============
 	// = Drag'n'drop =

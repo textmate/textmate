@@ -1,0 +1,60 @@
+/* Theme preview: CSS selectors, properties, functions, and at-rules.
+   Scroll through this sample to inspect every section. */
+@import url("https://example.com/fonts.css");
+
+:root {
+  --accent: #58a6ff;
+  --surface: hsl(220deg 20% 96%);
+  --spacing: 1.25rem;
+  --shadow: 0 8px 24px rgb(0 0 0 / 12%);
+  color-scheme: light dark;
+}
+
+body {
+  margin: 0;
+  padding: var(--spacing);
+  font: 16px/1.6 "SF Pro Text", system-ui, sans-serif;
+  background: var(--surface);
+  color: #202020;
+}
+
+#preview > .card[data-active="true"] {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: calc(var(--spacing) * 2);
+  border: 1px solid var(--accent);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  background-image: linear-gradient(135deg, white, #e8f0ff);
+}
+
+.card:hover,
+.card:focus-within {
+  transform: translateY(-2px);
+  transition: transform 180ms ease-in-out;
+}
+
+.card:nth-child(2n + 1)::before {
+  content: "Preview \2605  — \"Hello, world!\"";
+  color: rebeccapurple;
+}
+
+@supports (container-type: inline-size) {
+  .layout { container-type: inline-size; }
+}
+
+@media (max-width: 48rem) and (orientation: portrait) {
+  #preview > .card { grid-template-columns: 1fr; }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root { --surface: #1d2233; }
+  body { color: rgb(245 245 250 / 95%); }
+}
+
+@keyframes appear {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.card { animation: appear 300ms ease-out both; }

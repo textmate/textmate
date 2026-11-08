@@ -1,6 +1,7 @@
 #import <bundles/item.h>
 
 @class OakDocument;
+@class OakTextView;
 
 @interface DocumentWindowController : NSResponder
 @property (nonatomic) NSWindow*                                  window;
@@ -12,6 +13,7 @@
 
 @property (nonatomic, readonly) NSArray<OakDocument*>*           documents;
 @property (nonatomic, readonly) OakDocument*                     selectedDocument;
+@property (nonatomic, readonly) OakTextView*                      textView;
 @property (nonatomic) NSUInteger                                 selectedTabIndex;
 
 @property (nonatomic) BOOL                                       fileBrowserVisible;

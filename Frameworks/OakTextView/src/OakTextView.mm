@@ -267,6 +267,8 @@ static std::string shell_quote (std::vector<std::string> paths)
 @property (nonatomic) find::options_t  findOptions;
 @end
 
+NSNotificationName const OakTextViewThemeDidChangeNotification = @"OakTextViewThemeDidChangeNotification";
+
 @implementation OakTextViewFindServer
 + (id)findServerWithTextView:(OakTextView*)aTextView operation:(find_operation_t)anOperation options:(find::options_t)someOptions
 {
@@ -3139,6 +3141,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 	AUTO_REFRESH;
 	documentView->set_theme(newTheme);
+	[NSNotificationCenter.defaultCenter postNotificationName:OakTextViewThemeDidChangeNotification object:self];
 }
 
 - (void)setFont:(NSFont*)newFont
@@ -4223,6 +4226,7 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 
 - (void)mouseDown:(NSEvent*)anEvent
 {
+	scopeInspectionMouseDown = NO;
 	[self clearGhostText];
 
 	if([self.inputContext handleEvent:anEvent] || !documentView || [anEvent type] != NSEventTypeLeftMouseDown || ignoreMouseDown)
@@ -4231,6 +4235,24 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 	// A banner click must not pre-empt modifier- or multi-click-driven
 	// selection, and must still leave a valid anchor for mouseDragged:.
 	NSPoint mouseDownPoint = [self convertPoint:[anEvent locationInWindow] fromView:nil];
+	NSUInteger modifiers = anEvent.modifierFlags & (NSEventModifierFlagCommand | NSEventModifierFlagOption | NSEventModifierFlagControl | NSEventModifierFlagShift);
+	if(modifiers == NSEventModifierFlagCommand && anEvent.clickCount == 1 && [self.delegate respondsToSelector:@selector(textView:inspectScope:)])
+	{
+		ng::index_t index = documentView->index_at_point(mouseDownPoint);
+		CGRect caret = documentView->rect_at_index(index);
+		// Hit the glyph, rather than the next token when its right half is clicked.
+		if(index.index > 0 && mouseDownPoint.x < CGRectGetMinX(caret) && mouseDownPoint.y >= CGRectGetMinY(caret) && mouseDownPoint.y < CGRectGetMaxY(caret))
+			index.index = documentView->sanitize_index(index.index - 1);
+		NSString* scope = to_ns(scope::to_s(documentView->scope(index.index).right));
+		if([self.delegate textView:self inspectScope:scope])
+		{
+			scopeInspectionMouseDown = YES;
+			[self clearDefinitionHighlight];
+			self.showDefinitionCursor = NO;
+			return;
+		}
+	}
+
 	if([anEvent clickCount] == 1 && !([anEvent modifierFlags] & (NSEventModifierFlagShift | NSEventModifierFlagControl | NSEventModifierFlagOption | NSEventModifierFlagCommand)) && [self handleDiagnosticBannerClickAtPoint:mouseDownPoint])
 	{
 		mouseDownPos           = mouseDownPoint;
@@ -4303,6 +4325,8 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 
 - (void)mouseDragged:(NSEvent*)anEvent
 {
+	if(scopeInspectionMouseDown)
+		return;
 	if([self.inputContext handleEvent:anEvent] || !documentView || macroRecordingArray)
 		return;
 
@@ -4349,6 +4373,11 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 
 - (void)mouseUp:(NSEvent*)anEvent
 {
+	if(scopeInspectionMouseDown)
+	{
+		scopeInspectionMouseDown = NO;
+		return;
+	}
 	if([self.inputContext handleEvent:anEvent] || !documentView || macroRecordingArray)
 		return;
 
