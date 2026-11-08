@@ -48,13 +48,17 @@ OptionParser.new do |opts|
 end.parse!
 
 def git(*args)
-  stdout, stderr, status = Open3.capture3('git', *args)
+  # All output parsed by this script flows through here, so pin the encoding in
+  # one place: the pipe is tagged with Encoding.default_external (US-ASCII under
+  # the C locale), and String#split raises on any non-ASCII byte in a commit
+  # subject unless the string is UTF-8.
+  stdout, stderr, status = Open3.capture3('git', '-c', 'i18n.logOutputEncoding=UTF-8', *args)
   unless status.success?
     warn "git #{args.join(' ')} failed"
     warn stderr unless stderr.empty?
     exit status.exitstatus || 1
   end
-  stdout
+  stdout.force_encoding(Encoding::UTF_8).scrub
 end
 
 def tag_date(tag)

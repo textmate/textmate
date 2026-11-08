@@ -12,6 +12,59 @@
 <h1 id="changes">Changes</h1>
 
 <article class="latest">
+<h2 id="2026-11-08v2.24.0">2026-11-08 (v2.24.0)</h2>
+
+<ul>
+<li>Add external theme editor</li>
+<li>Add download function</li>
+<li>Fix downlaod text and icon</li>
+<li>Extensive tweeks to app appearance</li>
+<li>Theme preselection, appearance tweeks</li>
+<li>Pass selected filetype to theme editor</li>
+<li>Fixes for low risk review findings</li>
+<li>Move scoped colours in scope section</li>
+<li>Improvements to font selection appearance</li>
+<li>theme-editor-selection aborts at tests/save_selection.mm:280 (reproduced). valueForKey:@fontControls raises NSUnknownKeyException because ae8d177 removed _fontControls.</li>
+<li>Add rule always creates a comment rule</li>
+<li>Wrong row selected after a rename-on-save</li>
+<li>- New themes reuse one retained Theme Editor bundle object. - Reverting an unsaved theme removes its row and selects a remaining theme.</li>
+<li>Malformed themes crash the editor (reproduced).</li>
+<li>Second save refused (reproduced): a theme with a top-level false value cannot be saved twice</li>
+<li>Launch arguments (reproduced): any argument, e.g. -NSDocumentRevisionsDebugMode YES, prints the usage text and exits 1</li>
+<li>Double prompt (reproduced): closing a dirty window and choosing Revert asks twice.</li>
+<li>Export forces Save/Revert (reproduced): exporting a non-selected theme selects it first</li>
+<li>Duplicate after Revert (reproduced): the copy takes the discarded draft name</li>
+<li>Colours (reproduced in a throwaway test): parse_color rejects #RGB and #RGBA, which read_color accepts</li>
+<li>Missing preview resources</li>
+<li>Dead code and docs</li>
+<li>Move unrelated terminal and gutter test fixes out of theme editor PR</li>
+<li>Update default gutter background test expectation (#24)</li>
+<li>Merge pull request #25 from alistair-king/codex/terminal-test-fixes</li>
+<li>Bundle index setup: it is duplicated. Consolidated both paths into a [shared loader](/Users/alistairk/Development/textmate/Applications/ThemeEditor/src/bundle_index.h) that loads BundlesIndex and refreshes folders to detect external overrides.</li>
+<li>Double restyle: Removed the redundant themeUUID observer in OakDocumentView.mm</li>
+<li>Selection after delete: it indexes the name-sorted _themes (main.mm:1550), not the displayed order.</li>
+<li>Rename: it is mouse-only - Added Return and keypad Enter to rename the selected theme when the list has focus. The tooltip now mentions the shortcut.</li>
+<li>Colours: the panel colours in main.mm are hard-coded - Replaced the hard-coded panel, sidebar, action-bar, and border colours with macOS system colours</li>
+<li>loadSource inserts an empty global rule at index 0 that later saves and exports include. - Saves and exports now omit the editor’s global placeholder while it’s empty</li>
+<li>Replaced execl with LaunchServices, configured to reuse the running app.</li>
+<li>Exports now receive a fresh UUID each time, preserving all other content and leaving the source unchanged</li>
+<li>Change menu text</li>
+<li>A few last things, fix border. Add ASE and DTCG imports, add rename scope</li>
+<li>Merge branch &#39;develop&#39; into ak/theme-editor</li>
+<li>Add ability to edit scope selector</li>
+<li>Merge branch &#39;ak/theme-editor&#39; of https://github.com/alistair-king/textmate into ak/theme-editor</li>
+<li>Compare alignment rects in rule selector layout test</li>
+<li>Fixed the resolver to memoise results by source identity and share resolved containers, preventing exponential alias and JSON-pointer expansion.</li>
+<li>Updated docs/theme-editor.md and README.md to match the code</li>
+<li>Confirmed and fixed: the default Core Graphics Lab range distorted chroma. The L × 100 scaling was correct</li>
+<li>Theme editor (#22)</li>
+<li>Swallow AppKit-internal exceptions instead of aborting</li>
+<li>Force UTF-8 on git output parsed by changelog generators</li>
+<li>See <a href="https://github.com/tectiv3/textmate/compare/v2.23.2...v2.24.0">all changes since v2.23.2</a></li>
+</ul>
+</article>
+
+<article>
 <h2 id="2026-11-02v2.23.2">2026-11-02 (v2.23.2)</h2>
 
 <ul>
