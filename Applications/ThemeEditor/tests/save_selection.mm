@@ -255,7 +255,7 @@ int main ()
 			Require(editRuleButton.menu == nil && editRuleButton.action == @selector(renameRule:) && editRuleButton.target == controller, "Edit button does not open the rule editor directly");
 			Require(fabs(NSWidth(ruleSelector.frame) - NSWidth(ruleSelector.superview.frame)) < 1, "Rule selector does not fill the inspector row");
 			Require(fabs(NSMaxX(editRuleButton.frame) - NSWidth(ruleSelector.bounds)) < 1, "Edit button is not aligned to the right edge");
-			Require(fabs(NSMaxX(rules.frame) + ruleSelector.spacing - NSMinX(editRuleButton.frame)) < 1, "Rule dropdown does not expand up to the edit button");
+			Require(fabs(NSMaxX([rules alignmentRectForFrame:rules.frame]) + ruleSelector.spacing - NSMinX([editRuleButton alignmentRectForFrame:editRuleButton.frame])) < 1, "Rule dropdown does not expand up to the edit button");
 			NSView* ruleBox = ruleSelector.superview.superview.superview;
 			Require([ruleBox isKindOfClass:NSBox.class], "Style section has no box");
 			NSAppearance* originalAppearance = ruleBox.appearance;
