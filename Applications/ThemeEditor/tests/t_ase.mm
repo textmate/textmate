@@ -75,6 +75,45 @@ static NSData* ASEColor (char const* model, std::initializer_list<float> compone
 	return data;
 }
 
+static void AssertSRGBBytes (NSString* hex, NSInteger red, NSInteger green, NSInteger blue)
+{
+	NSColor* color = theme_editor::parse_color(hex, NSColorSpace.sRGBColorSpace);
+	OAK_ASSERT(color != nil);
+	// Allow one byte for differences between ColorSync versions. Expected
+	// values come from independent D50 Lab -> XYZ -> Bradford D65 -> sRGB math.
+	OAK_ASSERT(std::abs(color.redComponent * 255 - red) <= 1);
+	OAK_ASSERT(std::abs(color.greenComponent * 255 - green) <= 1);
+	OAK_ASSERT(std::abs(color.blueComponent * 255 - blue) <= 1);
+}
+
+void test_ase_photoshop_lab_values ()
+{
+	NSData* data = [NSData dataWithContentsOfFile:@THEME_EDITOR_FIXTURE_DIR "/photoshop-lab.ase"];
+	OAK_ASSERT(data != nil);
+	NSArray* colors = theme_editor::read_ase(data)[@"colors"];
+	OAK_ASSERT(colors.count == 4);
+	// The first swatch is CMYK. The following Photoshop Lab swatches store
+	// (L/100, a, b): (.88238525390625, -47, 9), (.88238525390625, 117, 120),
+	// and (.5216064453125, 77, -16). See fixtures/photoshop-lab.md.
+	OAK_ASSERT([colors[1][@"name"] isEqual:@"LAB 1"]);
+	OAK_ASSERT([colors[2][@"name"] isEqual:@"LAB 2"]);
+	OAK_ASSERT([colors[3][@"name"] isEqual:@"Swatch 1"]);
+	AssertSRGBBytes(colors[1][@"color"], 108, 245, 202);
+	AssertSRGBBytes(colors[2][@"color"], 255, 39, 0);
+	AssertSRGBBytes(colors[3][@"color"], 229, 29, 155);
+}
+
+void test_ase_lab_lightness_scale ()
+{
+	AssertSRGBBytes(theme_editor::read_ase(ASEColor("LAB ", {0, 0, 0}))[@"colors"][0][@"color"], 0, 0, 0);
+	AssertSRGBBytes(theme_editor::read_ase(ASEColor("LAB ", {0.5, 0, 0}))[@"colors"][0][@"color"], 119, 119, 119);
+	AssertSRGBBytes(theme_editor::read_ase(ASEColor("LAB ", {1, 0, 0}))[@"colors"][0][@"color"], 255, 255, 255);
+	// A moderate chroma value also catches the default Lab range's rescaling.
+	AssertSRGBBytes(theme_editor::read_ase(ASEColor("LAB ", {0.6, -35, -5}))[@"colors"][0][@"color"], 42, 161, 152);
+	for(NSData* data in @[ ASEColor("LAB ", {-0.01, 0, 0}), ASEColor("LAB ", {1.01, 0, 0}), ASEColor("LAB ", {NAN, 0, 0}), ASEColor("LAB ", {0.5, -129, 0}), ASEColor("LAB ", {0.5, 0, 128}) ])
+		OAK_ASSERT(RejectsASE(data));
+}
+
 void test_ase_color_models_and_component_validation ()
 {
 	for(NSData* data in @[ ASEColor("RGB ", {1, 0, 0}), ASEColor("CMYK", {0, 1, 1, 0}), ASEColor("LAB ", {0.5, 0, 0}), ASEColor("Gray", {0.5}) ])

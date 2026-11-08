@@ -91,7 +91,10 @@ namespace theme_editor
 				{
 					CGFloat components[] = { block.component() * 100, block.component(-128, 127), block.component(-128, 127), 1 };
 					CGFloat white[] = { 0.96422, 1, 0.82521 };
-					CGColorSpaceRef space = CGColorSpaceCreateLab(white, nullptr, nullptr);
+					// Core Graphics needs this symmetric range for standard CIELAB
+					// units; its default range changes chroma, even below +/-100.
+					CGFloat range[] = { -127.5, 127.5, -127.5, 127.5 };
+					CGColorSpaceRef space = CGColorSpaceCreateLab(white, nullptr, range);
 					CGColorRef lab = CGColorCreate(space, components);
 					color = [NSColor colorWithCGColor:lab];
 					CGColorRelease(lab);
