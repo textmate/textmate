@@ -13,6 +13,9 @@ namespace theme_editor
 		NSDictionary* root;
 		NSMutableDictionary* tokens = [NSMutableDictionary dictionary];
 		NSMutableDictionary* types = [NSMutableDictionary dictionary];
+		// Cache by source identity: hashing container contents can itself expand
+		// shared reference graphs. Keep resolved containers shared as well.
+		NSMapTable* resolved = [NSMapTable mapTableWithKeyOptions:NSPointerFunctionsStrongMemory | NSPointerFunctionsObjectPointerPersonality valueOptions:NSPointerFunctionsStrongMemory];
 
 		void collect (NSDictionary* group, NSString* path = @"", NSString* inherited = nil, NSUInteger depth = 0)
 		{
@@ -37,6 +40,14 @@ namespace theme_editor
 		id resolve (id value, NSUInteger depth = 0)
 		{
 			if(depth > 128) throw std::runtime_error("The token file contains a circular or excessively deep reference.");
+			if(id result = [resolved objectForKey:value]) return result;
+			id result = resolve_uncached(value, depth);
+			[resolved setObject:result forKey:value];
+			return result;
+		}
+
+		id resolve_uncached (id value, NSUInteger depth)
+		{
 			if([value isKindOfClass:NSString.class] && [value hasPrefix:@"{"] && [value hasSuffix:@"}"])
 			{
 				NSString* path = [value substringWithRange:NSMakeRange(1, [value length] - 2)];

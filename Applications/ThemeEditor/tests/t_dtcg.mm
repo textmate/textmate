@@ -64,12 +64,50 @@ void test_dtcg_nested_types_aliases_pointers_and_alpha ()
 	OAK_ASSERT([theme[@"settings"][0][@"settings"][@"selection"] isEqual:@"#FF000060"]);
 }
 
+void test_dtcg_repeated_references_share_resolved_values ()
+{
+	for(bool pointers : { false, true })
+	{
+		NSMutableDictionary* document = [NSMutableDictionary dictionary];
+		document[@"level0"] = @{ @"$type": @"number", @"$value": @[ @0 ] };
+		for(NSUInteger level = 1; level <= 20; ++level)
+		{
+			id reference = pointers
+				? (id)@{ @"$ref": [NSString stringWithFormat:@"#/level%lu/$value", level - 1] }
+				: [NSString stringWithFormat:@"{level%lu}", level - 1];
+			document[[NSString stringWithFormat:@"level%lu", level]] = @{ @"$type": @"number", @"$value": @[ reference, reference, reference ] };
+		}
+		document[@"color"] = @{ @"$type": @"color", @"$value": @{
+			@"colorSpace": @"srgb", @"components": @[ @1, @0, @0 ], @"metadata": @"{level20}"
+		} };
+		// Round-trip through JSON so the input has the same identities as a file.
+		NSData* data = TokenData(document);
+		NSDictionary* root = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+		theme_editor::dtcg_reader reader{ root };
+		reader.collect(root);
+		id value = reader.resolve(reader.tokens[@"level20"][@"$value"]);
+		for(NSUInteger level = 20; level > 0; --level)
+		{
+			OAK_ASSERT([value count] == 3);
+			// Identity checks avoid recursively comparing an exponential graph.
+			OAK_ASSERT(value[0] == value[1]);
+			OAK_ASSERT(value[0] == value[2]);
+			value = value[0];
+		}
+		OAK_ASSERT([value isEqual:@[ @0 ]]);
+		NSDictionary* palette = theme_editor::read_dtcg(data);
+		OAK_ASSERT([palette[@"colors"] count] == 1);
+		OAK_ASSERT([palette[@"colors"][0][@"color"] isEqual:@"#FF0000"]);
+	}
+}
+
 void test_dtcg_rejects_invalid_colors_and_references ()
 {
 	for(id document in @[
 		@[], @{}, @{ @"size": @{ @"$type": @"number", @"$value": @16 } },
 		@{ @"bad": @{ @"$type": @"color", @"$value": @"{missing}" } },
 		@{ @"loop": @{ @"$type": @"color", @"$value": @"{loop}" } },
+		@{ @"loop": @{ @"$type": @"color", @"$value": @{ @"$ref": @"#/loop/$value" } } },
 		@{ @"a": @{ @"$value": @"{b}" }, @"b": @{ @"$value": @"{a}" } },
 		@{ @"bad": @{ @"$type": @"color", @"$value": @{ @"$ref": @"other.json#/color" } } },
 		@{ @"bad": @{ @"$type": @"color", @"$value": @{ @"$ref": @"#/missing" } } },
